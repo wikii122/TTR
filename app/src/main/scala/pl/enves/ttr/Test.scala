@@ -7,22 +7,24 @@ import android.support.annotation.NonNull
 import android.view.{View, MenuItem, Menu}
 
 class Test extends Activity {
-  private var mGLView: MyGLSurfaceView = _
+  private var myGLSurfaceView: MyGLSurfaceView = _
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
 
     setContentView(R.layout.activity_test)
 
-    mGLView = findViewById(R.id.myGLSurfaceView).asInstanceOf[MyGLSurfaceView]
+    myGLSurfaceView = findViewById(R.id.myGLSurfaceView).asInstanceOf[MyGLSurfaceView]
   }
 
   override def onResume() {
     super.onResume()
+    myGLSurfaceView.onResume()
   }
 
   override def onPause() {
     super.onPause()
+    myGLSurfaceView.onPause()
   }
 
   override def onSaveInstanceState(@NonNull outState: Bundle) {
