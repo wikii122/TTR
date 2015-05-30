@@ -6,6 +6,7 @@ import pl.enves.ttr.graphics.GameView
 
 /**
  * Core game activity.
+ *
  * Basically it wraps and configures all things that can display other things.
  */
 class GameActivity extends Activity {
