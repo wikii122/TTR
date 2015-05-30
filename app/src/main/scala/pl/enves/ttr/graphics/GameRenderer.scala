@@ -4,11 +4,14 @@ import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
 import android.opengl.GLSurfaceView.Renderer
+import pl.enves.ttr.utils.Logging
 
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer extends Renderer {
+class GameRenderer extends Renderer with Logging {
+  log("Creating")
+
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int): Unit = ???
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig): Unit = ???
