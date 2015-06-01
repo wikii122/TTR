@@ -14,6 +14,7 @@ class GameView(val context: Context) extends GLSurfaceView(context) with Logging
   private[this] val renderer = GameRenderer()
 
   log("Creating")
+  setEGLContextClientVersion(2)
   setRenderer(renderer)
 
   override def onTouchEvent(event: MotionEvent): Boolean = ???
