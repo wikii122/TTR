@@ -1,7 +1,6 @@
 package pl.enves.ttr
 
 import android.content.Context
-;
 import android.opengl.GLSurfaceView
 import android.util.AttributeSet
 import pl.enves.ttr.renderer.MyRenderer

@@ -8,8 +8,8 @@ package pl.enves.ttr.renderer.shaders
  */
 
 import android.util.Log
-import android.opengl.GLES20
-import pl.enves.ttr.renderer.Model3d
+import android.opengl.{Matrix, GLES20}
+import pl.enves.ttr.renderer.{MVMatrix, PMatrix, Model3d}
 
 abstract class Shader {
   // prepare shaders and OpenGL program
@@ -52,7 +52,7 @@ abstract class Shader {
   /**
    * Or draw from buffers located in GPU memory
    */
-  def drawBuffers(mvpMatrix: Array[Float], model: Model3d)
+  def drawBuffers(model: Model3d)
 
   def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()
@@ -78,6 +78,12 @@ abstract class Shader {
     val s = GLES20.glGetShaderInfoLog(shader)
     Log.d("Shader", "CompilationLog:" + s)
 
-    shader
+    return shader
+  }
+
+  def makeMVPMatrix: Array[Float] = {
+    val mvpMatrix = new Array[Float](16)
+    Matrix.multiplyMM(mvpMatrix, 0, PMatrix(), 0, MVMatrix(), 0)
+    return mvpMatrix
   }
 }

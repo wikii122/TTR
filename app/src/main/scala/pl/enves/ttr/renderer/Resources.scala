@@ -19,65 +19,56 @@ import pl.enves.ttr.renderer.shaders._
 
 class Resources {
 
-  def ID_MODEL_TRIANGLE = 0
+  object ModelId extends Enumeration {
+    type ModelId = Value
+    val Triangle, Rectangle = Value
+  }
 
-  def ID_MODEL_RECT = 1
+  object TextureId extends Enumeration {
+    type TextureId = Value
+    val Test = Value
+  }
 
-  def ID_TEXTURE_TEST = 0
-
-  def ID_SHADER_MANDEL = 0
-
-  def ID_SHADER_COLOR = 1
-
-  def ID_SHADER_TEXTURE = 2
+  object ShaderId extends Enumeration {
+    type ShaderId = Value
+    val Mandel, Color, Texture = Value
+  }
 
   //create models
-  var models = new Array[Model3d](2)
-  models(ID_MODEL_TRIANGLE) = new Model3d(
-    Triangle.numVertex,
-    createFloatBuffer(Triangle.coords),
-    createFloatBuffer(Triangle.colors),
-    0,
-    0)
-
-  models(ID_MODEL_RECT) = new Model3d(Square.numVertex,
-    createFloatBuffer(Square.coords),
-    createFloatBuffer(Square.colors),
-    0,
-    0)
-
-  GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+  var models = Map(
+    (ModelId.Triangle, new Model3d(
+      Triangle.numVertex,
+      createFloatBuffer(Triangle.coords),
+      createFloatBuffer(Triangle.colors),
+      0,
+      0)),
+    (ModelId.Rectangle, new Model3d(
+      Square.numVertex,
+      createFloatBuffer(Square.coords),
+      createFloatBuffer(Square.colors),
+      0,
+      0))
+  )
 
   //create textures
   //TODO
-  var textures = new Array[Int](1)
+  var textures = Map((TextureId.Test, 0))
 
   //create shaders
-  var shaders = new Array[Shader](3)
-  shaders(ID_SHADER_MANDEL) = new MandelShader()
-  shaders(ID_SHADER_COLOR) = new ColorShader()
+  var shaders = Map(
+    (ShaderId.Mandel, new MandelShader()),
+    (ShaderId.Color, new ColorShader())
+    //(ShaderId.Texture, new TextureShader())
+  )
 
-  //shaders(ID_SHADER_TEXTURE) = new TextureShader()
+  def getTexture(texture: TextureId.TextureId): Int = textures(texture)
 
+  def getModel3d(model: ModelId.ModelId): Model3d = models(model)
 
-  // Texture is just a number
-  def getTexture(texture: Int): Int = {
-    textures(texture)
-  }
-
-  // per-vertex data
-  def getModel3d(model: Int): Model3d = {
-    models(model)
-  }
-
-  // But every shader needs some code around
-  def getShader(shader: Int): Shader = {
-    shaders(shader)
-  }
+  def getShader(shader: ShaderId.ShaderId): Shader = shaders(shader)
 
   // Buffer in GPU memory
   def createFloatBuffer(arr: Array[Float]): Int = {
-
     val floatBuffer = ByteBuffer.allocateDirect(arr.length * 4)
       .order(ByteOrder.nativeOrder()).asFloatBuffer()
 
@@ -91,12 +82,15 @@ class Resources {
 
     GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, arr.length * 4, floatBuffer, GLES20.GL_STATIC_DRAW)
 
-    buffer
+    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+
+    return buffer
   }
 
   def createShortBuffer(arr: Array[Short]): Int = {
     val shortBuffer = ByteBuffer.allocateDirect(arr.length * 2)
       .order(ByteOrder.nativeOrder()).asShortBuffer()
+
     shortBuffer.put(arr).position(0)
 
     val name = IntBuffer.allocate(1)
@@ -107,6 +101,12 @@ class Resources {
 
     GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, arr.length * 2, shortBuffer, GLES20.GL_STATIC_DRAW)
 
-    buffer
+    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
+
+    return buffer
   }
+}
+
+object Resources {
+  def apply() = new Resources
 }

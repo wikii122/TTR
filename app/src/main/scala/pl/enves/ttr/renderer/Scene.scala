@@ -6,30 +6,46 @@ import pl.enves.ttr.renderer.shaders._
 
 class Scene(resources: Resources) {
 
-  def draw(pMatrix: Array[Float], mvMatrix: Array[Float]) {
-    val mvpMatrix = new Array[Float](16)
-    Matrix.scaleM(mvMatrix, 0, 1.0f, 1.0f, 1.0f)
+  implicit def shaderToColorShader(shader: Shader): ColorShader = shader.asInstanceOf[ColorShader]
 
-    val ms = resources.getShader(resources.ID_SHADER_MANDEL).asInstanceOf[MandelShader]
-    val cs = resources.getShader(resources.ID_SHADER_COLOR).asInstanceOf[ColorShader]
+  implicit def shaderToMandelShader(shader: Shader): MandelShader = shader.asInstanceOf[MandelShader]
 
-    val rm = resources.getModel3d(resources.ID_MODEL_RECT)
-    val tm = resources.getModel3d(resources.ID_MODEL_TRIANGLE)
+  def draw() {
 
-    Matrix.translateM(mvMatrix, 0, -0.5f, -0.5f, 0.0f)
-    Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
-    ms.drawBuffers(mvpMatrix, rm)
+    MVMatrix.push()
 
-    Matrix.translateM(mvMatrix, 0, 1.0f, 0.0f, 0.0f)
-    Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
-    ms.drawBuffers(mvpMatrix, tm)
+    Matrix.scaleM(MVMatrix(), 0, 1.0f, 1.0f, 1.0f)
 
-    Matrix.translateM(mvMatrix, 0, 0.0f, 1.0f, 0.0f)
-    Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
-    cs.drawBuffers(mvpMatrix, rm)
+    val ms = resources.getShader(resources.ShaderId.Mandel)
+    val cs = resources.getShader(resources.ShaderId.Color)
 
-    Matrix.translateM(mvMatrix, 0, -1.0f, 0.0f, 0.0f)
-    Matrix.multiplyMM(mvpMatrix, 0, pMatrix, 0, mvMatrix, 0)
-    cs.drawBuffers(mvpMatrix, tm)
+    val rm = resources.getModel3d(resources.ModelId.Rectangle)
+    val tm = resources.getModel3d(resources.ModelId.Triangle)
+
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, -0.5f, -0.5f, 0.0f)
+    ms.drawBuffers(rm)
+    MVMatrix.pop()
+
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, 0.5f, -0.5f, 0.0f)
+    ms.drawBuffers(tm)
+    MVMatrix.pop()
+
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, 0.5f, 0.5f, 0.0f)
+    cs.drawBuffers(rm)
+    MVMatrix.pop()
+
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, -0.5f, 0.5f, 0.0f)
+    cs.drawBuffers(tm)
+    MVMatrix.pop()
+
+    MVMatrix.pop()
   }
+}
+
+object Scene {
+  def apply(resources: Resources) = new Scene(resources)
 }

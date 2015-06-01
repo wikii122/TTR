@@ -5,29 +5,9 @@ package pl.enves.ttr.renderer
  */
 
 
-class Model3d(numVertex: Int,
-              positionsBuffer: Int,
-              colorsBuffer: Int,
-              normalsBuffer: Int,
-              texCoordsBuffer: Int) {
-
-  def getNumVertex: Int = {
-    numVertex
-  }
-
-  def getPositionsBuffer: Int = {
-    positionsBuffer
-  }
-
-  def getColorsBuffer: Int = {
-    colorsBuffer
-  }
-
-  def getNormalsBuffer: Int = {
-    normalsBuffer
-  }
-
-  def getTexCoordsBuffer: Int = {
-    texCoordsBuffer
-  }
+case class Model3d(numVertex: Int,
+                   positionsBuffer: Int,
+                   colorsBuffer: Int,
+                   normalsBuffer: Int,
+                   texCoordsBuffer: Int) {
 }

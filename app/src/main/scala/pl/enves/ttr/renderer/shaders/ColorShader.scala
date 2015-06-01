@@ -4,35 +4,37 @@ import android.opengl.GLES20
 import pl.enves.ttr.renderer.Model3d
 
 class ColorShader extends Shader {
-  override def getVertexShaderCode: String = {
-    var r: String = ""
-    // the coordinates of the objects that use this vertex shader
-    r += "uniform mat4 u_MVPMatrix;"
+  override def getVertexShaderCode: String =
+    """
+    uniform mat4 u_MVPMatrix;
 
-    r += "attribute vec4 a_Position;"
-    r += "attribute vec4 a_Color;"
-    r += "varying vec4 v_Color;"
-    r += "void main() {"
-    // the matrix must be included as a modifier of gl_Position
-    r += "  gl_Position = u_MVPMatrix * a_Position;"
-    r += "  v_Color = a_Color;"
-    r += "}"
-    r
-  }
+    attribute vec4 a_Position;
+    attribute vec4 a_Color;
 
-  override def getFragmentShaderCode: String = {
-    var r: String = ""
-    r += "precision mediump float;"
-    r += "varying vec4 v_Color;"
-    r += "void main() {"
-    r += "  gl_FragColor = v_Color;"
-    r += "}"
-    r
-  }
+    varying vec4 v_Color;
 
-  override def drawBuffers(mvpMatrix: Array[Float], model: Model3d) {
-    val vertexBuffer = model.getPositionsBuffer
-    val colorBuffer = model.getColorsBuffer
+    void main() {
+      gl_Position = u_MVPMatrix * a_Position;
+      v_Color = a_Color;
+    }
+    """
+
+  override def getFragmentShaderCode: String =
+    """
+    precision mediump float;
+
+    varying vec4 v_Color;
+
+    void main() {
+      gl_FragColor = v_Color;
+    }
+    """
+
+  override def drawBuffers(model: Model3d) {
+    val mvpMatrix = makeMVPMatrix
+
+    val vertexBuffer = model.positionsBuffer
+    val colorBuffer = model.colorsBuffer
 
     GLES20.glUseProgram(program)
     checkGlError("glUseProgram")
@@ -77,7 +79,7 @@ class ColorShader extends Shader {
     checkGlError("glUniformMatrix4fv")
 
     // Draw
-    GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, model.getNumVertex)
+    GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, model.numVertex)
     checkGlError("glDrawArrays")
 
     // Disable attributes
