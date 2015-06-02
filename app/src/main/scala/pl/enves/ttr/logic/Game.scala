@@ -7,6 +7,7 @@ import pl.enves.ttr.logic.inner.Board
  */
 object Game {
   var board: Option[Board] = None
+
   def start() = ???
 
   // Requres parameters
@@ -19,4 +20,5 @@ object Game {
 
   def state: List[List[Option[Player.Value]]] = ???
 
+  private[logic] def boardVersion = board.get.version
 }
