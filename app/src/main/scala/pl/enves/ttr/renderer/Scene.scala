@@ -8,8 +8,6 @@ class Scene(resources: Resources) {
 
   implicit def shaderToColorShader(shader: Shader): ColorShader = shader.asInstanceOf[ColorShader]
 
-  implicit def shaderToMandelShader(shader: Shader): MandelShader = shader.asInstanceOf[MandelShader]
-
   implicit def shaderToTextureShader(shader: Shader): TextureShader = shader.asInstanceOf[TextureShader]
 
   def draw() {
@@ -18,7 +16,6 @@ class Scene(resources: Resources) {
 
     Matrix.scaleM(MVMatrix(), 0, 1.0f, 1.0f, 1.0f)
 
-    val ms = resources.getShader(resources.ShaderId.Mandel)
     val cs = resources.getShader(resources.ShaderId.Color)
     val ts = resources.getShader(resources.ShaderId.Texture)
 

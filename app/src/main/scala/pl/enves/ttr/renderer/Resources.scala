@@ -35,7 +35,7 @@ class Resources(context: Context) {
 
   object ShaderId extends Enumeration {
     type ShaderId = Value
-    val Mandel, Color, Texture = Value
+    val Color, Texture = Value
   }
 
   //create models
@@ -55,7 +55,6 @@ class Resources(context: Context) {
   )
 
   //create textures
-  //TODO
   var textures = Map(
     (TextureId.Test1, createTexture(R.drawable.sky)),
     (TextureId.Test2, createTexture(R.drawable.wood))
@@ -63,7 +62,6 @@ class Resources(context: Context) {
 
   //create shaders
   var shaders = Map(
-    (ShaderId.Mandel, new MandelShader()),
     (ShaderId.Color, new ColorShader()),
     (ShaderId.Texture, new TextureShader())
   )
