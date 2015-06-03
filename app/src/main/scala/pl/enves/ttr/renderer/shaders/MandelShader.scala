@@ -64,7 +64,7 @@ class MandelShader extends Shader {
     }
     """
 
-  override def drawBuffers(model: Model3d) {
+  override def drawBuffers(model: Model3d, texture: Int) {
     val mvpMatrix = makeMVPMatrix
     val vertexBuffer = model.positionsBuffer
 
@@ -90,7 +90,7 @@ class MandelShader extends Shader {
     GLES20.glEnableVertexAttribArray(mPositionHandle)
     checkGlError("glEnableVertexAttribArray")
 
-    GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, 0)
+    GLES20.glVertexAttribPointer(mPositionHandle, COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
     checkGlError("glVertexAttribPointer")
 
 

@@ -8,7 +8,7 @@ import pl.enves.ttr.renderer.MyRenderer
 class MyGLSurfaceView(context: Context, attrs: AttributeSet) extends GLSurfaceView(context, attrs) {
   var mMyRenderer: MyRenderer = _
   if (!isInEditMode) {
-    mMyRenderer = new MyRenderer()
+    mMyRenderer = new MyRenderer(context)
     setEGLConfigChooser(false)
     setEGLContextClientVersion(2)
 

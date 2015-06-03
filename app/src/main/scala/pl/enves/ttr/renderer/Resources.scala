@@ -13,11 +13,15 @@ import java.nio.IntBuffer
 import java.nio.FloatBuffer
 import java.nio.ShortBuffer
 
-import android.opengl.GLES20
+import android.content.Context
+import android.graphics.drawable.Drawable
+import android.graphics.{BitmapFactory, Bitmap}
+import android.opengl.{GLUtils, GLES20}
+import pl.enves.ttr.R
 import pl.enves.ttr.renderer.models._
 import pl.enves.ttr.renderer.shaders._
 
-class Resources {
+class Resources(context: Context) {
 
   object ModelId extends Enumeration {
     type ModelId = Value
@@ -26,7 +30,7 @@ class Resources {
 
   object TextureId extends Enumeration {
     type TextureId = Value
-    val Test = Value
+    val Test1, Test2 = Value
   }
 
   object ShaderId extends Enumeration {
@@ -41,24 +45,27 @@ class Resources {
       createFloatBuffer(Triangle.coords),
       createFloatBuffer(Triangle.colors),
       0,
-      0)),
+      createFloatBuffer(unflipY(Triangle.texCoords)))),
     (ModelId.Rectangle, new Model3d(
       Square.numVertex,
       createFloatBuffer(Square.coords),
       createFloatBuffer(Square.colors),
       0,
-      0))
+      createFloatBuffer(unflipY(Square.texCoords))))
   )
 
   //create textures
   //TODO
-  var textures = Map((TextureId.Test, 0))
+  var textures = Map(
+    (TextureId.Test1, createTexture(R.drawable.sky)),
+    (TextureId.Test2, createTexture(R.drawable.wood))
+  )
 
   //create shaders
   var shaders = Map(
     (ShaderId.Mandel, new MandelShader()),
-    (ShaderId.Color, new ColorShader())
-    //(ShaderId.Texture, new TextureShader())
+    (ShaderId.Color, new ColorShader()),
+    (ShaderId.Texture, new TextureShader())
   )
 
   def getTexture(texture: TextureId.TextureId): Int = textures(texture)
@@ -105,8 +112,42 @@ class Resources {
 
     return buffer
   }
+
+  def createTexture(image: Int): Int = {
+    val bitmap: Bitmap = BitmapFactory.decodeResource(context.getResources, image)
+
+    val name = IntBuffer.allocate(1)
+    GLES20.glGenTextures(1, name)
+    val texture = name.get(0)
+
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture)
+    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
+    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
+    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST)
+    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT)
+    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT)
+    GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+
+    // Recycle the bitmap, since its data has been loaded into OpenGL.
+    bitmap.recycle()
+
+    return texture
+  }
+
+  def unflipY(arr: Array[Float]): Array[Float] = {
+    val ret = new Array[Float](arr.length)
+    for(i <- arr.indices ) {
+      if(i%2 == 0) {
+        ret(i) = arr(i)
+      } else {
+        ret(i) = 1.0f-arr(i)
+      }
+    }
+    return ret
+  }
 }
 
 object Resources {
-  def apply() = new Resources
+  def apply(context: Context) = new Resources(context)
 }

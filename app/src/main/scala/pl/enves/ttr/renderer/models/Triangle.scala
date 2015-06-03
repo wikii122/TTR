@@ -12,4 +12,9 @@ object Triangle {
     0.0f, 0.0f, 1.0f, 1.0f) // bottom right
 
   val numVertex = 3
+
+  val texCoords = Array(
+    0.5f, 1.0f,
+    0.0f, 0.0f,
+    1.0f, 0.0f)
 }

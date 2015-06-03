@@ -10,6 +10,8 @@ class Scene(resources: Resources) {
 
   implicit def shaderToMandelShader(shader: Shader): MandelShader = shader.asInstanceOf[MandelShader]
 
+  implicit def shaderToTextureShader(shader: Shader): TextureShader = shader.asInstanceOf[TextureShader]
+
   def draw() {
 
     MVMatrix.push()
@@ -18,18 +20,22 @@ class Scene(resources: Resources) {
 
     val ms = resources.getShader(resources.ShaderId.Mandel)
     val cs = resources.getShader(resources.ShaderId.Color)
+    val ts = resources.getShader(resources.ShaderId.Texture)
 
     val rm = resources.getModel3d(resources.ModelId.Rectangle)
     val tm = resources.getModel3d(resources.ModelId.Triangle)
 
+    val tt1 = resources.getTexture(resources.TextureId.Test1)
+    val tt2 = resources.getTexture(resources.TextureId.Test2)
+
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, -0.5f, -0.5f, 0.0f)
-    ms.drawBuffers(rm)
+    ts.drawBuffers(rm, tt1)
     MVMatrix.pop()
 
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, 0.5f, -0.5f, 0.0f)
-    ms.drawBuffers(tm)
+    ts.drawBuffers(tm, tt2)
     MVMatrix.pop()
 
     MVMatrix.push()

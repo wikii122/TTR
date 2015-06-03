@@ -14,4 +14,10 @@ object Square {
     1.0f, 1.0f, 0.0f, 1.0f,
     0.0f, 0.0f, 1.0f, 1.0f,
     0.0f, 1.0f, 0.0f, 1.0f)
+
+  val texCoords = Array(
+    0.0f, 0.0f,
+    1.0f, 0.0f,
+    0.0f, 1.0f,
+    1.0f, 1.0f)
 }

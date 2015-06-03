@@ -46,13 +46,14 @@ abstract class Shader {
 
   protected def getFragmentShaderCode: String
 
-  final val COORDS_PER_VERTEX = 3
-  final val COLORS_PER_VERTEX = 4
+  final val COORD_SIZE = 3
+  final val COLOR_SIZE = 4
+  final val TEX_COORD_SIZE = 2
 
   /**
    * Or draw from buffers located in GPU memory
    */
-  def drawBuffers(model: Model3d)
+  def drawBuffers(model: Model3d, texture: Int = 0)
 
   def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()

@@ -30,7 +30,7 @@ class ColorShader extends Shader {
     }
     """
 
-  override def drawBuffers(model: Model3d) {
+  override def drawBuffers(model: Model3d, texture: Int) {
     val mvpMatrix = makeMVPMatrix
 
     val vertexBuffer = model.positionsBuffer
@@ -58,14 +58,14 @@ class ColorShader extends Shader {
     GLES20.glEnableVertexAttribArray(mPositionHandle)
     checkGlError("glEnableVertexAttribArray")
 
-    GLES20.glVertexAttribPointer(mPositionHandle, COORDS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, 0)
+    GLES20.glVertexAttribPointer(mPositionHandle, COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
     checkGlError("glVertexAttribPointer")
 
     // Apply colors
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBuffer)
     checkGlError("glBindBuffer")
 
-    GLES20.glVertexAttribPointer(mColorHandle, COLORS_PER_VERTEX, GLES20.GL_FLOAT, false, 0, 0)
+    GLES20.glVertexAttribPointer(mColorHandle, COLOR_SIZE, GLES20.GL_FLOAT, false, 0, 0)
     checkGlError("glVertexAttribPointer")
 
     GLES20.glEnableVertexAttribArray(mColorHandle)

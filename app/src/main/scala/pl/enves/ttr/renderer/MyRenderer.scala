@@ -2,10 +2,11 @@ package pl.enves.ttr.renderer
 
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import android.content.Context
 import android.opengl.GLES20.glViewport
 import android.opengl.{GLES20, GLSurfaceView, Matrix}
 
-class MyRenderer extends GLSurfaceView.Renderer {
+class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
 
   private[this] var resources: Option[Resources] = None
   private[this] var scene: Option[Scene] = None
@@ -47,7 +48,7 @@ class MyRenderer extends GLSurfaceView.Renderer {
     //TODO: Method stub
     GLES20.glClearColor(0.0f, 0.0f, 0.5f, 1.0f)
 
-    resources = Some(Resources())
+    resources = Some(Resources(context))
     scene = Some(Scene(resources.get))
   }
 }
