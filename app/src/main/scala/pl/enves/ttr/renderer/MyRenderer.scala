@@ -51,6 +51,8 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
     GLES20.glDepthMask( true )
     GLES20.glEnable(GLES20.GL_CULL_FACE)
     GLES20.glCullFace(GLES20.GL_BACK)
+    GLES20.glEnable(GLES20.GL_BLEND)
+    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
     resources = Some(Resources(context))
     scene = Some(Scene(resources.get))
