@@ -1,10 +1,23 @@
 package pl.enves.ttr.renderer
 
 import android.opengl.Matrix
+import pl.enves.ttr.renderer.models.Board
 
 import pl.enves.ttr.renderer.shaders._
 
 class Scene(resources: Resources) {
+  val board = new Board(resources)
+
+  def animate(): Unit = {
+
+  }
+
+  def draw() {
+    board.draw()
+  }
+}
+
+class TestScene(resources: Resources) {
 
   implicit def shaderToColorShader(shader: Shader): ColorShader = shader.asInstanceOf[ColorShader]
 

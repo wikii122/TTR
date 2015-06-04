@@ -22,7 +22,7 @@ class Resources(context: Context) {
 
   object ModelId extends Enumeration {
     type ModelId = Value
-    val Triangle, Rectangle, Cube = Value
+    val Triangle, Rectangle, Cube, Board3x3 = Value
   }
 
   object TextureId extends Enumeration {
@@ -74,11 +74,26 @@ class Resources(context: Context) {
     cubeVBOs
   )
 
+  val board3x3VBOs = new VBOs(
+    createFloatBuffer(Board3x3.coords),
+    createFloatBuffer(Board3x3.colors),
+    0,
+    0
+  )
+
+  val board3x3Geometry = new GeometryElements(
+    Board3x3.indices.length,
+    createShortBuffer(Board3x3.indices),
+    GLES20.GL_LINES,
+    board3x3VBOs
+  )
+
   //create models
   var models = Map(
     (ModelId.Triangle, triangleGeometry),
     (ModelId.Rectangle, squareGeometry),
-    (ModelId.Cube, cubeGeometry)
+    (ModelId.Cube, cubeGeometry),
+    (ModelId.Board3x3, board3x3Geometry)
   )
 
   //create textures
