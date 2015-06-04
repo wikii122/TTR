@@ -9,7 +9,7 @@ package pl.enves.ttr.renderer.shaders
 
 import android.util.Log
 import android.opengl.{Matrix, GLES20}
-import pl.enves.ttr.renderer.{MVMatrix, PMatrix, Model3d}
+import pl.enves.ttr.renderer.{MVMatrix, PMatrix, Geometry}
 
 abstract class Shader {
   // prepare shaders and OpenGL program
@@ -49,11 +49,8 @@ abstract class Shader {
   final val COORD_SIZE = 3
   final val COLOR_SIZE = 4
   final val TEX_COORD_SIZE = 2
-
-  /**
-   * Or draw from buffers located in GPU memory
-   */
-  def drawBuffers(model: Model3d, texture: Int = 0)
+  
+  def draw(model: Geometry, texture: Int = 0)
 
   def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()

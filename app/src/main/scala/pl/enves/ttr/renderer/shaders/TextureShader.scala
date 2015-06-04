@@ -1,7 +1,7 @@
 package pl.enves.ttr.renderer.shaders
 
 import android.opengl.GLES20
-import pl.enves.ttr.renderer.Model3d
+import pl.enves.ttr.renderer.Geometry
 
 class TextureShader extends Shader {
 
@@ -35,11 +35,11 @@ class TextureShader extends Shader {
     }
     """
 
-  override def drawBuffers(model: Model3d, texture: Int) {
+  override def draw(model: Geometry, texture: Int) {
     val mvpMatrix = makeMVPMatrix
 
-    val positionsBuffer = model.positionsBuffer
-    val texCoordsBuffer = model.texCoordsBuffer
+    val positionsBuffer = model.getVBOS.positions
+    val texCoordsBuffer = model.getVBOS.texCoords
 
     GLES20.glUseProgram(program)
     checkGlError("glUseProgram")
@@ -96,8 +96,8 @@ class TextureShader extends Shader {
     GLES20.glUniform1i(mSamplerHandle, 0)
 
     // Draw
-    GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, model.numVertex)
-    checkGlError("glDrawArrays")
+    model.draw()
+    checkGlError("draw")
 
     // Disable attributes
     GLES20.glDisableVertexAttribArray(mPositionHandle)

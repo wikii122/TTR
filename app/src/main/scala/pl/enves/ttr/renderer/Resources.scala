@@ -10,11 +10,8 @@ package pl.enves.ttr.renderer
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
-import java.nio.FloatBuffer
-import java.nio.ShortBuffer
 
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.graphics.{BitmapFactory, Bitmap}
 import android.opengl.{GLUtils, GLES20}
 import pl.enves.ttr.R
@@ -25,7 +22,7 @@ class Resources(context: Context) {
 
   object ModelId extends Enumeration {
     type ModelId = Value
-    val Triangle, Rectangle = Value
+    val Triangle, Rectangle, Cube = Value
   }
 
   object TextureId extends Enumeration {
@@ -38,20 +35,50 @@ class Resources(context: Context) {
     val Color, Texture = Value
   }
 
+  val triangleVBOs = new VBOs(
+    createFloatBuffer(Triangle.coords),
+    createFloatBuffer(Triangle.colors),
+    0,
+    createFloatBuffer(unflipY(Triangle.texCoords))
+  )
+  val triangleGeometry = new GeometryArrays(
+    Triangle.numVertex,
+    GLES20.GL_TRIANGLES,
+    triangleVBOs
+  )
+
+  val squareVBOs = new VBOs(
+    createFloatBuffer(Square.coords),
+    createFloatBuffer(Square.colors),
+    0,
+    createFloatBuffer(unflipY(Square.texCoords))
+  )
+
+  val squareGeometry = new GeometryArrays(
+    Square.numVertex,
+    GLES20.GL_TRIANGLE_STRIP,
+    squareVBOs
+  )
+
+  val cubeVBOs = new VBOs(
+    createFloatBuffer(Cube.coords),
+    createFloatBuffer(Cube.colors),
+    0,
+    createFloatBuffer(unflipY(Cube.texCoords))
+  )
+
+  val cubeGeometry = new GeometryElements(
+    Cube.indices.length,
+    createShortBuffer(Cube.indices),
+    GLES20.GL_TRIANGLES,
+    cubeVBOs
+  )
+
   //create models
   var models = Map(
-    (ModelId.Triangle, new Model3d(
-      Triangle.numVertex,
-      createFloatBuffer(Triangle.coords),
-      createFloatBuffer(Triangle.colors),
-      0,
-      createFloatBuffer(unflipY(Triangle.texCoords)))),
-    (ModelId.Rectangle, new Model3d(
-      Square.numVertex,
-      createFloatBuffer(Square.coords),
-      createFloatBuffer(Square.colors),
-      0,
-      createFloatBuffer(unflipY(Square.texCoords))))
+    (ModelId.Triangle, triangleGeometry),
+    (ModelId.Rectangle, squareGeometry),
+    (ModelId.Cube, cubeGeometry)
   )
 
   //create textures
@@ -68,7 +95,7 @@ class Resources(context: Context) {
 
   def getTexture(texture: TextureId.TextureId): Int = textures(texture)
 
-  def getModel3d(model: ModelId.ModelId): Model3d = models(model)
+  def getGeometry(model: ModelId.ModelId): Geometry = models(model)
 
   def getShader(shader: ShaderId.ShaderId): Shader = shaders(shader)
 
@@ -135,11 +162,11 @@ class Resources(context: Context) {
 
   def unflipY(arr: Array[Float]): Array[Float] = {
     val ret = new Array[Float](arr.length)
-    for(i <- arr.indices ) {
-      if(i%2 == 0) {
+    for (i <- arr.indices) {
+      if (i % 2 == 0) {
         ret(i) = arr(i)
       } else {
-        ret(i) = 1.0f-arr(i)
+        ret(i) = 1.0f - arr(i)
       }
     }
     return ret

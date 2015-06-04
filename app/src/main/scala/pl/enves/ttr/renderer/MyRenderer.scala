@@ -12,10 +12,7 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
   private[this] var scene: Option[Scene] = None
 
   override def onDrawFrame(gl: GL10) {
-    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
-
-    GLES20.glEnable(GLES20.GL_CULL_FACE)
-    gl.glCullFace(GL10.GL_BACK)
+    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
 
     //In case of inconsistent use of push and pop
     MVMatrix.clear()
@@ -25,6 +22,7 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
     //or simply
     //Matrix.translateM(MVMatrix(), 0, 0.0f, 0.0f, 0.0f)
 
+    scene.get.animate()
     scene.get.draw()
   }
 
@@ -47,6 +45,12 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
     //TODO: Method stub
     GLES20.glClearColor(0.0f, 0.0f, 0.5f, 1.0f)
+    GLES20.glClearDepthf(1.0f)
+    GLES20.glEnable(GLES20.GL_DEPTH_TEST)
+    GLES20.glDepthFunc(GLES20.GL_LEQUAL)
+    GLES20.glDepthMask( true )
+    GLES20.glEnable(GLES20.GL_CULL_FACE)
+    GLES20.glCullFace(GLES20.GL_BACK)
 
     resources = Some(Resources(context))
     scene = Some(Scene(resources.get))

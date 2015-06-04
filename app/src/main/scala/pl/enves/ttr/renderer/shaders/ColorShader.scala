@@ -1,7 +1,7 @@
 package pl.enves.ttr.renderer.shaders
 
 import android.opengl.GLES20
-import pl.enves.ttr.renderer.Model3d
+import pl.enves.ttr.renderer.{VBOs, GeometryArrays, Geometry}
 
 class ColorShader extends Shader {
   override def getVertexShaderCode: String =
@@ -21,7 +21,7 @@ class ColorShader extends Shader {
 
   override def getFragmentShaderCode: String =
     """
-    precision mediump float;
+    precision highp float;
 
     varying vec4 v_Color;
 
@@ -30,11 +30,10 @@ class ColorShader extends Shader {
     }
     """
 
-  override def drawBuffers(model: Model3d, texture: Int) {
+  override def draw(model: Geometry, texture: Int) {
     val mvpMatrix = makeMVPMatrix
-
-    val vertexBuffer = model.positionsBuffer
-    val colorBuffer = model.colorsBuffer
+    val vertexBuffer:Int = model.getVBOS.positions
+    val colorBuffer:Int = model.getVBOS.colors
 
     GLES20.glUseProgram(program)
     checkGlError("glUseProgram")
@@ -79,8 +78,8 @@ class ColorShader extends Shader {
     checkGlError("glUniformMatrix4fv")
 
     // Draw
-    GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, model.numVertex)
-    checkGlError("glDrawArrays")
+    model.draw()
+    checkGlError("draw")
 
     // Disable attributes
     GLES20.glDisableVertexAttribArray(mPositionHandle)

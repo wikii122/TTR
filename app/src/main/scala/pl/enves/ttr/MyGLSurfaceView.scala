@@ -9,12 +9,12 @@ class MyGLSurfaceView(context: Context, attrs: AttributeSet) extends GLSurfaceVi
   var mMyRenderer: MyRenderer = _
   if (!isInEditMode) {
     mMyRenderer = new MyRenderer(context)
-    setEGLConfigChooser(false)
+    setEGLConfigChooser(true)   //true, cause we need depth buffer
     setEGLContextClientVersion(2)
 
     setRenderer(mMyRenderer)
 
-    //setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
-    setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
+    setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
+    //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
   }
 }
