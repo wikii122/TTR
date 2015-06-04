@@ -13,11 +13,28 @@ class Board(resources: Resources) {
 
   val arrowLeft = resources.getTexture(resources.TextureId.ArrowLeft)
   val arrowRight = resources.getTexture(resources.TextureId.ArrowRight)
+  val ring = resources.getTexture(resources.TextureId.Ring)
+  val cross = resources.getTexture(resources.TextureId.Cross)
 
   val colorShader = resources.getShader(resources.ShaderId.Color)
   val textureShader = resources.getShader(resources.ShaderId.Texture)
 
   def animate(dt: Float = 0.0f): Unit = ???
+
+  //TODO: Correct after merge with Logic
+  def drawFigure(figure: Int, x: Int, y: Int): Unit = {
+    val nx = (2*x-7)/16.0f
+    val ny = (2*y-7)/16.0f
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, nx, ny, 0.0f)
+    Matrix.scaleM(MVMatrix(), 0, 1.0f/8.0f, 1.0f/8.0f, 1.0f)
+    if(figure == 0) {
+      textureShader.draw(rectangle, ring)
+    }else{
+      textureShader.draw(rectangle, cross)
+    }
+    MVMatrix.pop()
+  }
 
   def draw(): Unit = {
     MVMatrix.push()
@@ -112,6 +129,11 @@ class Board(resources: Resources) {
     Matrix.rotateM(MVMatrix(), 0, -90.0f, 0.0f, 0.0f, 1.0f)
     textureShader.draw(rectangle, arrowRight)
     MVMatrix.pop()
+
+    drawFigure(0, 1, 1)
+    drawFigure(1, 3, 1)
+    drawFigure(0, 2, 5)
+    drawFigure(1, 6, 6)
 
     MVMatrix.pop()
   }
