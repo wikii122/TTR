@@ -5,8 +5,4 @@ package pl.enves.ttr.logic
  *
  * Invalidates after any change in the board layout, such as rotation.
  */
-case class Position(x: Int, y: Int) {
-  private[this] val state = Game.boardVersion
-
-  def valid = state == Game.boardVersion
-}
+case class Position(x: Int, y: Int) extends Move

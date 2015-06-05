@@ -10,15 +10,14 @@ object Game {
 
   def start() = ???
 
-  // Requres parameters
-  def move(pos: Position): Boolean = ???
-
-  // Requires parameters
-  def rotate(): Boolean = ???
-
   def finished(): Option[Player.Value] = ???
 
-  def state: List[List[Option[Player.Value]]] = ???
+  def state: Seq[Seq[Option[Player.Value]]] = ???
+
+  def make(move: Move) = move match {
+    case Position(x, y) => board.get move (x, y)
+    case Rotation(b, r) => board.get rotate (b, r)
+  }
 
   private[logic] def boardVersion = board.get.version
 }
