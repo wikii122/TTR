@@ -6,12 +6,11 @@ package inner
  */
 private[logic] class Board {
   private[this] var _version = 0
+  private[this] val quadrants = (Quadrant.values map ((_, new BoardQuadrant))).toMap
 
   def version: Int = _version
 
-  // Requres parameters
   def move(x: Int, y: Int, player: Player.Value): Boolean = ???
 
-  // Requires parameters
   def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = ???
 }
