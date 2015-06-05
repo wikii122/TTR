@@ -1,8 +1,6 @@
 package pl.enves.ttr.logic
 package inner
 
-import pl.enves.ttr.logic.Player
-
 /**
  * Keeps fields states.
  */
@@ -12,7 +10,7 @@ private[logic] class Board {
   def version: Int = _version
 
   // Requres parameters
-  def move(x: Int, y: Int): Boolean = ???
+  def move(x: Int, y: Int, player: Player.Value): Boolean = ???
 
   // Requires parameters
   def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = ???
