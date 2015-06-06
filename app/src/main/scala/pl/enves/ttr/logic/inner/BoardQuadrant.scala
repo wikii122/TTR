@@ -2,22 +2,26 @@ package pl.enves.ttr.logic
 package inner
 
 import pl.enves.ttr.logic.Quadrant
+import pl.enves.ttr.utils.Logging
 
 /**
  * Field 3x3 with fields, ability to set them and rotate.
  */
-class BoardQuadrant {
+class BoardQuadrant extends Logging {
   private[this] val fields = Array.fill[Option[Player.Value]] (3, 3) (None)
   private[this] var rotation = 0
 
   def move(xv: Int, yv: Int, player: Player.Value) = {
+    log(s"Move $player at ($xv, $yv)")
     val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
+    log(s"Coordinates translated to ($x, $y) inside Quadrant")
 
     if (fields(x)(y).isEmpty) fields(x)(y) = Some(player)
     else throw new FieldTaken("Field is already taken")
   }
 
   def rotate(rot: Rotation.Value) = {
+    log(s"Rotate with $rot")
     val mod = rot match {
       case Rotation.r90 => 1
       case Rotation.r180 => 2

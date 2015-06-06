@@ -3,11 +3,12 @@ package pl.enves.ttr.logic
 import java.security.InvalidParameterException
 
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.utils.Logging
 
 /**
  * Wrapper for game logic.
  */
-object Game {
+object Game extends Logging {
   private[this] var board: Option[Board] = None
   /**
    * This field may be set externally. Represents current player.
@@ -15,6 +16,8 @@ object Game {
   var player: Player.Value = Player.X
 
   def start(startingPlayer: Player.Value) = {
+    log("Creating new game")
+    log(s"Starting player: $player")
     board = Some(new Board)
     player = startingPlayer
   }
@@ -32,12 +35,16 @@ object Game {
   def make(move: Move): Boolean = {
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (winner.isDefined) throw new GameFinished("Game is finished")
+
+    log(s"Move: $move for $player")
+
     val res = move match {
       case Position(x, y) => board.get move (x, y, player)
       case Rotation(b, r) => board.get rotate (b, r)
     }
 
     player = if (player == Player.X) Player.O else Player.X
+    log(s"Player changed to $player")
 
     return res
   }

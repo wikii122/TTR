@@ -1,10 +1,12 @@
 package pl.enves.ttr.logic
 package inner
 
+import pl.enves.ttr.utils.Logging
+
 /**
  * Manages fields states.
  */
-private[logic] class Board {
+private[logic] class Board extends Logging {
   private[this] var _version = 0
   private[this] val quadrants = createQuadrants.toMap
   private[this] var _winner: Option[Player.Value] = None
@@ -14,19 +16,21 @@ private[logic] class Board {
   def move(x: Int, y: Int, player: Player.Value): Boolean = {
     // TODO automate this
     val quad = if (y < Quadrant.size) {
-      if (x < Quadrant.size) quadrants(Quadrant.first)
-      else quadrants(Quadrant.second)
+      if (x < Quadrant.size) Quadrant.first
+      else Quadrant.second
     } else {
-      if (x < Quadrant.size) quadrants(Quadrant.third)
-      else quadrants(Quadrant.fourth)
+      if (x < Quadrant.size) Quadrant.third
+      else Quadrant.fourth
     }
 
-    quad.move(x, y, player)
+    log(s"Move of $player at ($x, $y) in $quad")
+    quadrants(quad).move(x, y, player)
 
     return checkVictory()
   }
 
   def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = {
+    log(s"Rotation from ${Game.player} for $quadrant by $rotation")
     quadrants(quadrant).rotate(rotation)
 
     return checkVictory()
