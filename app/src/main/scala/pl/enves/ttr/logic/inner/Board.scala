@@ -11,13 +11,31 @@ private[logic] class Board {
 
   def version: Int = _version
 
-  def move(x: Int, y: Int, player: Player.Value): Boolean = ???
+  def move(x: Int, y: Int, player: Player.Value): Boolean = {
+    // TODO automate this
+    val quad = if (y < Quadrant.size) {
+      if (x < Quadrant.size) quadrants(Quadrant.first)
+      else quadrants(Quadrant.second)
+    } else {
+      if (x < Quadrant.size) quadrants(Quadrant.third)
+      else quadrants(Quadrant.fourth)
+    }
 
-  def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = ???
+    quad.move(x, y, player)
+
+    return checkVictory()
+  }
+
+  def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = {
+    quadrants(quadrant).rotate(rotation)
+
+    return checkVictory()
+  }
 
   def finished = _winner
 
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
 
-  private def checkVictory: Boolean = ???
+  // TODO!!!!
+  private def checkVictory(): Boolean = false
 }

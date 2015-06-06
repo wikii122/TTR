@@ -16,5 +16,7 @@ object Rotation extends Enumeration {
 }
 
 object Quadrant extends Enumeration {
+  val size = 3
+
   val first, second, third, fourth = Value
 }

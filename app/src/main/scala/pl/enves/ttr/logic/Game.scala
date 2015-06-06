@@ -32,7 +32,7 @@ object Game {
    */
   def make(move: Move): Boolean = {
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
-    if (winner.isDefined) throw new MoveImpossible("Game is finished")
+    if (winner.isDefined) throw new GameFinished("Game is finished")
     val res = move match {
       case Position(x, y) => board.get move (x, y, player)
       case Rotation(b, r) => board.get rotate (b, r)
