@@ -15,16 +15,11 @@
             android:name=".GameActivity"
             android:label="@string/title_activity_game" >
             <intent-filter>
-
                 <!-- TODO: Add menu activity -->
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name=".EngineTestActivity"
-            android:label="@string/title_activity_engine_tests" >
         </activity>
     </application>
 
