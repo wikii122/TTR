@@ -27,7 +27,7 @@ class EngineTestActivity extends Activity with Logging {
     state foreach (d => log(d.toString()))
 
     log("Making rotation")
-    Game.make(Rotation(Quadrant.first, Rotation.r90))
+    Game.make(Rotation(Quadrant.third, Rotation.r90))
     log("Rotated")
 
     state = Game.state

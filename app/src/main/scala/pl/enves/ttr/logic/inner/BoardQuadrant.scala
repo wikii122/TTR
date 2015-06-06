@@ -32,7 +32,8 @@ class BoardQuadrant extends Logging {
     rotation = (rotation + mod) % 4
   }
 
-  private def readCoordinates(x: Int, y: Int): (Int, Int) = rotation match {
+  // Lines are horizontal, and assumption is they are vertical, thus x and y must be swapped
+  private def readCoordinates(y: Int, x: Int): (Int, Int) = rotation match {
     case 0 => (x, y)
     case 1 => (Quadrant.size - y, x)
     case 2 => (Quadrant.size - x, Quadrant.size - y)

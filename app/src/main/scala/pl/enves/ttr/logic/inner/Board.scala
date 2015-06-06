@@ -23,7 +23,7 @@ private[logic] class Board extends Logging {
       else Quadrant.fourth
     }
 
-    log(s"Move of $player at ($x, $y) in $quad")
+    log(s"Move of $player at ($x, $y) in $quad quadrant")
     quadrants(quad).move(x, y, player)
 
     return checkVictory()
