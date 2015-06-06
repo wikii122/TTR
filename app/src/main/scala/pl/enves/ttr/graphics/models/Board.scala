@@ -1,7 +1,7 @@
-package pl.enves.ttr.renderer.models
+package pl.enves.ttr.graphics.models
 
 import android.opengl.Matrix
-import pl.enves.ttr.renderer.{Resources, MVMatrix}
+import pl.enves.ttr.graphics.{Resources, MVMatrix}
 
 /**
  * Game board

@@ -1,4 +1,4 @@
-package pl.enves.ttr.renderer
+package pl.enves.ttr.graphics
 
 /**
  * Objects may utilize different combinations of per-vertex data, textures and shaders
@@ -15,8 +15,8 @@ import android.content.Context
 import android.graphics.{BitmapFactory, Bitmap}
 import android.opengl.{GLUtils, GLES20}
 import pl.enves.ttr.R
-import pl.enves.ttr.renderer.models._
-import pl.enves.ttr.renderer.shaders._
+import pl.enves.ttr.graphics.models._
+import pl.enves.ttr.graphics.shaders._
 
 class Resources(context: Context) {
 

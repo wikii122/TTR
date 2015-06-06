@@ -1,4 +1,4 @@
-package pl.enves.ttr.renderer.models
+package pl.enves.ttr.graphics.models
 
 object Triangle {
   val coords = Array(// in counterclockwise order:

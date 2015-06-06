@@ -1,4 +1,4 @@
-package pl.enves.ttr.renderer
+package pl.enves.ttr.graphics
 
 import android.opengl.GLES20
 

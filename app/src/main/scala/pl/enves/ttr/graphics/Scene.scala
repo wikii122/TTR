@@ -1,6 +1,6 @@
-package pl.enves.ttr.renderer
+package pl.enves.ttr.graphics
 
-import pl.enves.ttr.renderer.models.Board
+import pl.enves.ttr.graphics.models.Board
 
 class Scene(resources: Resources) {
   val board = new Board(resources)

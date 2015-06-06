@@ -1,4 +1,4 @@
-package pl.enves.ttr.renderer.models
+package pl.enves.ttr.graphics.models
 
 object Cube {
   val coords = Array(

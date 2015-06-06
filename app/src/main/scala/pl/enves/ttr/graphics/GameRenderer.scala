@@ -1,12 +1,18 @@
-package pl.enves.ttr.renderer
+package pl.enves.ttr.graphics
 
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import android.content.Context
-import android.opengl.GLES20.glViewport
 import android.opengl.{GLES20, GLSurfaceView, Matrix}
+import android.opengl.GLES20.glViewport
+import android.opengl.GLSurfaceView.Renderer
+import pl.enves.ttr.utils.Logging
 
-class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
+/**
+ * Manages the process of drawing the frame.
+ */
+class GameRenderer(context: Context) extends Renderer with Logging {
+  log("Creating")
 
   private[this] var resources: Option[Resources] = None
   private[this] var scene: Option[Scene] = None
@@ -27,7 +33,6 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
   }
 
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-    //TODO: Method stub
     glViewport(0, 0, width, height)
 
     Matrix.setIdentityM(PMatrix(), 0)
@@ -43,7 +48,6 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
-    //TODO: Method stub
     GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
     GLES20.glClearDepthf(1.0f)
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
@@ -57,4 +61,8 @@ class MyRenderer(context: Context) extends GLSurfaceView.Renderer {
     resources = Some(Resources(context))
     scene = Some(Scene(resources.get))
   }
+}
+
+object GameRenderer {
+  def apply(context: Context) = new GameRenderer(context)
 }

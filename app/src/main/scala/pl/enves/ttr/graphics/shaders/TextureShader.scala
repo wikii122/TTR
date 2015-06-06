@@ -1,7 +1,7 @@
-package pl.enves.ttr.renderer.shaders
+package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
-import pl.enves.ttr.renderer.Geometry
+import pl.enves.ttr.graphics.Geometry
 
 class TextureShader extends Shader {
 

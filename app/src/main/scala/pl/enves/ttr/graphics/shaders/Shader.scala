@@ -1,4 +1,4 @@
-package pl.enves.ttr.renderer.shaders
+package pl.enves.ttr.graphics.shaders
 
 /**
  * Every shader needs some code to bind data from graphic or user memory
@@ -9,7 +9,7 @@ package pl.enves.ttr.renderer.shaders
 
 import android.util.Log
 import android.opengl.{Matrix, GLES20}
-import pl.enves.ttr.renderer.{MVMatrix, PMatrix, Geometry}
+import pl.enves.ttr.graphics.{MVMatrix, PMatrix, Geometry}
 
 abstract class Shader {
   // prepare shaders and OpenGL program
