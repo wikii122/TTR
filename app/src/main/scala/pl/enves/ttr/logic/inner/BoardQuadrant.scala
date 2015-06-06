@@ -7,7 +7,7 @@ import pl.enves.ttr.utils.Logging
 /**
  * Field 3x3 with fields, ability to set them and rotate.
  */
-class BoardQuadrant extends Logging {
+private[inner] class BoardQuadrant extends Logging {
   private[this] val fields = Array.fill[Option[Player.Value]] (3, 3) (None)
   private[this] var rotation = 0
 
@@ -32,15 +32,21 @@ class BoardQuadrant extends Logging {
     rotation = (rotation + mod) % 4
   }
 
+  def get(xv: Int, yv: Int): Option[Player.Value] = {
+    val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
+
+    return fields(x)(y)
+  }
+
   // Lines are horizontal, and assumption is they are vertical, thus x and y must be swapped
   private def readCoordinates(y: Int, x: Int): (Int, Int) = rotation match {
     case 0 => (x, y)
-    case 1 => (Quadrant.size - y, x)
-    case 2 => (Quadrant.size - x, Quadrant.size - y)
-    case 3 => (y, Quadrant.size - x)
+    case 1 => (Quadrant.size - y - 1, x)
+    case 2 => (Quadrant.size - x - 1, Quadrant.size - y - 1)
+    case 3 => (y, Quadrant.size - x - 1)
   }
 
-  def line(i: Int): Seq[Option[Player.Value]] = fields(i).toSeq
+  def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 to (Quadrant.size-1)) yield get(x, y)
 }
 
 object BoardQuadrant {
