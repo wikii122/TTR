@@ -10,6 +10,7 @@ private[logic] class Board extends Logging {
   private[this] var _version = 0
   private[this] val quadrants = createQuadrants.toMap
   private[this] var _winner: Option[Player.Value] = None
+  private[this] var _combination: List[(Int, Int)] = Nil
 
   def version: Int = _version
 
@@ -25,6 +26,7 @@ private[logic] class Board extends Logging {
 
     log(s"Move of $player at ($x, $y) in $quad quadrant")
     quadrants(quad).move(x, y, player)
+    _version += 1
 
     return checkVictory()
   }
@@ -32,13 +34,16 @@ private[logic] class Board extends Logging {
   def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = {
     log(s"Rotation from ${Game.player} for $quadrant by $rotation")
     quadrants(quadrant).rotate(rotation)
+    _version += 1
 
     return checkVictory()
   }
 
   def finished = _winner
 
-  def lines: Seq[Seq[Option[Player.Value]]] = (0 to 5) map {
+  def finishingMove = _combination
+
+  def lines: Game.State = (0 to 5) map {
     i => if (i < Quadrant.size)
       quadrants(Quadrant.first).line(i) ++ quadrants(Quadrant.second).line(i)
     else
@@ -47,6 +52,11 @@ private[logic] class Board extends Logging {
 
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
 
-  // TODO!!!!
-  private def checkVictory(): Boolean = false
+  private def checkVictory(): Boolean = VictoryConditions.check(lines) exists {
+    t => val (player, fields) = t
+      _winner = Some(player)
+      _combination = fields
+
+      true
+  }
 }

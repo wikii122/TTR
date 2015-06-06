@@ -9,6 +9,7 @@ import pl.enves.ttr.utils.Logging
  * Wrapper for game logic.
  */
 object Game extends Logging {
+  type State = Seq[Seq[Option[Player.Value]]]
   private[this] var board: Option[Board] = None
   /**
    * This field may be set externally. Represents current player.
@@ -24,7 +25,7 @@ object Game extends Logging {
 
   def winner: Option[Player.Value] = board.get.finished
 
-  def state: Seq[Seq[Option[Player.Value]]] = board.get.lines
+  def state: State = board.get.lines
   /**
    * Makes a move, whether it's a rotation or putting symbol.
    * After it switches to next player.

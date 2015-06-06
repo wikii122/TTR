@@ -46,7 +46,7 @@ private[inner] class BoardQuadrant extends Logging {
     case 3 => (y, Quadrant.size - x - 1)
   }
 
-  def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 to (Quadrant.size-1)) yield get(x, y)
+  def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 until Quadrant.size) yield get(x, y)
 }
 
 object BoardQuadrant {
