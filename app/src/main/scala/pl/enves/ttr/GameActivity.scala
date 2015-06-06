@@ -17,12 +17,17 @@ class GameActivity extends Activity with Logging {
     log("onCreate")
     super.onCreate(state)
     view = Some(GameView(this))
+    view.get.startGame()
+
     setContentView(view.get)
   }
 
   override def onPause(): Unit = {
     super.onPause()
-    view.get.onPause()
+    // TODO: closing on lost focus is temporary for activity testing, while it has limited functionalities.
+    // It should be removed once restarting game is possible.
+    //view.get.onPause()
+    this.finish()
   }
 
   override def onResume(): Unit = {
