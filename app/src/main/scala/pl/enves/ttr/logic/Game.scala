@@ -19,7 +19,7 @@ object Game {
     player = startingPlayer
   }
 
-  def finished: Option[Player.Value] = ???
+  def winner: Option[Player.Value] = board.get.finished
 
   def state: Seq[Seq[Option[Player.Value]]] = ???
 
@@ -32,7 +32,7 @@ object Game {
    */
   def make(move: Move): Boolean = {
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
-    if (finished.isDefined) throw new MoveImpossible("Game has finished")
+    if (winner.isDefined) throw new MoveImpossible("Game is finished")
     val res = move match {
       case Position(x, y) => board.get move (x, y, player)
       case Rotation(b, r) => board.get rotate (b, r)

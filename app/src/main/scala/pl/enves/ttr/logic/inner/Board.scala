@@ -7,6 +7,7 @@ package inner
 private[logic] class Board {
   private[this] var _version = 0
   private[this] val quadrants = createQuadrants.toMap
+  private[this] var _winner: Option[Player.Value] = None
 
   def version: Int = _version
 
@@ -14,5 +15,9 @@ private[logic] class Board {
 
   def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = ???
 
+  def finished = _winner
+
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
+
+  private def checkVictory: Boolean = ???
 }
