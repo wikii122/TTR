@@ -9,6 +9,7 @@ import pl.enves.ttr.logic.Quadrant
 class BoardQuadrant {
   private[this] val fields = Array.fill[Option[Player.Value]] (3, 3) (None)
   private[this] var rotation = 0
+
   def move(xv: Int, yv: Int, player: Player.Value) = {
     val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
 
@@ -33,6 +34,8 @@ class BoardQuadrant {
     case 2 => (Quadrant.size - x, Quadrant.size - y)
     case 3 => (y, Quadrant.size - x)
   }
+
+  def line(i: Int): Seq[Option[Player.Value]] = fields(i).toSeq
 }
 
 object BoardQuadrant {

@@ -34,6 +34,13 @@ private[logic] class Board {
 
   def finished = _winner
 
+  def lines: Seq[Seq[Option[Player.Value]]] = (0 to 5) map {
+    i => if (i < Quadrant.size)
+      quadrants(Quadrant.first).line(i) ++ quadrants(Quadrant.second).line(i)
+    else
+      quadrants(Quadrant.third).line(i % Quadrant.size) ++ quadrants(Quadrant.fourth).line(i % Quadrant.size)
+  }
+
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
 
   // TODO!!!!

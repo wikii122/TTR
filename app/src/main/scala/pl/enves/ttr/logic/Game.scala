@@ -21,8 +21,7 @@ object Game {
 
   def winner: Option[Player.Value] = board.get.finished
 
-  def state: Seq[Seq[Option[Player.Value]]] = ???
-
+  def state: Seq[Seq[Option[Player.Value]]] = board.get.lines
   /**
    * Makes a move, whether it's a rotation or putting symbol.
    * After it switches to next player.
