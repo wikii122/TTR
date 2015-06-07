@@ -22,30 +22,18 @@ class Resources(context: Context) {
 
   object ModelId extends Enumeration {
     type ModelId = Value
-    val Triangle, Rectangle, Cube, Board3x3 = Value
+    val Rectangle, Board3x3 = Value
   }
 
   object TextureId extends Enumeration {
     type TextureId = Value
-    val Test1, Test2, ArrowLeft, ArrowRight, Ring, Cross = Value
+    val ArrowLeft, ArrowRight, Ring, Cross = Value
   }
 
   object ShaderId extends Enumeration {
     type ShaderId = Value
     val Color, Texture = Value
   }
-
-  val triangleVBOs = new VBOs(
-    createFloatBuffer(Triangle.coords),
-    createFloatBuffer(Triangle.colors),
-    0,
-    createFloatBuffer(unflipY(Triangle.texCoords))
-  )
-  val triangleGeometry = new GeometryArrays(
-    Triangle.numVertex,
-    GLES20.GL_TRIANGLES,
-    triangleVBOs
-  )
 
   val squareVBOs = new VBOs(
     createFloatBuffer(Square.coords),
@@ -58,20 +46,6 @@ class Resources(context: Context) {
     Square.numVertex,
     GLES20.GL_TRIANGLE_STRIP,
     squareVBOs
-  )
-
-  val cubeVBOs = new VBOs(
-    createFloatBuffer(Cube.coords),
-    createFloatBuffer(Cube.colors),
-    0,
-    createFloatBuffer(unflipY(Cube.texCoords))
-  )
-
-  val cubeGeometry = new GeometryElements(
-    Cube.indices.length,
-    createShortBuffer(Cube.indices),
-    GLES20.GL_TRIANGLES,
-    cubeVBOs
   )
 
   val board3x3VBOs = new VBOs(
@@ -90,9 +64,7 @@ class Resources(context: Context) {
 
   //create models
   var models = Map(
-    (ModelId.Triangle, triangleGeometry),
     (ModelId.Rectangle, squareGeometry),
-    (ModelId.Cube, cubeGeometry),
     (ModelId.Board3x3, board3x3Geometry)
   )
 
