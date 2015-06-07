@@ -21,8 +21,10 @@ class GameView(val context: Context) extends GLSurfaceView(context) with Logging
 
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
   //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
-  
-  override def onTouchEvent(event: MotionEvent): Boolean = ???
+
+  override def onTouchEvent(e: MotionEvent): Boolean = {
+    return renderer.onTouchEvent(e)
+  }
 }
 
 object GameView {
