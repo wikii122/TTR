@@ -12,15 +12,22 @@ import pl.enves.ttr.utils.Logging
  * Takes responsibility for handling input from system and managing graphics rendering.
  */
 class GameView(val context: Context) extends GLSurfaceView(context) with Logging {
-  private[this] val renderer = GameRenderer()
+  private[this] val renderer = GameRenderer(context)
 
   log("Creating")
+  setEGLConfigChooser(true)   //true, cause we need depth buffer
   setEGLContextClientVersion(2)
+
   setRenderer(renderer)
+
+  setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
+  //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
 
   def startGame() = Game.start(Player.X)
 
-  override def onTouchEvent(event: MotionEvent): Boolean = ???
+  override def onTouchEvent(e: MotionEvent): Boolean = {
+    return renderer.onTouchEvent(e)
+  }
 }
 
 object GameView {
