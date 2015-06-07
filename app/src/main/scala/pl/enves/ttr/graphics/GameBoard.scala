@@ -4,6 +4,7 @@ import javax.microedition.khronos.opengles.GL10
 
 import android.opengl.{GLU, Matrix}
 import pl.enves.ttr.graphics.DrawReason.DrawReason
+import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.{Logging, Vector3}
 
 /**
@@ -24,18 +25,20 @@ class GameBoard(resources: Resources) extends Logging {
 
   def animate(dt: Float = 0.0f): Unit = ???
 
-  //TODO: Correct after merge with Logic
-  def drawFigure(figure: Int, x: Int, y: Int): Unit = {
-    val nx = (2 * x - 7) / 2.0f
-    val ny = (2 * y - 7) / 2.0f
-    MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, nx, ny, 0.0f)
-    if (figure == 0) {
-      textureShader.draw(rectangle, ring)
-    } else {
-      textureShader.draw(rectangle, cross)
+  def drawFigure(player: Option[Player.Value] , x: Int, y: Int): Unit = {
+    if(player.isDefined) {
+      val nx = (2 * x - 5) / 2.0f
+      val ny = (2 * y - 5) / 2.0f
+      MVMatrix.push()
+      Matrix.translateM(MVMatrix(), 0, nx, ny, 0.0f)
+      if (player.get == Player.O) {
+        textureShader.draw(rectangle, ring)
+      }
+      if (player.get == Player.X) {
+        textureShader.draw(rectangle, cross)
+      }
+      MVMatrix.pop()
     }
-    MVMatrix.pop()
   }
 
   def draw(drawReason: DrawReason): Unit = {
@@ -125,10 +128,12 @@ class GameBoard(resources: Resources) extends Logging {
       textureShader.draw(rectangle, arrowRight)
       MVMatrix.pop()
 
-      drawFigure(0, 1, 1)
-      drawFigure(1, 3, 1)
-      drawFigure(0, 2, 5)
-      drawFigure(1, 6, 6)
+      val state:Game.State = Game.state
+      for(i <- 0 to 5) {
+        for(j <- 0 to 5) {
+          drawFigure(state(i)(j), j, i)
+        }
+      }
     }
 
     if (drawReason == DrawReason.Click) {
@@ -151,35 +156,45 @@ class GameBoard(resources: Resources) extends Logging {
 
         val I = new Array[Float](3)
         if (intersectRayAndXYPlane(near, far, I)) {
-          log("intersect:  " + I(0) + " " + I(1) + " " + I(2))
           val x = I(0)
           val y = I(1)
 
           val iax = Math.floor(Math.abs(x)).toInt
           val iay = Math.floor(Math.abs(y)).toInt
 
-          if (iax <= 2 && iay <= 2) {
-            log("Clicked board: " + iax + " " + iay)
-          } else if (iax == 2 && iay == 3) {
-            log("Clicked left arrow")
-          } else if (iax == 3 && iay == 2) {
-            log("Clicked right arrow")
-          } else {
-            log("Clicked nothing")
-          }
-
+          var quadrant: Quadrant.Value = Quadrant.first
+          var arrowsReversed = false
           if (x >= 0) {
             if (y >= 0) {
-              log("In the upper right corner")
+              quadrant = Quadrant.fourth
             } else {
-              log("In the down right corner")
+              quadrant = Quadrant.second
+              arrowsReversed = true
             }
           } else {
             if (y >= 0) {
-              log("In the upper left corner")
+              quadrant = Quadrant.third
+              arrowsReversed = true
             } else {
-              log("In the down left corner")
+              quadrant = Quadrant.first
             }
+          }
+
+          if (iax <= 2 && iay <= 2) {
+            val a = if(x>=0) 3+iax else 2-iax
+            val b = if(y>=0) 3+iay else 2-iay
+            val position = new Position(a, b)
+            Game.make(position)
+          } else if (iax == 2 && iay == 3) {
+            val rot = if(arrowsReversed) Rotation.r270 else Rotation.r90
+            val rotation = new Rotation(quadrant, rot)
+            Game.make(rotation)
+          } else if (iax == 3 && iay == 2) {
+            val rot = if(arrowsReversed) Rotation.r90 else Rotation.r270
+            val rotation = new Rotation(quadrant, rot)
+            Game.make(rotation)
+          } else {
+            log("Clicked nothing")
           }
         }
       } else {

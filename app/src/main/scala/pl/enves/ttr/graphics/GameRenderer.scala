@@ -1,12 +1,14 @@
 package pl.enves.ttr.graphics
 
+import java.security.InvalidParameterException
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import android.content.Context
-import android.opengl.{GLU, GLES20, GLSurfaceView, Matrix}
+import android.opengl.{GLES20, Matrix}
 import android.opengl.GLES20.glViewport
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
+import pl.enves.ttr.logic.{GameFinished, FieldTaken}
 import pl.enves.ttr.utils.Logging
 
 /**
@@ -84,7 +86,13 @@ class GameRenderer(context: Context) extends Renderer with Logging {
         ClickInfo.viewport = Array(0, 0, viewportWidth, viewportHeight)
 
         setCamera()
-        board.get.draw(DrawReason.Click)
+        try {
+          board.get.draw(DrawReason.Click)
+        } catch {
+          case e: InvalidParameterException => error(e.getMessage)
+          case e: FieldTaken => ???  //Display message?
+          case e: GameFinished => ???  //Display what?
+        }
       }
       return true
     }
