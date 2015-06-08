@@ -8,6 +8,7 @@ import pl.enves.ttr.utils.Logging
  */
 private[logic] class Board extends Logging {
   private[this] var _version = 0
+  private[this] var freeFields = 36
   private[this] val quadrants = createQuadrants.toMap
   private[this] var _winner: Option[Player.Value] = None
   private[this] var _combination: List[(Int, Int)] = Nil
@@ -15,6 +16,8 @@ private[logic] class Board extends Logging {
   def version: Int = _version
 
   def move(x: Int, y: Int, player: Player.Value): Boolean = {
+    if ((freeFields == 0) && _winner.isEmpty) throw new GameDrawn
+
     // TODO automate this
     val quad = if (y < Quadrant.size) {
       if (x < Quadrant.size) Quadrant.first
@@ -26,7 +29,9 @@ private[logic] class Board extends Logging {
 
     log(s"Move of $player at ($x, $y) in $quad quadrant")
     quadrants(quad).move(x, y, player)
+
     _version += 1
+    freeFields -= 1
 
     return checkVictory()
   }
@@ -57,6 +62,7 @@ private[logic] class Board extends Logging {
       _winner = Some(player)
       _combination = fields
 
+      log(s"Game finished! $player won on $fields")
       true
   }
 }
