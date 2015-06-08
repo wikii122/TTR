@@ -10,7 +10,7 @@ import pl.enves.ttr.utils.{Logging, Vector3}
 /**
  * Game board
  */
-class GameBoard(resources: Resources) extends Logging {
+class GameBoard(resources: Resources) extends Logging with Vector3 {
 
   val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
   val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
@@ -209,15 +209,14 @@ class GameBoard(resources: Resources) extends Logging {
     val planePoint = Array(0.0f, 0.0f, 0.0f)
     val planeNormal = Array(0.0f, 0.0f, 1.0f)
 
-    val rayDirection, w0, temp = new Array[Float](3)
     var r, a, b: Float = 0.0f
 
     val SMALL_NUM = 0.0001f
 
-    Vector3.sub(rayDirection, P1, P0)
-    Vector3.sub(w0, P0, planePoint)
-    a = -Vector3.dotProduct(planeNormal, w0)
-    b = Vector3.dotProduct(planeNormal, rayDirection)
+    val rayDirection = sub(P1, P0)
+    val w0 = sub(P0, planePoint)
+    a = -dotProduct(planeNormal, w0)
+    b = dotProduct(planeNormal, rayDirection)
     if (Math.abs(b) < SMALL_NUM) {
       // ray is parallel to plane
       //if (a == 0) {
@@ -233,8 +232,12 @@ class GameBoard(resources: Resources) extends Logging {
     }
 
     // Get intersection point
-    Vector3.scale(temp, r, rayDirection)
-    Vector3.add(I, P0, temp)
+    val temp = scale(r, rayDirection)
+    val tI = add(P0, temp)
+
+    tI.indices foreach {
+      i => I(i) = tI(i)
+    }
 
     return true
   }
