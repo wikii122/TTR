@@ -3,6 +3,8 @@ package pl.enves.ttr.graphics.shaders
 import android.opengl.GLES20
 import pl.enves.ttr.graphics.Geometry
 
+case class TextureShaderData(texture: Int) extends AdditionalData
+
 class TextureShader extends Shader {
 
   override def getVertexShaderCode: String =
@@ -35,7 +37,7 @@ class TextureShader extends Shader {
     }
     """
 
-  override def draw(model: Geometry, texture: Int) {
+  override def draw(model: Geometry, data: AdditionalData) {
     val mvpMatrix = makeMVPMatrix
 
     val positionsBuffer = model.getVBOS.positions
@@ -90,7 +92,7 @@ class TextureShader extends Shader {
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
 
     // Bind the texture to this unit.
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, data.asInstanceOf[TextureShaderData].texture)
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     GLES20.glUniform1i(mSamplerHandle, 0)

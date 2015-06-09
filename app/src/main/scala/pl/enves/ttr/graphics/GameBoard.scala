@@ -4,6 +4,7 @@ import javax.microedition.khronos.opengles.GL10
 
 import android.opengl.{GLU, Matrix}
 import pl.enves.ttr.graphics.DrawReason.DrawReason
+import pl.enves.ttr.graphics.shaders.TextureShaderData
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.{Logging, Vector3}
 
@@ -15,10 +16,10 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
   val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
   val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
 
-  val arrowLeft = resources.getTexture(resources.TextureId.ArrowLeft)
-  val arrowRight = resources.getTexture(resources.TextureId.ArrowRight)
-  val ring = resources.getTexture(resources.TextureId.Ring)
-  val cross = resources.getTexture(resources.TextureId.Cross)
+  val arrowLeft = new TextureShaderData(resources.getTexture(resources.TextureId.ArrowLeft))
+  val arrowRight = new TextureShaderData(resources.getTexture(resources.TextureId.ArrowRight))
+  val ring = new TextureShaderData(resources.getTexture(resources.TextureId.Ring))
+  val cross = new TextureShaderData(resources.getTexture(resources.TextureId.Cross))
 
   val colorShader = resources.getShader(resources.ShaderId.Color)
   val textureShader = resources.getShader(resources.ShaderId.Texture)

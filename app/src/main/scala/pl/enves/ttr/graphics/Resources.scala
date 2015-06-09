@@ -78,7 +78,7 @@ class Resources(context: Context) {
 
   //create shaders
   var shaders = Map(
-    (ShaderId.Color, new ColorShader()),
+    (ShaderId.Color, new ColorsShader()),
     (ShaderId.Texture, new TextureShader())
   )
 
