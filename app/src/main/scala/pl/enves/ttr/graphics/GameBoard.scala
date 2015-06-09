@@ -24,14 +24,19 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
   val colorShader = resources.getShader(resources.ShaderId.Color)
   val textureShader = resources.getShader(resources.ShaderId.Texture)
 
+  val highlightTime:Long = 2000
+  var highlightTimeSet: Long = 0
+  var highlightX = 0
+  var highlightY = 0
+
   def animate(dt: Float = 0.0f): Unit = ???
+
+  def translate(a: Int): Float = (2 * a - 5) / 2.0f
 
   def drawFigure(player: Option[Player.Value] , x: Int, y: Int): Unit = {
     if(player.isDefined) {
-      val nx = (2 * x - 5) / 2.0f
-      val ny = (2 * y - 5) / 2.0f
       MVMatrix.push()
-      Matrix.translateM(MVMatrix(), 0, nx, ny, 0.0f)
+      Matrix.translateM(MVMatrix(), 0, translate(x), translate(y), 0.0f)
       if (player.get == Player.O) {
         textureShader.draw(rectangle, ring)
       }
@@ -47,6 +52,14 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
     Matrix.scaleM(MVMatrix(), 0, 3.0f / 16.0f, 3.0f / 16.0f, 1.0f)
 
     if (drawReason == DrawReason.Render) {
+      //Highlight
+      if(System.currentTimeMillis() < highlightTimeSet + highlightTime) {
+        MVMatrix.push()
+        Matrix.translateM(MVMatrix(), 0, translate(highlightX), translate(highlightY), 0.0f)
+        colorShader.draw(rectangle)
+        MVMatrix.pop()
+      }
+
       //Bottom Left
       MVMatrix.push()
       Matrix.translateM(MVMatrix(), 0, -3.0f / 2, -3.0f / 2, 0.0f)
@@ -185,7 +198,15 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
             val a = if(x>=0) 3+iax else 2-iax
             val b = if(y>=0) 3+iay else 2-iay
             val position = new Position(a, b)
-            Game.make(position)
+            try {
+              Game.make(position)
+            }catch {
+              case e: FieldTaken => {
+                highlightTimeSet = System.currentTimeMillis()
+                highlightX = a
+                highlightY = b
+              }
+            }
           } else if (iax == 2 && iay == 3) {
             val rot = if(arrowsReversed) Rotation.r270 else Rotation.r90
             val rotation = new Rotation(quadrant, rot)
