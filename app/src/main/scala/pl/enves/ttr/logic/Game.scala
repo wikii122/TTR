@@ -35,7 +35,7 @@ object Game extends Logging {
    */
   def make(move: Move): Boolean = {
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
-    if (winner.isDefined) throw new GameFinished("Game is finished")
+    if (winner.isDefined) throw new GameWon("Game is finished")
 
     log(s"Move: $move for $player")
 

@@ -8,7 +8,7 @@ import android.opengl.{GLES20, Matrix}
 import android.opengl.GLES20.glViewport
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{GameFinished, FieldTaken}
+import pl.enves.ttr.logic.{GameWon, GameFinished, FieldTaken}
 import pl.enves.ttr.utils.Logging
 
 /**
@@ -90,7 +90,8 @@ class GameRenderer(context: Context) extends Renderer with Logging {
           board.get.draw(DrawReason.Click)
         } catch {
           case e: InvalidParameterException => error(e.getMessage)
-          case e: GameFinished => ???  //Display what?
+          case e: GameWon => ???  //TODO display message about winner
+          case e: GameFinished => ??? // TODO display message from exception
         }
       }
       return true
