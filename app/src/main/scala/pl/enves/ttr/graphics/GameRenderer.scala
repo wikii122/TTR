@@ -90,7 +90,6 @@ class GameRenderer(context: Context) extends Renderer with Logging {
           board.get.draw(DrawReason.Click)
         } catch {
           case e: InvalidParameterException => error(e.getMessage)
-          case e: FieldTaken => ???  //Display message?
           case e: GameFinished => ???  //Display what?
         }
       }

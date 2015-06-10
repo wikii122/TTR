@@ -11,6 +11,8 @@ import android.util.Log
 import android.opengl.{Matrix, GLES20}
 import pl.enves.ttr.graphics.{MVMatrix, PMatrix, Geometry}
 
+class AdditionalData
+
 abstract class Shader {
   // prepare shaders and OpenGL program
   var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, getVertexShaderCode)
@@ -50,7 +52,7 @@ abstract class Shader {
   final val COLOR_SIZE = 4
   final val TEX_COORD_SIZE = 2
   
-  def draw(model: Geometry, texture: Int = 0)
+  def draw(model: Geometry, data: AdditionalData = new AdditionalData)
 
   def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()

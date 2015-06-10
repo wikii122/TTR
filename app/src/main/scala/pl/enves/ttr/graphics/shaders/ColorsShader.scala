@@ -1,9 +1,9 @@
 package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
-import pl.enves.ttr.graphics.{VBOs, GeometryArrays, Geometry}
+import pl.enves.ttr.graphics.Geometry
 
-class ColorShader extends Shader {
+class ColorsShader extends Shader {
   override def getVertexShaderCode: String =
     """
     uniform mat4 u_MVPMatrix;
@@ -30,7 +30,7 @@ class ColorShader extends Shader {
     }
     """
 
-  override def draw(model: Geometry, texture: Int) {
+  override def draw(model: Geometry, data: AdditionalData = new AdditionalData) {
     val mvpMatrix = makeMVPMatrix
     val vertexBuffer:Int = model.getVBOS.positions
     val colorBuffer:Int = model.getVBOS.colors
