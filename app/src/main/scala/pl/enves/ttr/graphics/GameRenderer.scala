@@ -17,8 +17,8 @@ import pl.enves.ttr.utils.Logging
 class GameRenderer(context: Context) extends Renderer with Logging {
   log("Creating")
 
-  private[this] var resources: Option[Resources] = None
-  private[this] var board: Option[GameBoard] = None
+  private[this] lazy val board: GameBoard = GameBoard(Resources(context))
+
   var viewportWidth: Int = 1
   var viewportHeight: Int = 1
 
@@ -38,7 +38,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
       setCamera()
 
       //board.get.animate()
-      board.get.draw(DrawReason.Render)
+      board.draw(DrawReason.Render)
     }
   }
 
@@ -72,9 +72,6 @@ class GameRenderer(context: Context) extends Renderer with Logging {
       GLES20.glCullFace(GLES20.GL_BACK)
       GLES20.glEnable(GLES20.GL_BLEND)
       GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
-
-      resources = Some(Resources(context))
-      board = Some(GameBoard(resources.get))
     }
   }
 
@@ -87,7 +84,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
 
         setCamera()
         try {
-          board.get.draw(DrawReason.Click)
+          board.draw(DrawReason.Click)
         } catch {
           case e: InvalidParameterException => error(e.getMessage)
           case e: GameWon => ???  //TODO display message about winner

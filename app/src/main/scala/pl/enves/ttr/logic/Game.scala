@@ -10,7 +10,9 @@ import pl.enves.ttr.utils.Logging
  */
 object Game extends Logging {
   type State = Seq[Seq[Option[Player.Value]]]
+
   private[this] var board: Option[Board] = None
+
   /**
    * This field may be set externally. Represents current player.
    */

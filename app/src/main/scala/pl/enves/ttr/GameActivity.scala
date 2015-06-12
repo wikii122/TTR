@@ -11,27 +11,36 @@ import pl.enves.ttr.utils.Logging
  * Basically it wraps and configures all things that can display other things.
  */
 class GameActivity extends Activity with Logging {
-  private[this] var view: Option[GameView] = None
+  private[this] lazy val view: GameView = GameView(this)
 
   override def onCreate(state: Bundle): Unit = {
-    log("onCreate")
-    super.onCreate(state)
-    view = Some(GameView(this))
-    view.get.startGame()
+    log("Created")
 
-    setContentView(view.get)
+    super.onCreate(state)
+
+    view.startGame()
+    setContentView(view)
   }
 
   override def onPause(): Unit = {
+    log("Paused")
+
     super.onPause()
-    // TODO: closing on lost focus is temporary for activity testing, while it has limited functionalities.
-    // It should be removed once restarting game is possible.
-    //view.get.onPause()
-    this.finish()
+    view.onPause()
   }
 
   override def onResume(): Unit = {
+    log("Resumed")
+
     super.onResume()
-    view.get.onResume()
+    view.onResume()
+  }
+
+  override def onStop() = {
+    log("Stopped")
+    
+    super.onStop()
+    // TODO: Remove in production
+    this.finish()
   }
 }
