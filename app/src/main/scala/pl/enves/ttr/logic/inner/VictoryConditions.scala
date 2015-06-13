@@ -41,7 +41,7 @@ private[inner] object VictoryConditions extends Logging {
   }
 
   private def checkNormalDiagonal(board: State, x: Int, y: Int): Option[WinnerData] = {
-    val seq = indexes map (i => board(x+i)(y+1))
+    val seq = indexes map (i => board(x+i)(y+i))
     val res = checkSeq(seq) getOrElse { return None }
 
     return Some((res, (indexes map {i => (x+i, y+i)}).toList))
