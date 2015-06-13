@@ -20,8 +20,7 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context) extends Renderer with Logging {
   log("Creating")
 
-  private[this] lazy val board: GameBoard = GameBoard(Resources(context))
-
+  private[this] var board: Option[GameBoard] = None
   var viewportWidth: Int = 1
   var viewportHeight: Int = 1
 
@@ -41,7 +40,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
       setCamera()
 
       //board.get.animate()
-      board.draw(DrawReason.Render)
+      board.get.draw(DrawReason.Render)
     }
   }
 
@@ -75,6 +74,8 @@ class GameRenderer(context: Context) extends Renderer with Logging {
       GLES20.glCullFace(GLES20.GL_BACK)
       GLES20.glEnable(GLES20.GL_BLEND)
       GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+
+      board = Some(GameBoard(Resources(context)))
     }
   }
 
@@ -87,7 +88,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
 
         setCamera()
         Try {
-          board.draw(DrawReason.Click)
+          board.get.draw(DrawReason.Click)
         } match {
           case _: Success[Unit] => if (Game.finished) {
             val text = Game.winner match {
