@@ -3,13 +3,16 @@ package pl.enves.ttr.graphics
 import java.security.InvalidParameterException
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+import android.app.AlertDialog
 import android.content.Context
 import android.opengl.{GLES20, Matrix}
 import android.opengl.GLES20.glViewport
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{GameWon, GameFinished, FieldTaken}
+import pl.enves.ttr.logic.{Game, GameWon, GameFinished, FieldTaken}
 import pl.enves.ttr.utils.Logging
+
+import scala.util.{Failure, Success, Try}
 
 /**
  * Manages the process of drawing the frame.
@@ -83,14 +86,24 @@ class GameRenderer(context: Context) extends Renderer with Logging {
         ClickInfo.viewport = Array(0, 0, viewportWidth, viewportHeight)
 
         setCamera()
-        try {
+        Try {
           board.draw(DrawReason.Click)
-        } catch {
-          case e: InvalidParameterException => error(e.getMessage)
-          case e: GameWon => ???  //TODO display message about winner
-          case e: GameFinished => ??? // TODO display message from exception
+        } match {
+          case _: Success[Unit] => if (Game.finished) {
+            val text = Game.winner match {
+              case Some(x) => s"Player $x wins"
+              case None => "Game finished with a draw"
+            }
+
+            log(text)
+
+            new AlertDialog.Builder(context).setMessage(text).create().show()
+          }
+
+          case Failure(err) => error(err.getMessage)
         }
       }
+
       return true
     }
   }

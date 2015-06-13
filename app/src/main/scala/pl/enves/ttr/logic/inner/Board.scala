@@ -44,7 +44,9 @@ private[logic] class Board extends Logging {
     return checkVictory()
   }
 
-  def finished = _winner
+  def winner = _winner
+
+  def finished = _winner.isDefined || (freeFields == 0)
 
   def finishingMove = _combination
 

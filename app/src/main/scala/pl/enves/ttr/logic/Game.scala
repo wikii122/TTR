@@ -25,7 +25,7 @@ object Game extends Logging {
     player = startingPlayer
   }
 
-  def winner: Option[Player.Value] = board.get.finished
+  def winner: Option[Player.Value] = board.get.winner
 
   def state: State = board.get.lines
   /**
@@ -51,6 +51,8 @@ object Game extends Logging {
 
     return res
   }
+
+  def finished = board.get.finished
 
   private[logic] def boardVersion = board.get.version
 }
