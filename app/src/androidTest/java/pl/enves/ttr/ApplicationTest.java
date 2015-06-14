@@ -1,4 +1,4 @@
-package me.heol.ttr;
+package pl.enves.ttr;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;
