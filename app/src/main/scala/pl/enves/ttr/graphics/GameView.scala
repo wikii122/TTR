@@ -3,7 +3,7 @@ package pl.enves.ttr.graphics
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{Player, Game}
+import pl.enves.ttr.logic.{Player, StandardGame}
 import pl.enves.ttr.utils.Logging
 
 /**
@@ -23,7 +23,7 @@ class GameView(val context: Context) extends GLSurfaceView(context) with Logging
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
   //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
 
-  def startGame() = Game.start(Player.X)
+  def startGame() = StandardGame.start(Player.X)
 
   override def onTouchEvent(e: MotionEvent): Boolean = {
     return renderer.onTouchEvent(e)

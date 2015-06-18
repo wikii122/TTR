@@ -9,7 +9,7 @@ import android.opengl.{GLES20, Matrix}
 import android.opengl.GLES20.glViewport
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{Game, GameWon, GameFinished, FieldTaken}
+import pl.enves.ttr.logic.{StandardGame, GameWon, GameFinished, FieldTaken}
 import pl.enves.ttr.utils.Logging
 
 import scala.util.{Failure, Success, Try}
@@ -90,8 +90,8 @@ class GameRenderer(context: Context) extends Renderer with Logging {
         Try {
           board.get.draw(DrawReason.Click)
         } match {
-          case _: Success[Unit] => if (Game.finished) {
-            val text = Game.winner match {
+          case _: Success[Unit] => if (StandardGame.finished) {
+            val text = StandardGame.winner match {
               case Some(x) => s"Player $x wins"
               case None => "Game finished with a draw"
             }

@@ -142,7 +142,7 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
       textureShader.draw(rectangle, arrowRight)
       MVMatrix.pop()
 
-      val state:Game.State = Game.state
+      val state:StandardGame.State = StandardGame.state
       for(i <- 0 to 5) {
         for(j <- 0 to 5) {
           drawFigure(state(i)(j), j, i)
@@ -199,7 +199,7 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
             val b = if(y>=0) 3+iay else 2-iay
             val position = new Position(a, b)
             try {
-              Game.make(position)
+              StandardGame.make(position)
             }catch {
               case e: FieldTaken => {
                 highlightTimeSet = System.currentTimeMillis()
@@ -210,11 +210,11 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
           } else if (iax == 2 && iay == 3) {
             val rot = if(arrowsReversed) Rotation.r270 else Rotation.r90
             val rotation = new Rotation(quadrant, rot)
-            Game.make(rotation)
+            StandardGame.make(rotation)
           } else if (iax == 3 && iay == 2) {
             val rot = if(arrowsReversed) Rotation.r90 else Rotation.r270
             val rotation = new Rotation(quadrant, rot)
-            Game.make(rotation)
+            StandardGame.make(rotation)
           } else {
             log("Clicked nothing")
           }

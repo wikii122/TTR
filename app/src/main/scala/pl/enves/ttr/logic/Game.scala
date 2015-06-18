@@ -1,58 +1,33 @@
 package pl.enves.ttr.logic
 
-import java.security.InvalidParameterException
-
-import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.utils.Logging
-
-/**
- * Wrapper for game logic.
- */
-object Game extends Logging {
+abstract class Game {
   type State = Seq[Seq[Option[Player.Value]]]
 
-  private[this] var board: Option[Board] = None
+  protected var _player: Player.Value = Player.X
+
+  def player = _player
 
   /**
-   * This field may be set externally. Represents current player.
+   * Set starting player.
    */
-  var player: Player.Value = Player.X
+  def start(startingPlayer: Player.Value)
 
-  def start(startingPlayer: Player.Value) = {
-    log("Creating new game")
-    log(s"Starting player: $player")
-    board = Some(new Board)
-    player = startingPlayer
-  }
-
-  def winner: Option[Player.Value] = board.get.winner
-
-  def state: State = board.get.lines
   /**
-   * Makes a move, whether it's a rotation or putting symbol.
-   * After it switches to next player.
-   * May throw InvalidParameterException when given invalid move,
-   * and ImpossibleMove when Position is taken or game finished.
-   * If called before start, throws NoSuchElementException.
+   * Get board visualization.
    */
-  def make(move: Move): Boolean = {
-    if (!move.valid) throw new InvalidParameterException("Given move has expired!")
-    if (winner.isDefined) throw new GameWon("Game is finished")
+  def state: State
 
-    log(s"Move: $move for $player")
+  /**
+   * Make a move, obviously.
+   */
+  def make(move: Move): Boolean
 
-    val res = move match {
-      case Position(x, y) => board.get move (x, y, player)
-      case Rotation(b, r) => board.get rotate (b, r)
-    }
+  def finished: Boolean
 
-    player = if (player == Player.X) Player.O else Player.X
-    log(s"Player changed to $player")
+  def winner: Option[Player.Value]
 
-    return res
-  }
-
-  def finished = board.get.finished
-
-  private[logic] def boardVersion = board.get.version
+  /**
+   * Indicates whether this device can alter the board at the moment,
+   */
+  def locked: Boolean
 }
