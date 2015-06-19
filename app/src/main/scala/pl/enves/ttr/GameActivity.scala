@@ -4,6 +4,7 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.View
 import pl.enves.ttr.graphics.GameView
+import pl.enves.ttr.logic.{GameManager, StandardGame, Game}
 import pl.enves.ttr.utils.Logging
 
 /**
@@ -11,7 +12,7 @@ import pl.enves.ttr.utils.Logging
  *
  * Basically it wraps and configures all things that can display other things.
  */
-class GameActivity extends Activity with Logging {
+class GameActivity extends Activity with GameManager {
   private[this] lazy val view: GameView = GameView(this)
 
   override def onCreate(state: Bundle): Unit = {
@@ -23,6 +24,9 @@ class GameActivity extends Activity with Logging {
       View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
     )
+
+    // TODO match game type if more is possible
+    game = new StandardGame
 
     view.startGame()
     setContentView(view)

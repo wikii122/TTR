@@ -8,19 +8,19 @@ import pl.enves.ttr.utils.Logging
 /**
  * Wrapper for game logic.
  */
-object StandardGame extends Game with Logging {
-  private[this] var board: Option[Board] = None
+class StandardGame extends Game with Logging {
+  private[this] val board = new Board
 
   def start(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
-    board = Some(new Board)
     _player = startingPlayer
   }
 
-  def winner: Option[Player.Value] = board.get.winner
+  def winner: Option[Player.Value] = board.winner
 
-  def state: State = board.get.lines
+  def state: State = board.lines
+
   /**
    * Makes a move, whether it's a rotation or putting symbol.
    * After it switches to next player.
@@ -35,8 +35,8 @@ object StandardGame extends Game with Logging {
     log(s"Move: $move for ${_player}")
 
     val res = move match {
-      case Position(x, y) => board.get move (x, y, _player)
-      case Rotation(b, r) => board.get rotate (b, r)
+      case Position(x, y) => board move (x, y, _player)
+      case Rotation(b, r) => board rotate (b, r)
     }
 
     _player = if (_player == Player.X) Player.O else Player.X
@@ -45,9 +45,9 @@ object StandardGame extends Game with Logging {
     return res
   }
 
-  def finished = board.get.finished
+  def finished = board.finished
 
-  protected[logic] def boardVersion = board.get.version
+  protected def boardVersion = board.version
 
   def locked: Boolean = false
 }

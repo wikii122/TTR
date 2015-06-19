@@ -9,7 +9,7 @@ import android.opengl.{GLES20, Matrix}
 import android.opengl.GLES20.glViewport
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{StandardGame, GameWon, GameFinished, FieldTaken}
+import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Logging
 
 import scala.util.{Failure, Success, Try}
@@ -17,7 +17,7 @@ import scala.util.{Failure, Success, Try}
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context) extends Renderer with Logging {
+class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
   private[this] var board: Option[GameBoard] = None
@@ -75,7 +75,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
       GLES20.glEnable(GLES20.GL_BLEND)
       GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
-      board = Some(GameBoard(Resources(context)))
+      board = Some(GameBoard(game, Resources(context)))
     }
   }
 
@@ -90,8 +90,8 @@ class GameRenderer(context: Context) extends Renderer with Logging {
         Try {
           board.get.draw(DrawReason.Click)
         } match {
-          case _: Success[Unit] => if (StandardGame.finished) {
-            val text = StandardGame.winner match {
+          case _: Success[Unit] => if (game.finished) {
+            val text = game.winner match {
               case Some(x) => s"Player $x wins"
               case None => "Game finished with a draw"
             }
@@ -111,5 +111,6 @@ class GameRenderer(context: Context) extends Renderer with Logging {
 }
 
 object GameRenderer {
-  def apply(context: Context) = new GameRenderer(context)
+  def apply(context: Context with GameManager) = new GameRenderer(context, context.game)
+  def apply(context: Context, game: Game) = new GameRenderer(context, game)
 }
