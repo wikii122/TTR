@@ -11,7 +11,7 @@ import pl.enves.ttr.utils.{Logging, Vector3}
 /**
  * Game board
  */
-class GameBoard(resources: Resources) extends Logging with Vector3 {
+class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
 
   val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
   val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
@@ -142,7 +142,7 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
       textureShader.draw(rectangle, arrowRight)
       MVMatrix.pop()
 
-      val state:Game.State = Game.state
+      val state: game.State = game.state
       for(i <- 0 to 5) {
         for(j <- 0 to 5) {
           drawFigure(state(i)(j), j, i)
@@ -197,9 +197,9 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
           if (iax <= 2 && iay <= 2) {
             val a = if(x>=0) 3+iax else 2-iax
             val b = if(y>=0) 3+iay else 2-iay
-            val position = new Position(a, b)
+            val position = new game.Position(a, b)
             try {
-              Game.make(position)
+              game.make(position)
             }catch {
               case e: FieldTaken => {
                 highlightTimeSet = System.currentTimeMillis()
@@ -208,13 +208,13 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
               }
             }
           } else if (iax == 2 && iay == 3) {
-            val rot = if(arrowsReversed) Rotation.r270 else Rotation.r90
-            val rotation = new Rotation(quadrant, rot)
-            Game.make(rotation)
+            val rot = if(arrowsReversed) QRotation.r270 else QRotation.r90
+            val rotation = new game.Rotation(quadrant, rot)
+            game.make(rotation)
           } else if (iax == 3 && iay == 2) {
-            val rot = if(arrowsReversed) Rotation.r90 else Rotation.r270
-            val rotation = new Rotation(quadrant, rot)
-            Game.make(rotation)
+            val rot = if(arrowsReversed) QRotation.r90 else QRotation.r270
+            val rotation = new game.Rotation(quadrant, rot)
+            game.make(rotation)
           } else {
             log("Clicked nothing")
           }
@@ -266,5 +266,5 @@ class GameBoard(resources: Resources) extends Logging with Vector3 {
 }
 
 object GameBoard {
-  def apply(resources: Resources) = new GameBoard(resources)
+  def apply(game: Game, resources: Resources) = new GameBoard(game, resources)
 }

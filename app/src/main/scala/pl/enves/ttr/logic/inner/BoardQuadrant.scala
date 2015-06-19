@@ -20,12 +20,12 @@ private[inner] class BoardQuadrant extends Logging {
     else throw new FieldTaken("Field is already taken")
   }
 
-  def rotate(rot: Rotation.Value) = {
+  def rotate(rot: QRotation.Value) = {
     log(s"Rotate with $rot")
     val mod = rot match {
-      case Rotation.r90 => 1
-      case Rotation.r180 => 2
-      case Rotation.r270 => 3
+      case QRotation.r90 => 1
+      case QRotation.r180 => 2
+      case QRotation.r270 => 3
       case _ => 0
     }
 

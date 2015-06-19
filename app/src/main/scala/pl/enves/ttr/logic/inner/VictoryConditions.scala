@@ -1,7 +1,6 @@
-package pl.enves.ttr.logic.inner
+package pl.enves.ttr.logic
+package inner
 
-import pl.enves.ttr.logic.Game.State
-import pl.enves.ttr.logic.{Game, Player}
 import pl.enves.ttr.utils.Logging
 
 /**
@@ -12,42 +11,42 @@ private[inner] object VictoryConditions extends Logging {
 
   private val indexes = for (x <- 0 until 5) yield x
 
-  def check(board: Game.State): Option[WinnerData] =
+  def check(board: Game#State): Option[WinnerData] =
     checkHorizontal(board).flatten.headOption orElse
       checkVertical(board).flatten.headOption orElse
       checkDiagonal(board).flatten.headOption
 
-  private def checkHorizontal(board: Game.State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 5)
+  private def checkHorizontal(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 5)
     yield checkRow(board, x, y)
 
-  private def checkVertical(board: Game.State): Seq[Option[WinnerData]] = for (x <- 0 until 5; y <- 0 until 2)
+  private def checkVertical(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 5; y <- 0 until 2)
     yield checkColumn(board, x, y)
 
-  private def checkDiagonal(board: Game.State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 2)
+  private def checkDiagonal(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 2)
     yield checkNormalDiagonal(board, x, y) orElse checkReverseDiagonal(board, 5-x, y)
 
-  private def checkRow(board: State, x: Int, y: Int): Option[WinnerData] = {
+  private def checkRow(board: Game#State, x: Int, y: Int): Option[WinnerData] = {
     val seq = indexes map (i => board(x+i)(y))
     val res = checkSeq(seq) getOrElse { return None }
 
     return Some((res, (indexes map {i => (x+i, y)}).toList))
   }
 
-  private def checkColumn(board: State, x: Int, y: Int): Option[WinnerData] = {
+  private def checkColumn(board: Game#State, x: Int, y: Int): Option[WinnerData] = {
     val seq = indexes map (i => board(x)(y+i))
     val res = checkSeq(seq) getOrElse { return None }
 
     return Some((res, (indexes map {i => (x, y+i)}).toList))
   }
 
-  private def checkNormalDiagonal(board: State, x: Int, y: Int): Option[WinnerData] = {
+  private def checkNormalDiagonal(board: Game#State, x: Int, y: Int): Option[WinnerData] = {
     val seq = indexes map (i => board(x+i)(y+i))
     val res = checkSeq(seq) getOrElse { return None }
 
     return Some((res, (indexes map {i => (x+i, y+i)}).toList))
   }
 
-  private def checkReverseDiagonal(board: State, x: Int, y: Int): Option[WinnerData] = {
+  private def checkReverseDiagonal(board: Game#State, x: Int, y: Int): Option[WinnerData] = {
     val seq = indexes map (i => board(x-i)(y+i))
     val res = checkSeq(seq) getOrElse { return None }
 

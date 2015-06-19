@@ -1,18 +1,17 @@
 package pl.enves.ttr
 
-import android.app.{ActionBar, Activity}
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.view.{WindowManager, View}
+import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
-import pl.enves.ttr.utils.Logging
+import pl.enves.ttr.logic.{GameManager, StandardGame}
 
 /**
  * Core game activity.
  *
  * Basically it wraps and configures all things that can display other things.
  */
-class GameActivity extends AppCompatActivity with Logging {
+class GameActivity extends AppCompatActivity with GameManager {
   private[this] lazy val view: GameView = GameView(this)
 
   override def onCreate(state: Bundle): Unit = {
@@ -21,6 +20,9 @@ class GameActivity extends AppCompatActivity with Logging {
     super.onCreate(state)
 
     setGui()
+
+    // TODO match game type if more is possible
+    game = new StandardGame
 
     view.startGame()
     setContentView(view)

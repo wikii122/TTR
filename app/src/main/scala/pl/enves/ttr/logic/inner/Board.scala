@@ -36,8 +36,8 @@ private[logic] class Board extends Logging {
     return checkVictory()
   }
 
-  def rotate(quadrant: Quadrant.Value, rotation: Rotation.Value): Boolean = {
-    log(s"Rotation from ${Game.player} for $quadrant by $rotation")
+  def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value): Boolean = {
+    log(s"Rotation for $quadrant by $rotation")
     quadrants(quadrant).rotate(rotation)
     _version += 1
 
@@ -50,7 +50,7 @@ private[logic] class Board extends Logging {
 
   def finishingMove = _combination
 
-  def lines: Game.State = (0 to 5) map {
+  def lines: Game#State = (0 to 5) map {
     i => if (i < Quadrant.size)
       quadrants(Quadrant.first).line(i) ++ quadrants(Quadrant.second).line(i)
     else

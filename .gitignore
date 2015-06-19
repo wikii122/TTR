@@ -107,4 +107,5 @@ project/plugins/project/
 .DS_Store
 /build
 
-
+#Git conflicts
+*.orig
