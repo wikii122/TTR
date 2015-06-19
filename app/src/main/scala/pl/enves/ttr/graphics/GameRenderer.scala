@@ -102,7 +102,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
           }
 
           case Failure(err) => error(err.getMessage)
-          case _ => 
+          case _ =>
         }
       }
 
