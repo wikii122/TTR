@@ -47,7 +47,9 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     }
   }
 
-  def draw(drawReason: DrawReason): Unit = {
+  def draw(drawReason: DrawReason): Boolean = {
+    var res = true
+
     MVMatrix.push()
     Matrix.scaleM(MVMatrix(), 0, 3.0f / 16.0f, 3.0f / 16.0f, 1.0f)
 
@@ -217,6 +219,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
             game.make(rotation)
           } else {
             log("Clicked nothing")
+            res = false
           }
         }
       } else {
@@ -225,6 +228,8 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     }
 
     MVMatrix.pop()
+
+    return res
   }
 
   def intersectRayAndXYPlane(P0: Array[Float], P1: Array[Float], I: Array[Float]): Boolean = {

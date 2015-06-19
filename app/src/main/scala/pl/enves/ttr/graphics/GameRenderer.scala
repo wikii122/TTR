@@ -90,7 +90,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
         Try {
           board.get.draw(DrawReason.Click)
         } match {
-          case _: Success[Unit] => if (game.finished) {
+          case Success(true) => if (game.finished) {
             val text = game.winner match {
               case Some(x) => s"Player $x wins"
               case None => "Game finished with a draw"
@@ -102,6 +102,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
           }
 
           case Failure(err) => error(err.getMessage)
+          case _ => 
         }
       }
 
