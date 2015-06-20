@@ -16,10 +16,10 @@ private[inner] object VictoryConditions extends Logging {
       checkVertical(board).flatten.headOption orElse
       checkDiagonal(board).flatten.headOption
 
-  private def checkHorizontal(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 5)
+  private def checkHorizontal(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 6)
     yield checkRow(board, x, y)
 
-  private def checkVertical(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 5; y <- 0 until 2)
+  private def checkVertical(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 6; y <- 0 until 2)
     yield checkColumn(board, x, y)
 
   private def checkDiagonal(board: Game#State): Seq[Option[WinnerData]] = for (x <- 0 until 2; y <- 0 until 2)
@@ -53,8 +53,10 @@ private[inner] object VictoryConditions extends Logging {
     return Some((res, (indexes map {i => (x-i, y+i)}).toList))
   }
 
-  private def checkSeq(seq: Seq[Option[Player.Value]]): Option[Player.Value] =
+  private def checkSeq(seq: Seq[Option[Player.Value]]): Option[Player.Value] = {
+    println(seq.flatten count (_ == Player.X))
     if ((seq.flatten count (_ == Player.X)) == 5) Some(Player.X)
     else if ((seq.flatten count (_ == Player.O)) == 5) Some(Player.O)
     else None
+  }
 }
