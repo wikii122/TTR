@@ -8,9 +8,7 @@ import pl.enves.ttr.utils.Logging
 /**
  * Wrapper for game logic.
  */
-class StandardGame extends Game with Logging {
-  private[this] val board = new Board
-
+class StandardGame extends Game(new Board) with Logging {
   def start(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
@@ -46,8 +44,6 @@ class StandardGame extends Game with Logging {
   }
 
   def finished = board.finished
-
-  protected def boardVersion = board.version
 
   def locked: Boolean = false
 }

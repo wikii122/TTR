@@ -1,6 +1,8 @@
 package pl.enves.ttr.logic
 
-abstract class Game {
+import pl.enves.ttr.logic.inner.Board
+
+abstract class Game(protected val board: Board) {
   type State = Seq[Seq[Option[Player.Value]]]
 
   protected var _player: Player.Value = Player.X
@@ -31,15 +33,13 @@ abstract class Game {
    */
   def locked: Boolean
 
-  protected def boardVersion: Int
-
   /**
    * Used to mark that data depend on Board version.
    */
   private[logic] class Move {
-    private[this] val state = boardVersion
+    private[this] val state = board.version
 
-    def valid = state == boardVersion
+    def valid = state == board.version
   }
 
   /**
