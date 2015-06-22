@@ -9,6 +9,9 @@ import pl.enves.ttr.utils.Logging
  * Wrapper for game logic.
  */
 class StandardGame extends Game(new Board) with Logging {
+  /**
+   * Initiates the game with given player.
+   */
   def start(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
