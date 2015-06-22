@@ -28,11 +28,10 @@ private[logic] class Board extends Logging {
     }
 
     log(s"Move of $player at ($x, $y) in $quad quadrant")
-    quadrants(quad).move(x, y, player)
+    quadrants.move(quad, x, y, player)
 
     _version += 1
     freeFields -= 1
-    quadrants.tick()
 
     return checkVictory()
   }
@@ -40,10 +39,9 @@ private[logic] class Board extends Logging {
   def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value): Boolean = {
     log(s"Rotation for $quadrant by $rotation")
 
-    quadrants(quadrant).rotate(rotation)
+    quadrants.rotate(quadrant, rotation)
 
     _version += 1
-    quadrants.tick()
 
     return checkVictory()
   }
@@ -75,6 +73,16 @@ private[logic] class Board extends Logging {
   }
 
   private implicit class QuadrantManager(map: Map[Quadrant.Value, BoardQuadrant]) {
-    def tick() = map foreach (_._2.tickCooldown())
+    private def tick() = map foreach (_._2.tickCooldown())
+
+    def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value) = {
+      map(quadrant).rotate(rotation)
+      tick()
+    }
+
+    def move(quadrant: Quadrant.Value, x: Int, y: Int, player: Player.Value) = {
+      map(quadrant).move(x, y, player)
+      tick()
+    }
   }
 }
