@@ -31,7 +31,7 @@ private[inner] class BoardQuadrant extends Logging {
       case _ => 0
     }
 
-    rotationCooldown = rotationIndicator + 1 // Correction that there should be tickCooldown called
+    rotationCooldown = rotationIndicator
 
     rotation = (rotation + mod) % 4
   }
@@ -51,7 +51,7 @@ private[inner] class BoardQuadrant extends Logging {
    * This was created as separate function because quadrant is not aware of about ¾ moves that
    * happen on the board.
    */
-  def tickCooldown() = rotationCooldown = rotationCooldown - 1
+  def tickCooldown() = if (rotationCooldown > 0) rotationCooldown = rotationCooldown - 1
 
   // Lines are horizontal, and assumption is they are vertical, thus x and y must be swapped
   private def readCoordinates(y: Int, x: Int): (Int, Int) = rotation match {
