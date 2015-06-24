@@ -51,7 +51,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     var res = true
 
     MVMatrix.push()
-    Matrix.scaleM(MVMatrix(), 0, 3.0f / 16.0f, 3.0f / 16.0f, 1.0f)
+    Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 1.0f)
 
     if (drawReason == DrawReason.Render) {
       //Highlight
