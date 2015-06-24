@@ -25,10 +25,12 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
   val colorsShader = resources.getShader(resources.ShaderId.Colors)
   val textureShader = resources.getShader(resources.ShaderId.Texture)
 
-  val highlightTime:Long = 2000
-  var highlightTimeSet: Long = 0
-  var highlightX = 0
-  var highlightY = 0
+  val winningHighlight = new ColorShaderData(Array(0.0f, 1.0f, 0.0f, 1.0f))
+  val illegalHighlight = new ColorShaderData(Array(1.0f, 0.0f, 0.0f, 1.0f))
+
+  val illegalHighlightTime:Long = 2000
+  var illegalHighlightTimeSet: Long = 0
+  var illegalCoords = (0, 0)
 
   def animate(dt: Float = 0.0f): Unit = ???
 
@@ -56,11 +58,20 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
 
     if (drawReason == DrawReason.Render) {
       //Highlight
-      if(System.currentTimeMillis() < highlightTimeSet + highlightTime) {
+      if(System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime) {
         MVMatrix.push()
-        Matrix.translateM(MVMatrix(), 0, translate(highlightX), translate(highlightY), 0.0f)
-        colorShader.draw(rectangle, new ColorShaderData(Array(1.0f, 0.0f, 0.0f, 1.0f)))
+        Matrix.translateM(MVMatrix(), 0, translate(illegalCoords._1), translate(illegalCoords._2), 0.0f)
+        colorShader.draw(rectangle, illegalHighlight)
         MVMatrix.pop()
+      }
+
+      if(game.finished && game.finishingMove != Nil) {
+        for(coords <- game.finishingMove) {
+          MVMatrix.push()
+          Matrix.translateM(MVMatrix(), 0, translate(coords._2), translate(coords._1), 0.0f)
+          colorShader.draw(rectangle, winningHighlight)
+          MVMatrix.pop()
+        }
       }
 
       //Bottom Left
@@ -205,9 +216,8 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
               game.make(position)
             }catch {
               case e: FieldTaken => {
-                highlightTimeSet = System.currentTimeMillis()
-                highlightX = a
-                highlightY = b
+                illegalHighlightTimeSet = System.currentTimeMillis()
+                illegalCoords = (a, b)
               }
             }
           } else if (iax == 2 && iay == 3) {

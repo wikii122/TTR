@@ -37,7 +37,7 @@ class Resources(context: Context) {
 
   val squareVBOs = new VBOs(
     createFloatBuffer(Square.coords),
-    createFloatBuffer(Square.colors),
+    0,
     0,
     createFloatBuffer(unflipY(Square.texCoords))
   )

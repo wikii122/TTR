@@ -24,6 +24,8 @@ abstract class Game {
 
   def finished: Boolean
 
+  def finishingMove: List[(Int, Int)]
+
   def winner: Option[Player.Value]
 
   /**

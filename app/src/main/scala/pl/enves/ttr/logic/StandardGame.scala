@@ -48,6 +48,8 @@ class StandardGame extends Game with Logging {
 
   def finished = board.finished
 
+  def finishingMove = board.finishingMove
+
   protected def boardVersion = board.version
 
   def locked: Boolean = false
