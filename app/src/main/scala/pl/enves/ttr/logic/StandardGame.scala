@@ -29,18 +29,19 @@ class StandardGame extends Game with Logging {
    * If called before start, throws NoSuchElementException.
    */
   def make(move: Move): Boolean = {
+    implicit val player = this.player
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (winner.isDefined) throw new GameWon("Game is finished")
 
-    log(s"Move: $move for ${_player}")
+    log(s"Move: $move for $player")
 
     val res = move match {
-      case Position(x, y) => board move (x, y, _player)
+      case Position(x, y) => board move (x, y)
       case Rotation(b, r) => board rotate (b, r)
     }
 
-    _player = if (_player == Player.X) Player.O else Player.X
-    log(s"Player changed to ${_player}")
+    _player = if (player == Player.X) Player.O else Player.X
+    log(s"Player set to ${_player}")
 
     return res
   }

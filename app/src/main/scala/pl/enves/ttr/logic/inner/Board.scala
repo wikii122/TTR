@@ -15,7 +15,7 @@ private[logic] class Board extends Logging {
 
   def version: Int = _version
 
-  def move(x: Int, y: Int, player: Player.Value): Boolean = {
+  def move(x: Int, y: Int)(implicit player: Player.Value): Boolean = {
     if ((freeFields == 0) && _winner.isEmpty) throw new GameDrawn
 
     // TODO automate this
@@ -36,9 +36,10 @@ private[logic] class Board extends Logging {
     return checkVictory()
   }
 
-  def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value): Boolean = {
-    log(s"Rotation for $quadrant by $rotation")
+  def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value)(implicit player: Player.Value): Boolean = {
+    log(s"Rotation for $quadrant by $rotation for player $player")
     quadrants(quadrant).rotate(rotation)
+    
     _version += 1
 
     return checkVictory()
