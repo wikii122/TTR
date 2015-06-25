@@ -32,12 +32,12 @@ class Resources(context: Context) {
 
   object ShaderId extends Enumeration {
     type ShaderId = Value
-    val Color, Texture = Value
+    val Color, Colors, Texture = Value
   }
 
   val squareVBOs = new VBOs(
     createFloatBuffer(Square.coords),
-    createFloatBuffer(Square.colors),
+    0,
     0,
     createFloatBuffer(unflipY(Square.texCoords))
   )
@@ -78,7 +78,8 @@ class Resources(context: Context) {
 
   //create shaders
   var shaders = Map(
-    (ShaderId.Color, new ColorsShader()),
+    (ShaderId.Color, new ColorShader()),
+    (ShaderId.Colors, new ColorsShader()),
     (ShaderId.Texture, new TextureShader())
   )
 

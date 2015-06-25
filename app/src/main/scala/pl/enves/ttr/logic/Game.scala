@@ -35,6 +35,8 @@ abstract class Game(protected val board: Board) {
 
   def finished: Boolean
 
+  def finishingMove: List[(Int, Int)]
+
   def winner: Option[Player.Value]
 
   /**

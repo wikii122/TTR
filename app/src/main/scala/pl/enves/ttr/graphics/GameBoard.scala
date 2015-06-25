@@ -4,7 +4,7 @@ import javax.microedition.khronos.opengles.GL10
 
 import android.opengl.{GLU, Matrix}
 import pl.enves.ttr.graphics.DrawReason.DrawReason
-import pl.enves.ttr.graphics.shaders.TextureShaderData
+import pl.enves.ttr.graphics.shaders.{ColorShaderData, TextureShaderData}
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.{Logging, Vector3}
 
@@ -22,12 +22,15 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
   val cross = new TextureShaderData(resources.getTexture(resources.TextureId.Cross))
 
   val colorShader = resources.getShader(resources.ShaderId.Color)
+  val colorsShader = resources.getShader(resources.ShaderId.Colors)
   val textureShader = resources.getShader(resources.ShaderId.Texture)
 
-  val highlightTime:Long = 2000
-  var highlightTimeSet: Long = 0
-  var highlightX = 0
-  var highlightY = 0
+  val winningHighlight = new ColorShaderData(Array(0.0f, 1.0f, 0.0f, 1.0f))
+  val illegalHighlight = new ColorShaderData(Array(1.0f, 0.0f, 0.0f, 1.0f))
+
+  val illegalHighlightTime:Long = 2000
+  var illegalHighlightTimeSet: Long = 0
+  var illegalCoords = (0, 0)
 
   def animate(dt: Float = 0.0f): Unit = ???
 
@@ -51,43 +54,52 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     var res = true
 
     MVMatrix.push()
-    Matrix.scaleM(MVMatrix(), 0, 3.0f / 16.0f, 3.0f / 16.0f, 1.0f)
+    Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 1.0f)
 
     if (drawReason == DrawReason.Render) {
       //Highlight
-      if(System.currentTimeMillis() < highlightTimeSet + highlightTime) {
+      if(System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime) {
         MVMatrix.push()
-        Matrix.translateM(MVMatrix(), 0, translate(highlightX), translate(highlightY), 0.0f)
-        colorShader.draw(rectangle)
+        Matrix.translateM(MVMatrix(), 0, translate(illegalCoords._1), translate(illegalCoords._2), 0.0f)
+        colorShader.draw(rectangle, illegalHighlight)
         MVMatrix.pop()
+      }
+
+      if(game.finished && game.finishingMove != Nil) {
+        for(coords <- game.finishingMove) {
+          MVMatrix.push()
+          Matrix.translateM(MVMatrix(), 0, translate(coords._2), translate(coords._1), 0.0f)
+          colorShader.draw(rectangle, winningHighlight)
+          MVMatrix.pop()
+        }
       }
 
       //Bottom Left
       MVMatrix.push()
       Matrix.translateM(MVMatrix(), 0, -3.0f / 2, -3.0f / 2, 0.0f)
       Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorShader.draw(board3x3)
+      colorsShader.draw(board3x3)
       MVMatrix.pop()
 
       //Bottom Right
       MVMatrix.push()
       Matrix.translateM(MVMatrix(), 0, 3.0f / 2, -3.0f / 2, 0.0f)
       Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorShader.draw(board3x3)
+      colorsShader.draw(board3x3)
       MVMatrix.pop()
 
       //Top Left
       MVMatrix.push()
       Matrix.translateM(MVMatrix(), 0, -3.0f / 2, 3.0f / 2, 0.0f)
       Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorShader.draw(board3x3)
+      colorsShader.draw(board3x3)
       MVMatrix.pop()
 
       //Top Right
       MVMatrix.push()
       Matrix.translateM(MVMatrix(), 0, 3.0f / 2, 3.0f / 2, 0.0f)
       Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorShader.draw(board3x3)
+      colorsShader.draw(board3x3)
       MVMatrix.pop()
 
       //Bottom Left Arrow Left
@@ -204,9 +216,8 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
               game.make(position)
             }catch {
               case e: FieldTaken => {
-                highlightTimeSet = System.currentTimeMillis()
-                highlightX = a
-                highlightY = b
+                illegalHighlightTimeSet = System.currentTimeMillis()
+                illegalCoords = (a, b)
               }
             }
           } else if (iax == 2 && iay == 3) {
