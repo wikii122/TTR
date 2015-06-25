@@ -44,7 +44,7 @@ class StandardGame extends Game(new Board) with Logging {
   }
 
   def winner: Option[Player.Value] = board.winner
-  
+
   def state: State = board.lines
 
   def finished = board.finished
