@@ -11,15 +11,11 @@ import pl.enves.ttr.utils.Logging
 class StandardGame extends Game with Logging {
   private[this] val board = new Board
 
-  def start(startingPlayer: Player.Value) = {
+  protected def onStart(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
     _player = startingPlayer
   }
-
-  def winner: Option[Player.Value] = board.winner
-
-  def state: State = board.lines
 
   /**
    * Makes a move, whether it's a rotation or putting symbol.
@@ -28,7 +24,7 @@ class StandardGame extends Game with Logging {
    * and ImpossibleMove when Position is taken or game finished.
    * If called before start, throws NoSuchElementException.
    */
-  def make(move: Move): Boolean = {
+  protected def onMove(move: Move): Boolean = {
     implicit val player = this.player
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (winner.isDefined) throw new GameWon("Game is finished")
@@ -46,9 +42,13 @@ class StandardGame extends Game with Logging {
     return res
   }
 
+  def winner: Option[Player.Value] = board.winner
+
+  def state: State = board.lines
+
   def finished = board.finished
 
-  protected def boardVersion = board.version
-
   def locked: Boolean = false
+
+  protected def boardVersion = board.version
 }

@@ -10,7 +10,7 @@ abstract class Game {
   /**
    * Set starting player.
    */
-  def start(startingPlayer: Player.Value)
+  final def start(startingPlayer: Player.Value) = onStart(startingPlayer)
 
   /**
    * Get board visualization.
@@ -20,7 +20,10 @@ abstract class Game {
   /**
    * Make a move, obviously.
    */
-  def make(move: Move): Boolean
+  final def make(move: Move): Boolean = {
+    if (locked) throw new BoardLocked
+    onMove(move)
+  }
 
   def finished: Boolean
 
@@ -30,6 +33,10 @@ abstract class Game {
    * Indicates whether this device can alter the board at the moment,
    */
   def locked: Boolean
+
+  protected def onStart(player: Player.Value)
+
+  protected def onMove(move: Move): Boolean
 
   protected def boardVersion: Int
 
