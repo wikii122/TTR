@@ -3,6 +3,7 @@ package pl.enves.ttr.logic
 class MoveImpossible(msg: String) extends RuntimeException(msg)
 
 class FieldTaken(msg: String) extends MoveImpossible(msg)
+class RotationLocked(msg: String) extends MoveImpossible(msg)
 
 class BoardLocked extends MoveImpossible("The user is cannot change the board at the moment.")
 

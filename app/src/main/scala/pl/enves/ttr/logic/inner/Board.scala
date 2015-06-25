@@ -7,9 +7,9 @@ import pl.enves.ttr.utils.Logging
  * Manages fields states.
  */
 private[logic] class Board extends Logging {
+  private[this] val quadrants = createQuadrants.toMap
   private[this] var _version = 0
   private[this] var freeFields = 36
-  private[this] val quadrants = createQuadrants.toMap
   private[this] var _winner: Option[Player.Value] = None
   private[this] var _combination: List[(Int, Int)] = Nil
 
@@ -28,7 +28,7 @@ private[logic] class Board extends Logging {
     }
 
     log(s"Move of $player at ($x, $y) in $quad quadrant")
-    quadrants(quad).move(x, y, player)
+    quadrants.move(quad, x, y, player)
 
     _version += 1
     freeFields -= 1
@@ -39,6 +39,7 @@ private[logic] class Board extends Logging {
   def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value)(implicit player: Player.Value): Boolean = {
     log(s"Rotation for $quadrant by $rotation for player $player")
     quadrants(quadrant).rotate(rotation)
+
 
     _version += 1
 
@@ -58,6 +59,8 @@ private[logic] class Board extends Logging {
       quadrants(Quadrant.third).line(i % Quadrant.size) ++ quadrants(Quadrant.fourth).line(i % Quadrant.size)
   }
 
+  def availableRotations = quadrants filter (_._2.canRotate) keys
+
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
 
   private def checkVictory(): Boolean = VictoryConditions.check(lines) exists {
@@ -67,5 +70,19 @@ private[logic] class Board extends Logging {
 
       log(s"Game finished! $player won on $fields")
       true
+  }
+
+  private implicit class QuadrantManager(map: Map[Quadrant.Value, BoardQuadrant]) {
+    private def tick() = map foreach (_._2.tickCooldown())
+
+    def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value) = {
+      map(quadrant).rotate(rotation)
+      tick()
+    }
+
+    def move(quadrant: Quadrant.Value, x: Int, y: Int, player: Player.Value) = {
+      map(quadrant).move(x, y, player)
+      tick()
+    }
   }
 }

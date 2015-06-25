@@ -1,6 +1,14 @@
 package pl.enves.ttr.logic
 
-abstract class Game {
+import pl.enves.ttr.logic.inner.Board
+
+/**
+ * The Game instance is responsible for handling players and managing board.
+ *
+ * It is not aware of any of the game rules by itself, as this is
+ * the what Board is responsible for.
+ */
+abstract class Game(protected val board: Board) {
   type State = Seq[Seq[Option[Player.Value]]]
 
   protected var _player: Player.Value = Player.X
@@ -30,6 +38,11 @@ abstract class Game {
   def winner: Option[Player.Value]
 
   /**
+   * Get list of available rotations
+   */
+  def availableRotations: List[Quadrant.Value] = board.availableRotations.toList
+
+  /**
    * Indicates whether this device can alter the board at the moment,
    */
   def locked: Boolean
@@ -44,9 +57,9 @@ abstract class Game {
    * Used to mark that data depend on Board version.
    */
   private[logic] class Move {
-    private[this] val state = boardVersion
+    private[this] val state = board.version
 
-    def valid = state == boardVersion
+    def valid = state == board.version
   }
 
   /**
