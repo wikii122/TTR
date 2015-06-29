@@ -54,7 +54,6 @@ private[inner] object VictoryConditions extends Logging {
   }
 
   private def checkSeq(seq: Seq[Option[Player.Value]]): Option[Player.Value] = {
-    println(seq.flatten count (_ == Player.X))
     if ((seq.flatten count (_ == Player.X)) == 5) Some(Player.X)
     else if ((seq.flatten count (_ == Player.O)) == 5) Some(Player.O)
     else None

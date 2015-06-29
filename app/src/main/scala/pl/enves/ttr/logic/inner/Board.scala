@@ -38,7 +38,7 @@ private[logic] class Board extends Logging {
 
   def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value)(implicit player: Player.Value): Boolean = {
     log(s"Rotation for $quadrant by $rotation for player $player")
-    quadrants(quadrant).rotate(rotation)
+    quadrants.rotate(quadrant, rotation)
 
 
     _version += 1
