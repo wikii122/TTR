@@ -35,6 +35,8 @@ abstract class Game(protected val board: Board) {
 
   def finished: Boolean
 
+  final def nonFinished = !finished
+
   def finishingMove: List[(Int, Int)]
 
   def winner: Option[Player.Value]
@@ -42,7 +44,8 @@ abstract class Game(protected val board: Board) {
   /**
    * Get list of available rotations
    */
-  def availableRotations: List[Quadrant.Value] = board.availableRotations.toList
+  def availableRotations: List[Quadrant.Value] = if (nonFinished) board.availableRotations.toList
+    else Nil
 
   /**
    * Indicates whether this device can alter the board at the moment,

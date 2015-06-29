@@ -9,4 +9,4 @@ class BoardLocked extends MoveImpossible("The user is cannot change the board at
 
 class GameFinished(msg: String) extends MoveImpossible(msg)
 class GameWon(msg: String) extends MoveImpossible(msg)
-class GameDrawn extends GameFinished("There is no possibility to add a symbol")
+class GameDrawn extends GameFinished("Game has been drawn")

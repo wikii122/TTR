@@ -28,7 +28,7 @@ class StandardGame extends Game(new Board) with Logging {
   protected def onMove(move: Move): Boolean = {
     implicit val player = this.player
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
-    if (winner.isDefined) throw new GameWon("Game is finished")
+    if (finished) throw new GameWon(s"Game is finished. $winner has won.")
 
     log(s"Move: $move for $player")
 
