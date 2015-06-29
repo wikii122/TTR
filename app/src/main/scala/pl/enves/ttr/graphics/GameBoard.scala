@@ -1,17 +1,27 @@
 package pl.enves.ttr.graphics
 
-import javax.microedition.khronos.opengles.GL10
-
-import android.opengl.{GLU, Matrix}
-import pl.enves.ttr.graphics.DrawReason.DrawReason
+import android.opengl.Matrix
 import pl.enves.ttr.graphics.shaders.{ColorShaderData, TextureShaderData}
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.{Logging, Vector3}
+import pl.enves.ttr.utils.{Algebra, Logging}
 
 /**
  * Game board
+ * Uses 2 coordinate systems:
+ * Logic: (Int, Int), (0, 0) is where (0, 0) field is
+ * Display: (Float, Float), (0, 0) is in the center of displayed board
  */
-class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
+class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
+
+  private class ClickException(msg: String) extends RuntimeException(msg)
+
+  private abstract class BoardZone()
+
+  private case class NoneZone() extends BoardZone()
+
+  private case class FigureZone() extends BoardZone()
+
+  private case class ArrowZone(quadrant: Quadrant.Value, rotation: QRotation.Value) extends BoardZone()
 
   val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
   val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
@@ -72,18 +82,33 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     case Quadrant.fourth => 180.0f
   }
 
-  def toCenter(a: Int): Float = (2 * a - 5) / 2.0f
+  private def decodeZone(x: Int, y: Int): BoardZone = {
+    if (x >= 0 && x <= 5 && y >= 0 && y <= 5) {
+      new FigureZone()
+    } else {
+      val quadrant = logicToQuadrant(x, y)
+      if ((x, y) == arrowLeftPosition(quadrant)) {
+        new ArrowZone(quadrant, QRotation.r90)
+      } else if ((x, y) == arrowRightPosition(quadrant)) {
+        new ArrowZone(quadrant, QRotation.r270)
+      } else {
+        new NoneZone()
+      }
+    }
+  }
 
-  def toLogical(a: Float): Int = {
+  def logicToDisplay(a: Int): Float = (2 * a - 5) / 2.0f
+
+  def displayToLogic(a: Float): Int = {
     val i = Math.floor(Math.abs(a)).toInt
     return if (a >= 0) 3 + i else 2 - i
   }
 
-  def clickQuadrant(x: Float, y: Float): Quadrant.Value = {
-    if (x >= 0) {
-      if (y >= 0) Quadrant.fourth else Quadrant.second
+  def logicToQuadrant(x: Int, y: Int): Quadrant.Value = {
+    if (x >= 3) {
+      if (y >= 3) Quadrant.fourth else Quadrant.second
     } else {
-      if (y >= 0) Quadrant.third else Quadrant.first
+      if (y >= 3) Quadrant.third else Quadrant.first
     }
   }
 
@@ -99,10 +124,15 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     illegalHighlightTimeSet -= illegalHighlightTime
   }
 
+  def setIllegal(x: Int, y: Int): Unit = {
+    illegalHighlightTimeSet = System.currentTimeMillis()
+    illegalCoords = (x, y)
+  }
+
   def drawFigure(player: Option[Player.Value], x: Int, y: Int): Unit = {
     if (player.isDefined) {
       MVMatrix.push()
-      Matrix.translateM(MVMatrix(), 0, toCenter(x), toCenter(y), 0.0f)
+      Matrix.translateM(MVMatrix(), 0, logicToDisplay(x), logicToDisplay(y), 0.0f)
 
       checkIllegal(x, y)
 
@@ -138,7 +168,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
 
     // Arrow Left
     MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, toCenter(a._1), toCenter(a._2), 0.0f)
+    Matrix.translateM(MVMatrix(), 0, logicToDisplay(a._1), logicToDisplay(a._2), 0.0f)
     Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
     if (desaturated) {
       checkIllegal(a._1, a._2)
@@ -150,7 +180,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
 
     // Arrow Right
     MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, toCenter(b._1), toCenter(b._2), 0.0f)
+    Matrix.translateM(MVMatrix(), 0, logicToDisplay(b._1), logicToDisplay(b._2), 0.0f)
     Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
     if (desaturated) {
       checkIllegal(b._1, b._2)
@@ -161,164 +191,108 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Vector3 {
     MVMatrix.pop()
   }
 
-  def draw(drawReason: DrawReason): Boolean = {
-    var res = true
-
-    MVMatrix.push()
+  def prepareForDisplay(): Unit = {
     Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 1.0f)
+  }
 
-    if (drawReason == DrawReason.Render) {
-
-      if (rotationAngle > 0) {
-        rotationAngle -= 2
-      }
-
-      if (rotationAngle < 0) {
-        rotationAngle += 2
-      }
-
-      val state: game.State = game.state
-
-      for (quadrant <- Quadrant.values) {
-        //Quadrants
-        MVMatrix.push()
-        val centre = quadrantCentre(quadrant)
-
-        Matrix.translateM(MVMatrix(), 0, centre._1, centre._2, 0.0f)
-
-        if (quadrant == rotatedQuadrant) {
-          Matrix.rotateM(MVMatrix(), 0, rotationAngle, 0.0f, 0.0f, 1.0f)
-        }
-
-        MVMatrix.push()
-        Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-        colorsShader.draw(board3x3)
-        MVMatrix.pop()
-
-        Matrix.translateM(MVMatrix(), 0, -centre._1, -centre._2, 0.0f)
-
-        drawFigures(state, quadrant)
-
-        MVMatrix.pop()
-
-        // Arrows
-        drawArrowPair(quadrant, !game.availableRotations.contains(quadrant))
-      }
+  def animate(): Unit = {
+    if (rotationAngle > 0) {
+      rotationAngle -= 2
     }
 
-    if (drawReason == DrawReason.Click) {
-      val temp1 = new Array[Float](4)
-      val temp2 = new Array[Float](4)
-      val near = new Array[Float](3)
-      val far = new Array[Float](3)
-
-      val result1 = GLU.gluUnProject(ClickInfo.X, ClickInfo.Y, 1.0f, MVMatrix(), 0, PMatrix(), 0, ClickInfo.viewport, 0, temp1, 0)
-      val result2 = GLU.gluUnProject(ClickInfo.X, ClickInfo.Y, 0.0f, MVMatrix(), 0, PMatrix(), 0, ClickInfo.viewport, 0, temp2, 0)
-
-      if (result1 == GL10.GL_TRUE && result2 == GL10.GL_TRUE) {
-        near(0) = temp1(0) / temp1(3)
-        near(1) = temp1(1) / temp1(3)
-        near(2) = temp1(2) / temp1(3)
-
-        far(0) = temp2(0) / temp2(3)
-        far(1) = temp2(1) / temp2(3)
-        far(2) = temp2(2) / temp2(3)
-
-        val I = new Array[Float](3)
-        if (intersectRayAndXYPlane(near, far, I)) {
-          val x = I(0)
-          val y = I(1)
-
-          val lx = toLogical(x)
-          val ly = toLogical(y)
-
-          if (lx >= 0 && lx <= 5 && ly >= 0 && ly <= 5) {
-            val position = new game.Position(lx, ly)
-            try {
-              game.make(position)
-              discardIllegal()
-            } catch {
-              case e: FieldTaken =>
-                illegalHighlightTimeSet = System.currentTimeMillis()
-                illegalCoords = (lx, ly)
-            }
-          } else {
-            val quadrant = clickQuadrant(x, y)
-
-            val rot = if ((lx, ly) == arrowLeftPosition(quadrant)) {
-              QRotation.r90
-            } else if ((lx, ly) == arrowRightPosition(quadrant)) {
-              QRotation.r270
-            } else {
-              null
-            }
-
-            if (rot != null) {
-              val rotation = new game.Rotation(quadrant, rot)
-              try {
-                rotatedQuadrant = quadrant
-                rotationAngle = rot match {
-                  case QRotation.r270 => 90
-                  case QRotation.r90 => -90
-                }
-                game.make(rotation)
-                discardIllegal()
-              } catch {
-                case e: RotationLocked =>
-                  rotationAngle = 0
-                  illegalHighlightTimeSet = System.currentTimeMillis()
-                  illegalCoords = (lx, ly)
-              }
-            } else {
-              log("Clicked nothing")
-              res = false
-            }
-          }
-        } else {
-          error("ModelView or Projection Matrix cannot be inverted")
-        }
-      }
+    if (rotationAngle < 0) {
+      rotationAngle += 2
     }
+  }
+
+  def draw(): Unit = {
+    MVMatrix.push()
+    prepareForDisplay()
+
+    val state: game.State = game.state
+
+    for (quadrant <- Quadrant.values) {
+      //Quadrants
+      MVMatrix.push()
+      val centre = quadrantCentre(quadrant)
+
+      Matrix.translateM(MVMatrix(), 0, centre._1, centre._2, 0.0f)
+
+      if (quadrant == rotatedQuadrant) {
+        Matrix.rotateM(MVMatrix(), 0, rotationAngle, 0.0f, 0.0f, 1.0f)
+      }
+
+      MVMatrix.push()
+      Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
+      colorsShader.draw(board3x3)
+      MVMatrix.pop()
+
+      Matrix.translateM(MVMatrix(), 0, -centre._1, -centre._2, 0.0f)
+
+      drawFigures(state, quadrant)
+
+      MVMatrix.pop()
+
+      // Arrows
+      drawArrowPair(quadrant, !game.availableRotations.contains(quadrant))
+    }
+
     MVMatrix.pop()
+  }
 
+  def click(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
+    var res = true
+    MVMatrix.push()
+    prepareForDisplay()
+
+    try {
+      val (near, far) = unProjectMatrices(MVMatrix(), PMatrix(), clickX, clickY, viewport)
+      val I = intersectRayAndXYPlane(near, far)
+      processClick(I(0), I(1))
+    } catch {
+      case e: UnProjectException =>
+        error(e.getMessage)
+        res = false
+      case e: IntersectException =>
+        // In current scene configuration this shouldn't happen
+        error(e.getMessage)
+        res = false
+      case e: ClickException =>
+        log(e.getMessage)
+        res = false
+    } finally {
+      MVMatrix.pop()
+    }
     return res
   }
 
-  def intersectRayAndXYPlane(P0: Array[Float], P1: Array[Float], I: Array[Float]): Boolean = {
-    val planePoint = Array(0.0f, 0.0f, 0.0f)
-    val planeNormal = Array(0.0f, 0.0f, 1.0f)
-
-    var r, a, b: Float = 0.0f
-
-    val SMALL_NUM = 0.0001f
-
-    val rayDirection = sub(P1, P0)
-    val w0 = sub(P0, planePoint)
-    a = -dotProduct(planeNormal, w0)
-    b = dotProduct(planeNormal, rayDirection)
-    if (Math.abs(b) < SMALL_NUM) {
-      // ray is parallel to plane
-      //if (a == 0) {
-      // ray lies in plane
-      //}
-      return false
+  def processClick(fx: Float, fy: Float): Unit = {
+    val x = displayToLogic(fx)
+    val y = displayToLogic(fy)
+    try {
+      decodeZone(x, y) match {
+        case FigureZone() =>
+          val move = new game.Position(x, y)
+          game.make(move)
+          discardIllegal()
+        case ArrowZone(quadrant, rotation) =>
+          val move = new game.Rotation(quadrant, rotation)
+          game.make(move)
+          discardIllegal()
+          rotatedQuadrant = quadrant
+          rotationAngle = rotation match {
+            case QRotation.r270 => 90
+            case QRotation.r90 => -90
+          }
+        case NoneZone() =>
+          throw new ClickException("Clicked nothing")
+      }
+    } catch {
+      case e: FieldTaken =>
+        setIllegal(x, y)
+      case e: RotationLocked =>
+        setIllegal(x, y)
     }
-
-    // Check if specified segment intersects with plane
-    r = a / b
-    if (r < 0.0f || r > 1.0f) {
-      return false
-    }
-
-    // Get intersection point
-    val temp = scale(r, rayDirection)
-    val tI = add(P0, temp)
-
-    tI.indices foreach {
-      i => I(i) = tI(i)
-    }
-
-    return true
   }
 }
 
