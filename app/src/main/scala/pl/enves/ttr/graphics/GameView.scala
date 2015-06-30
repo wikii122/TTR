@@ -3,7 +3,7 @@ package pl.enves.ttr.graphics
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{Player, Game}
+import pl.enves.ttr.logic.{GameManager, Player, StandardGame}
 import pl.enves.ttr.utils.Logging
 
 /**
@@ -11,7 +11,7 @@ import pl.enves.ttr.utils.Logging
  *
  * Takes responsibility for handling input from system and managing graphics rendering.
  */
-class GameView(val context: Context) extends GLSurfaceView(context) with Logging {
+class GameView(val context: Context with GameManager) extends GLSurfaceView(context) with Logging {
   private[this] val renderer = GameRenderer(context)
 
   log("Creating")
@@ -23,13 +23,11 @@ class GameView(val context: Context) extends GLSurfaceView(context) with Logging
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
   //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
 
-  def startGame() = Game.start(Player.X)
+  def startGame() = context.game.start(Player.X)
 
-  override def onTouchEvent(e: MotionEvent): Boolean = {
-    return renderer.onTouchEvent(e)
-  }
+  override def onTouchEvent(e: MotionEvent): Boolean = renderer.onTouchEvent(e)
 }
 
 object GameView {
-  def apply(context: Context) = new GameView(context)
+  def apply(context: Context with GameManager) = new GameView(context)
 }

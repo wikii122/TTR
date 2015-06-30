@@ -1,15 +1,13 @@
 package pl.enves.ttr.graphics
 
-import java.security.InvalidParameterException
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 import android.app.AlertDialog
 import android.content.Context
 import android.opengl.{GLES20, Matrix}
-import android.opengl.GLES20.glViewport
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
-import pl.enves.ttr.logic.{Game, GameWon, GameFinished, FieldTaken}
+import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Logging
 
 import scala.util.{Failure, Success, Try}
@@ -17,12 +15,12 @@ import scala.util.{Failure, Success, Try}
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context) extends Renderer with Logging {
+class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
   private[this] var board: Option[GameBoard] = None
-  var viewportWidth: Int = 1
-  var viewportHeight: Int = 1
+  private[this] var viewportWidth: Int = 1
+  private[this] var viewportHeight: Int = 1
 
   def setCamera(): Unit = {
     //In case of inconsistent use of push and pop
@@ -39,14 +37,14 @@ class GameRenderer(context: Context) extends Renderer with Logging {
     this.synchronized {
       setCamera()
 
-      //board.get.animate()
-      board.get.draw(DrawReason.Render)
+      board.get.animate()
+      board.get.draw()
     }
   }
 
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int) {
     this.synchronized {
-      glViewport(0, 0, width, height)
+      GLES20.glViewport(0, 0, width, height)
       viewportWidth = width
       viewportHeight = height
 
@@ -65,7 +63,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
     this.synchronized {
-      GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
+      GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
       GLES20.glClearDepthf(1.0f)
       GLES20.glEnable(GLES20.GL_DEPTH_TEST)
       GLES20.glDepthFunc(GLES20.GL_LEQUAL)
@@ -75,23 +73,23 @@ class GameRenderer(context: Context) extends Renderer with Logging {
       GLES20.glEnable(GLES20.GL_BLEND)
       GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
-      board = Some(GameBoard(Resources(context)))
+      board = Some(GameBoard(game, Resources(context)))
     }
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {
     this.synchronized {
       if (e.getAction == MotionEvent.ACTION_DOWN) {
-        ClickInfo.X = e.getX
-        ClickInfo.Y = viewportHeight - e.getY
-        ClickInfo.viewport = Array(0, 0, viewportWidth, viewportHeight)
+        val clickX = e.getX
+        val clickY = viewportHeight - e.getY
+        val viewport = Array(0, 0, viewportWidth, viewportHeight)
 
         setCamera()
         Try {
-          board.get.draw(DrawReason.Click)
+          board.get.click(clickX, clickY, viewport)
         } match {
-          case _: Success[Unit] => if (Game.finished) {
-            val text = Game.winner match {
+          case Success(true) => if (game.finished) {
+            val text = game.winner match {
               case Some(x) => s"Player $x wins"
               case None => "Game finished with a draw"
             }
@@ -102,6 +100,7 @@ class GameRenderer(context: Context) extends Renderer with Logging {
           }
 
           case Failure(err) => error(err.getMessage)
+          case _ =>
         }
       }
 
@@ -111,5 +110,6 @@ class GameRenderer(context: Context) extends Renderer with Logging {
 }
 
 object GameRenderer {
-  def apply(context: Context) = new GameRenderer(context)
+  def apply(context: Context with GameManager) = new GameRenderer(context, context.game)
+  def apply(context: Context, game: Game) = new GameRenderer(context, game)
 }

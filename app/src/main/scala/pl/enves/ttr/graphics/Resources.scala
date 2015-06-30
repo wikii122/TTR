@@ -27,17 +27,17 @@ class Resources(context: Context) {
 
   object TextureId extends Enumeration {
     type TextureId = Value
-    val ArrowLeft, ArrowRight, Ring, Cross = Value
+    val ArrowLeft, ArrowLeftGray, ArrowRight, ArrowRightGray, Ring, Cross = Value
   }
 
   object ShaderId extends Enumeration {
     type ShaderId = Value
-    val Color, Texture = Value
+    val Color, Colors, Texture = Value
   }
 
   val squareVBOs = new VBOs(
     createFloatBuffer(Square.coords),
-    createFloatBuffer(Square.colors),
+    0,
     0,
     createFloatBuffer(unflipY(Square.texCoords))
   )
@@ -72,13 +72,16 @@ class Resources(context: Context) {
   var textures = Map(
     (TextureId.ArrowLeft, createTexture(R.drawable.arrow_left)),
     (TextureId.ArrowRight, createTexture(R.drawable.arrow_right)),
+    (TextureId.ArrowLeftGray, createTexture(R.drawable.arrow_left_gray)),
+    (TextureId.ArrowRightGray, createTexture(R.drawable.arrow_right_gray)),
     (TextureId.Ring, createTexture(R.drawable.ring)),
     (TextureId.Cross, createTexture(R.drawable.cross))
   )
 
   //create shaders
   var shaders = Map(
-    (ShaderId.Color, new ColorsShader()),
+    (ShaderId.Color, new ColorShader()),
+    (ShaderId.Colors, new ColorsShader()),
     (ShaderId.Texture, new TextureShader())
   )
 
