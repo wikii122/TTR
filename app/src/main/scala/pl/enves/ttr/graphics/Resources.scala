@@ -17,6 +17,7 @@ import android.opengl.{GLUtils, GLES20}
 import pl.enves.ttr.R
 import pl.enves.ttr.graphics.models._
 import pl.enves.ttr.graphics.shaders._
+import pl.enves.ttr.graphics.textures.Texture
 
 class Resources(context: Context) {
 
@@ -70,12 +71,12 @@ class Resources(context: Context) {
 
   //create textures
   var textures = Map(
-    (TextureId.ArrowLeft, createTexture(R.drawable.arrow_left)),
-    (TextureId.ArrowRight, createTexture(R.drawable.arrow_right)),
-    (TextureId.ArrowLeftGray, createTexture(R.drawable.arrow_left_gray)),
-    (TextureId.ArrowRightGray, createTexture(R.drawable.arrow_right_gray)),
-    (TextureId.Ring, createTexture(R.drawable.ring)),
-    (TextureId.Cross, createTexture(R.drawable.cross))
+    (TextureId.ArrowLeft, createTexture(Texture(context, R.drawable.arrow_left))),
+    (TextureId.ArrowRight, createTexture(Texture(context, R.drawable.arrow_right))),
+    (TextureId.ArrowLeftGray, createTexture(Texture(context, R.drawable.arrow_left_gray))),
+    (TextureId.ArrowRightGray, createTexture(Texture(context, R.drawable.arrow_right_gray))),
+    (TextureId.Ring, createTexture(Texture(context, R.drawable.ring))),
+    (TextureId.Cross, createTexture(Texture(context, R.drawable.cross)))
   )
 
   //create shaders
@@ -130,9 +131,7 @@ class Resources(context: Context) {
     return buffer
   }
 
-  def createTexture(image: Int): Int = {
-    val bitmap: Bitmap = BitmapFactory.decodeResource(context.getResources, image)
-
+  def createTexture(bitmap: Bitmap): Int = {
     val name = IntBuffer.allocate(1)
     GLES20.glGenTextures(1, name)
     val texture = name.get(0)
