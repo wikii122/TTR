@@ -1,17 +1,17 @@
 package pl.enves.ttr
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic.{GameManager, StandardGame}
+import pl.enves.ttr.utils.androidx.ExtendedActivity
 
 /**
  * Core game activity.
  *
  * Basically it wraps and configures all things that can display other things.
  */
-class GameActivity extends AppCompatActivity with GameManager {
+class GameActivity extends ExtendedActivity with GameManager {
   private[this] lazy val view: GameView = GameView(this)
 
   override def onCreate(state: Bundle): Unit = {
