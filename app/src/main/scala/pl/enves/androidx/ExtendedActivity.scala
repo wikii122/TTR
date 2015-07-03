@@ -1,4 +1,4 @@
-package pl.enves.ttr.utils.androidx
+package pl.enves.androidx
 
 import android.content.{Context, Intent}
 import android.support.v7.app.AppCompatActivity

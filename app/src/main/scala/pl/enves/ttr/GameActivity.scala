@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic.{GameManager, StandardGame}
-import pl.enves.ttr.utils.androidx.ExtendedActivity
+import pl.enves.androidx.ExtendedActivity
 
 /**
  * Core game activity.

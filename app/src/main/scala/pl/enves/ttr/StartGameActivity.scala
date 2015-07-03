@@ -4,7 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import android.widget.Button
-import pl.enves.ttr.utils.androidx._
+import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.api._
 
 class StartGameActivity extends ExtendedActivity {
   private[this] var gameActive = false
