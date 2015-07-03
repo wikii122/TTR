@@ -44,6 +44,9 @@ class GameActivity extends ExtendedActivity with GameManager {
   override def onStop() = {
     log("Stopping")
     super.onStop()
+
+    // There is no point to keep finished game in memory.
+    if (game.finished) this.finish()
   }
 
   def setGui() = {
