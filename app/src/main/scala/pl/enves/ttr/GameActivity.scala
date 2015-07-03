@@ -15,7 +15,7 @@ class GameActivity extends AppCompatActivity with GameManager {
   private[this] lazy val view: GameView = GameView(this)
 
   override def onCreate(state: Bundle): Unit = {
-    log("Created")
+    log("Creating")
 
     super.onCreate(state)
 
@@ -29,25 +29,21 @@ class GameActivity extends AppCompatActivity with GameManager {
   }
 
   override def onPause(): Unit = {
-    log("Paused")
+    log("Pausing")
 
     super.onPause()
     view.onPause()
   }
 
   override def onResume(): Unit = {
-    log("Resumed")
-
+    log("Resuming")
     super.onResume()
     view.onResume()
   }
 
   override def onStop() = {
-    log("Stopped")
-    
+    log("Stopping")
     super.onStop()
-    // TODO: Remove in production
-    this.finish()
   }
 
   def setGui() = {

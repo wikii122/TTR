@@ -15,11 +15,13 @@
             android:name=".GameActivity"
             android:label="@string/title_activity_game"
             android:screenOrientation="portrait"
+            android:launchMode="singleTask"
             android:configChanges="keyboardHidden|orientation|screenSize">
         </activity>
 
         <activity
-            android:name=".StartGameActivity">
+            android:name=".StartGameActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

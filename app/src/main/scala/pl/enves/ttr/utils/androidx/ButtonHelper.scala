@@ -4,7 +4,7 @@ import android.view.View
 import android.view.View.OnClickListener
 import android.widget.Button
 
-trait ButtonHelpers {
+trait ButtonHelper {
   implicit class ButtonHelper(button: Button) {
     def onClick(function: View => Unit) = button setOnClickListener new OnClickListener {
       override def onClick(v: View): Unit = function(v)
