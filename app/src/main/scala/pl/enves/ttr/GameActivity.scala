@@ -3,8 +3,10 @@ package pl.enves.ttr
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
-import pl.enves.ttr.logic.{GameManager, StandardGame}
+import pl.enves.ttr.logic.{GameState, GameManager, StandardGame}
 import pl.enves.androidx.ExtendedActivity
+
+import scala.concurrent.Future
 
 /**
  * Core game activity.
@@ -33,6 +35,8 @@ class GameActivity extends ExtendedActivity with GameManager {
 
     super.onPause()
     view.onPause()
+
+    GameState store game
   }
 
   override def onResume(): Unit = {
@@ -46,7 +50,10 @@ class GameActivity extends ExtendedActivity with GameManager {
     super.onStop()
 
     // There is no point to keep finished game in memory.
-    if (game.finished) this.finish()
+    if (game.finished) {
+      GameState.clear()
+      this.finish()
+    }
   }
 
   def setGui() = {

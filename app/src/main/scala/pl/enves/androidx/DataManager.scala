@@ -2,8 +2,7 @@ package pl.enves.androidx
 
 import android.content.Context
 
-import scala.reflect.runtime.universe._
-
+import reflect.runtime.universe._
 /**
  * Key-value string storage.
  */

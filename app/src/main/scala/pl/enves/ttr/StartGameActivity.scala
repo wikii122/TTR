@@ -6,6 +6,7 @@ import android.view.View
 import android.widget.Button
 import pl.enves.androidx.ExtendedActivity
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.logic.GameState
 
 class StartGameActivity extends ExtendedActivity {
   private[this] var gameActive = false
@@ -56,5 +57,5 @@ class StartGameActivity extends ExtendedActivity {
   /**
    * Used to check if there is a game in progress.
    */
-  private[this] def activeGame: Boolean = false
+  private[this] def activeGame: Boolean = GameState.isActive
 }
