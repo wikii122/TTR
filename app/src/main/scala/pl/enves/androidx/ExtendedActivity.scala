@@ -2,7 +2,7 @@ package pl.enves.androidx
 
 import android.content.{Context, Intent}
 import android.support.v7.app.AppCompatActivity
-import pl.enves.ttr.utils.Logging
+import pl.enves.androidx.Logging
 
 import scala.reflect.{ClassTag, classTag}
 

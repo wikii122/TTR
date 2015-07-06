@@ -1,7 +1,7 @@
 package pl.enves.ttr.logic
 package inner
 
-import pl.enves.ttr.utils.Logging
+import pl.enves.androidx.Logging
 
 /**
  * Used to determine if game is finished.

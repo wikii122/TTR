@@ -6,7 +6,7 @@ import pl.enves.androidx.DataManager
  * Object used to load last played game
  */
 object GameState extends DataManager("TTR_GAME_STATE") {
-  def store(game: Game) = ???
+  def store(game: Game) = set("gameData", game.dump)
 
   def load(): Game = ???
 

@@ -2,8 +2,8 @@ package pl.enves.ttr.logic
 
 import java.security.InvalidParameterException
 
+import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.utils.Logging
 
 /**
  * Wrapper for game logic.

@@ -3,7 +3,7 @@ package pl.enves.ttr
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
-import pl.enves.ttr.logic.{GameState, GameManager, StandardGame}
+import pl.enves.ttr.logic.{Game, GameState, GameManager, StandardGame}
 import pl.enves.androidx.ExtendedActivity
 
 import scala.concurrent.Future
@@ -23,8 +23,11 @@ class GameActivity extends ExtendedActivity with GameManager {
 
     setGui()
 
-    // TODO match game type if more is possible
-    game = new StandardGame
+    Option(getIntent.getExtras) getOrElse (throw new UninitializedError()) getString "TYPE" match {
+        case Game.STANDARD => game = new StandardGame
+        case Game.CONTINUE => game = GameState.load()
+        case s => throw new IllegalArgumentException(s"Invalid game type: $s")
+    }
 
     view.startGame()
     setContentView(view)

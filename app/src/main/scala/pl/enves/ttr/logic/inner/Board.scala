@@ -1,12 +1,12 @@
 package pl.enves.ttr.logic
 package inner
 
-import pl.enves.ttr.utils.Logging
+import pl.enves.androidx.{Jsonable, Logging}
 
 /**
  * Manages fields states.
  */
-private[logic] class Board extends Logging {
+private[logic] class Board extends Logging with Jsonable {
   private[this] val quadrants = createQuadrants.toMap
   private[this] var _version = 0
   private[this] var freeFields = 36
@@ -85,4 +85,12 @@ private[logic] class Board extends Logging {
       tick()
     }
   }
+
+  override def dump: String = ???
+
+  override def load(data: String): Unit = ???
+}
+
+object Board {
+  def load(data: String) = ???
 }
