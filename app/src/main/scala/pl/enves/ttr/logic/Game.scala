@@ -1,7 +1,7 @@
 package pl.enves.ttr.logic
 
-import pl.enves.androidx.Jsonable
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.utils.Jsonable
 
 /**
  * The Game instance is responsible for handling players and managing board.
@@ -22,11 +22,6 @@ abstract class Game(protected val board: Board) extends Jsonable {
   final def start(startingPlayer: Player.Value) = onStart(startingPlayer)
 
   /**
-   * Get board visualization.
-   */
-  def state: State
-
-  /**
    * Make a move, obviously.
    */
   final def make(move: Move): Boolean = {
@@ -34,13 +29,17 @@ abstract class Game(protected val board: Board) extends Jsonable {
     onMove(move)
   }
 
-  def finished: Boolean
+  def winner: Option[Player.Value] = board.winner
 
+  def finished = board.finished
   final def nonFinished = !finished
 
-  def finishingMove: List[(Int, Int)]
+  def finishingMove = board.finishingMove
 
-  def winner: Option[Player.Value]
+  /**
+   * Get board visualization.
+   */
+  def state: State = board.lines
 
   /**
    * Get list of available rotations
@@ -67,10 +66,10 @@ abstract class Game(protected val board: Board) extends Jsonable {
 
     def valid = state == board.version
   }
+  
+  override def loadJson(data: String): Unit = ???
 
-  def dump: String = ???
-
-  def load(data: String) = ???
+  override def toMap: Map[String, Any] = ???
 
   /**
    * Class used to pass board position.

@@ -59,5 +59,5 @@ class StartGameActivity extends ExtendedActivity {
   /**
    * Used to check if there is a game in progress.
    */
-  private[this] def activeGame: Boolean = GameState.isActive
+  private[this] def activeGame: Boolean = GameState.active
 }
