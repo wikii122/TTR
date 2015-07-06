@@ -1,4 +1,4 @@
-package pl.enves.androidx.api
+package pl.enves.androidx.helpers
 
 import android.content.{Context, Intent}
 
