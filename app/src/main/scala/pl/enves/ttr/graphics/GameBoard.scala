@@ -2,6 +2,7 @@ package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
 import pl.enves.ttr.graphics.shaders.{ColorShaderData, TextureShaderData}
+import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.{Algebra, Logging}
 
@@ -22,6 +23,8 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
   private case class FigureZone() extends BoardZone()
 
   private case class ArrowZone(quadrant: Quadrant.Value, rotation: QRotation.Value) extends BoardZone()
+
+  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f)
 
   val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
   val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
@@ -236,6 +239,19 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
       // Arrows
       drawArrowPair(quadrant, !game.availableRotations.contains(quadrant))
     }
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, logicToDisplay(2), logicToDisplay(7), 0.0f)
+    Matrix.scaleM(MVMatrix(), 0, 4.0f, 4.0f, 1.0f)
+    playerText.draw()
+    MVMatrix.pop()
+
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, logicToDisplay(4), logicToDisplay(7), 0.0f)
+    game.player match {
+      case Player.O => textureShader.draw(rectangle, ring)
+      case Player.X => textureShader.draw(rectangle, cross)
+    }
+    MVMatrix.pop()
 
     MVMatrix.pop()
   }

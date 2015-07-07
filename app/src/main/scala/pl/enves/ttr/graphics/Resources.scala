@@ -17,9 +17,11 @@ import android.opengl.{GLUtils, GLES20}
 import pl.enves.ttr.R
 import pl.enves.ttr.graphics.models._
 import pl.enves.ttr.graphics.shaders._
-import pl.enves.ttr.graphics.textures.Texture
+import pl.enves.ttr.utils.Logging
 
-class Resources(context: Context) {
+import scala.collection.mutable
+
+class Resources(context: Context) extends Logging {
 
   object ModelId extends Enumeration {
     type ModelId = Value
@@ -64,20 +66,47 @@ class Resources(context: Context) {
   )
 
   //create models
-  var models = Map(
-    (ModelId.Rectangle, squareGeometry),
-    (ModelId.Board3x3, board3x3Geometry)
+  var models: mutable.HashMap[String, Geometry] = mutable.HashMap(
+    (ModelId.Rectangle.toString, squareGeometry),
+    (ModelId.Board3x3.toString, board3x3Geometry)
   )
 
-  //create textures
-  var textures = Map(
-    (TextureId.ArrowLeft, createTexture(Texture(context, R.drawable.arrow_left))),
-    (TextureId.ArrowRight, createTexture(Texture(context, R.drawable.arrow_right))),
-    (TextureId.ArrowLeftGray, createTexture(Texture(context, R.drawable.arrow_left_gray))),
-    (TextureId.ArrowRightGray, createTexture(Texture(context, R.drawable.arrow_right_gray))),
-    (TextureId.Ring, createTexture(Texture(context, R.drawable.ring))),
-    (TextureId.Cross, createTexture(Texture(context, R.drawable.cross)))
+  def addProcModel(name: String, procGeometry: ProcGeometry): Unit = {
+    log("adding model: " + name)
+    val buffers = procGeometry.getBuffers
+    val vbos = new VBOs(
+      if(buffers.positions.isDefined) createFloatBuffer(buffers.positions.get) else 0,
+      if(buffers.colors.isDefined) createFloatBuffer(buffers.colors.get) else 0,
+      if(buffers.normals.isDefined) createFloatBuffer(buffers.normals.get) else 0,
+      if(buffers.texCoords.isDefined) createFloatBuffer(unflipY(buffers.texCoords.get)) else 0
+    )
+    val geometry = procGeometry match {
+      case ProcGeometryArrays(numVertices, drawMode, b) => new GeometryArrays(
+        numVertices,
+        drawMode,
+        vbos)
+      case ProcGeometryElements(numIndices, indices, drawMode, b) => new GeometryElements(
+        numIndices,
+        createShortBuffer(indices),
+        drawMode,
+        vbos)
+    }
+    models.update(name, geometry)
+  }
+
+  var textures: mutable.HashMap[String, Int] = mutable.HashMap(
+    (TextureId.ArrowLeft.toString, createTexture(context, R.drawable.arrow_left)),
+    (TextureId.ArrowRight.toString, createTexture(context, R.drawable.arrow_right)),
+    (TextureId.ArrowLeftGray.toString, createTexture(context, R.drawable.arrow_left_gray)),
+    (TextureId.ArrowRightGray.toString, createTexture(context, R.drawable.arrow_right_gray)),
+    (TextureId.Ring.toString, createTexture(context, R.drawable.ring)),
+    (TextureId.Cross.toString, createTexture(context, R.drawable.cross))
   )
+
+  def addProcTexture(name: String, bitmap: Bitmap): Unit = {
+    log("adding texture: " + name)
+    textures.update(name, createTexture(bitmap))
+  }
 
   //create shaders
   var shaders = Map(
@@ -86,9 +115,13 @@ class Resources(context: Context) {
     (ShaderId.Texture, new TextureShader())
   )
 
-  def getTexture(texture: TextureId.TextureId): Int = textures(texture)
+  def getTexture(texture: TextureId.TextureId): Int = textures(texture.toString)
 
-  def getGeometry(model: ModelId.ModelId): Geometry = models(model)
+  def getTexture(texture: String): Int = textures(texture)
+
+  def getGeometry(model: ModelId.ModelId): Geometry = models(model.toString)
+
+  def getGeometry(model: String): Geometry = models(model)
 
   def getShader(shader: ShaderId.ShaderId): Shader = shaders(shader)
 
@@ -150,6 +183,9 @@ class Resources(context: Context) {
 
     return texture
   }
+
+  def createTexture(context: Context, image: Int): Int =
+    createTexture(BitmapFactory.decodeResource(context.getResources, image))
 
   def unflipY(arr: Array[Float]): Array[Float] = {
     val ret = new Array[Float](arr.length)
