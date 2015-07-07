@@ -1,13 +1,12 @@
 package pl.enves.ttr.logic
 package inner
 
- import pl.enves.androidx.Logging
- import pl.enves.ttr.utils.Jsonable
+import pl.enves.androidx.Logging
 
 /**
  * Field 3x3 with fields, ability to set them and rotate.
  */
-private[inner] class BoardQuadrant extends Logging with Jsonable {
+private[inner] class BoardQuadrant extends Logging {
   private val rotationIndicator = 3
   private[this] val fields = Array.fill[Option[Player.Value]] (3, 3) (None)
   private[this] var rotation = 0
@@ -61,10 +60,6 @@ private[inner] class BoardQuadrant extends Logging with Jsonable {
     case 2 => (Quadrant.size - x - 1, Quadrant.size - y - 1)
     case 3 => (y, Quadrant.size - x - 1)
   }
-
-  override def loadJson(data: String): Unit = ???
-
-  override def toMap: Map[String, Any] = ???
 }
 
 object BoardQuadrant {

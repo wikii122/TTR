@@ -2,12 +2,11 @@ package pl.enves.ttr.logic
 package inner
 
 import pl.enves.androidx.Logging
-import pl.enves.ttr.utils.Jsonable
 
 /**
  * Manages fields states.
  */
-private[logic] class Board extends Logging with Jsonable {
+private[logic] class Board extends Logging {
   private[this] val quadrants = createQuadrants.toMap
   private[this] var _version = 0
   private[this] var freeFields = 36
@@ -72,10 +71,6 @@ private[logic] class Board extends Logging with Jsonable {
       log(s"Game finished! $player won on $fields")
       true
   }
-
-  override def loadJson(data: String): Unit = ???
-
-  override def toMap: Map[String, Any] = ???
 
   private implicit class QuadrantManager(map: Map[Quadrant.Value, BoardQuadrant]) {
     private def tick() = map foreach (_._2.tickCooldown())

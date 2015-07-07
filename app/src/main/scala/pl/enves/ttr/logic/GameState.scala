@@ -12,7 +12,7 @@ object GameState {
   private val name = "TTR_GAME_STATE"
 
   def store(game: Game)(implicit context: Context) = {
-    sets(context, field, game.toJson)
+    sets(context, field, game.toJson.compactPrint)
   }
 
   def load()(implicit context: Context): Game = ???

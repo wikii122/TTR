@@ -1,7 +1,6 @@
 package pl.enves.ttr.logic
 
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.utils.Jsonable
 
 /**
  * The Game instance is responsible for handling players and managing board.
@@ -9,7 +8,7 @@ import pl.enves.ttr.utils.Jsonable
  * It is not aware of any of the game rules by itself, as this is
  * the what Board is responsible for.
  */
-abstract class Game(protected val board: Board) extends Jsonable {
+abstract class Game(protected val board: Board) {
   type State = Seq[Seq[Option[Player.Value]]]
 
   protected var _player: Player.Value = Player.X
@@ -66,10 +65,6 @@ abstract class Game(protected val board: Board) extends Jsonable {
 
     def valid = state == board.version
   }
-  
-  override def loadJson(data: String): Unit = ???
-
-  override def toMap: Map[String, Any] = ???
 
   /**
    * Class used to pass board position.
