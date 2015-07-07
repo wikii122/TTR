@@ -58,7 +58,10 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 
   protected def boardVersion: Int
 
-  override def toMap = ???
+  override final def toMap = Map(
+    "player" -> _player,
+    "board" -> board.toJson
+  )
 
   /**
    * Used to mark that data depend on Board version.

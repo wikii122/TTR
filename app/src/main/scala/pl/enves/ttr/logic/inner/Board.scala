@@ -3,6 +3,8 @@ package inner
 
 import pl.enves.androidx.Logging
 import pl.enves.ttr.utils.JsonMappable
+import pl.enves.ttr.utils.JsonProtocol._
+import spray.json._
 
 /**
  * Manages fields states.
@@ -85,11 +87,19 @@ private[logic] class Board extends Logging with JsonMappable {
       map(quadrant).move(x, y, player)
       tick()
     }
+
+    def toJson: JsValue = (map.toList map {
+      p: (Quadrant.Value, BoardQuadrant) => val (k, v) = p
+        JsObject(
+          "quadrant" -> k.toJson,
+          "data" -> v.toJson
+        )
+    }).toJson
   }
 
-  override def toMap: Map[String, Any] = ???
-}
-
-object Board {
-  def load(data: String) = ???
+  override def toMap: Map[String, Any] = Map(
+    "freeFields" -> freeFields,
+    "version" -> _version,
+    "quadrants" -> quadrants.toJson
+  )
 }

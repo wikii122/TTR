@@ -3,6 +3,8 @@ package inner
 
 import pl.enves.androidx.Logging
 import pl.enves.ttr.utils.JsonMappable
+import pl.enves.ttr.utils.JsonProtocol._
+import spray.json._
 
 /**
  * Field 3x3 with fields, ability to set them and rotate.
@@ -62,7 +64,12 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
     case 3 => (y, Quadrant.size - x - 1)
   }
 
-  override def toMap: Map[String, Any] = ???
+  override def toMap: Map[String, Any] = Map(
+    "cooldown" -> rotationCooldown,
+    // FIXME Arrays are not supported in protocol
+    "fields" -> (fields.toList map { arr => (arr.toList map { p => p.toJson}).toJson }),
+    "rotation" -> rotation
+  )
 }
 
 object BoardQuadrant {
@@ -71,6 +78,4 @@ object BoardQuadrant {
 
   // Workaround for an unambiguity
   def named(loc: Quadrant.Value) = apply(loc: Quadrant.Value)
-
-  def load(data: String) = ???
 }

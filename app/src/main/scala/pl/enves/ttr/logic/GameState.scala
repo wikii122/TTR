@@ -1,17 +1,19 @@
 package pl.enves.ttr.logic
 
 import android.content.Context
+import pl.enves.androidx.Logging
 import spray.json._
 import DefaultJsonProtocol._
 /**
  * Object used to load last played game
  */
-object GameState {
+object GameState extends Logging {
   private val field = "gameData"
   private val empty = ""
   private val name = "TTR_GAME_STATE"
 
   def store(game: Game)(implicit context: Context) = {
+    log(game.toJson.compactPrint)
     sets(context, field, game.toJson.compactPrint)
   }
 
