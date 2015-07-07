@@ -5,6 +5,4 @@ import JsonProtocol._
 
 trait JsonMappable extends Mappable {
   def toJson: JsValue = toMap.toJson
-
-  def fromJson(js: JsValue)
 }
