@@ -9,6 +9,8 @@ import pl.enves.ttr.logic.inner.Board
  * Wrapper for game logic.
  */
 class StandardGame extends Game(new Board) with Logging {
+  override protected val gameType = Game.STANDARD
+
   /**
    * Initiates the game with given player.
    */

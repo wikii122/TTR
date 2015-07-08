@@ -23,7 +23,7 @@ class GameActivity extends ExtendedActivity with GameManager {
 
     setGui()
 
-    Option(getIntent.getExtras) getOrElse (throw new UninitializedError()) getString "TYPE" match {
+    Game withName (Option(getIntent.getExtras) getOrElse (throw new UninitializedError()) getString "TYPE") match {
         case Game.STANDARD => game = new StandardGame
         case Game.CONTINUE => game = GameState.load()
         case s => throw new IllegalArgumentException(s"Invalid game type: $s")
@@ -39,7 +39,8 @@ class GameActivity extends ExtendedActivity with GameManager {
     super.onPause()
     view.onPause()
 
-    GameState store game
+    if (game.nonFinished) GameState store game
+    else GameState clear()
   }
 
   override def onResume(): Unit = {

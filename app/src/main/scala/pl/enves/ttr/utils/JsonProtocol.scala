@@ -60,11 +60,10 @@ object JsonProtocol extends DefaultJsonProtocol {
     case b: Boolean => JsFalse
     // FIXME Potentially errorprone
     case m: Map[_, _] => m.asInstanceOf[Map[String, Any]].toJson
+    case l: List[_] => l.asInstanceOf[List[Any]] map data2json toJson
     case p: Player.Value => p.toJson
     case Some(x) => data2json(x)
     case None => JsNull
-    // FIXME Rather obvious
-    case l: List[JsValue] => l.toJson
     case o => throw new DeserializationException(s"Unparsable type: ${o.getClass} in instance $o")
   }
 

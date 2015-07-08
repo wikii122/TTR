@@ -40,7 +40,7 @@ class StartGameActivity extends ExtendedActivity {
     val itnt = intent[GameActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-    itnt putExtra ("TYPE", Game.STANDARD)
+    itnt putExtra ("TYPE", Game.STANDARD.toString)
     itnt start()
   }
 
@@ -52,7 +52,7 @@ class StartGameActivity extends ExtendedActivity {
     log("Intending to continue previously run game")
     val itnt = intent[GameActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra ("TYPE", Game.CONTINUE)
+    itnt putExtra ("TYPE", Game.CONTINUE.toString)
     itnt start()
   }
 

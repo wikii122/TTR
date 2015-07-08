@@ -10,6 +10,8 @@ import pl.enves.ttr.utils.JsonMappable
  * the what Board is responsible for.
  */
 abstract class Game(protected val board: Board) extends JsonMappable {
+  protected val gameType: Game.Value
+
   type State = Seq[Seq[Option[Player.Value]]]
 
   protected var _player: Player.Value = Player.X
@@ -60,7 +62,8 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 
   override final def toMap = Map(
     "player" -> _player,
-    "board" -> board.toJson
+    "board" -> board.toJson,
+    "type" -> gameType
   )
 
   /**
@@ -91,7 +94,6 @@ abstract class Game(protected val board: Board) extends JsonMappable {
   case class Rotation(board: Quadrant.Value, r: QRotation.Value) extends Move
 }
 
-object Game {
-  val STANDARD = "Standard Game"
-  val CONTINUE = "Continue Previous"
+object Game extends Enumeration {
+  val STANDARD, CONTINUE = Value
 }
