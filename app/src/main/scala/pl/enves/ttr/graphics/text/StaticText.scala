@@ -1,6 +1,6 @@
 package pl.enves.ttr.graphics.text
 
-import android.graphics.{Typeface, Paint, Canvas, Bitmap}
+import android.graphics._
 import android.opengl.GLES20
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.shaders.TextureShaderData
@@ -10,7 +10,7 @@ import pl.enves.ttr.utils.Logging
 /**
  * Display string pre-rendered to texture
  */
-class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f)
+class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f, color: Int = Color.BLACK)
   extends Logging {
 
   var fontHeight, textWidth = 0.0f
@@ -28,7 +28,7 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   val textPaint = new Paint()
   textPaint.setAntiAlias(true)
   textPaint.setTypeface(Typeface.SANS_SERIF)
-  textPaint.setARGB(0xff, 0xff, 0x00, 0x00)
+  textPaint.setColor(color)
 
   //Find optimal font size
   //TODO: more optimal
