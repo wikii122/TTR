@@ -2,10 +2,10 @@ package pl.enves.ttr.graphics.text
 
 import android.graphics.{Typeface, Paint, Canvas, Bitmap}
 import android.opengl.GLES20
+import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.shaders.TextureShaderData
 import pl.enves.ttr.graphics.models.Rectangle
-import pl.enves.ttr.utils.Logging
 
 /**
  * Display string pre-rendered to texture

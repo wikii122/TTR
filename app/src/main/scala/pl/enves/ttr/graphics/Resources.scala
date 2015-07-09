@@ -14,10 +14,10 @@ import java.nio.IntBuffer
 import android.content.Context
 import android.graphics.{BitmapFactory, Bitmap}
 import android.opengl.{GLUtils, GLES20}
+import pl.enves.androidx.Logging
 import pl.enves.ttr.R
 import pl.enves.ttr.graphics.models._
 import pl.enves.ttr.graphics.shaders._
-import pl.enves.ttr.utils.Logging
 
 import scala.collection.mutable
 
