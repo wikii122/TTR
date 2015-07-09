@@ -1,6 +1,6 @@
 package pl.enves.ttr.utils
 
-import pl.enves.ttr.logic.{Quadrant, Player}
+import pl.enves.ttr.logic.{Game, Quadrant, Player}
 import spray.json._
 
 object JsonProtocol extends DefaultJsonProtocol {
@@ -35,6 +35,15 @@ object JsonProtocol extends DefaultJsonProtocol {
 
     def read(json: JsValue) = json match {
       case JsString(str) => Quadrant.withName(str)
+      case _ => throw new DeserializationException("Enum string expected")
+    }
+  }
+
+  implicit object GameTypeFormatter extends JsonFormat[Game.Value] {
+    def write(obj: Game.Value) = JsString(obj.toString)
+
+    def read(json: JsValue) = json match {
+      case JsString(str) => Game.withName(str)
       case _ => throw new DeserializationException("Enum string expected")
     }
   }

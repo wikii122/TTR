@@ -7,11 +7,11 @@ import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
 /**
- * Field 3x3 with fields, ability to set them and rotate.
+ * Field 3x3 with _fields, ability to set them and rotate.
  */
 private[inner] class BoardQuadrant extends Logging with JsonMappable {
   private val rotationIndicator = 3
-  private[this] val fields = Array.fill[Option[Player.Value]] (3, 3) (None)
+  private[this] val _fields = Array.fill[Option[Player.Value]] (3, 3) (None)
   private[this] var rotation = 0
   private[this] var rotationCooldown = 0
 
@@ -20,7 +20,7 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
     val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
     log(s"Coordinates translated to ($x, $y) inside Quadrant")
 
-    if (fields(x)(y).isEmpty) fields(x)(y) = Some(player)
+    if (_fields(x)(y).isEmpty) _fields(x)(y) = Some(player)
     else throw new FieldTaken("Field is already taken")
   }
 
@@ -42,7 +42,7 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
   def get(xv: Int, yv: Int): Option[Player.Value] = {
     val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
 
-    return fields(x)(y)
+    return _fields(x)(y)
   }
 
   def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 until Quadrant.size) yield get(x, y)
@@ -67,9 +67,13 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
   override def toMap: Map[String, Any] = Map(
     "cooldown" -> rotationCooldown,
     // FIXME Arrays are not supported in protocol
-    "fields" -> (fields.toList map { arr => (arr.toList map { p => p.toJson}).toJson }),
+    "fields" -> (_fields.toList map { arr => (arr.toList map { p => p.toJson}).toJson }),
     "rotation" -> rotation
   )
+
+  private[inner] def setRotation(i: Int) = rotation = i
+  private[inner] def setCooldown(i: Int) = rotationCooldown = i
+  private[inner] def fields = _fields
 }
 
 object BoardQuadrant {

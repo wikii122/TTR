@@ -9,12 +9,13 @@ import spray.json._
 /**
  * Manages fields states.
  */
-private[logic] class Board extends Logging with JsonMappable {
-  private[this] val quadrants = createQuadrants.toMap
-  private[this] var _version = 0
-  private[this] var freeFields = 36
+private[logic] class Board private () extends Logging with JsonMappable {
   private[this] var _winner: Option[Player.Value] = None
   private[this] var _combination: List[(Int, Int)] = Nil
+
+  private val quadrants = createQuadrants.toMap
+  private var _version = 0
+  private var freeFields = 36
 
   def version: Int = _version
 
@@ -102,4 +103,33 @@ private[logic] class Board extends Logging with JsonMappable {
     "version" -> _version,
     "quadrants" -> quadrants.toJson
   )
+}
+
+object Board {
+  def apply() = new Board()
+  def apply(jsValue: JsValue): Board = {
+    val fields = jsValue.asJsObject.fields
+    val board = new Board()
+    board.freeFields = fields("freeFields").convertTo[Int]
+    board._version = fields("version").convertTo[Int]
+
+    val quadrants = fields("quadrants").asInstanceOf[JsArray].elements map (_.asJsObject.fields) map {
+      field =>
+        field("quadrant").convertTo[Quadrant.Value] ->
+        field("data").asJsObject.fields
+    }
+
+    quadrants foreach {
+      p => val (quad, data) = p
+        val quadrant = board.quadrants(quad)
+        quadrant setRotation data("rotation").convertTo[Int]
+        quadrant setCooldown data("cooldown").convertTo[Int]
+        val triple = data("fields").asInstanceOf[JsArray].elements map (_.asInstanceOf[JsArray].elements)
+        for (i <- 0 until triple.length;
+          j <- 0 until triple(i).length
+        ) quadrant.fields(i)(j) = triple(i)(j).convertTo[Option[Player.Value]]
+    }
+
+    return board
+  }
 }

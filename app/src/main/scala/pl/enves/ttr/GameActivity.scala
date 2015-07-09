@@ -24,8 +24,8 @@ class GameActivity extends ExtendedActivity with GameManager {
     setGui()
 
     Game withName (Option(getIntent.getExtras) getOrElse (throw new UninitializedError()) getString "TYPE") match {
-        case Game.STANDARD => game = new StandardGame
-        case Game.CONTINUE => game = GameState.load()
+        case Game.STANDARD => game = Game.create(Game.STANDARD)
+        case Game.CONTINUE => game = Game.load(GameState.load())
         case s => throw new IllegalArgumentException(s"Invalid game type: $s")
     }
 

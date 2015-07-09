@@ -3,7 +3,7 @@ package pl.enves.ttr.logic
 import android.content.Context
 import pl.enves.androidx.Logging
 import spray.json._
-import DefaultJsonProtocol._
+import pl.enves.ttr.utils.JsonProtocol._
 /**
  * Object used to load last played game
  */
@@ -17,7 +17,7 @@ object GameState extends Logging {
     sets(context, field, game.toJson.compactPrint)
   }
 
-  def load()(implicit context: Context): Game = ???
+  def load()(implicit context: Context): JsValue = gets(context, field).parseJson
 
   def clear()(implicit context: Context) = sets(context, field, empty)
 

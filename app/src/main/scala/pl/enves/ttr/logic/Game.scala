@@ -2,6 +2,8 @@ package pl.enves.ttr.logic
 
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonMappable
+import spray.json._
+import pl.enves.ttr.utils.JsonProtocol._
 
 /**
  * The Game instance is responsible for handling players and managing board.
@@ -96,4 +98,16 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 
 object Game extends Enumeration {
   val STANDARD, CONTINUE = Value
+
+  def create(typo: Game.Value): Game = typo match {
+    case STANDARD => StandardGame()
+  }
+
+  def load(jsValue: JsValue): Game = {
+    jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
+      case STANDARD => StandardGame(jsValue)
+    }
+  }
+
+
 }
