@@ -69,8 +69,9 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   private def checkVictory(): Boolean = VictoryConditions.check(lines) exists {
     t => val (player, fields) = t
-      _winner = Some(player)
+      _winner = Option(player orNull)
       _combination = fields
+      freeFields = 0
 
       log(s"Game finished! $player won on $fields")
       true
