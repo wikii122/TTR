@@ -3,8 +3,8 @@ package pl.enves.ttr.graphics
 import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
+import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.{GameManager, Player, StandardGame}
-import pl.enves.ttr.utils.Logging
 
 /**
  * Main view of the game.

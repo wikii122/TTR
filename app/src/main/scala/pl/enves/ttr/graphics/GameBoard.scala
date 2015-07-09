@@ -1,10 +1,11 @@
 package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
+import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.shaders.{ColorShaderData, TextureShaderData}
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.{Algebra, Logging}
+import pl.enves.ttr.utils.Algebra
 
 /**
  * Game board

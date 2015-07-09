@@ -2,13 +2,17 @@ package pl.enves.ttr.logic
 
 import java.security.InvalidParameterException
 
+import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.utils.Logging
+import spray.json._
+import pl.enves.ttr.utils.JsonProtocol._
 
 /**
  * Wrapper for game logic.
  */
-class StandardGame extends Game(new Board) with Logging {
+class StandardGame private (board: Board = Board()) extends Game(board) with Logging {
+  override protected val gameType = Game.STANDARD
+
   /**
    * Initiates the game with given player.
    */
@@ -42,16 +46,20 @@ class StandardGame extends Game(new Board) with Logging {
 
     return res
   }
-
-  def winner: Option[Player.Value] = board.winner
-
-  def state: State = board.lines
-
-  def finished = board.finished
-
-  def finishingMove = board.finishingMove
   
   def locked: Boolean = false
 
   protected def boardVersion = board.version
+}
+
+object StandardGame {
+  def apply() = new StandardGame()
+  def apply(jsValue: JsValue): Game = {
+    val fields = jsValue.asJsObject.fields
+    val board = Board(fields("board"))
+    val game = new StandardGame(board)
+    game._player = fields("player").convertTo[Player.Value]
+
+    return game
+  }
 }

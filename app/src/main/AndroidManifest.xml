@@ -16,10 +16,13 @@
             android:label="@string/title_activity_game"
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize">
-            <intent-filter>
-                <!-- TODO: Add menu activity -->
-                <action android:name="android.intent.action.MAIN" />
+        </activity>
 
+        <activity
+            android:name=".StartGameActivity"
+            android:screenOrientation="portrait">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

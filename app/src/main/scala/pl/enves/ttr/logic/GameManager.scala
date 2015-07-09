@@ -1,6 +1,6 @@
 package pl.enves.ttr.logic
 
-import pl.enves.ttr.utils.Logging
+import pl.enves.androidx.Logging
 
 trait GameManager extends Logging {
   protected[this] var _game: Option[Game] = None
