@@ -1,5 +1,6 @@
 package pl.enves.ttr.graphics
 
+import android.graphics.Color
 import android.opengl.Matrix
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.shaders.{ColorShaderData, TextureShaderData}
@@ -25,7 +26,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
 
   private case class ArrowZone(quadrant: Quadrant.Value, rotation: QRotation.Value) extends BoardZone()
 
-  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f)
+  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, Color.CYAN)
 
   val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
   val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
