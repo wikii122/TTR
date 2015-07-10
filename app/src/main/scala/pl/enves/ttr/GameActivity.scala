@@ -23,7 +23,8 @@ class GameActivity extends ExtendedActivity with GameManager {
 
     setGui()
 
-    Game withName (Option(getIntent.getExtras) getOrElse (throw new UninitializedError()) getString "TYPE") match {
+    val b:Bundle = Option(getIntent.getExtras) getOrElse (throw new UninitializedError())
+    Game withName (b getString "TYPE") match {
         case Game.STANDARD =>
           game = Game.create(Game.STANDARD)
           view.startGame()
