@@ -11,21 +11,14 @@ import pl.enves.ttr.graphics.models.Rectangle
  * Display string pre-rendered to texture
  */
 class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f, color: Int = Color.BLACK)
-  extends Logging with GeometryProvider with BitmapProvider with SceneObject {
+  extends Logging with GeometryProvider with TextureProvider with SceneObject {
 
   resources.addBitmapProvider(this)
   resources.addGeometryProvider(this)
 
   override def getGeometry: Map[String, GeometryData] = Map((modelName, modelGeometry))
 
-  override def getBitmapsNames: List[String] = List(textureName)
-  override def getBitmap(name: String): Bitmap = {
-    if(name == textureName) {
-      return createBitmap()
-    }else{
-      throw new NoSuchFieldException
-    }
-  }
+  override def getTextures: Map[String, Int] = Map((textureName, createTexture(createBitmap())))
 
   var fontHeight, textWidth = 0.0f
 

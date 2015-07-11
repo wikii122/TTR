@@ -11,8 +11,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import java.nio.IntBuffer
 
-import android.graphics.Bitmap
-import android.opengl.{GLUtils, GLES20}
+import android.opengl.GLES20
 import pl.enves.androidx.Logging
 
 import pl.enves.ttr.graphics.shaders._
@@ -26,19 +25,18 @@ object ShaderId extends Enumeration {
 
 class Resources() extends Logging {
 
-  private val bitmapProviders: mutable.ListBuffer[BitmapProvider] = mutable.ListBuffer()
+  private val textureProviders: mutable.ListBuffer[TextureProvider] = mutable.ListBuffer()
   private val geometryProviders: mutable.ListBuffer[GeometryProvider] = mutable.ListBuffer()
 
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")
     //create textures
-    for (bitmapProvider <- bitmapProviders) {
-      log("Polling Bitmap Provider: " + bitmapProvider)
-      val names = bitmapProvider.getBitmapsNames
-      for (name <- names) {
-        log("Adding Bitmap: " + name)
-        addTexture(name, bitmapProvider.getBitmap(name))
+    for (textureProvider <- textureProviders) {
+      log("Polling Texture Provider: " + textureProvider)
+      for (texture <- textureProvider.getTextures) {
+        log("Adding Texture: " + texture._1)
+        addTexture(texture._1, texture._2)
       }
     }
 
@@ -59,8 +57,8 @@ class Resources() extends Logging {
     )
   }
 
-  def addBitmapProvider(provider: BitmapProvider): Unit = {
-    bitmapProviders.append(provider)
+  def addBitmapProvider(provider: TextureProvider): Unit = {
+    textureProviders.append(provider)
     log("Added Bitmap Provider: " + provider.getClass.getName)
   }
 
@@ -97,14 +95,13 @@ class Resources() extends Logging {
 
   private val textures: mutable.HashMap[String, Int] = mutable.HashMap()
 
-  private def addTexture(name: String, bitmap: Bitmap): Unit = {
-    log("adding texture: " + name)
-    textures.update(name, createTexture(bitmap))
+  private def addTexture(name: String, texture: Int): Unit = {
+    textures.update(name, texture)
   }
 
   private var shaders: Map[ShaderId.ShaderId, Shader] = Map()
 
-//  def getTexture(texture: TextureId.TextureId): Int = textures(texture.toString)
+  //  def getTexture(texture: TextureId.TextureId): Int = textures(texture.toString)
 
   def getTexture(texture: String): Int = textures(texture)
 
@@ -152,27 +149,6 @@ class Resources() extends Logging {
 
     return buffer
   }
-
-  private def createTexture(bitmap: Bitmap): Int = {
-    val name = IntBuffer.allocate(1)
-    GLES20.glGenTextures(1, name)
-    val texture = name.get(0)
-
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture)
-    GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0)
-    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR)
-    GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR_MIPMAP_NEAREST)
-    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, GLES20.GL_REPEAT)
-    GLES20.glTexParameterf(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, GLES20.GL_REPEAT)
-    GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D)
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
-
-    // Recycle the bitmap, since its data has been loaded into OpenGL.
-    bitmap.recycle()
-
-    return texture
-  }
-
 
   private def unflipY(arr: Array[Float]): Array[Float] = {
     val ret = new Array[Float](arr.length)
