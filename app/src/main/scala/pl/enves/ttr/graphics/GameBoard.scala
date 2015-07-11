@@ -3,8 +3,10 @@ package pl.enves.ttr.graphics
 import android.graphics.Color
 import android.opengl.Matrix
 import pl.enves.androidx.Logging
-import pl.enves.ttr.graphics.shaders.{ColorShaderData, TextureShaderData}
+import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.text.StaticText
+import pl.enves.ttr.graphics.DefaultTextureId._
+import pl.enves.ttr.graphics.DefaultGeometryId._
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -14,7 +16,7 @@ import pl.enves.ttr.utils.Algebra
  * Logic: (Int, Int), (0, 0) is where (0, 0) field is
  * Display: (Float, Float), (0, 0) is in the center of displayed board
  */
-class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
+class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
 
   private class ClickException(msg: String) extends RuntimeException(msg)
 
@@ -28,19 +30,19 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
 
   val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, Color.CYAN)
 
-  val board3x3 = resources.getGeometry(resources.ModelId.Board3x3)
-  val rectangle = resources.getGeometry(resources.ModelId.Rectangle)
+  var board3x3: Option[Geometry] = None
+  var rectangle: Option[Geometry] = None
 
-  val arrowLeft = new TextureShaderData(resources.getTexture(resources.TextureId.ArrowLeft))
-  val arrowRight = new TextureShaderData(resources.getTexture(resources.TextureId.ArrowRight))
-  val arrowLeftGray = new TextureShaderData(resources.getTexture(resources.TextureId.ArrowLeftGray))
-  val arrowRightGray = new TextureShaderData(resources.getTexture(resources.TextureId.ArrowRightGray))
-  val ring = new TextureShaderData(resources.getTexture(resources.TextureId.Ring))
-  val cross = new TextureShaderData(resources.getTexture(resources.TextureId.Cross))
+  var arrowLeft: Option[TextureShaderData] = None
+  var arrowRight: Option[TextureShaderData] = None
+  var arrowLeftGray: Option[TextureShaderData] = None
+  var arrowRightGray: Option[TextureShaderData] = None
+  var ring: Option[TextureShaderData] = None
+  var cross: Option[TextureShaderData] = None
 
-  val colorShader = resources.getShader(resources.ShaderId.Color)
-  val colorsShader = resources.getShader(resources.ShaderId.Colors)
-  val textureShader = resources.getShader(resources.ShaderId.Texture)
+  var colorShader: Option[ColorShader] = None
+  var colorsShader: Option[ColorsShader] = None
+  var textureShader: Option[TextureShader] = None
 
   val winningHighlight = new ColorShaderData(Array(0.0f, 1.0f, 0.0f, 1.0f))
   val illegalHighlight = new ColorShaderData(Array(1.0f, 0.0f, 0.0f, 1.0f))
@@ -51,6 +53,25 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
 
   var rotatedQuadrant: Quadrant.Value = Quadrant.first
   var rotationAngle: Int = 0
+
+  override def onUpdateResources(): Unit = {
+    log("onUpdateResources")
+    playerText.onUpdateResources()
+
+    board3x3 = Some(resources.getGeometry(Board3x3.toString))
+    rectangle = Some(resources.getGeometry(Rectangle.toString))
+
+    arrowLeft = Some(new TextureShaderData(resources.getTexture(ArrowLeft.toString)))
+    arrowRight = Some(new TextureShaderData(resources.getTexture(ArrowRight.toString)))
+    arrowLeftGray = Some(new TextureShaderData(resources.getTexture(ArrowLeftGray.toString)))
+    arrowRightGray = Some(new TextureShaderData(resources.getTexture(ArrowRightGray.toString)))
+    ring = Some(new TextureShaderData(resources.getTexture(Ring.toString)))
+    cross = Some(new TextureShaderData(resources.getTexture(Cross.toString)))
+
+    colorShader = Some(resources.getShader(ShaderId.Color).asInstanceOf[ColorShader])
+    colorsShader = Some(resources.getShader(ShaderId.Colors).asInstanceOf[ColorsShader])
+    textureShader = Some(resources.getShader(ShaderId.Texture).asInstanceOf[TextureShader])
+  }
 
   def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-1.5f, -1.5f)
@@ -120,7 +141,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
   def checkIllegal(x: Int, y: Int): Unit = {
     if ((x, y) == illegalCoords) {
       if (System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime) {
-        colorShader.draw(rectangle, illegalHighlight)
+        colorShader.get.draw(rectangle.get, illegalHighlight)
       }
     }
   }
@@ -143,15 +164,15 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
 
       if (game.finished && game.finishingMove != Nil) {
         if (game.finishingMove.contains((y, x))) {
-          colorShader.draw(rectangle, winningHighlight)
+          colorShader.get.draw(rectangle.get, winningHighlight)
         }
       }
 
       if (player.get == Player.O) {
-        textureShader.draw(rectangle, ring)
+        textureShader.get.draw(rectangle.get, ring.get)
       }
       if (player.get == Player.X) {
-        textureShader.draw(rectangle, cross)
+        textureShader.get.draw(rectangle.get, cross.get)
       }
       MVMatrix.pop()
     }
@@ -177,9 +198,9 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
     Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
     if (desaturated) {
       checkIllegal(a._1, a._2)
-      textureShader.draw(rectangle, arrowLeftGray)
+      textureShader.get.draw(rectangle.get, arrowLeftGray.get)
     } else {
-      textureShader.draw(rectangle, arrowLeft)
+      textureShader.get.draw(rectangle.get, arrowLeft.get)
     }
     MVMatrix.pop()
 
@@ -189,9 +210,9 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
     Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
     if (desaturated) {
       checkIllegal(b._1, b._2)
-      textureShader.draw(rectangle, arrowRightGray)
+      textureShader.get.draw(rectangle.get, arrowRightGray.get)
     } else {
-      textureShader.draw(rectangle, arrowRight)
+      textureShader.get.draw(rectangle.get, arrowRight.get)
     }
     MVMatrix.pop()
   }
@@ -200,7 +221,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
     Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 1.0f)
   }
 
-  def animate(): Unit = {
+  override def onAnimate(dt: Float): Unit = {
     if (rotationAngle > 0) {
       rotationAngle -= 2
     }
@@ -210,7 +231,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
     }
   }
 
-  def draw(): Unit = {
+  override def onDraw(): Unit = {
     MVMatrix.push()
     prepareForDisplay()
 
@@ -229,7 +250,7 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
 
       MVMatrix.push()
       Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorsShader.draw(board3x3)
+      colorsShader.get.draw(board3x3.get)
       MVMatrix.pop()
 
       Matrix.translateM(MVMatrix(), 0, -centre._1, -centre._2, 0.0f)
@@ -244,21 +265,21 @@ class GameBoard(game: Game, resources: Resources) extends Logging with Algebra {
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, logicToDisplay(2), logicToDisplay(7), 0.0f)
     Matrix.scaleM(MVMatrix(), 0, 4.0f, 4.0f, 1.0f)
-    playerText.draw()
+    playerText.onDraw()
     MVMatrix.pop()
 
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, logicToDisplay(4), logicToDisplay(7), 0.0f)
     game.player match {
-      case Player.O => textureShader.draw(rectangle, ring)
-      case Player.X => textureShader.draw(rectangle, cross)
+      case Player.O => textureShader.get.draw(rectangle.get, ring.get)
+      case Player.X => textureShader.get.draw(rectangle.get, cross.get)
     }
     MVMatrix.pop()
 
     MVMatrix.pop()
   }
 
-  def click(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
+  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
     var res = true
     MVMatrix.push()
     prepareForDisplay()

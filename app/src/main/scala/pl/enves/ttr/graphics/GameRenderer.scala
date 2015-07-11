@@ -18,7 +18,10 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
-  private[this] var board: Option[GameBoard] = None
+  private[this] val resources = Resources()
+  resources.addBitmapProvider(new DefaultTextures(context))
+  resources.addGeometryProvider(new DefaultGeometries)
+  private[this] val board = GameBoard(game, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
 
@@ -37,8 +40,8 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     this.synchronized {
       setCamera()
 
-      board.get.animate()
-      board.get.draw()
+      board.onAnimate(1.0f)
+      board.onDraw()
     }
   }
 
@@ -73,7 +76,8 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
       GLES20.glEnable(GLES20.GL_BLEND)
       GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
-      board = Some(GameBoard(game, Resources(context)))
+      resources.createOpenGLResources()
+      board.onUpdateResources()
     }
   }
 
@@ -86,7 +90,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
         setCamera()
         Try {
-          board.get.click(clickX, clickY, viewport)
+          board.onClick(clickX, clickY, viewport)
         } match {
           case Success(true) => if (game.finished) {
             val text = game.winner match {
@@ -111,5 +115,6 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
 object GameRenderer {
   def apply(context: Context with GameManager) = new GameRenderer(context, context.game)
+
   def apply(context: Context, game: Game) = new GameRenderer(context, game)
 }
