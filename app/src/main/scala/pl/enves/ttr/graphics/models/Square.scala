@@ -1,17 +1,31 @@
 package pl.enves.ttr.graphics.models
 
+import android.opengl.GLES20
+import pl.enves.ttr.graphics.{BuffersData, ArraysGeometryData}
+
 object Square {
-  val coords = Array(
+  private val coords = Array(
     -0.5f, -0.5f, 0.0f,
     0.5f, -0.5f, 0.0f,
     -0.5f, 0.5f, 0.0f,
     0.5f, 0.5f, 0.0f)
 
-  val numVertex = 4
+  private val numVertex = 4
 
-  val texCoords = Array(
+  private val texCoords = Array(
     0.0f, 0.0f,
     1.0f, 0.0f,
     0.0f, 1.0f,
     1.0f, 1.0f)
+
+  val squareGeometry = new ArraysGeometryData(
+    numVertex,
+    GLES20.GL_TRIANGLE_STRIP,
+    new BuffersData(
+      Some(coords),
+      None,
+      None,
+      Some(texCoords)
+    )
+  )
 }

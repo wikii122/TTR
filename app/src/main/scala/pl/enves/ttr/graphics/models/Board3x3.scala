@@ -1,10 +1,13 @@
 package pl.enves.ttr.graphics.models
 
+import android.opengl.GLES20
+import pl.enves.ttr.graphics.{BuffersData, ElementsGeometryData}
+
 /**
  * Model of 1/4 of game board
  */
 object Board3x3 {
-  val coords = Array(
+  private val coords = Array(
 
     -0.5f, -0.5f, 0.0f, //Bottom Left
     0.5f, -0.5f, 0.0f, //Bottom Right
@@ -20,7 +23,7 @@ object Board3x3 {
     0.5f, 1.0f/6.0f, 0.0f //Right Center Top
   )
 
-  val indices = Array[Short](
+  private val indices = Array[Short](
     //Outer
     0, 1,
     1, 2,
@@ -32,7 +35,8 @@ object Board3x3 {
     8, 10,
     9, 11
   )
-  val colors = Array(
+
+  private val colors = Array(
     1.0f, 0.0f, 0.0f, 1.0f,
     1.0f, 0.0f, 0.0f, 1.0f,
     1.0f, 0.0f, 0.0f, 1.0f,
@@ -45,5 +49,17 @@ object Board3x3 {
     0.0f, 0.0f, 1.0f, 1.0f,
     0.0f, 0.0f, 1.0f, 1.0f,
     0.0f, 0.0f, 1.0f, 1.0f
+  )
+
+  val board3x3Geometry = new ElementsGeometryData(
+    indices.length,
+    indices,
+    GLES20.GL_LINES,
+    new BuffersData(
+      Some(coords),
+      Some(colors),
+      None,
+      None
+    )
   )
 }

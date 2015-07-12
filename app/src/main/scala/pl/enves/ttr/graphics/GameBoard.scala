@@ -3,10 +3,10 @@ package pl.enves.ttr.graphics
 import android.graphics.Color
 import android.opengl.Matrix
 import pl.enves.androidx.Logging
+import pl.enves.ttr.graphics.models.DefaultGeometryId
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.DefaultTextureId._
-import pl.enves.ttr.graphics.DefaultGeometryId._
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -62,8 +62,8 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onUpdateResources(): Unit = {
     log("onUpdateResources")
 
-    board3x3 = Some(resources.getGeometry(Board3x3.toString))
-    rectangle = Some(resources.getGeometry(Square.toString))
+    board3x3 = Some(resources.getGeometry(DefaultGeometryId.Board3x3.toString))
+    rectangle = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
     arrowLeft = Some(new TextureShaderData(resources.getTexture(ArrowLeft.toString)))
     arrowRight = Some(new TextureShaderData(resources.getTexture(ArrowRight.toString)))

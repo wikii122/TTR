@@ -8,6 +8,7 @@ import android.opengl.{GLES20, Matrix}
 import android.opengl.GLSurfaceView.Renderer
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
+import pl.enves.ttr.graphics.models.DefaultGeometries
 import pl.enves.ttr.logic._
 
 import scala.util.{Failure, Success, Try}
