@@ -63,7 +63,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     log("onUpdateResources")
 
     board3x3 = Some(resources.getGeometry(Board3x3.toString))
-    rectangle = Some(resources.getGeometry(Rectangle.toString))
+    rectangle = Some(resources.getGeometry(Square.toString))
 
     arrowLeft = Some(new TextureShaderData(resources.getTexture(ArrowLeft.toString)))
     arrowRight = Some(new TextureShaderData(resources.getTexture(ArrowRight.toString)))
