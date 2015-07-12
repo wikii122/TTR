@@ -3,8 +3,6 @@ package pl.enves.ttr.graphics.shaders
 import android.opengl.GLES20
 import pl.enves.ttr.graphics.Geometry
 
-case class ColorShaderData(color: Array[Float]) extends AdditionalData
-
 class ColorShader extends Shader {
   override def getVertexShaderCode: String =
     """
@@ -32,10 +30,14 @@ class ColorShader extends Shader {
     }
     """
 
-  override def draw(model: Geometry, data: AdditionalData) {
+  /**
+   * (color: Array[Float])
+   */
+  override type dataType = (Float, Float, Float, Float)
+
+  override def draw(model: Geometry, data: dataType) {
     val mvpMatrix = makeMVPMatrix
     val vertexBuffer: Int = model.getVBOS.positions
-    val colorBuffer: Int = model.getVBOS.colors
 
     GLES20.glUseProgram(program)
     checkGlError("glUseProgram")
@@ -65,7 +67,7 @@ class ColorShader extends Shader {
     checkGlError("glBindBuffer")
 
     // Apply color
-    GLES20.glUniform4fv(mColorHandle, 1, data.asInstanceOf[ColorShaderData].color, 0)
+    GLES20.glUniform4f(mColorHandle, data._1, data._2, data._3, data._4)
     checkGlError("glUniform4fv")
 
     // Apply the MVP matrix

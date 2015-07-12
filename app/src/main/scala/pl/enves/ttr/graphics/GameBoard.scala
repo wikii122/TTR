@@ -6,7 +6,6 @@ import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.models.DefaultGeometryId
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.text.StaticText
-import pl.enves.ttr.graphics.DefaultTextureId._
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -36,19 +35,19 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   var board3x3: Option[Geometry] = None
   var rectangle: Option[Geometry] = None
 
-  var arrowLeft: Option[TextureShaderData] = None
-  var arrowRight: Option[TextureShaderData] = None
-  var arrowLeftGray: Option[TextureShaderData] = None
-  var arrowRightGray: Option[TextureShaderData] = None
-  var ring: Option[TextureShaderData] = None
-  var cross: Option[TextureShaderData] = None
+  var arrowLeft: Option[Int] = None
+  var arrowRight: Option[Int] = None
+  var arrowLeftGray: Option[Int] = None
+  var arrowRightGray: Option[Int] = None
+  var ring: Option[Int] = None
+  var cross: Option[Int] = None
 
   var colorShader: Option[ColorShader] = None
   var colorsShader: Option[ColorsShader] = None
   var textureShader: Option[TextureShader] = None
 
-  val winningHighlight = new ColorShaderData(Array(0.0f, 1.0f, 0.0f, 1.0f))
-  val illegalHighlight = new ColorShaderData(Array(1.0f, 0.0f, 0.0f, 1.0f))
+  val winningHighlight = (0.0f, 1.0f, 0.0f, 1.0f)
+  val illegalHighlight = (1.0f, 0.0f, 0.0f, 1.0f)
 
   val illegalHighlightTime: Long = 2000
   var illegalHighlightTimeSet: Long = 0
@@ -65,12 +64,12 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     board3x3 = Some(resources.getGeometry(DefaultGeometryId.Board3x3.toString))
     rectangle = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    arrowLeft = Some(new TextureShaderData(resources.getTexture(ArrowLeft.toString)))
-    arrowRight = Some(new TextureShaderData(resources.getTexture(ArrowRight.toString)))
-    arrowLeftGray = Some(new TextureShaderData(resources.getTexture(ArrowLeftGray.toString)))
-    arrowRightGray = Some(new TextureShaderData(resources.getTexture(ArrowRightGray.toString)))
-    ring = Some(new TextureShaderData(resources.getTexture(Ring.toString)))
-    cross = Some(new TextureShaderData(resources.getTexture(Cross.toString)))
+    arrowLeft = Some(resources.getTexture(DefaultTextureId.ArrowLeft.toString))
+    arrowRight = Some(resources.getTexture(DefaultTextureId.ArrowRight.toString))
+    arrowLeftGray = Some(resources.getTexture(DefaultTextureId.ArrowLeftGray.toString))
+    arrowRightGray = Some(resources.getTexture(DefaultTextureId.ArrowRightGray.toString))
+    ring = Some(resources.getTexture(DefaultTextureId.Ring.toString))
+    cross = Some(resources.getTexture(DefaultTextureId.Cross.toString))
 
     colorShader = Some(resources.getShader(ShaderId.Color).asInstanceOf[ColorShader])
     colorsShader = Some(resources.getShader(ShaderId.Colors).asInstanceOf[ColorsShader])
@@ -249,7 +248,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
       MVMatrix.push()
       Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorsShader.get.draw(board3x3.get)
+      colorsShader.get.draw(board3x3.get, null)
       MVMatrix.pop()
 
       Matrix.translateM(MVMatrix(), 0, -centre._1, -centre._2, 0.0f)

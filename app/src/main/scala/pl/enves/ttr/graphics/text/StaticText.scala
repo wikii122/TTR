@@ -4,7 +4,7 @@ import android.graphics._
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.shaders.{TextureShader, TextureShaderData}
+import pl.enves.ttr.graphics.shaders.TextureShader
 import pl.enves.ttr.graphics.models.Rectangle
 
 /**
@@ -62,12 +62,12 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
     return bitmap
   }
 
-  var drawData: Option[TextureShaderData] = None
+  var texture: Option[Int] = None
   var rectangle: Option[Geometry] = None
   var textureShader: Option[TextureShader] = None
 
   override def onUpdateResources(): Unit = {
-    drawData = Some(new TextureShaderData(resources.getTexture(textureName)))
+    texture = Some(resources.getTexture(textureName))
     rectangle = Some(resources.getGeometry(modelName))
     textureShader = Some(resources.getShader(ShaderId.Texture).asInstanceOf[TextureShader])
   }
@@ -93,6 +93,6 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = false
 
   override def onDraw(): Unit = {
-    textureShader.get.draw(rectangle.get, drawData.get)
+    textureShader.get.draw(rectangle.get, texture.get)
   }
 }
