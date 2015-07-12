@@ -88,9 +88,9 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
     )
   }
 
-  override def onAnimate(dt: Float): Unit = ???
+  override def onAnimate(dt: Float): Unit = {}
 
-  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = ???
+  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = false
 
   override def onDraw(): Unit = {
     textureShader.get.draw(rectangle.get, drawData.get)

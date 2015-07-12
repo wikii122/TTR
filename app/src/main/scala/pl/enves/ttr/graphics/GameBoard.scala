@@ -29,6 +29,9 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   private case class ArrowZone(quadrant: Quadrant.Value, rotation: QRotation.Value) extends BoardZone()
 
   val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, Color.CYAN)
+  playerText.objectPosition = Array(logicToDisplay(2), logicToDisplay(7), 0.0f)
+  playerText.objectScale = Array(4.0f, 4.0f, 1.0f)
+  addChild(playerText)
 
   var board3x3: Option[Geometry] = None
   var rectangle: Option[Geometry] = None
@@ -52,11 +55,12 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   var illegalCoords = (0, 0)
 
   var rotatedQuadrant: Quadrant.Value = Quadrant.first
-  var rotationAngle: Int = 0
+  var quadrantRotationAngle: Int = 0
+
+  objectScale = Array(0.25f, 0.25f, 1.0f)
 
   override def onUpdateResources(): Unit = {
     log("onUpdateResources")
-    playerText.onUpdateResources()
 
     board3x3 = Some(resources.getGeometry(Board3x3.toString))
     rectangle = Some(resources.getGeometry(Rectangle.toString))
@@ -217,23 +221,18 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     MVMatrix.pop()
   }
 
-  def prepareForDisplay(): Unit = {
-    Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 1.0f)
-  }
-
   override def onAnimate(dt: Float): Unit = {
-    if (rotationAngle > 0) {
-      rotationAngle -= 2
+    if (quadrantRotationAngle > 0) {
+      quadrantRotationAngle -= 2
     }
 
-    if (rotationAngle < 0) {
-      rotationAngle += 2
+    if (quadrantRotationAngle < 0) {
+      quadrantRotationAngle += 2
     }
   }
 
   override def onDraw(): Unit = {
     MVMatrix.push()
-    prepareForDisplay()
 
     val state: game.State = game.state
 
@@ -245,7 +244,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       Matrix.translateM(MVMatrix(), 0, centre._1, centre._2, 0.0f)
 
       if (quadrant == rotatedQuadrant) {
-        Matrix.rotateM(MVMatrix(), 0, rotationAngle, 0.0f, 0.0f, 1.0f)
+        Matrix.rotateM(MVMatrix(), 0, quadrantRotationAngle, 0.0f, 0.0f, 1.0f)
       }
 
       MVMatrix.push()
@@ -262,11 +261,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       // Arrows
       drawArrowPair(quadrant, !game.availableRotations.contains(quadrant))
     }
-    MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, logicToDisplay(2), logicToDisplay(7), 0.0f)
-    Matrix.scaleM(MVMatrix(), 0, 4.0f, 4.0f, 1.0f)
-    playerText.onDraw()
-    MVMatrix.pop()
 
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, logicToDisplay(4), logicToDisplay(7), 0.0f)
@@ -282,7 +276,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
     var res = true
     MVMatrix.push()
-    prepareForDisplay()
 
     try {
       val (near, far) = unProjectMatrices(MVMatrix(), PMatrix(), clickX, clickY, viewport)
@@ -319,7 +312,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
           game.make(move)
           discardIllegal()
           rotatedQuadrant = quadrant
-          rotationAngle = rotation match {
+          quadrantRotationAngle = rotation match {
             case QRotation.r270 => 90
             case QRotation.r90 => -90
           }

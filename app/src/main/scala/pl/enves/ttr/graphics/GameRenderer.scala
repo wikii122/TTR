@@ -40,8 +40,8 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     this.synchronized {
       setCamera()
 
-      board.onAnimate(1.0f)
-      board.onDraw()
+      board.animate(1.0f)
+      board.draw()
     }
   }
 
@@ -77,7 +77,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
       GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
       resources.createOpenGLResources()
-      board.onUpdateResources()
+      board.updateResources()
     }
   }
 
@@ -90,7 +90,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
         setCamera()
         Try {
-          board.onClick(clickX, clickY, viewport)
+          board.click(clickX, clickY, viewport)
         } match {
           case Success(true) => if (game.finished) {
             val text = game.winner match {
