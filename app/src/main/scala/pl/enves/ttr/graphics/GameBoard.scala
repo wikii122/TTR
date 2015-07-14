@@ -231,8 +231,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   }
 
   override def onDraw(): Unit = {
-    MVMatrix.push()
-
     val state: game.State = game.state
 
     for (quadrant <- Quadrant.values) {
@@ -268,13 +266,10 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       case Player.X => textureShader.get.draw(rectangle.get, cross.get)
     }
     MVMatrix.pop()
-
-    MVMatrix.pop()
   }
 
   override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
     var res = true
-    MVMatrix.push()
 
     try {
       val (near, far) = unProjectMatrices(MVMatrix(), PMatrix(), clickX, clickY, viewport)
@@ -291,8 +286,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       case e: ClickException =>
         log(e.getMessage)
         res = false
-    } finally {
-      MVMatrix.pop()
     }
     return res
   }
