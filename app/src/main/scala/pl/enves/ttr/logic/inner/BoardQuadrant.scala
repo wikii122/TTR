@@ -13,7 +13,7 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
   private val rotationIndicator = 3
   private[this] val _fields = Array.fill[Option[Player.Value]] (3, 3) (None)
   private[this] var rotation = 0
-  private[this] var rotationCooldown = 0
+  private[this] var rotationCooldown = rotationIndicator
 
   def move(xv: Int, yv: Int, player: Player.Value) = {
     log(s"Move $player at ($xv, $yv)")
