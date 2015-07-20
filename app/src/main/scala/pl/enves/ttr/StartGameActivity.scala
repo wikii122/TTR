@@ -21,15 +21,15 @@ class StartGameActivity extends ExtendedActivity {
 
     val continueGameButton = find[Button] (R.id.button_continue)
     continueGameButton onClick continueGame
+
+    GameState.onDataChanged(enableButtons)
   }
 
   override def onStart() = {
     log("Starting")
     super.onStart()
 
-    val continueGameButton = find[Button] (R.id.button_continue)
-    if (activeGame) continueGameButton.enable()
-    else continueGameButton.disable()
+    enableButtons()
   }
 
   /**
@@ -55,6 +55,13 @@ class StartGameActivity extends ExtendedActivity {
     itnt putExtra ("TYPE", Game.CONTINUE.toString)
     itnt start()
   }
+
+
+  private[this] def enableButtons(): Unit = UiThread ( ()=> {
+    val continueGameButton = find[Button](R.id.button_continue)
+    if (activeGame) continueGameButton.enable()
+    else continueGameButton.disable()
+  })
 
   /**
    * Used to check if there is a game in progress.
