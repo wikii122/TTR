@@ -1,8 +1,8 @@
-package pl.enves.ttr.graphics
+package pl.enves.ttr.graphics.board
 
 import android.opengl.Matrix
 import pl.enves.androidx.Logging
-import pl.enves.ttr.graphics.board.{Coordinates, CurrentPlayerIndicator}
+import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.models.DefaultGeometryId
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.logic._
