@@ -1,11 +1,10 @@
 package pl.enves.ttr.graphics
 
-import android.graphics.Color
 import android.opengl.Matrix
 import pl.enves.androidx.Logging
+import pl.enves.ttr.graphics.board.{Coordinates, CurrentPlayerIndicator}
 import pl.enves.ttr.graphics.models.DefaultGeometryId
 import pl.enves.ttr.graphics.shaders._
-import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -15,7 +14,7 @@ import pl.enves.ttr.utils.Algebra
  * Logic: (Int, Int), (0, 0) is where (0, 0) field is
  * Display: (Float, Float), (0, 0) is in the center of displayed board
  */
-class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra with Coordinates {
 
   private class ClickException(msg: String) extends RuntimeException(msg)
 
@@ -27,10 +26,10 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
   private case class ArrowZone(quadrant: Quadrant.Value, rotation: QRotation.Value) extends BoardZone()
 
-  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, Color.CYAN)
-  playerText.objectPosition = Array(logicToDisplay(2), logicToDisplay(7), 0.0f)
-  playerText.objectScale = Array(4.0f, 4.0f, 1.0f)
-  addChild(playerText)
+  val currentPlayerIndicator = new CurrentPlayerIndicator(game, resources)
+  currentPlayerIndicator.objectPosition =  Array(0.0f, logicToDisplay(7), 0.0f)
+  currentPlayerIndicator.objectScale = Array(4.0f, 4.0f, 1.0f)
+  addChild(currentPlayerIndicator)
 
   var board3x3: Option[Geometry] = None
   var rectangle: Option[Geometry] = None
@@ -124,13 +123,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
         new NoneZone()
       }
     }
-  }
-
-  def logicToDisplay(a: Int): Float = (2 * a - 5) / 2.0f
-
-  def displayToLogic(a: Float): Int = {
-    val i = Math.floor(Math.abs(a)).toInt
-    return if (a >= 0) 3 + i else 2 - i
   }
 
   def logicToQuadrant(x: Int, y: Int): Quadrant.Value = {
@@ -258,14 +250,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       // Arrows
       drawArrowPair(quadrant, !game.availableRotations.contains(quadrant))
     }
-
-    MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, logicToDisplay(4), logicToDisplay(7), 0.0f)
-    game.player match {
-      case Player.O => textureShader.get.draw(rectangle.get, ring.get)
-      case Player.X => textureShader.get.draw(rectangle.get, cross.get)
-    }
-    MVMatrix.pop()
   }
 
   override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
