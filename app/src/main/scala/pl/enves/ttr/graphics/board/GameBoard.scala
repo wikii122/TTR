@@ -36,17 +36,31 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
   var arrowLeft: Option[Int] = None
   var arrowRight: Option[Int] = None
-  var arrowLeftGray: Option[Int] = None
-  var arrowRightGray: Option[Int] = None
+
   var ring: Option[Int] = None
   var cross: Option[Int] = None
+  var empty: Option[Int] = None
 
   var colorShader: Option[ColorShader] = None
   var colorsShader: Option[ColorsShader] = None
   var textureShader: Option[TextureShader] = None
+  var maskShader: Option[MaskShader] = None
 
   val winningHighlight = (0.0f, 1.0f, 0.0f, 1.0f)
   val illegalHighlight = (1.0f, 0.0f, 0.0f, 1.0f)
+
+  //TODO: Load from settings
+  var crossColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
+  var ringColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
+  var outerColor1 = Array(179.0f/255.0f, 179.0f/255.0f, 179.0f/255.0f, 1.0f)
+  var outerColor2 = Array(255.0f/255.0f, 255.0f/255.0f, 255.0f/255.0f, 1.0f)
+  var winnerOuterColor = Array(0.0f/255.0f, 179.0f/255.0f, 0.0f/255.0f, 1.0f)
+  var illegalOuterColor = Array(179.0f/255.0f, 0.0f/255.0f, 0.0f/255.0f, 1.0f)
+  var inactiveColor = Array(55.0f/255.0f, 55.0f/255.0f, 55.0f/255.0f, 1.0f)
+  var backgroundColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
+
+
+  val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   val illegalHighlightTime: Long = 2000
   var illegalHighlightTimeSet: Long = 0
@@ -60,19 +74,19 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onUpdateResources(): Unit = {
     log("onUpdateResources")
 
-    board3x3 = Some(resources.getGeometry(DefaultGeometryId.Board3x3.toString))
     rectangle = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    arrowLeft = Some(resources.getTexture(DefaultTextureId.ArrowLeft.toString))
-    arrowRight = Some(resources.getTexture(DefaultTextureId.ArrowRight.toString))
-    arrowLeftGray = Some(resources.getTexture(DefaultTextureId.ArrowLeftGray.toString))
-    arrowRightGray = Some(resources.getTexture(DefaultTextureId.ArrowRightGray.toString))
-    ring = Some(resources.getTexture(DefaultTextureId.Ring.toString))
-    cross = Some(resources.getTexture(DefaultTextureId.Cross.toString))
+    arrowLeft = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskArrowLeft.toString))
+    arrowRight = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskArrowRight.toString))
+
+    ring = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskRing.toString))
+    cross = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskCross.toString))
+    empty = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskEmpty.toString))
 
     colorShader = Some(resources.getShader(ShaderId.Color).asInstanceOf[ColorShader])
     colorsShader = Some(resources.getShader(ShaderId.Colors).asInstanceOf[ColorsShader])
     textureShader = Some(resources.getShader(ShaderId.Texture).asInstanceOf[TextureShader])
+    maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
 
   def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
@@ -110,6 +124,13 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     case Quadrant.fourth => 180.0f
   }
 
+  def defaultOuterColor(quadrant: Quadrant.Value) = quadrant match {
+    case Quadrant.first => outerColor1
+    case Quadrant.second => outerColor2
+    case Quadrant.third => outerColor2
+    case Quadrant.fourth => outerColor1
+  }
+
   private def decodeZone(x: Int, y: Int): BoardZone = {
     if (x >= 0 && x <= 5 && y >= 0 && y <= 5) {
       new FigureZone()
@@ -133,12 +154,8 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     }
   }
 
-  def checkIllegal(x: Int, y: Int): Unit = {
-    if ((x, y) == illegalCoords) {
-      if (System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime) {
-        colorShader.get.draw(rectangle.get, illegalHighlight)
-      }
-    }
+  def checkIllegal(x: Int, y: Int): Boolean = {
+    (x, y) == illegalCoords && System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime
   }
 
   def discardIllegal(): Unit = {
@@ -150,34 +167,43 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     illegalCoords = (x, y)
   }
 
-  def drawFigure(player: Option[Player.Value], x: Int, y: Int): Unit = {
-    if (player.isDefined) {
-      MVMatrix.push()
-      Matrix.translateM(MVMatrix(), 0, logicToDisplay(x), logicToDisplay(y), 0.0f)
+  def checkWinning(x: Int, y:Int): Boolean = {
+    game.finished && game.finishingMove != Nil && game.finishingMove.contains((y, x))
+  }
 
-      checkIllegal(x, y)
+  def drawFigure(player: Option[Player.Value], x: Int, y: Int, quadrant: Quadrant.Value): Unit = {
+    MVMatrix.push()
+    Matrix.translateM(MVMatrix(), 0, logicToDisplay(x), logicToDisplay(y), 0.0f)
 
-      if (game.finished && game.finishingMove != Nil) {
-        if (game.finishingMove.contains((y, x))) {
-          colorShader.get.draw(rectangle.get, winningHighlight)
-        }
+    val outer = if(checkIllegal(x, y)) {
+      illegalOuterColor
+    } else {
+      if(checkWinning(x, y)) {
+        winnerOuterColor
+      } else {
+        defaultOuterColor(quadrant)
       }
+    }
 
+    if (player.isDefined) {
       if (player.get == Player.O) {
-        textureShader.get.draw(rectangle.get, ring.get)
+        maskShader.get.draw(rectangle.get, (noColor, ringColor, outer, ring.get))
       }
       if (player.get == Player.X) {
-        textureShader.get.draw(rectangle.get, cross.get)
+        maskShader.get.draw(rectangle.get, (noColor, crossColor, outer, cross.get))
       }
-      MVMatrix.pop()
+    } else {
+      maskShader.get.draw(rectangle.get, (noColor, noColor, outer, empty.get))
     }
+
+    MVMatrix.pop()
   }
 
   def drawFigures(state: game.State, quadrant: Quadrant.Value) = {
     val fields = quadrantFields(quadrant)
     for (i <- fields._1) {
       for (j <- fields._2) {
-        drawFigure(state(i)(j), j, i)
+        drawFigure(state(i)(j), j, i, quadrant)
       }
     }
   }
@@ -187,28 +213,36 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     val b = arrowRightPosition(quadrant)
     val rot = arrowsRotation(quadrant)
 
+    val inner = if(desaturated) {
+      inactiveColor
+    } else {
+      defaultOuterColor(quadrant)
+    }
+
+    val outer1 = if(checkIllegal(a._1, a._2)) {
+      illegalOuterColor
+    }else {
+      noColor
+    }
+
+    val outer2 = if(checkIllegal(b._1, b._2)) {
+      illegalOuterColor
+    }else {
+      noColor
+    }
+
     // Arrow Left
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, logicToDisplay(a._1), logicToDisplay(a._2), 0.0f)
     Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
-    if (desaturated) {
-      checkIllegal(a._1, a._2)
-      textureShader.get.draw(rectangle.get, arrowLeftGray.get)
-    } else {
-      textureShader.get.draw(rectangle.get, arrowLeft.get)
-    }
+    maskShader.get.draw(rectangle.get, (noColor, inner, outer1, arrowLeft.get))
     MVMatrix.pop()
 
     // Arrow Right
     MVMatrix.push()
     Matrix.translateM(MVMatrix(), 0, logicToDisplay(b._1), logicToDisplay(b._2), 0.0f)
     Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
-    if (desaturated) {
-      checkIllegal(b._1, b._2)
-      textureShader.get.draw(rectangle.get, arrowRightGray.get)
-    } else {
-      textureShader.get.draw(rectangle.get, arrowRight.get)
-    }
+    maskShader.get.draw(rectangle.get, (noColor, inner, outer2, arrowRight.get))
     MVMatrix.pop()
   }
 
@@ -235,11 +269,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       if (quadrant == rotatedQuadrant) {
         Matrix.rotateM(MVMatrix(), 0, quadrantRotationAngle, 0.0f, 0.0f, 1.0f)
       }
-
-      MVMatrix.push()
-      Matrix.scaleM(MVMatrix(), 0, 3.0f, 3.0f, 1.0f)
-      colorsShader.get.draw(board3x3.get, null)
-      MVMatrix.pop()
 
       Matrix.translateM(MVMatrix(), 0, -centre._1, -centre._2, 0.0f)
 

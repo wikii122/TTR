@@ -68,7 +68,9 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
     this.synchronized {
-      GLES20.glClearColor(1.0f, 1.0f, 1.0f, 1.0f)
+      //TODO: Load from settings
+      val backgroundColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f)
+      GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
       GLES20.glClearDepthf(1.0f)
       GLES20.glEnable(GLES20.GL_DEPTH_TEST)
       GLES20.glDepthFunc(GLES20.GL_LEQUAL)

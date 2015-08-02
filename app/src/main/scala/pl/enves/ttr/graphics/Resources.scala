@@ -20,7 +20,7 @@ import scala.collection.mutable
 
 object ShaderId extends Enumeration {
   type ShaderId = Value
-  val Color, Colors, Texture = Value
+  val Color, Colors, Texture, Mask = Value
 }
 
 class Resources() extends Logging {
@@ -53,7 +53,8 @@ class Resources() extends Logging {
     shaders = Map(
       (ShaderId.Color, new ColorShader()),
       (ShaderId.Colors, new ColorsShader()),
-      (ShaderId.Texture, new TextureShader())
+      (ShaderId.Texture, new TextureShader()),
+      (ShaderId.Mask, new MaskShader())
     )
   }
 

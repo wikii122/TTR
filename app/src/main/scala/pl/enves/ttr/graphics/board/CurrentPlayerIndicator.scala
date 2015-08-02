@@ -3,7 +3,7 @@ package pl.enves.ttr.graphics.board
 import android.graphics.Color
 import android.opengl.Matrix
 import pl.enves.ttr.graphics.models.DefaultGeometryId
-import pl.enves.ttr.graphics.shaders.TextureShader
+import pl.enves.ttr.graphics.shaders.{MaskShader, TextureShader}
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic.Player
@@ -14,24 +14,32 @@ import pl.enves.ttr.logic.Game
  */
 class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject with Coordinates {
 
-  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, Color.CYAN)
+  //TODO: From settings
+  val textColor = Color.rgb(179, 179, 179)
+  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, textColor)
   playerText.objectPosition = Array(-0.5f, 0.0f, 0.0f)
   addChild(playerText)
 
   var ring: Option[Int] = None
   var cross: Option[Int] = None
 
-  var textureShader: Option[TextureShader] = None
+  var maskShader: Option[MaskShader] = None
 
   var rectangle: Option[Geometry] = None
+
+  //TODO: Load from settings
+  var crossColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
+  var ringColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
+  var outerColor = Array(179.0f/255.0f, 179.0f/255.0f, 179.0f/255.0f, 1.0f)
+  val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   override protected def onUpdateResources(): Unit = {
     rectangle = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    ring = Some(resources.getTexture(DefaultTextureId.Ring.toString))
-    cross = Some(resources.getTexture(DefaultTextureId.Cross.toString))
+    ring = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskRing.toString))
+    cross = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskCross.toString))
 
-    textureShader = Some(resources.getShader(ShaderId.Texture).asInstanceOf[TextureShader])
+    maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
 
   override protected def onAnimate(dt: Float): Unit = {
@@ -46,8 +54,8 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
     MVMatrix.push()
     Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 0.25f)
     game.player match {
-      case Player.O => textureShader.get.draw(rectangle.get, ring.get)
-      case Player.X => textureShader.get.draw(rectangle.get, cross.get)
+      case Player.O => maskShader.get.draw(rectangle.get, (noColor, ringColor, outerColor, ring.get))
+      case Player.X => maskShader.get.draw(rectangle.get, (noColor, crossColor, outerColor, cross.get))
     }
     MVMatrix.pop()
   }

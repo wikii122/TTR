@@ -4,13 +4,12 @@ import pl.enves.ttr.graphics.{GeometryData, GeometryProvider}
 
 object DefaultGeometryId extends Enumeration {
   type ModelId = Value
-  val Square, Board3x3 = Value
+  val Square = Value
 }
 
 class DefaultGeometries extends GeometryProvider {
 
   override def getGeometry: Map[String, GeometryData] = Map(
-    (DefaultGeometryId.Square.toString, Square.squareGeometry),
-    (DefaultGeometryId.Board3x3.toString, Board3x3.board3x3Geometry)
+    (DefaultGeometryId.Square.toString, Square.squareGeometry)
   )
 }
