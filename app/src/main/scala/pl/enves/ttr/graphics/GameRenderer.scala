@@ -2,10 +2,11 @@ package pl.enves.ttr.graphics
 
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
+
 import android.app.AlertDialog
 import android.content.Context
-import android.opengl.{GLES20, Matrix}
 import android.opengl.GLSurfaceView.Renderer
+import android.opengl.{GLES20, Matrix}
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.board.GameBoard
@@ -27,6 +28,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
+  private var framesLastSecond = 0
 
   def setCamera(): Unit = {
     //In case of inconsistent use of push and pop
@@ -44,10 +46,17 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
       val now = System.currentTimeMillis()
 
-      if(lastFrame != 0) {
+      if (lastFrame != 0) {
         setCamera()
-        board.animate((now-lastFrame)/1000.0f)
+        board.animate((now - lastFrame) / 1000.0f)
         board.draw()
+
+        framesLastSecond += 1
+
+        if (now / 1000 > lastFrame / 1000) {
+          log("FPS: " + framesLastSecond)
+          framesLastSecond = 0
+        }
       }
       lastFrame = now
     }
@@ -75,7 +84,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
     this.synchronized {
       //TODO: Load from settings
-      val backgroundColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f)
+      val backgroundColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f)
       GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
       GLES20.glClearDepthf(1.0f)
       GLES20.glEnable(GLES20.GL_DEPTH_TEST)
