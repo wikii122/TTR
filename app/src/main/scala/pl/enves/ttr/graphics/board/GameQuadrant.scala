@@ -33,7 +33,11 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   val illegalHighlightTime: Long = 2000
   var illegalHighlightTimeSet: Long = 0
 
+  val rotationSpeed = 90.0f //degrees per second
+
   val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+
+  var animateRotation = false
 
   def quadrantOffset(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (0, 0)
@@ -126,17 +130,35 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     }
   }
 
+  def setRotationAnimation(qRotation: QRotation.Value): Unit = {
+    objectRotationAngle = qRotation match {
+      case QRotation.r270 => 90.0f
+      case QRotation.r90 => -90.0f
+    }
+    animateRotation = true
+  }
+
   override def onAnimate(dt: Float): Unit = {
-    if (objectRotationAngle >= 2.0f) {
-      objectRotationAngle -= 2.0f
-    }
+    if(animateRotation) {
+      if (objectRotationAngle > 0.0f) {
+        objectRotationAngle -= rotationSpeed*dt
+        if(objectRotationAngle < 0.0f) {
+          objectRotationAngle = 0.0f
+          animateRotation = false
+        }
+      }
 
-    if (objectRotationAngle <= -2.0f) {
-      objectRotationAngle += 2.0f
-    }
+      if (objectRotationAngle < 0.0f) {
+        objectRotationAngle += rotationSpeed*dt
+        if(objectRotationAngle > 0.0f) {
+          objectRotationAngle = 0.0f
+          animateRotation = false
+        }
+      }
 
-    val a = Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(objectRotationAngle))))
-    objectScale = Array(a.toFloat, a.toFloat, 1.0f)
+      val a = Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(objectRotationAngle))))
+      objectScale = Array(a.toFloat, a.toFloat, 1.0f)
+    }
   }
 
   override def onDraw(): Unit = {

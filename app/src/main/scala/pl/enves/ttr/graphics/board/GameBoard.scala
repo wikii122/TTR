@@ -203,10 +203,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
         val move = new game.Rotation(a._1, a._2)
         game.make(move)
         discardIllegal()
-        quadrants(a._1).objectRotationAngle = a._2 match {
-          case QRotation.r270 => 90.0f
-          case QRotation.r90 => -90.0f
-        }
+        quadrants(a._1).setRotationAnimation(a._2)
       } catch {
         case e: RotationLocked =>
           setIllegal(a)

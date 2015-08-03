@@ -26,6 +26,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   private[this] val board = new GameBoard(game, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
+  private[this] var lastFrame: Long = 0
 
   def setCamera(): Unit = {
     //In case of inconsistent use of push and pop
@@ -40,10 +41,15 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   override def onDrawFrame(gl: GL10) {
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
     this.synchronized {
-      setCamera()
 
-      board.animate(1.0f)
-      board.draw()
+      val now = System.currentTimeMillis()
+
+      if(lastFrame != 0) {
+        setCamera()
+        board.animate((now-lastFrame)/1000.0f)
+        board.draw()
+      }
+      lastFrame = now
     }
   }
 
