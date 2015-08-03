@@ -163,7 +163,3 @@ class Resources() extends Logging {
     return ret
   }
 }
-
-object Resources {
-  def apply() = new Resources()
-}

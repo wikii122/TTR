@@ -2,17 +2,16 @@ package pl.enves.ttr.graphics.board
 
 import android.graphics.Color
 import android.opengl.Matrix
-import pl.enves.ttr.graphics.models.DefaultGeometryId
-import pl.enves.ttr.graphics.shaders.{MaskShader, TextureShader}
 import pl.enves.ttr.graphics._
+import pl.enves.ttr.graphics.models.DefaultGeometryId
+import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.text.StaticText
-import pl.enves.ttr.logic.Player
-import pl.enves.ttr.logic.Game
+import pl.enves.ttr.logic.{Game, Player}
 
 /**
  * Display current player in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject with Coordinates {
+class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject {
 
   //TODO: From settings
   val textColor = Color.rgb(179, 179, 179)
@@ -25,16 +24,16 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
 
   var maskShader: Option[MaskShader] = None
 
-  var rectangle: Option[Geometry] = None
+  var square: Option[Geometry] = None
 
   //TODO: Load from settings
-  var crossColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
-  var ringColor = Array(27.0f/255.0f, 20.0f/255.0f, 100.0f/255.0f, 1.0f)
-  var outerColor = Array(179.0f/255.0f, 179.0f/255.0f, 179.0f/255.0f, 1.0f)
+  var crossColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
+  var ringColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
+  var outerColor = Array(179.0f / 255.0f, 179.0f / 255.0f, 179.0f / 255.0f, 1.0f)
   val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   override protected def onUpdateResources(): Unit = {
-    rectangle = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
+    square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
     ring = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskRing.toString))
     cross = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskCross.toString))
@@ -54,8 +53,8 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
     MVMatrix.push()
     Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 0.25f)
     game.player match {
-      case Player.O => maskShader.get.draw(rectangle.get, (noColor, ringColor, outerColor, ring.get))
-      case Player.X => maskShader.get.draw(rectangle.get, (noColor, crossColor, outerColor, cross.get))
+      case Player.O => maskShader.get.draw(square.get, (noColor, ringColor, outerColor, ring.get))
+      case Player.X => maskShader.get.draw(square.get, (noColor, crossColor, outerColor, cross.get))
     }
     MVMatrix.pop()
   }

@@ -66,7 +66,7 @@ trait SceneObject {
         result = child.click(clickX, clickY, viewport)
       }
     }
-    if(!result) {
+    if (!result) {
       result = onClick(clickX, clickY, viewport)
     }
     MVMatrix.pop()

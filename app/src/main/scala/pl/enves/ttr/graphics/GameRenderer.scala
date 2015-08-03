@@ -20,10 +20,10 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = Resources()
+  private[this] val resources = new Resources()
   resources.addBitmapProvider(new DefaultTextures(context))
   resources.addGeometryProvider(new DefaultGeometries)
-  private[this] val board = GameBoard(game, resources)
+  private[this] val board = new GameBoard(game, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
 
