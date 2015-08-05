@@ -56,9 +56,9 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   override def onUpdateResources(): Unit = {
     square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    ring = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskRing.toString))
-    cross = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskCross.toString))
-    empty = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskEmpty.toString))
+    ring = Some(resources.getTexture(DefaultTextureId.MaskRing.toString))
+    cross = Some(resources.getTexture(DefaultTextureId.MaskCross.toString))
+    empty = Some(resources.getTexture(DefaultTextureId.MaskEmpty.toString))
 
     maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
@@ -96,6 +96,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     val nx = x % 3 - 1.0f
     val ny = y % 3 - 1.0f
     Matrix.translateM(MVMatrix(), 0, nx, ny, 0.0f)
+    Matrix.scaleM(MVMatrix(), 0, 0.95f, 0.95f, 0.95f)
 
     val outer = if (checkIllegal(x, y)) {
       illegalOuterColor

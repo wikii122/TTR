@@ -7,11 +7,11 @@ import pl.enves.ttr.R
 object DefaultTextureId extends Enumeration {
   type TextureId = Value
   val
-  Pat1x1MaskCross,
-  Pat1x1MaskRing,
-  Pat1x1MaskEmpty,
-  Pat1x1MaskArrowRight,
-  Pat1x1MaskArrowLeft = Value
+  MaskCross,
+  MaskRing,
+  MaskEmpty,
+  MaskArrowRight,
+  MaskArrowLeft = Value
 }
 
 class DefaultTextures(context: Context) extends TextureProvider {
@@ -57,10 +57,10 @@ class DefaultTextures(context: Context) extends TextureProvider {
   }
 
   override def getTextures: Map[String, Int] = Map(
-    (DefaultTextureId.Pat1x1MaskCross.toString, decode(R.drawable.pat_1x1_mask_cross, 32, 32, Bitmap.Config.ARGB_8888)),
-    (DefaultTextureId.Pat1x1MaskRing.toString, decode(R.drawable.pat_1x1_mask_ring, 32, 32, Bitmap.Config.ARGB_8888)),
-    (DefaultTextureId.Pat1x1MaskEmpty.toString, decode(R.drawable.pat_1x1_mask_empty, 32, 32, Bitmap.Config.ARGB_8888)),
-    (DefaultTextureId.Pat1x1MaskArrowLeft.toString, decode(R.drawable.pat_1x1_mask_arrow_left, 32, 32, Bitmap.Config.ARGB_8888)),
-    (DefaultTextureId.Pat1x1MaskArrowRight.toString, decode(R.drawable.pat_1x1_mask_arrow_right, 32, 32, Bitmap.Config.ARGB_8888))
+    (DefaultTextureId.MaskCross.toString, decode(R.drawable.pat_cross_mod_mask, 256, 256, Bitmap.Config.ARGB_8888)),
+    (DefaultTextureId.MaskRing.toString, decode(R.drawable.pat_ring_mod_mask, 256, 256, Bitmap.Config.ARGB_8888)),
+    (DefaultTextureId.MaskEmpty.toString, decode(R.drawable.pat_empty_mod_mask, 256, 256, Bitmap.Config.ARGB_8888)),
+    (DefaultTextureId.MaskArrowLeft.toString, decode(R.drawable.pat_arrow_left_mod_mask, 256, 256, Bitmap.Config.ARGB_8888)),
+    (DefaultTextureId.MaskArrowRight.toString, decode(R.drawable.pat_arrow_right_mod_mask, 256, 256, Bitmap.Config.ARGB_8888))
   )
 }

@@ -57,8 +57,8 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
     square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    arrowLeft = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskArrowLeft.toString))
-    arrowRight = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskArrowRight.toString))
+    arrowLeft = Some(resources.getTexture(DefaultTextureId.MaskArrowLeft.toString))
+    arrowRight = Some(resources.getTexture(DefaultTextureId.MaskArrowRight.toString))
 
     maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }

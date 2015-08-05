@@ -35,8 +35,8 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   override protected def onUpdateResources(): Unit = {
     square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    ring = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskRing.toString))
-    cross = Some(resources.getTexture(DefaultTextureId.Pat1x1MaskCross.toString))
+    ring = Some(resources.getTexture(DefaultTextureId.MaskRing.toString))
+    cross = Some(resources.getTexture(DefaultTextureId.MaskCross.toString))
 
     maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
