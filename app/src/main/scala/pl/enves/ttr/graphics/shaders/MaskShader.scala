@@ -1,7 +1,7 @@
 package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
-import pl.enves.ttr.graphics.Geometry
+import pl.enves.ttr.graphics.{MatrixStack, Geometry}
 
 /**
  * output.rgba = color1*mask.r + color2*mask.g + color3*mask.b
@@ -67,8 +67,8 @@ class MaskShader extends Shader {
    */
   override type dataType = (Array[Float], Array[Float], Array[Float], Int)
 
-  override def draw(model: Geometry, data: dataType) {
-    val mvpMatrix = makeMVPMatrix
+  override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
+    val mvpMatrix = makeMVPMatrix(mvMatrix, pMatrix)
 
     val positionsBuffer = model.getVBOS.positions
     val texCoordsBuffer = model.getVBOS.texCoords

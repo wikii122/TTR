@@ -1,7 +1,7 @@
 package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
-import pl.enves.ttr.graphics.Geometry
+import pl.enves.ttr.graphics.{MatrixStack, Geometry}
 
 class TextureShader extends Shader {
 
@@ -48,8 +48,8 @@ class TextureShader extends Shader {
    */
   override type dataType = Int
 
-  override def draw(model: Geometry, data: dataType) {
-    val mvpMatrix = makeMVPMatrix
+  override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
+    val mvpMatrix = makeMVPMatrix(mvMatrix, pMatrix)
 
     val positionsBuffer = model.getVBOS.positions
     val texCoordsBuffer = model.getVBOS.texCoords

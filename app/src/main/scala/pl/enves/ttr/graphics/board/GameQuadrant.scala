@@ -89,14 +89,14 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
 
   var illegalCoords = (0, 0)
 
-  def drawFigure(player: Option[Player.Value], x: Int, y: Int): Unit = {
-    MVMatrix.push()
+  def drawFigure(player: Option[Player.Value], x: Int, y: Int, mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
+    mvMatrix.push()
 
     // From the quadrant center
     val nx = x % 3 - 1.0f
     val ny = y % 3 - 1.0f
-    Matrix.translateM(MVMatrix(), 0, nx, ny, 0.0f)
-    Matrix.scaleM(MVMatrix(), 0, 0.95f, 0.95f, 0.95f)
+    Matrix.translateM(mvMatrix.get(), 0, nx, ny, 0.0f)
+    Matrix.scaleM(mvMatrix.get(), 0, 0.95f, 0.95f, 0.95f)
 
     val outer = if (checkIllegal(x, y)) {
       illegalOuterColor
@@ -110,23 +110,23 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
 
     if (player.isDefined) {
       if (player.get == Player.O) {
-        maskShader.get.draw(square.get, (noColor, ringColor, outer, ring.get))
+        maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, ringColor, outer, ring.get))
       }
       if (player.get == Player.X) {
-        maskShader.get.draw(square.get, (noColor, crossColor, outer, cross.get))
+        maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, crossColor, outer, cross.get))
       }
     } else {
-      maskShader.get.draw(square.get, (noColor, noColor, outer, empty.get))
+      maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, empty.get))
     }
 
-    MVMatrix.pop()
+    mvMatrix.pop()
   }
 
-  def drawFigures(state: game.State, quadrant: Quadrant.Value) = {
+  def drawFigures(state: game.State, quadrant: Quadrant.Value, mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
     val fields = quadrantFields(quadrant)
     for (i <- fields._1) {
       for (j <- fields._2) {
-        drawFigure(state(i)(j), j, i)
+        drawFigure(state(i)(j), j, i, mvMatrix, pMatrix)
       }
     }
   }
@@ -162,14 +162,14 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     }
   }
 
-  override def onDraw(): Unit = {
+  override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     val state: game.State = game.state
-    drawFigures(state, quadrant)
+    drawFigures(state, quadrant, mvMatrix, pMatrix)
   }
 
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
+  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
     try {
-      val (near, far) = unProjectMatrices(MVMatrix(), PMatrix(), clickX, clickY, viewport)
+      val (near, far) = unProjectMatrices(mvMatrix.get(), pMatrix.get(), clickX, clickY, viewport)
       val I = intersectRayAndXYPlane(near, far)
       return processClick(I(0), I(1))
     } catch {
