@@ -30,7 +30,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
 
-  val mvMatrix = new MatrixStack()
+  val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
 
   def setCamera(mvMatrix: MatrixStack): Unit = {
@@ -109,7 +109,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
         val clickX = e.getX
         val clickY = viewportHeight - e.getY
         val viewport = Array(0, 0, viewportWidth, viewportHeight)
-        val tempMVMatrix = new MatrixStack()
+        val tempMVMatrix = new MatrixStack(8)
         val tempPMatrix = new MatrixStack()
         pMatrix.get().copyToArray(tempPMatrix.get())
         setCamera(tempMVMatrix)

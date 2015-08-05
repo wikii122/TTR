@@ -2,25 +2,38 @@ package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
 
-import scala.collection.mutable
+import pl.enves.androidx.Logging
 
-//TODO: better
-class MatrixStack {
-  var matrix = new Array[Float](16)
-  Matrix.setIdentityM(matrix, 0)
-  val buf = new mutable.Stack[Array[Float]]
+class MatrixStack(size:Int = 1) extends Logging {
+  private var stack = new Array[Array[Float]](size)
+  private var pointer: Int = 0
 
-  def get(): Array[Float] = matrix
+  for(i <- 0 to size-1) {
+    stack(i) = new Array[Float](16)
+  }
+
+  clear()
+
+  def get(): Array[Float] = stack(pointer)
 
   def push(): Unit =
-    buf.push(matrix.clone())
+    if(pointer+1 < size) {
+      stack(pointer).copyToArray(stack(pointer+1))
+      pointer+=1
+    }else{
+      error("Stack full, cannot push")
+    }
 
   def pop(): Unit =
-    matrix = buf.pop()
+    if(pointer > 0) {
+      pointer-=1
+    } else {
+      error("Stack empty, cannot pop")
+    }
 
   def clear(): Unit = {
-    Matrix.setIdentityM(matrix, 0)
-    buf.clear()
+    pointer = 0
+    Matrix.setIdentityM(stack(pointer), 0)
   }
 }
 

@@ -42,6 +42,8 @@ abstract class Shader {
     Log.e("Shader", "NoProgram")
   }
 
+  val mvpMatrix = new Array[Float](16)
+
   protected def getVertexShaderCode: String
 
   protected def getFragmentShaderCode: String
@@ -81,9 +83,7 @@ abstract class Shader {
     return shader
   }
 
-  def makeMVPMatrix(mvMatrix: MatrixStack, pMatrix: MatrixStack): Array[Float] = {
-    val mvpMatrix = new Array[Float](16)
+  def makeMVPMatrix(mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
     Matrix.multiplyMM(mvpMatrix, 0, pMatrix.get(), 0, mvMatrix.get(), 0)
-    return mvpMatrix
   }
 }

@@ -49,7 +49,7 @@ class TextureShader extends Shader {
   override type dataType = Int
 
   override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
-    val mvpMatrix = makeMVPMatrix(mvMatrix, pMatrix)
+    makeMVPMatrix(mvMatrix, pMatrix)
 
     val positionsBuffer = model.getVBOS.positions
     val texCoordsBuffer = model.getVBOS.texCoords

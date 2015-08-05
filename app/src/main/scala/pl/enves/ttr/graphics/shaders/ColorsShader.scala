@@ -41,7 +41,7 @@ class ColorsShader extends Shader {
   override type dataType = Null
 
   override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
-    val mvpMatrix = makeMVPMatrix(mvMatrix, pMatrix)
+    makeMVPMatrix(mvMatrix, pMatrix)
     val vertexBuffer:Int = model.getVBOS.positions
     val colorBuffer:Int = model.getVBOS.colors
 
