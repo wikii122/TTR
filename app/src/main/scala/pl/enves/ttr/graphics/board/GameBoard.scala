@@ -112,9 +112,9 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
   }
 
-  override protected def onDraw(): Unit = {
+  override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     for (quadrant <- Quadrant.values) {
-      drawArrowPair(quadrant, !game.availableRotations.contains(quadrant))
+      drawArrowPair(quadrant, !game.availableRotations.contains(quadrant), mvMatrix, pMatrix)
     }
   }
 
@@ -125,7 +125,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     case Quadrant.fourth => outerColor1
   }
 
-  def drawArrowPair(quadrant: Quadrant.Value, desaturated: Boolean = false) = {
+  def drawArrowPair(quadrant: Quadrant.Value, desaturated: Boolean = false, mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
     val a = arrowLeftPosition(quadrant)
     val b = arrowRightPosition(quadrant)
     val rot = arrowsRotation(quadrant)
@@ -149,23 +149,23 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     }
 
     // Arrow Left
-    MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, a._1, a._2, 0.0f)
-    Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
-    maskShader.get.draw(square.get, (noColor, inner, outer1, arrowLeft.get))
-    MVMatrix.pop()
+    mvMatrix.push()
+    Matrix.translateM(mvMatrix.get(), 0, a._1, a._2, 0.0f)
+    Matrix.rotateM(mvMatrix.get(), 0, rot, 0.0f, 0.0f, 1.0f)
+    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, outer1, arrowLeft.get))
+    mvMatrix.pop()
 
     // Arrow Right
-    MVMatrix.push()
-    Matrix.translateM(MVMatrix(), 0, b._1, b._2, 0.0f)
-    Matrix.rotateM(MVMatrix(), 0, rot, 0.0f, 0.0f, 1.0f)
-    maskShader.get.draw(square.get, (noColor, inner, outer2, arrowRight.get))
-    MVMatrix.pop()
+    mvMatrix.push()
+    Matrix.translateM(mvMatrix.get(), 0, b._1, b._2, 0.0f)
+    Matrix.rotateM(mvMatrix.get(), 0, rot, 0.0f, 0.0f, 1.0f)
+    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, outer2, arrowRight.get))
+    mvMatrix.pop()
   }
 
-  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
+  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
     try {
-      val (near, far) = unProjectMatrices(MVMatrix(), PMatrix(), clickX, clickY, viewport)
+      val (near, far) = unProjectMatrices(mvMatrix.get(), pMatrix.get(), clickX, clickY, viewport)
       val I = intersectRayAndXYPlane(near, far)
       return processClick(I(0), I(1))
     } catch {

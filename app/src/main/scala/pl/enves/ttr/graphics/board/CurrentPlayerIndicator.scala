@@ -46,16 +46,16 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
     //objectRotationAngle += 1;
   }
 
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = false
+  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
 
-  override protected def onDraw(): Unit = {
-    Matrix.translateM(MVMatrix(), 0, 0.375f, 0.0f, 0.0f)
-    MVMatrix.push()
-    Matrix.scaleM(MVMatrix(), 0, 0.25f, 0.25f, 0.25f)
+  override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
+    Matrix.translateM(mvMatrix.get(), 0, 0.375f, 0.0f, 0.0f)
+    mvMatrix.push()
+    Matrix.scaleM(mvMatrix.get(), 0, 0.25f, 0.25f, 0.25f)
     game.player match {
-      case Player.O => maskShader.get.draw(square.get, (noColor, ringColor, outerColor, ring.get))
-      case Player.X => maskShader.get.draw(square.get, (noColor, crossColor, outerColor, cross.get))
+      case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, ringColor, outerColor, ring.get))
+      case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, crossColor, outerColor, cross.get))
     }
-    MVMatrix.pop()
+    mvMatrix.pop()
   }
 }

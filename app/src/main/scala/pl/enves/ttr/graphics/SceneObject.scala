@@ -19,18 +19,18 @@ trait SceneObject {
 
   protected def onAnimate(dt: Float): Unit
 
-  protected def onDraw(): Unit
+  protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit
 
-  protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean
+  protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean
 
   def addChild(child: SceneObject): Unit = {
     children.append(child)
   }
 
-  def transformToPosition(): Unit = {
-    Matrix.translateM(MVMatrix(), 0, objectPosition(0), objectPosition(1), objectPosition(2))
-    Matrix.rotateM(MVMatrix(), 0, objectRotationAngle, objectRotation(0), objectRotation(1), objectRotation(2))
-    Matrix.scaleM(MVMatrix(), 0, objectScale(0), objectScale(1), objectScale(2))
+  def transformToPosition(mvMatrix: MatrixStack): Unit = {
+    Matrix.translateM(mvMatrix.get(), 0, objectPosition(0), objectPosition(1), objectPosition(2))
+    Matrix.rotateM(mvMatrix.get(), 0, objectRotationAngle, objectRotation(0), objectRotation(1), objectRotation(2))
+    Matrix.scaleM(mvMatrix.get(), 0, objectScale(0), objectScale(1), objectScale(2))
   }
 
   def updateResources(): Unit = {
@@ -47,29 +47,29 @@ trait SceneObject {
     }
   }
 
-  def draw(): Unit = {
-    MVMatrix.push()
-    transformToPosition()
-    onDraw()
+  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
+    mvMatrix.push()
+    transformToPosition(mvMatrix)
+    onDraw(mvMatrix, pMatrix)
     for (child <- children) {
-      child.draw()
+      child.draw(mvMatrix, pMatrix)
     }
-    MVMatrix.pop()
+    mvMatrix.pop()
   }
 
-  def click(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = {
-    MVMatrix.push()
-    transformToPosition()
+  def click(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
+    mvMatrix.push()
+    transformToPosition(mvMatrix)
     var result = false
     for (child <- children) {
       if (!result) {
-        result = child.click(clickX, clickY, viewport)
+        result = child.click(clickX, clickY, viewport, mvMatrix, pMatrix)
       }
     }
     if (!result) {
-      result = onClick(clickX, clickY, viewport)
+      result = onClick(clickX, clickY, viewport, mvMatrix, pMatrix)
     }
-    MVMatrix.pop()
+    mvMatrix.pop()
     return result
   }
 }

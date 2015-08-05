@@ -5,12 +5,12 @@ import android.opengl.Matrix
 import scala.collection.mutable
 
 //TODO: better
-object MVMatrix {
+class MatrixStack {
   var matrix = new Array[Float](16)
   Matrix.setIdentityM(matrix, 0)
   val buf = new mutable.Stack[Array[Float]]
 
-  def apply(): Array[Float] = matrix
+  def get(): Array[Float] = matrix
 
   def push(): Unit =
     buf.push(matrix.clone())
@@ -24,10 +24,3 @@ object MVMatrix {
   }
 }
 
-//TODO: better
-object PMatrix {
-  var matrix = new Array[Float](16)
-  Matrix.setIdentityM(matrix, 0)
-
-  def apply(): Array[Float] = matrix
-}

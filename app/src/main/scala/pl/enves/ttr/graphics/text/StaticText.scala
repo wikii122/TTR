@@ -95,10 +95,10 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
 
   override def onAnimate(dt: Float): Unit = {}
 
-  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int]): Boolean = false
+  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
 
-  override def onDraw(): Unit = {
+  override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     //colorShader.get.draw(rectangle.get, highlight)
-    textureShader.get.draw(rectangle.get, texture.get)
+    textureShader.get.draw(mvMatrix, pMatrix, rectangle.get, texture.get)
   }
 }

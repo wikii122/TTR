@@ -30,9 +30,12 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
 
-  def setCamera(): Unit = {
+  val mvMatrix = new MatrixStack()
+  val pMatrix = new MatrixStack()
+
+  def setCamera(mvMatrix: MatrixStack): Unit = {
     //In case of inconsistent use of push and pop
-    MVMatrix.clear()
+    mvMatrix.clear()
 
     //Apply camera transformations
     //Matrix.setLookAtM(MVMatrix(), 0, 0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f)
@@ -42,14 +45,14 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
   override def onDrawFrame(gl: GL10) {
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
-    this.synchronized {
+    //this.synchronized {
 
       val now = System.currentTimeMillis()
 
       if (lastFrame != 0) {
-        setCamera()
+        setCamera(mvMatrix)
         board.animate((now - lastFrame) / 1000.0f)
-        board.draw()
+        board.draw(mvMatrix, pMatrix)
 
         framesLastSecond += 1
 
@@ -59,30 +62,30 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
         }
       }
       lastFrame = now
-    }
+    //}
   }
 
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-    this.synchronized {
+    //this.synchronized {
       GLES20.glViewport(0, 0, width, height)
       viewportWidth = width
       viewportHeight = height
 
-      Matrix.setIdentityM(PMatrix(), 0)
+      Matrix.setIdentityM(pMatrix.get(), 0)
       if (height > width) {
         val ratio = height.toFloat / width.toFloat
         //Matrix.frustumM(PMatrix(), 0, -1.0f, 1.0f, -ratio, ratio, 3.0f, 7.0f)
-        Matrix.orthoM(PMatrix(), 0, -1.0f, 1.0f, -ratio, ratio, -1.0f, 1.0f)
+        Matrix.orthoM(pMatrix.get(), 0, -1.0f, 1.0f, -ratio, ratio, -1.0f, 1.0f)
       } else {
         val ratio = width.toFloat / height.toFloat
         //Matrix.frustumM(PMatrix(), 0, -ratio, ratio, -1.0f, 1.0f, 3.0f, 7.0f)
-        Matrix.orthoM(PMatrix(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
+        Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
       }
-    }
+    //}
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
-    this.synchronized {
+    //this.synchronized {
       //TODO: Load from settings
       val backgroundColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f)
       GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
@@ -97,19 +100,21 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
       resources.createOpenGLResources()
       board.updateResources()
-    }
+    //}
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {
-    this.synchronized {
+    //this.synchronized {
       if (e.getAction == MotionEvent.ACTION_DOWN) {
         val clickX = e.getX
         val clickY = viewportHeight - e.getY
         val viewport = Array(0, 0, viewportWidth, viewportHeight)
-
-        setCamera()
+        val tempMVMatrix = new MatrixStack()
+        val tempPMatrix = new MatrixStack()
+        pMatrix.get().copyToArray(tempPMatrix.get())
+        setCamera(tempMVMatrix)
         Try {
-          board.click(clickX, clickY, viewport)
+          board.click(clickX, clickY, viewport, tempMVMatrix, tempPMatrix)
         } match {
           case Success(true) => if (game.finished) {
             val text = game.winner match {
@@ -128,7 +133,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
       }
 
       return true
-    }
+    //}
   }
 }
 
