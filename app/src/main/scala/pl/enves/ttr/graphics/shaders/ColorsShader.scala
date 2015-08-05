@@ -4,6 +4,14 @@ import android.opengl.GLES20
 import pl.enves.ttr.graphics.Geometry
 
 class ColorsShader extends Shader {
+
+  // Get handlers to attributes
+  val mPositionHandle = GLES20.glGetAttribLocation(program, "a_Position")
+  val mColorHandle = GLES20.glGetAttribLocation(program, "a_Color")
+
+  // Get handlers to uniforms
+  val mMVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
+
   override def getVertexShaderCode: String =
     """
     uniform mat4 u_MVPMatrix;
@@ -38,55 +46,31 @@ class ColorsShader extends Shader {
     val colorBuffer:Int = model.getVBOS.colors
 
     GLES20.glUseProgram(program)
-    checkGlError("glUseProgram")
-
-    //Get handlers to attributes
-
-    val mPositionHandle = GLES20.glGetAttribLocation(program, "a_Position")
-    checkGlError("glGetAttribLocation")
-
-    val mColorHandle = GLES20.glGetAttribLocation(program, "a_Color")
-    checkGlError("glGetAttribLocation")
-
-    // Get handlers to uniforms
-    val mMVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
-    checkGlError("glGetUniformLocation")
 
     // Apply positions
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, vertexBuffer)
-    checkGlError("glBindBuffer")
 
     GLES20.glEnableVertexAttribArray(mPositionHandle)
-    checkGlError("glEnableVertexAttribArray")
 
     GLES20.glVertexAttribPointer(mPositionHandle, COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
-    checkGlError("glVertexAttribPointer")
 
     // Apply colors
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, colorBuffer)
-    checkGlError("glBindBuffer")
 
     GLES20.glVertexAttribPointer(mColorHandle, COLOR_SIZE, GLES20.GL_FLOAT, false, 0, 0)
-    checkGlError("glVertexAttribPointer")
 
     GLES20.glEnableVertexAttribArray(mColorHandle)
-    checkGlError("glEnableVertexAttribArray")
 
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
-    checkGlError("glBindBuffer")
 
     // Apply the MVP matrix
     GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0)
-    checkGlError("glUniformMatrix4fv")
 
     // Draw
     model.draw()
-    checkGlError("draw")
 
     // Disable attributes
     GLES20.glDisableVertexAttribArray(mPositionHandle)
-    checkGlError("glDisableVertexAttribArray")
     GLES20.glDisableVertexAttribArray(mColorHandle)
-    checkGlError("glDisableVertexAttribArray")
   }
 }

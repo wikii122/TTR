@@ -5,6 +5,14 @@ import pl.enves.ttr.graphics.Geometry
 
 class TextureShader extends Shader {
 
+  // Get handlers to attributes
+  val mPositionHandle = GLES20.glGetAttribLocation(program, "a_Position")
+  val mTexCoordHandle = GLES20.glGetAttribLocation(program, "a_TexCoord")
+
+  // Get handlers to uniforms
+  val mMVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
+  val mSamplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
+
   override def getVertexShaderCode: String =
     """
     uniform mat4 u_MVPMatrix;
@@ -47,49 +55,25 @@ class TextureShader extends Shader {
     val texCoordsBuffer = model.getVBOS.texCoords
 
     GLES20.glUseProgram(program)
-    checkGlError("glUseProgram")
-
-    // Get handlers to attributes
-
-    val mPositionHandle = GLES20.glGetAttribLocation(program, "a_Position")
-    checkGlError("glGetAttribLocation")
-
-    val mTexCoordHandle = GLES20.glGetAttribLocation(program, "a_TexCoord")
-    checkGlError("glGetAttribLocation")
-
-    // Get handlers to uniforms
-    val mMVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
-    checkGlError("glGetUniformLocation")
-
-    val mSamplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
-    checkGlError("glGetUniformLocation")
 
     // Apply positions
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, positionsBuffer)
-    checkGlError("glBindBuffer")
 
     GLES20.glEnableVertexAttribArray(mPositionHandle)
-    checkGlError("glEnableVertexAttribArray")
 
     GLES20.glVertexAttribPointer(mPositionHandle, COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
-    checkGlError("glVertexAttribPointer")
 
     // Apply texture coordinates
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texCoordsBuffer)
-    checkGlError("glBindBuffer")
 
     GLES20.glVertexAttribPointer(mTexCoordHandle, TEX_COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
-    checkGlError("glVertexAttribPointer")
 
     GLES20.glEnableVertexAttribArray(mTexCoordHandle)
-    checkGlError("glEnableVertexAttribArray")
 
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
-    checkGlError("glBindBuffer")
 
     // Apply the MVP matrix
     GLES20.glUniformMatrix4fv(mMVPMatrixHandle, 1, false, mvpMatrix, 0)
-    checkGlError("glUniformMatrix4fv")
 
     // Set the active texture unit to texture unit 0.
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
@@ -102,13 +86,10 @@ class TextureShader extends Shader {
 
     // Draw
     model.draw()
-    checkGlError("draw")
 
     // Disable attributes
     GLES20.glDisableVertexAttribArray(mPositionHandle)
-    checkGlError("glDisableVertexAttribArray")
     GLES20.glDisableVertexAttribArray(mTexCoordHandle)
-    checkGlError("glDisableVertexAttribArray")
 
     // Disable
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)

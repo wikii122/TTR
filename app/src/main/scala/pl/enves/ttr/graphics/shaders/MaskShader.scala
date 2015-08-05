@@ -9,6 +9,17 @@ import pl.enves.ttr.graphics.Geometry
 
 class MaskShader extends Shader {
 
+  // Get handlers to attributes
+  val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
+  val texCoordHandle = GLES20.glGetAttribLocation(program, "a_MaskTexCoord")
+
+  // Get handlers to uniforms
+  val MVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
+  val samplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
+  val color1Handle = GLES20.glGetUniformLocation(program, "u_Color1")
+  val color2Handle = GLES20.glGetUniformLocation(program, "u_Color2")
+  val color3Handle = GLES20.glGetUniformLocation(program, "u_Color3")
+
   override def getVertexShaderCode: String =
     """
     uniform mat4 u_MVPMatrix;
@@ -63,68 +74,32 @@ class MaskShader extends Shader {
     val texCoordsBuffer = model.getVBOS.texCoords
 
     GLES20.glUseProgram(program)
-    checkGlError("glUseProgram")
-
-    // Get handlers to attributes
-
-    val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
-    checkGlError("glGetAttribLocation")
-
-    val texCoordHandle = GLES20.glGetAttribLocation(program, "a_MaskTexCoord")
-    checkGlError("glGetAttribLocation")
-
-    // Get handlers to uniforms
-    val MVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
-    checkGlError("glGetUniformLocation")
-
-    val samplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
-    checkGlError("glGetUniformLocation")
-
-    val color1Handle = GLES20.glGetUniformLocation(program, "u_Color1")
-    checkGlError("glGetUniformLocation")
-
-    val color2Handle = GLES20.glGetUniformLocation(program, "u_Color2")
-    checkGlError("glGetUniformLocation")
-
-    val color3Handle = GLES20.glGetUniformLocation(program, "u_Color3")
-    checkGlError("glGetUniformLocation")
 
     // Apply positions
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, positionsBuffer)
-    checkGlError("glBindBuffer")
 
     GLES20.glEnableVertexAttribArray(positionHandle)
-    checkGlError("glEnableVertexAttribArray")
 
     GLES20.glVertexAttribPointer(positionHandle, COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
-    checkGlError("glVertexAttribPointer")
 
     // Apply texture coordinates
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texCoordsBuffer)
-    checkGlError("glBindBuffer")
 
     GLES20.glVertexAttribPointer(texCoordHandle, TEX_COORD_SIZE, GLES20.GL_FLOAT, false, 0, 0)
-    checkGlError("glVertexAttribPointer")
 
     GLES20.glEnableVertexAttribArray(texCoordHandle)
-    checkGlError("glEnableVertexAttribArray")
 
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
-    checkGlError("glBindBuffer")
 
     // Apply the MVP matrix
     GLES20.glUniformMatrix4fv(MVPMatrixHandle, 1, false, mvpMatrix, 0)
-    checkGlError("glUniformMatrix4fv")
 
     //Apply Colors
     GLES20.glUniform4fv(color1Handle, 1, data._1, 0)
-    checkGlError("glUniform4fv")
 
     GLES20.glUniform4fv(color2Handle, 1, data._2, 0)
-    checkGlError("glUniform4fv")
 
     GLES20.glUniform4fv(color3Handle, 1, data._3, 0)
-    checkGlError("glUniform4fv")
 
     // Set the active texture unit to texture unit 0.
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
@@ -137,13 +112,10 @@ class MaskShader extends Shader {
 
     // Draw
     model.draw()
-    checkGlError("draw")
 
     // Disable attributes
     GLES20.glDisableVertexAttribArray(positionHandle)
-    checkGlError("glDisableVertexAttribArray")
     GLES20.glDisableVertexAttribArray(texCoordHandle)
-    checkGlError("glDisableVertexAttribArray")
 
     // Disable
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
