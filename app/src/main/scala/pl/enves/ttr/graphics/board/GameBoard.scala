@@ -70,14 +70,14 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     case Quadrant.fourth => (1.5f, 1.5f)
   }
 
-  def arrowLeftPosition(quadrant: Quadrant.Value) = quadrant match {
+  def arrowRightPosition(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-2.5f, -3.5f)
     case Quadrant.second => (3.5f, -2.5f)
     case Quadrant.third => (-3.5f, 2.5f)
     case Quadrant.fourth => (2.5f, 3.5f)
   }
 
-  def arrowRightPosition(quadrant: Quadrant.Value) = quadrant match {
+  def arrowLeftPosition(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-3.5f, -2.5f)
     case Quadrant.second => (2.5f, -3.5f)
     case Quadrant.third => (-2.5f, 3.5f)
