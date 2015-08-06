@@ -46,6 +46,11 @@ abstract class Game(protected val board: Board) extends JsonMappable {
   def state: State = board.lines
 
   /**
+   * Get quadrant visualization.
+   */
+  def quadrantState(quadrant: Quadrant.Value): Array[Array[Option[Player.Value]]] = board.quadrantState(quadrant)
+
+  /**
    * Get list of available rotations
    */
   def availableRotations: List[Quadrant.Value] = if (nonFinished) board.availableRotations.toList

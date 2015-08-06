@@ -71,7 +71,9 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   }
 
   def checkWinning(x: Int, y: Int): Boolean = {
-    game.finished && game.finishingMove != Nil && game.finishingMove.contains((y, x))
+    val nx = x + quadrantOffset(quadrant)._1
+    val ny = y + quadrantOffset(quadrant)._2
+    game.finished && game.finishingMove != Nil && game.finishingMove.contains((ny, nx))
   }
 
   def checkIllegal(x: Int, y: Int): Boolean = {
@@ -122,10 +124,9 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     mvMatrix.pop()
   }
 
-  def drawFigures(state: game.State, quadrant: Quadrant.Value, mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
-    val fields = quadrantFields(quadrant)
-    for (i <- fields._1) {
-      for (j <- fields._2) {
+  def drawFigures(state: Array[Array[Option[Player.Value]]], quadrant: Quadrant.Value, mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
+    for (i <- 0 to Quadrant.size-1) {
+      for (j <- 0 to Quadrant.size-1) {
         drawFigure(state(i)(j), j, i, mvMatrix, pMatrix)
       }
     }
@@ -163,7 +164,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   }
 
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    val state: game.State = game.state
+    val state: Array[Array[Option[Player.Value]]] = game.quadrantState(quadrant)
     drawFigures(state, quadrant, mvMatrix, pMatrix)
   }
 
@@ -198,7 +199,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
         discardIllegal()
       } catch {
         case e: FieldTaken =>
-          setIllegal(x, y)
+          setIllegal(x%Quadrant.size, y%Quadrant.size)
       }
       return true
     }
