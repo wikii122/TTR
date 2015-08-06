@@ -201,9 +201,11 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       val a = arrow.get
       try {
         val move = new game.Rotation(a._1, a._2)
-        game.make(move)
+        quadrants(a._1).synchronized {
+          game.make(move)
+          quadrants(a._1).setRotationAnimation(a._2)
+        }
         discardIllegal()
-        quadrants(a._1).setRotationAnimation(a._2)
       } catch {
         case e: RotationLocked =>
           setIllegal(a)

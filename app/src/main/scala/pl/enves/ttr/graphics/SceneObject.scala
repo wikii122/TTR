@@ -8,7 +8,7 @@ import scala.collection.mutable
  *
  */
 trait SceneObject {
-  private val children: mutable.ListBuffer[SceneObject] = mutable.ListBuffer()
+  protected val children: mutable.ListBuffer[SceneObject] = mutable.ListBuffer()
 
   var objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
   var objectRotationAngle = 0.0f

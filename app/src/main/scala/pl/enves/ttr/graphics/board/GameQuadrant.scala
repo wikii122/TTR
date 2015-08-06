@@ -168,6 +168,18 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     drawFigures(state, quadrant, mvMatrix, pMatrix)
   }
 
+  override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
+    mvMatrix.push()
+    this.synchronized {
+      transformToPosition(mvMatrix)
+      onDraw(mvMatrix, pMatrix)
+      for (child <- children) {
+        child.draw(mvMatrix, pMatrix)
+      }
+    }
+    mvMatrix.pop()
+  }
+
   override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
     try {
       val (near, far) = unProjectMatrices(mvMatrix.get(), pMatrix.get(), clickX, clickY, viewport)
