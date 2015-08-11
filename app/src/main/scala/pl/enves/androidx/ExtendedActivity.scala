@@ -10,8 +10,6 @@ import scala.reflect.{ClassTag, classTag}
 abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry with Logging {
   type ID = Int
 
-  implicit protected[this] val context: Context = this
-
   private lazy val handler = new Handler(Looper.getMainLooper)
   private lazy val uiThread = Looper.getMainLooper.getThread
 

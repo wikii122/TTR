@@ -2,11 +2,11 @@ package pl.enves.androidx
 package context
 
 import android.content.Context
-import android.os.Bundle
+import android.os.{PersistableBundle, Bundle}
 import android.support.v7.app.AppCompatActivity
 
 object ContextRegistry {
-  def context = ctx
+  def context = ctx.get
   private var ctx: Option[Context] = None
   private def context_=(c: Context) = ctx = Some(c)
 }

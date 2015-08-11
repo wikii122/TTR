@@ -8,7 +8,7 @@ import spray.json._
 
 import pl.enves.ttr.utils.ExecutorContext._
 import scala.concurrent.Future
-
+import pl.enves.androidx.context.ContextRegistry
 /**
  * Object used to load last played game
  */
@@ -20,28 +20,28 @@ object GameState extends Logging {
 
   def onDataChanged(f: () => Unit) = dataChanged = f
 
-  def store(game: Game)(implicit ctx: Context) = Future {
-    sets(ctx, field, game.toJson.compactPrint)
+  def store(game: Game) = Future {
+    sets(field, game.toJson.compactPrint)
   } andThen { case _ => dataChanged() }
 
-  def load()(implicit ctx: Context): JsValue = gets(ctx, field).parseJson
+  def load(): JsValue = gets(field).parseJson
 
-  def clear()(implicit ctx: Context) = Future {
-    sets(ctx, field, empty)
+  def clear() = Future {
+    sets(field, empty)
   } andThen { case _ => dataChanged() }
 
-  def active(implicit ctx: Context): Boolean =
-    if (gets(ctx, field) == empty) false
+  def active: Boolean =
+    if (gets(field) == empty) false
     else true
 
-  def nonActive(implicit context: Context) = !active
+  def nonActive = !active
 
   // Not setting monitor here, as docs shredpref operations are atomic
-  private def gets(ctx: Context, key: String): String =
-    ctx.getSharedPreferences(name, Context.MODE_PRIVATE).getString(key, "")
+  private def gets(key: String): String =
+    ContextRegistry.context.getSharedPreferences(name, Context.MODE_PRIVATE).getString(key, "")
 
-  private def sets(ctx: Context, key: String, value: String) = this.synchronized {
-    val editor = ctx.getSharedPreferences(name, Context.MODE_PRIVATE).edit()
+  private def sets(key: String, value: String) = this.synchronized {
+    val editor = ContextRegistry.context.getSharedPreferences(name, Context.MODE_PRIVATE).edit()
     editor.putString(key, value)
     editor.commit()
   }
