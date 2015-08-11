@@ -4,9 +4,10 @@ import android.content.{Context, Intent}
 import android.os.{Handler, Looper}
 import android.support.v7.app.AppCompatActivity
 import android.os.Build
+import pl.enves.androidx.context.ContextRegistry
 import scala.reflect.{ClassTag, classTag}
 
-abstract class ExtendedActivity extends AppCompatActivity with Logging {
+abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry with Logging {
   type ID = Int
 
   implicit protected[this] val context: Context = this
@@ -17,7 +18,6 @@ abstract class ExtendedActivity extends AppCompatActivity with Logging {
   protected def find[A](id: ID) = findViewById(id).asInstanceOf[A]
 
   protected def intent[A: ClassTag] = new Intent(this, classTag[A].runtimeClass)
-
 
   protected def UiThread(f: () => Unit) = {
     lazy val runnable = new Runnable() { def run() = f() }
