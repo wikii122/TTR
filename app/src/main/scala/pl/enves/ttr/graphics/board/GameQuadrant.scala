@@ -66,6 +66,12 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
         }
         startAnimatingRotation = None
         animateRotation = true
+
+        for (x <- 0 until Quadrant.size) {
+          for (y <- 0 until Quadrant.size) {
+            fields(x)(y).discardIllegal()
+          }
+        }
       }
     }
 
