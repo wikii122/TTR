@@ -1,10 +1,7 @@
 package pl.enves.ttr.graphics.board
 
-import android.opengl.Matrix
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.models.DefaultGeometryId
-import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -14,60 +11,34 @@ import pl.enves.ttr.utils.Algebra
  */
 class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  var square: Option[Geometry] = None
-
-  var ring: Option[Int] = None
-  var cross: Option[Int] = None
-  var empty: Option[Int] = None
-
-  var maskShader: Option[MaskShader] = None
-
-  //TODO: Load from settings
-  var crossColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
-  var ringColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
-  var outerColor1 = Array(179.0f / 255.0f, 179.0f / 255.0f, 179.0f / 255.0f, 1.0f)
-  var outerColor2 = Array(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f)
-  var winnerOuterColor = Array(0.0f / 255.0f, 179.0f / 255.0f, 0.0f / 255.0f, 1.0f)
-  var illegalOuterColor = Array(179.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f)
-
-  val illegalHighlightTime: Long = 2000
-  var illegalHighlightTimeSet: Long = 0
-
   val rotationSpeed = 90.0f //degrees per second
-
-  val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   var animateRotation = false
 
-  def quadrantOffset(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => (0, 0)
-    case Quadrant.second => (3, 0)
-    case Quadrant.third => (0, 3)
-    case Quadrant.fourth => (3, 3)
+  var startAnimatingRotation: Option[QRotation.Value] = None
+
+  val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
+  for (x <- 0 until Quadrant.size) {
+    for (y <- 0 until Quadrant.size) {
+      // Position from the quadrant center
+      // TODO: calculate from Quadrant.size
+      val nx = x - 1.0f
+      val ny = y - 1.0f
+      fields(x)(y).translate(nx, ny, 0.0f)
+
+      addChild(fields(x)(y))
+    }
   }
 
-  def quadrantFields(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => (0 to 2, 0 to 2)
-    case Quadrant.second => (0 to 2, 3 to 5)
-    case Quadrant.third => (3 to 5, 0 to 2)
-    case Quadrant.fourth => (3 to 5, 3 to 5)
+  def quadrantOffset(quadrant: Quadrant.Value) = quadrant match {
+    case Quadrant.first => (0, 0)
+    case Quadrant.second => (Quadrant.size, 0)
+    case Quadrant.third => (0, Quadrant.size)
+    case Quadrant.fourth => (Quadrant.size, Quadrant.size)
   }
 
   override def onUpdateResources(): Unit = {
-    square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    ring = Some(resources.getTexture(DefaultTextureId.MaskRing.toString))
-    cross = Some(resources.getTexture(DefaultTextureId.MaskCross.toString))
-    empty = Some(resources.getTexture(DefaultTextureId.MaskEmpty.toString))
-
-    maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
-  }
-
-  def defaultOuterColor(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => outerColor1
-    case Quadrant.second => outerColor2
-    case Quadrant.third => outerColor2
-    case Quadrant.fourth => outerColor1
   }
 
   def checkWinning(x: Int, y: Int): Boolean = {
@@ -76,71 +47,35 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     game.finished && game.finishingMove != Nil && game.finishingMove.contains((ny, nx))
   }
 
-  def checkIllegal(x: Int, y: Int): Boolean = {
-    (x, y) == illegalCoords && System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime
-  }
-
-  def discardIllegal(): Unit = {
-    illegalHighlightTimeSet -= illegalHighlightTime
-  }
-
-  def setIllegal(x: Int, y: Int): Unit = {
-    illegalHighlightTimeSet = System.currentTimeMillis()
-    illegalCoords = (x, y)
-  }
-
-  var illegalCoords = (0, 0)
-
-  def drawFigure(player: Option[Player.Value], x: Int, y: Int, mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    mvMatrix.push()
-
-    // From the quadrant center
-    val nx = x % 3 - 1.0f
-    val ny = y % 3 - 1.0f
-    Matrix.translateM(mvMatrix.get(), 0, nx, ny, 0.0f)
-    Matrix.scaleM(mvMatrix.get(), 0, 0.95f, 0.95f, 0.95f)
-
-    val outer = if (checkIllegal(x, y)) {
-      illegalOuterColor
-    } else {
-      if (checkWinning(x, y)) {
-        winnerOuterColor
-      } else {
-        defaultOuterColor(quadrant)
-      }
-    }
-
-    if (player.isDefined) {
-      if (player.get == Player.O) {
-        maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, ringColor, outer, ring.get))
-      }
-      if (player.get == Player.X) {
-        maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, crossColor, outer, cross.get))
-      }
-    } else {
-      maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, empty.get))
-    }
-
-    mvMatrix.pop()
-  }
-
-  def drawFigures(state: Array[Array[Option[Player.Value]]], quadrant: Quadrant.Value, mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
-    for (i <- 0 to Quadrant.size-1) {
-      for (j <- 0 to Quadrant.size-1) {
-        drawFigure(state(i)(j), j, i, mvMatrix, pMatrix)
-      }
-    }
-  }
-
   def setRotationAnimation(qRotation: QRotation.Value): Unit = {
-    objectRotationAngle = qRotation match {
-      case QRotation.r270 => 90.0f
-      case QRotation.r90 => -90.0f
-    }
-    animateRotation = true
+    startAnimatingRotation = Some(qRotation)
   }
 
   override def onAnimate(dt: Float): Unit = {
+    this.synchronized {
+      for (x <- 0 until Quadrant.size) {
+        for (y <- 0 until Quadrant.size) {
+          fields(x)(y).value = game.quadrantField(quadrant, x, y)
+        }
+      }
+
+      if (startAnimatingRotation.isDefined) {
+        objectRotationAngle = startAnimatingRotation.get match {
+          case QRotation.r270 => 90.0f
+          case QRotation.r90 => -90.0f
+        }
+        startAnimatingRotation = None
+        animateRotation = true
+      }
+    }
+
+    //This doesn't have to be synchronized
+    for (x <- 0 until Quadrant.size) {
+      for (y <- 0 until Quadrant.size) {
+        fields(x)(y).winning = checkWinning(x, y)
+      }
+    }
+
     if(animateRotation) {
       if (objectRotationAngle > 0.0f) {
         objectRotationAngle -= rotationSpeed*dt
@@ -164,20 +99,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   }
 
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    val state: Array[Array[Option[Player.Value]]] = game.quadrantState(quadrant)
-    drawFigures(state, quadrant, mvMatrix, pMatrix)
-  }
 
-  override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    mvMatrix.push()
-    this.synchronized {
-      transformToPosition(mvMatrix)
-      onDraw(mvMatrix, pMatrix)
-      for (child <- children) {
-        child.draw(mvMatrix, pMatrix)
-      }
-    }
-    mvMatrix.pop()
   }
 
   override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
@@ -203,15 +125,17 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     if (fx > -1.5f && fx < 1.5f && fy > -1.5f && fy < 1.5f) {
       // Calculate field
       // Although quadrants are now independent, fields inside them are still not
-      val x = Math.floor(fx + 1.5f).toInt + quadrantOffset(quadrant)._1
-      val y = Math.floor(fy + 1.5f).toInt + quadrantOffset(quadrant)._2
+      val x = Math.floor(fx + 1.5f).toInt
+      val y = Math.floor(fy + 1.5f).toInt
+      val nx = x + quadrantOffset(quadrant)._1
+      val ny = y + quadrantOffset(quadrant)._2
       try {
-        val move = new game.Position(x, y)
+        val move = new game.Position(nx, ny)
         game.make(move)
-        discardIllegal()
+        fields(x)(y).discardIllegal()
       } catch {
         case e: FieldTaken =>
-          setIllegal(x%Quadrant.size, y%Quadrant.size)
+          fields(x)(y).setIllegal()
       }
       return true
     }

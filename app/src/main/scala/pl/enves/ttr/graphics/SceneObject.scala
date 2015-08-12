@@ -10,10 +10,10 @@ import scala.collection.mutable
 trait SceneObject {
   protected val children: mutable.ListBuffer[SceneObject] = mutable.ListBuffer()
 
-  var objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
-  var objectRotationAngle = 0.0f
-  var objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
-  var objectScale = Array[Float](1.0f, 1.0f, 1.0f)
+  protected var objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
+  protected var objectRotationAngle = 0.0f
+  protected var objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
+  protected var objectScale = Array[Float](1.0f, 1.0f, 1.0f)
 
   protected def onUpdateResources(): Unit
 
@@ -27,7 +27,7 @@ trait SceneObject {
     children.append(child)
   }
 
-  def transformToPosition(mvMatrix: MatrixStack): Unit = {
+  protected def transformToPosition(mvMatrix: MatrixStack): Unit = {
     Matrix.translateM(mvMatrix.get(), 0, objectPosition(0), objectPosition(1), objectPosition(2))
     Matrix.rotateM(mvMatrix.get(), 0, objectRotationAngle, objectRotation(0), objectRotation(1), objectRotation(2))
     Matrix.scaleM(mvMatrix.get(), 0, objectScale(0), objectScale(1), objectScale(2))
@@ -71,5 +71,28 @@ trait SceneObject {
     }
     mvMatrix.pop()
     return result
+  }
+
+  def scale(x:Float, y:Float, z:Float): Unit = {
+    objectScale(0) *= x
+    objectScale(1) *= y
+    objectScale(2) *= z
+  }
+
+  def translate(x:Float, y:Float, z:Float): Unit = {
+    objectPosition(0) += x
+    objectPosition(1) += y
+    objectPosition(2) += z
+  }
+
+  def rotate(a:Float): Unit = {
+    objectRotationAngle += a
+  }
+
+  def rotation(a:Float, x:Float, y:Float, z:Float): Unit = {
+    objectRotationAngle = a
+    objectRotation(0) = x
+    objectRotation(1) = y
+    objectRotation(2) = z
   }
 }

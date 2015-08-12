@@ -45,11 +45,7 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
     return _fields(x)(y)
   }
 
-  def revget(x: Int, y: Int) = get(y, x)
-
   def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 until Quadrant.size) yield get(x, y)
-
-  def state: Array[Array[Option[Player.Value]]] = Array.tabulate(Quadrant.size, Quadrant.size)(revget)
 
   def canRotate = rotationCooldown == 0
 

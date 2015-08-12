@@ -1,10 +1,7 @@
 package pl.enves.ttr.graphics.board
 
-import android.opengl.Matrix
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.models.DefaultGeometryId
-import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -14,27 +11,9 @@ import pl.enves.ttr.utils.Algebra
  */
 class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  var square: Option[Geometry] = None
-
-  var arrowLeft: Option[Int] = None
-  var arrowRight: Option[Int] = None
-
-  var maskShader: Option[MaskShader] = None
-
-  //TODO: Load from settings
-  var outerColor1 = Array(179.0f / 255.0f, 179.0f / 255.0f, 179.0f / 255.0f, 1.0f)
-  var outerColor2 = Array(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f)
-  var illegalOuterColor = Array(179.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f)
-  var inactiveColor = Array(55.0f / 255.0f, 55.0f / 255.0f, 55.0f / 255.0f, 1.0f)
-
-  val illegalHighlightTime: Long = 2000
-  var illegalHighlightTimeSet: Long = 0
-
-  val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
-
   val currentPlayerIndicator = new CurrentPlayerIndicator(game, resources)
-  currentPlayerIndicator.objectPosition = Array(0.0f, 4.5f, 0.0f)
-  currentPlayerIndicator.objectScale = Array(4.0f, 4.0f, 1.0f)
+  currentPlayerIndicator.translate(0.0f, 4.5f, 0.0f)
+  currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
   addChild(currentPlayerIndicator)
 
   val quadrants = Map(
@@ -44,23 +23,39 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     (Quadrant.fourth, new GameQuadrant(game, Quadrant.fourth, resources))
   )
 
+  val allArrows = Array(
+    (Quadrant.first, QRotation.r90),
+    (Quadrant.first, QRotation.r270),
+    (Quadrant.second, QRotation.r90),
+    (Quadrant.second, QRotation.r270),
+    (Quadrant.third, QRotation.r90),
+    (Quadrant.third, QRotation.r270),
+    (Quadrant.fourth, QRotation.r90),
+    (Quadrant.fourth, QRotation.r270)
+  )
+
+  val arrows = allArrows map {key => key -> new ArrowField(key._1, key._2, resources)} toMap
+
+  for((name, arrow) <- arrows) {
+    val pos = name._2 match {
+      case QRotation.r90 => arrowLeftPosition(name._1)
+      case QRotation.r270 => arrowRightPosition(name._1)
+    }
+    val rot = arrowsRotation(name._1)
+    arrow.translate(pos._1, pos._2, 0.0f)
+    arrow.rotate(rot)
+    addChild(arrow)
+  }
+
   for (quadrant <- Quadrant.values) {
     val centre = quadrantCentre(quadrant)
-    quadrants(quadrant).objectPosition = Array(centre._1, centre._2, 0.0f)
+    quadrants(quadrant).translate(centre._1, centre._2, 0.0f)
     addChild(quadrants(quadrant))
   }
 
   objectScale = Array(0.25f, 0.25f, 1.0f)
 
   override def onUpdateResources(): Unit = {
-    log("onUpdateResources")
-
-    square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
-
-    arrowLeft = Some(resources.getTexture(DefaultTextureId.MaskArrowLeft.toString))
-    arrowRight = Some(resources.getTexture(DefaultTextureId.MaskArrowRight.toString))
-
-    maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
 
   def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
@@ -93,74 +88,14 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
   type Arrow = (Quadrant.Value, QRotation.Value)
 
-  def checkIllegal(arrow: Arrow): Boolean = {
-    arrow == illegalArrow && System.currentTimeMillis() < illegalHighlightTimeSet + illegalHighlightTime
-  }
-
-  def discardIllegal(): Unit = {
-    illegalHighlightTimeSet -= illegalHighlightTime
-  }
-
-  def setIllegal(arrow: Arrow): Unit = {
-    illegalHighlightTimeSet = System.currentTimeMillis()
-    illegalArrow = arrow
-  }
-
-  var illegalArrow: Arrow = (Quadrant.first, QRotation.r90)
-
   override def onAnimate(dt: Float): Unit = {
-
+    val availableRotations = game.availableRotations
+    for((name, arrow) <- arrows) {
+      arrow.active = !availableRotations.contains(name._1)
+    }
   }
 
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    for (quadrant <- Quadrant.values) {
-      drawArrowPair(quadrant, !game.availableRotations.contains(quadrant), mvMatrix, pMatrix)
-    }
-  }
-
-  def defaultOuterColor(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => outerColor1
-    case Quadrant.second => outerColor2
-    case Quadrant.third => outerColor2
-    case Quadrant.fourth => outerColor1
-  }
-
-  def drawArrowPair(quadrant: Quadrant.Value, desaturated: Boolean = false, mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
-    val a = arrowLeftPosition(quadrant)
-    val b = arrowRightPosition(quadrant)
-    val rot = arrowsRotation(quadrant)
-
-    val inner = if (desaturated) {
-      inactiveColor
-    } else {
-      defaultOuterColor(quadrant)
-    }
-
-    val outer1 = if (checkIllegal(quadrant, QRotation.r90)) {
-      illegalOuterColor
-    } else {
-      noColor
-    }
-
-    val outer2 = if (checkIllegal(quadrant, QRotation.r270)) {
-      illegalOuterColor
-    } else {
-      noColor
-    }
-
-    // Arrow Left
-    mvMatrix.push()
-    Matrix.translateM(mvMatrix.get(), 0, a._1, a._2, 0.0f)
-    Matrix.rotateM(mvMatrix.get(), 0, rot, 0.0f, 0.0f, 1.0f)
-    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, outer1, arrowLeft.get))
-    mvMatrix.pop()
-
-    // Arrow Right
-    mvMatrix.push()
-    Matrix.translateM(mvMatrix.get(), 0, b._1, b._2, 0.0f)
-    Matrix.rotateM(mvMatrix.get(), 0, rot, 0.0f, 0.0f, 1.0f)
-    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, outer2, arrowRight.get))
-    mvMatrix.pop()
   }
 
   override def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
@@ -184,7 +119,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       val al = arrowLeftPosition(quadrant)
       val ar = arrowRightPosition(quadrant)
 
-      //Arrows are just squares
+      //Arrow fields are just squares
       if (x > al._1 - 0.5f && x < al._1 + 0.5f && y > al._2 - 0.5f && y < al._2 + 0.5f) {
         return Some((quadrant, QRotation.r90))
       }
@@ -205,10 +140,10 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
           game.make(move)
           quadrants(a._1).setRotationAnimation(a._2)
         }
-        discardIllegal()
+        arrows(a).discardIllegal()
       } catch {
         case e: RotationLocked =>
-          setIllegal(a)
+          arrows(a).setIllegal()
       }
       return true
     }
