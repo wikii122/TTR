@@ -34,9 +34,9 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     (Quadrant.fourth, QRotation.r270)
   )
 
-  val arrows = allArrows map {key => key -> new ArrowField(key._1, key._2, resources)} toMap
+  val arrows = allArrows map { key => key -> new ArrowField(key._1, key._2, resources) } toMap
 
-  for((name, arrow) <- arrows) {
+  for ((name, arrow) <- arrows) {
     val pos = name._2 match {
       case QRotation.r90 => arrowLeftPosition(name._1)
       case QRotation.r270 => arrowRightPosition(name._1)
@@ -90,7 +90,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
   override def onAnimate(dt: Float): Unit = {
     val availableRotations = game.availableRotations
-    for((name, arrow) <- arrows) {
+    for ((name, arrow) <- arrows) {
       arrow.active = !availableRotations.contains(name._1)
     }
   }

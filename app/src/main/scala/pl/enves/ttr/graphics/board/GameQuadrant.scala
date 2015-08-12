@@ -76,18 +76,18 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
       }
     }
 
-    if(animateRotation) {
+    if (animateRotation) {
       if (objectRotationAngle > 0.0f) {
-        objectRotationAngle -= rotationSpeed*dt
-        if(objectRotationAngle < 0.0f) {
+        objectRotationAngle -= rotationSpeed * dt
+        if (objectRotationAngle < 0.0f) {
           objectRotationAngle = 0.0f
           animateRotation = false
         }
       }
 
       if (objectRotationAngle < 0.0f) {
-        objectRotationAngle += rotationSpeed*dt
-        if(objectRotationAngle > 0.0f) {
+        objectRotationAngle += rotationSpeed * dt
+        if (objectRotationAngle > 0.0f) {
           objectRotationAngle = 0.0f
           animateRotation = false
         }

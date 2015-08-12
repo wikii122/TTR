@@ -73,23 +73,23 @@ trait SceneObject {
     return result
   }
 
-  def scale(x:Float, y:Float, z:Float): Unit = {
+  def scale(x: Float, y: Float, z: Float): Unit = {
     objectScale(0) *= x
     objectScale(1) *= y
     objectScale(2) *= z
   }
 
-  def translate(x:Float, y:Float, z:Float): Unit = {
+  def translate(x: Float, y: Float, z: Float): Unit = {
     objectPosition(0) += x
     objectPosition(1) += y
     objectPosition(2) += z
   }
 
-  def rotate(a:Float): Unit = {
+  def rotate(a: Float): Unit = {
     objectRotationAngle += a
   }
 
-  def rotation(a:Float, x:Float, y:Float, z:Float): Unit = {
+  def rotation(a: Float, x: Float, y: Float, z: Float): Unit = {
     objectRotationAngle = a
     objectRotation(0) = x
     objectRotation(1) = y

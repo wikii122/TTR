@@ -4,7 +4,7 @@ import android.opengl.Matrix
 import pl.enves.ttr.graphics.{DefaultTextureId, Resources, MatrixStack}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
-class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources) extends Field(resources){
+class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources) extends Field(resources) {
 
   var arrow: Option[Int] = None
 

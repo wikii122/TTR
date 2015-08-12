@@ -37,103 +37,90 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     //In case of inconsistent use of push and pop
     mvMatrix.clear()
 
-    //Apply camera transformations
-    //Matrix.setLookAtM(MVMatrix(), 0, 0.0f, 0.0f, 5.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f)
-    //or simply
-    //Matrix.translateM(MVMatrix(), 0, 0.0f, 0.0f, -5.0f)
+    //We don't use camera transformations
   }
 
   override def onDrawFrame(gl: GL10) {
     GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
-    //this.synchronized {
 
-      val now = System.currentTimeMillis()
+    val now = System.currentTimeMillis()
 
-      if (lastFrame != 0) {
-        setCamera(mvMatrix)
-        board.animate((now - lastFrame) / 1000.0f)
-        board.draw(mvMatrix, pMatrix)
+    if (lastFrame != 0) {
+      setCamera(mvMatrix)
+      board.animate((now - lastFrame) / 1000.0f)
+      board.draw(mvMatrix, pMatrix)
 
-        framesLastSecond += 1
+      framesLastSecond += 1
 
-        if (now / 1000 > lastFrame / 1000) {
-          log("FPS: " + framesLastSecond)
-          framesLastSecond = 0
-        }
+      if (now / 1000 > lastFrame / 1000) {
+        log("FPS: " + framesLastSecond)
+        framesLastSecond = 0
       }
-      lastFrame = now
-    //}
+    }
+    lastFrame = now
   }
 
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int) {
-    //this.synchronized {
-      GLES20.glViewport(0, 0, width, height)
-      viewportWidth = width
-      viewportHeight = height
+    GLES20.glViewport(0, 0, width, height)
+    viewportWidth = width
+    viewportHeight = height
 
-      Matrix.setIdentityM(pMatrix.get(), 0)
-      if (height > width) {
-        val ratio = height.toFloat / width.toFloat
-        //Matrix.frustumM(PMatrix(), 0, -1.0f, 1.0f, -ratio, ratio, 3.0f, 7.0f)
-        Matrix.orthoM(pMatrix.get(), 0, -1.0f, 1.0f, -ratio, ratio, -1.0f, 1.0f)
-      } else {
-        val ratio = width.toFloat / height.toFloat
-        //Matrix.frustumM(PMatrix(), 0, -ratio, ratio, -1.0f, 1.0f, 3.0f, 7.0f)
-        Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
-      }
-    //}
+    Matrix.setIdentityM(pMatrix.get(), 0)
+    if (height > width) {
+      val ratio = height.toFloat / width.toFloat
+      Matrix.orthoM(pMatrix.get(), 0, -1.0f, 1.0f, -ratio, ratio, -1.0f, 1.0f)
+    } else {
+      val ratio = width.toFloat / height.toFloat
+      Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
+    }
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
-    //this.synchronized {
-      //TODO: Load from settings
-      val backgroundColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f)
-      GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
-      GLES20.glClearDepthf(1.0f)
-      GLES20.glEnable(GLES20.GL_DEPTH_TEST)
-      GLES20.glDepthFunc(GLES20.GL_LEQUAL)
-      GLES20.glDepthMask(true)
-      GLES20.glEnable(GLES20.GL_CULL_FACE)
-      GLES20.glCullFace(GLES20.GL_BACK)
-      GLES20.glEnable(GLES20.GL_BLEND)
-      GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+    //TODO: Load from settings
+    val backgroundColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f)
+    GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
+    GLES20.glClearDepthf(1.0f)
+    GLES20.glEnable(GLES20.GL_DEPTH_TEST)
+    GLES20.glDepthFunc(GLES20.GL_LEQUAL)
+    GLES20.glDepthMask(true)
+    GLES20.glEnable(GLES20.GL_CULL_FACE)
+    GLES20.glCullFace(GLES20.GL_BACK)
+    GLES20.glEnable(GLES20.GL_BLEND)
+    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
-      resources.createOpenGLResources()
-      board.updateResources()
-    //}
+    resources.createOpenGLResources()
+    board.updateResources()
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {
-    //this.synchronized {
-      if (e.getAction == MotionEvent.ACTION_DOWN) {
-        val clickX = e.getX
-        val clickY = viewportHeight - e.getY
-        val viewport = Array(0, 0, viewportWidth, viewportHeight)
-        val tempMVMatrix = new MatrixStack(8)
-        val tempPMatrix = new MatrixStack()
-        pMatrix.get().copyToArray(tempPMatrix.get())
-        setCamera(tempMVMatrix)
-        Try {
-          board.click(clickX, clickY, viewport, tempMVMatrix, tempPMatrix)
-        } match {
-          case Success(true) => if (game.finished) {
-            val text = game.winner match {
-              case Some(x) => s"Player $x wins"
-              case None => "Game finished with a draw"
-            }
-
-            log(text)
-
-            new AlertDialog.Builder(context).setMessage(text).create().show()
+    if (e.getAction == MotionEvent.ACTION_DOWN) {
+      val clickX = e.getX
+      val clickY = viewportHeight - e.getY
+      val viewport = Array(0, 0, viewportWidth, viewportHeight)
+      val tempMVMatrix = new MatrixStack(8)
+      val tempPMatrix = new MatrixStack()
+      pMatrix.get().copyToArray(tempPMatrix.get())
+      setCamera(tempMVMatrix)
+      Try {
+        board.click(clickX, clickY, viewport, tempMVMatrix, tempPMatrix)
+      } match {
+        case Success(true) => if (game.finished) {
+          val text = game.winner match {
+            case Some(x) => s"Player $x wins"
+            case None => "Game finished with a draw"
           }
 
-          case Failure(err) => error(err.getMessage)
-          case _ =>
-        }
-      }
+          log(text)
 
-      return true
-    //}
+          new AlertDialog.Builder(context).setMessage(text).create().show()
+        }
+
+        case Failure(err) => error(err.getMessage)
+        case _ =>
+      }
+    }
+
+    return true
   }
 }
 

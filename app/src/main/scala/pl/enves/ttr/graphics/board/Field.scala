@@ -26,9 +26,9 @@ class Field(resources: Resources) extends SceneObject with Logging {
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    if(checkIllegal()) {
+    if (checkIllegal()) {
       illegalHighlightTimeLeft -= dt
-      if(illegalHighlightTimeLeft < 0.0f) {
+      if (illegalHighlightTimeLeft < 0.0f) {
         illegalHighlightTimeLeft = 0.0f
       }
     }
