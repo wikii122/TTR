@@ -1,6 +1,7 @@
 package pl.enves.ttr.graphics.board
 
 import android.opengl.Matrix
+import pl.enves.ttr.graphics.themes.{ColorId, Theme}
 import pl.enves.ttr.graphics.{DefaultTextureId, Resources, MatrixStack}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
@@ -8,11 +9,10 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
 
   var arrow: Option[Int] = None
 
-  //TODO: Load from settings
-  var outerColor1 = Array(179.0f / 255.0f, 179.0f / 255.0f, 179.0f / 255.0f, 1.0f)
-  var outerColor2 = Array(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f)
-  var illegalOuterColor = Array(179.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f)
-  var inactiveColor = Array(55.0f / 255.0f, 55.0f / 255.0f, 55.0f / 255.0f, 1.0f)
+  var outerColor1 = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var outerColor2 = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var illegalOuterColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var inactiveColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => outerColor1
@@ -29,6 +29,14 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
       case QRotation.r90 => arrow = Some(resources.getTexture(DefaultTextureId.MaskArrowLeft.toString))
       case QRotation.r270 => arrow = Some(resources.getTexture(DefaultTextureId.MaskArrowRight.toString))
     }
+  }
+
+  override protected def onUpdateTheme(): Unit = {
+    super.onUpdateTheme()
+    outerColor1 = resources.getTheme.rgba(ColorId.outer1)
+    outerColor2 = resources.getTheme.rgba(ColorId.outer2)
+    illegalOuterColor = resources.getTheme.rgba(ColorId.outerIllegal)
+    inactiveColor = resources.getTheme.rgba(ColorId.inactive)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

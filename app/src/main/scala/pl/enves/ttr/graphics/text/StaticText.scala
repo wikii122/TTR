@@ -6,11 +6,13 @@ import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.shaders.{ColorShader, TextureShader}
 import pl.enves.ttr.graphics.models.Rectangle
+import pl.enves.ttr.graphics.themes.ColorId.ColorId
+import pl.enves.ttr.graphics.themes.Theme
 
 /**
  * Display string pre-rendered to texture
  */
-class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f, color: Int = Color.BLACK)
+class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f, color: ColorId)
   extends Logging with GeometryProvider with TextureProvider with SceneObject {
 
   resources.addBitmapProvider(this)
@@ -18,7 +20,9 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
 
   override def getGeometry: Map[String, GeometryData] = Map((modelName, modelGeometry))
 
-  override def getTextures: Map[String, Int] = Map((textureName, createTexture(createBitmap())))
+  override def getTextures: Map[String, Int] = {
+    Map((textureName, createTexture(createBitmap())))
+  }
 
   var fontHeight, textWidth = 0.0f
 
@@ -29,7 +33,7 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   val textPaint = new Paint()
   textPaint.setAntiAlias(true)
   textPaint.setTypeface(Typeface.SANS_SERIF)
-  textPaint.setColor(color)
+  textPaint.setColor(resources.getTheme.android(color))
 
   //Find optimal font size
   //TODO: more optimal
@@ -75,6 +79,11 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
     rectangle = Some(resources.getGeometry(modelName))
     textureShader = Some(resources.getShader(ShaderId.Texture).asInstanceOf[TextureShader])
     colorShader = Some(resources.getShader(ShaderId.Color).asInstanceOf[ColorShader])
+  }
+
+  override protected def onUpdateTheme(): Unit = {
+    textPaint.setColor(resources.getTheme.android(color))
+    updateTexture(resources.getTexture(textureName), createBitmap())
   }
 
   def textureName: String = text + "Texture"

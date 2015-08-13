@@ -58,6 +58,9 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onUpdateResources(): Unit = {
   }
 
+  override protected def onUpdateTheme(): Unit = {
+  }
+
   def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-1.5f, -1.5f)
     case Quadrant.second => (1.5f, -1.5f)

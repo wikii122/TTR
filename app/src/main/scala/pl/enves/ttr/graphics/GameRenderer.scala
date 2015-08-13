@@ -11,6 +11,7 @@ import android.view.MotionEvent
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.graphics.models.DefaultGeometries
+import pl.enves.ttr.graphics.themes.{Red, ColorId, Blue}
 import pl.enves.ttr.logic._
 
 import scala.util.{Failure, Success, Try}
@@ -29,6 +30,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
+  private var themeNeedsUpdate = false
 
   val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
@@ -41,14 +43,20 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   }
 
   override def onDrawFrame(gl: GL10) {
-    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
-
+    if (themeNeedsUpdate) {
+      updateTheme()
+      themeNeedsUpdate = false
+    }
     val now = System.currentTimeMillis()
 
     if (lastFrame != 0) {
       setCamera(mvMatrix)
       board.animate((now - lastFrame) / 1000.0f)
-      board.draw(mvMatrix, pMatrix)
+
+      this.synchronized {
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
+        board.draw(mvMatrix, pMatrix)
+      }
 
       framesLastSecond += 1
 
@@ -76,9 +84,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
-    //TODO: Load from settings
-    val backgroundColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f)
-    GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
+    GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
     GLES20.glClearDepthf(1.0f)
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
     GLES20.glDepthFunc(GLES20.GL_LEQUAL)
@@ -90,6 +96,13 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
     resources.createOpenGLResources()
     board.updateResources()
+    themeNeedsUpdate = true
+  }
+
+  def updateTheme(): Unit = {
+    val backgroundColor = resources.getTheme.rgb(ColorId.background)
+    GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
+    board.updateTheme()
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {
@@ -118,6 +131,9 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
         case Failure(err) => error(err.getMessage)
         case _ =>
       }
+      
+      resources.theme = ThemeId((resources.theme.id+1)%ThemeId.maxId)
+      themeNeedsUpdate = true
     }
 
     return true

@@ -15,6 +15,7 @@ import android.opengl.GLES20
 import pl.enves.androidx.Logging
 
 import pl.enves.ttr.graphics.shaders._
+import pl.enves.ttr.graphics.themes._
 
 import scala.collection.mutable
 
@@ -23,11 +24,31 @@ object ShaderId extends Enumeration {
   val Color, Colors, Texture, Mask = Value
 }
 
+object ThemeId extends Enumeration {
+  type ThemeId = Value
+  val Blue, Brown, First, Green, Orange, Pink, Red, Second, White = Value
+}
+
 class Resources() extends Logging {
 
   private val textureProviders: mutable.ListBuffer[TextureProvider] = mutable.ListBuffer()
   private val geometryProviders: mutable.ListBuffer[GeometryProvider] = mutable.ListBuffer()
 
+  val themes = Map (
+    ThemeId.Blue -> Blue,
+    ThemeId.Brown -> Brown,
+    ThemeId.First -> First,
+    ThemeId.Green -> Green,
+    ThemeId.Orange -> Orange,
+    ThemeId.Pink -> Pink,
+    ThemeId.Red -> Red,
+    ThemeId.Second -> Second,
+    ThemeId.White -> White
+  )
+
+  var theme = ThemeId.Blue
+
+  def getTheme: Theme = themes(theme)
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")

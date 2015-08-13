@@ -6,6 +6,7 @@ import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.models.DefaultGeometryId
 import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.text.StaticText
+import pl.enves.ttr.graphics.themes.{ColorId, Theme}
 import pl.enves.ttr.logic.{Quadrant, Game, Player}
 
 /**
@@ -13,9 +14,7 @@ import pl.enves.ttr.logic.{Quadrant, Game, Player}
  */
 class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject {
 
-  //TODO: From settings
-  val textColor = Color.rgb(179, 179, 179)
-  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, textColor)
+  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, ColorId.text)
   playerText.translate(-0.125f, 0.0f, 0.0f)
   addChild(playerText)
 
@@ -25,6 +24,8 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   addChild(field)
 
   override protected def onUpdateResources(): Unit = {}
+
+  override protected def onUpdateTheme(): Unit = {}
 
   override protected def onAnimate(dt: Float): Unit = {
     field.value = Some(game.player)

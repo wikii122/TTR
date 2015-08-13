@@ -1,5 +1,6 @@
 package pl.enves.ttr.graphics.board
 
+import pl.enves.ttr.graphics.themes.{ColorId, Theme}
 import pl.enves.ttr.graphics.{Resources, DefaultTextureId, MatrixStack}
 import pl.enves.ttr.logic._
 
@@ -12,18 +13,28 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   var empty: Option[Int] = None
 
   //TODO: Load from settings
-  var crossColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
-  var ringColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
-  var outerColor1 = Array(179.0f / 255.0f, 179.0f / 255.0f, 179.0f / 255.0f, 1.0f)
-  var outerColor2 = Array(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f)
-  var winnerOuterColor = Array(0.0f / 255.0f, 179.0f / 255.0f, 0.0f / 255.0f, 1.0f)
-  var illegalOuterColor = Array(179.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f)
+  var crossColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var ringColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var outerColor1 = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var outerColor2 = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var winnerOuterColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var illegalOuterColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
     ring = Some(resources.getTexture(DefaultTextureId.MaskRing.toString))
     cross = Some(resources.getTexture(DefaultTextureId.MaskCross.toString))
     empty = Some(resources.getTexture(DefaultTextureId.MaskEmpty.toString))
+  }
+
+  override protected def onUpdateTheme(): Unit = {
+    super.onUpdateTheme()
+    crossColor = resources.getTheme.rgba(ColorId.cross)
+    ringColor = resources.getTheme.rgba(ColorId.ring)
+    outerColor1 = resources.getTheme.rgba(ColorId.outer1)
+    outerColor2 = resources.getTheme.rgba(ColorId.outer2)
+    winnerOuterColor = resources.getTheme.rgba(ColorId.outerWinner)
+    illegalOuterColor = resources.getTheme.rgba(ColorId.outerIllegal)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

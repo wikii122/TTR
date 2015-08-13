@@ -25,6 +25,8 @@ class Field(resources: Resources) extends SceneObject with Logging {
     maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
 
+  override protected def onUpdateTheme(): Unit = {}
+
   override protected def onAnimate(dt: Float): Unit = {
     if (checkIllegal()) {
       illegalHighlightTimeLeft -= dt

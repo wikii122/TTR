@@ -4,10 +4,8 @@ import java.nio.IntBuffer
 
 import android.graphics.Bitmap
 import android.opengl.{GLUtils, GLES20}
+import android.util.Log
 
-/**
- * 
- */
 trait TextureProvider {
   def getTextures: Map[String, Int]
   
@@ -26,9 +24,18 @@ trait TextureProvider {
     GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
 
     // Recycle the bitmap, since its data has been loaded into OpenGL.
-    //bitmap.recycle()
+    bitmap.recycle()
 
     return texture
+  }
+
+  def updateTexture(texture: Int, bitmap: Bitmap): Unit = {
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture)
+    GLUtils.texSubImage2D(GLES20.GL_TEXTURE_2D, 0, 0, 0, bitmap)
+    GLES20.glGenerateMipmap(GLES20.GL_TEXTURE_2D)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, 0)
+
+    bitmap.recycle()
   }
 }
 

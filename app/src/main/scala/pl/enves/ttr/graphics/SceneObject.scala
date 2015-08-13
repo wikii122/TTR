@@ -1,6 +1,7 @@
 package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
+import pl.enves.ttr.graphics.themes.Theme
 
 import scala.collection.mutable
 
@@ -16,6 +17,8 @@ trait SceneObject {
   protected var objectScale = Array[Float](1.0f, 1.0f, 1.0f)
 
   protected def onUpdateResources(): Unit
+
+  protected def onUpdateTheme(): Unit
 
   protected def onAnimate(dt: Float): Unit
 
@@ -37,6 +40,13 @@ trait SceneObject {
     onUpdateResources()
     for (child <- children) {
       child.updateResources()
+    }
+  }
+
+  def updateTheme(): Unit = {
+    onUpdateTheme()
+    for (child <- children) {
+      child.updateTheme()
     }
   }
 
