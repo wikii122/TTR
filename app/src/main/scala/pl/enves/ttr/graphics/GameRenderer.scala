@@ -9,6 +9,8 @@ import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
+import pl.enves.ttr.graphics.themes.{ThemeId, Red, ColorId, Blue}
+import ThemeId.ThemeId
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.graphics.models.DefaultGeometries
 import pl.enves.ttr.graphics.themes.{Red, ColorId, Blue}
@@ -40,6 +42,11 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     mvMatrix.clear()
 
     //We don't use camera transformations
+  }
+
+  def setTheme(theme: ThemeId): Unit = {
+    resources.theme = theme
+    themeNeedsUpdate = true
   }
 
   override def onDrawFrame(gl: GL10) {
@@ -131,9 +138,6 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
         case Failure(err) => error(err.getMessage)
         case _ =>
       }
-      
-      resources.theme = ThemeId((resources.theme.id+1)%ThemeId.maxId)
-      themeNeedsUpdate = true
     }
 
     return true

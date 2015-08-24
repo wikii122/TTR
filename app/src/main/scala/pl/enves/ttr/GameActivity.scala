@@ -3,6 +3,7 @@ package pl.enves.ttr
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
+import pl.enves.ttr.graphics.themes.ThemeId
 import pl.enves.ttr.logic.{Game, GameState, GameManager, StandardGame}
 import pl.enves.androidx.ExtendedActivity
 
@@ -33,7 +34,7 @@ class GameActivity extends ExtendedActivity with GameManager {
         case s =>
           throw new IllegalArgumentException(s"Invalid game type: $s")
     }
-
+    view.setTheme(ThemeId.withName(b getString "THEME" ))
     setContentView(view)
   }
 
