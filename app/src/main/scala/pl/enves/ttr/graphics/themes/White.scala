@@ -10,7 +10,6 @@ object White extends Theme {
     ColorId.outer2 -> Color.argb(255, 174, 184, 217),
     ColorId.outerIllegal -> Color.argb(255, 179, 0, 0), //TODO
     ColorId.outerWinner -> Color.argb(255, 0, 179, 0), //TODO
-    ColorId.inactive -> Color.argb(255, 55, 55, 55), //TODO
     ColorId.text -> Color.argb(255, 179, 179, 179), //TODO
     ColorId.background -> Color.argb(255, 255, 255, 255)
   )
