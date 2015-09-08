@@ -34,7 +34,7 @@ class GameActivity extends ExtendedActivity with GameManager {
         case s =>
           throw new IllegalArgumentException(s"Invalid game type: $s")
     }
-    view.setTheme(ThemeId.withName(b getString "THEME" ))
+    view.setTheme(ThemeId.values.find(_.toString == b.getString("THEME")).getOrElse(ThemeId(0)))
     setContentView(view)
   }
 

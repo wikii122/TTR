@@ -41,9 +41,12 @@ class StartGameActivity extends ExtendedActivity {
   override def onPause() {
     super.onPause()
 
-    val ed: SharedPreferences.Editor = prefs.get.edit()
-    ed.putString("THEME", getTheme())
-    ed.commit()
+    val themePicker = find[ThemePicker] (R.id.theme_picker)
+    if(themePicker.hasChanged) {
+      val ed: SharedPreferences.Editor = prefs.get.edit()
+      ed.putString("THEME", getTheme())
+      ed.commit()
+    }
   }
 
 
