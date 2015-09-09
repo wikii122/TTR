@@ -94,7 +94,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onAnimate(dt: Float): Unit = {
     val availableRotations = game.availableRotations
     for ((name, arrow) <- arrows) {
-      arrow.active = availableRotations.contains(name._1)
+      arrow.active = !availableRotations.contains(name._1)
     }
   }
 

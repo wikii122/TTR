@@ -10,6 +10,7 @@ object Blue extends Theme {
     ColorId.outer2 -> Color.argb(255, 255, 255, 255),
     ColorId.outerIllegal -> Color.argb(255, 179, 0, 0),
     ColorId.outerWinner -> Color.argb(255, 0, 179, 0),
+    ColorId.inactive -> Color.argb(255, 55, 55, 55),
     ColorId.text -> Color.argb(255, 179, 179, 179),
     ColorId.background -> Color.argb(255, 27, 20, 100)
   )

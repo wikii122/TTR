@@ -4,7 +4,7 @@ import android.graphics.Color
 
 object ColorId extends Enumeration {
   type ColorId = Value
-  val cross, ring, outer1, outer2, outerWinner, outerIllegal, text, background = Value
+  val cross, ring, outer1, outer2, outerWinner, outerIllegal, inactive, text, background = Value
 }
 
 trait Theme {
