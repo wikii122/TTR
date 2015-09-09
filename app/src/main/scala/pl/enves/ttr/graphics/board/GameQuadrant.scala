@@ -11,11 +11,13 @@ import pl.enves.ttr.utils.Algebra
  */
 class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  val rotationSpeed = 90.0f //degrees per second
+  val rotationTime = 1.0f //seconds
 
   var animateRotation = false
 
-  var startAnimatingRotation: Option[QRotation.Value] = None
+  var rotationCCW = false
+
+  var rotationLinear = 0.0f
 
   val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
@@ -48,7 +50,19 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   }
 
   def setRotationAnimation(qRotation: QRotation.Value): Unit = {
-    startAnimatingRotation = Some(qRotation)
+    rotationLinear = 0.0f
+    rotationCCW = qRotation match {
+      case QRotation.r270 => false
+      case QRotation.r90 => true
+    }
+
+    animateRotation = true
+
+    for (x <- 0 until Quadrant.size) {
+      for (y <- 0 until Quadrant.size) {
+        fields(x)(y).discardIllegal()
+      }
+    }
   }
 
   override def onAnimate(dt: Float): Unit = {
@@ -56,21 +70,6 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
       for (x <- 0 until Quadrant.size) {
         for (y <- 0 until Quadrant.size) {
           fields(x)(y).value = game.quadrantField(quadrant, x, y)
-        }
-      }
-
-      if (startAnimatingRotation.isDefined) {
-        objectRotationAngle = startAnimatingRotation.get match {
-          case QRotation.r270 => 90.0f
-          case QRotation.r90 => -90.0f
-        }
-        startAnimatingRotation = None
-        animateRotation = true
-
-        for (x <- 0 until Quadrant.size) {
-          for (y <- 0 until Quadrant.size) {
-            fields(x)(y).discardIllegal()
-          }
         }
       }
     }
@@ -83,20 +82,17 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     }
 
     if (animateRotation) {
-      if (objectRotationAngle > 0.0f) {
-        objectRotationAngle -= rotationSpeed * dt
-        if (objectRotationAngle < 0.0f) {
-          objectRotationAngle = 0.0f
-          animateRotation = false
-        }
+      rotationLinear += dt / rotationTime
+
+      if (rotationLinear >= 1.0f) {
+        rotationLinear = 1.0f
+        animateRotation = false
       }
 
-      if (objectRotationAngle < 0.0f) {
-        objectRotationAngle += rotationSpeed * dt
-        if (objectRotationAngle > 0.0f) {
-          objectRotationAngle = 0.0f
-          animateRotation = false
-        }
+      objectRotationAngle = ((Math.sin(Math.PI / 2 + rotationLinear * Math.PI) + 1.0) * 45.0).toFloat
+
+      if (rotationCCW) {
+        objectRotationAngle = -objectRotationAngle
       }
 
       val a = Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(objectRotationAngle))))
