@@ -1,7 +1,6 @@
 package pl.enves.ttr.graphics.board
 
-import android.opengl.Matrix
-import pl.enves.ttr.graphics.themes.{ColorId, Theme}
+import pl.enves.ttr.graphics.themes.ColorId
 import pl.enves.ttr.graphics.{DefaultTextureId, Resources, MatrixStack}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
@@ -9,19 +8,17 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
 
   var arrow: Option[Int] = None
 
-  var outerColor1 = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var outerColor2 = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var illegalOuterColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var inactiveColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
-
-  def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => outerColor1
-    case Quadrant.second => outerColor2
-    case Quadrant.third => outerColor2
-    case Quadrant.fourth => outerColor1
-  }
+  var colorActive = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var colorInactive = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   var active = false
+
+  def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
+    case Quadrant.first => ColorId.outer1
+    case Quadrant.second => ColorId.outer2
+    case Quadrant.third => ColorId.outer2
+    case Quadrant.fourth => ColorId.outer1
+  }
 
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
@@ -33,10 +30,8 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
 
   override protected def onUpdateTheme(): Unit = {
     super.onUpdateTheme()
-    outerColor1 = resources.getTheme.rgba(ColorId.outer1)
-    outerColor2 = resources.getTheme.rgba(ColorId.outer2)
-    illegalOuterColor = resources.getTheme.rgba(ColorId.outerIllegal)
-    inactiveColor = resources.getTheme.rgba(ColorId.inactive)
+    colorActive = resources.getTheme.rgba(defaultArrowColor(quadrant))
+    colorInactive = resources.getTheme.rgba(defaultArrowColor(quadrant), 0.25f)
   }
 
   override protected def onAnimate(dt: Float): Unit = {
@@ -49,17 +44,11 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
 
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     val inner = if (active) {
-      inactiveColor
+      colorActive
     } else {
-      defaultArrowColor(quadrant)
+      colorInactive
     }
 
-    val outer = if (checkIllegal()) {
-      illegalOuterColor
-    } else {
-      noColor
-    }
-
-    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, outer, arrow.get))
+    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, noColor, arrow.get))
   }
 }

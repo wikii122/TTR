@@ -4,6 +4,7 @@ import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.models.DefaultGeometryId
 import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics._
+import pl.enves.ttr.graphics.themes.ColorId
 
 class Field(resources: Resources) extends SceneObject with Logging {
   objectScale = Array(0.9f, 0.9f, 1.0f)
@@ -12,7 +13,7 @@ class Field(resources: Resources) extends SceneObject with Logging {
 
   var maskShader: Option[MaskShader] = None
 
-  val noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var noColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   //TODO: Load from settings
   val illegalHighlightTime: Float = 1.0f
@@ -25,7 +26,9 @@ class Field(resources: Resources) extends SceneObject with Logging {
     maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
   }
 
-  override protected def onUpdateTheme(): Unit = {}
+  override protected def onUpdateTheme(): Unit = {
+    noColor = resources.getTheme.rgba(ColorId.background, 0.0f) //To nicely fade-out on edges
+  }
 
   override protected def onAnimate(dt: Float): Unit = {
     if (checkIllegal()) {

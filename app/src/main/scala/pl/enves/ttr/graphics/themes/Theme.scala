@@ -20,5 +20,10 @@ trait Theme {
     return Array(Color.red(c)/255.0f, Color.green(c)/255.0f, Color.blue(c)/255.0f, Color.alpha(c)/255.0f)
   }
 
+  def rgba(colorId: ColorId.Value, overrideAlpha: Float): Array[Float] = {
+    val c = colors(colorId)
+    return Array(Color.red(c)/255.0f, Color.green(c)/255.0f, Color.blue(c)/255.0f, overrideAlpha)
+  }
+
   def android(colorId: ColorId.Value): Int = colors(colorId)
 }
