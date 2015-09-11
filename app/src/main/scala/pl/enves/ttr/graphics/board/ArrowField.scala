@@ -7,6 +7,8 @@ import pl.enves.ttr.logic.{QRotation, Quadrant}
 
 class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources) extends Field(resources) {
 
+  shakeAmplitude = 30.0f
+
   var arrow: Option[Int] = None
 
   var colorActive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)

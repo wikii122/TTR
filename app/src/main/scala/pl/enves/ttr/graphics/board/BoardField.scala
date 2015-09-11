@@ -17,7 +17,6 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   var outerColor1: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
   var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
   var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var illegalOuterColor: ColorArray = Array(1.0f, 0.0f, 0.0f, 1.0f)
 
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
@@ -42,14 +41,10 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   }
 
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    val outer = if (checkIllegal()) {
-      illegalOuterColor
+    val outer = if (winning) {
+      winnerOuterColor
     } else {
-      if (winning) {
-        winnerOuterColor
-      } else {
-        defaultOuterColor(quadrant)
-      }
+      defaultOuterColor(quadrant)
     }
 
     if (value.isDefined) {

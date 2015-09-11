@@ -17,9 +17,17 @@ class Field(resources: Resources) extends SceneObject with Logging {
   var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   //TODO: Load from settings
-  val illegalHighlightTime: Float = 1.0f
+  protected var shakeTime: Float = 1.0f //seconds
 
-  var illegalHighlightTimeLeft: Float = 0.0f
+  protected var shakeAmplitude = 15.0f
+
+  protected var shakeFrequency = 5.0f //Hz
+
+  private var shaken = false
+
+  private var shakeTimeElapsed: Float = 0.0f
+
+  private var notStirred = 0.0f
 
   override protected def onUpdateResources(): Unit = {
     square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
@@ -33,10 +41,13 @@ class Field(resources: Resources) extends SceneObject with Logging {
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    if (checkIllegal()) {
-      illegalHighlightTimeLeft -= dt
-      if (illegalHighlightTimeLeft < 0.0f) {
-        illegalHighlightTimeLeft = 0.0f
+    if (shaken) {
+      val s = shakeAmplitude * Math.sin(shakeTimeElapsed * shakeFrequency * 2 * Math.PI).toFloat
+      objectRotationAngle = notStirred + s * Math.sin(shakeTimeElapsed * Math.PI).toFloat   //Apply Ease In And Ease Out
+
+      shakeTimeElapsed += dt
+      if (shakeTimeElapsed >= shakeTime) {
+        discardIllegal()
       }
     }
   }
@@ -45,15 +56,18 @@ class Field(resources: Resources) extends SceneObject with Logging {
 
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {}
 
-  def checkIllegal(): Boolean = {
-    illegalHighlightTimeLeft > 0.0f
-  }
-
   def discardIllegal(): Unit = {
-    illegalHighlightTimeLeft = 0.0f
+    if(shaken) {
+      shaken = false
+      objectRotationAngle = notStirred
+    }
   }
 
   def setIllegal(): Unit = {
-    illegalHighlightTimeLeft = illegalHighlightTime
+    if(!shaken) {
+      shaken = true
+      notStirred = objectRotationAngle
+    }
+    shakeTimeElapsed = 0.0f
   }
 }
