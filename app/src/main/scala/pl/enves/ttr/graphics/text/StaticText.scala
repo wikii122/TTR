@@ -4,15 +4,13 @@ import android.graphics._
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.shaders.{ColorShader, TextureShader}
 import pl.enves.ttr.graphics.models.Rectangle
-import pl.enves.ttr.graphics.themes.ColorId.ColorId
-import pl.enves.ttr.graphics.themes.Theme
+import pl.enves.ttr.graphics.shaders.{ColorShader, TextureShader}
 
 /**
  * Display string pre-rendered to texture
  */
-class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f, color: ColorId)
+class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f)
   extends Logging with GeometryProvider with TextureProvider with SceneObject {
 
   resources.addBitmapProvider(this)
@@ -33,7 +31,7 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   val textPaint = new Paint()
   textPaint.setAntiAlias(true)
   textPaint.setTypeface(Typeface.SANS_SERIF)
-  textPaint.setColor(resources.getTheme.android(color))
+  textPaint.setColor(resources.getTheme.text)
 
   //Find optimal font size
   //TODO: more optimal
@@ -82,7 +80,7 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   }
 
   override protected def onUpdateTheme(): Unit = {
-    textPaint.setColor(resources.getTheme.android(color))
+    textPaint.setColor(resources.getTheme.text)
     updateTexture(resources.getTexture(textureName), createBitmap())
   }
 

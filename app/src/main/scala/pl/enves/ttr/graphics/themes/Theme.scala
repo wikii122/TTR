@@ -1,29 +1,41 @@
 package pl.enves.ttr.graphics.themes
 
-import android.graphics.Color
+import android.content.res.Resources
+import pl.enves.ttr.R
+import pl.enves.ttr.graphics.ColorTypes.ColorAndroid
+import pl.enves.ttr.graphics.themes.ThemeId.ThemeId
 
-object ColorId extends Enumeration {
-  type ColorId = Value
-  val cross, ring, outer1, outer2, outerWinner, outerIllegal, inactive, text, background = Value
-}
+case class Theme(
+                  background: ColorAndroid,
+                  outer1: ColorAndroid,
+                  outer2: ColorAndroid,
+                  text: ColorAndroid,
+                  winner: ColorAndroid
+                  )
 
-trait Theme {
-  val colors: Map[ColorId.Value, Int]
+object Theme {
+  private val names = Map(
+    ThemeId.Blue -> R.array.theme_blue,
+    ThemeId.Brown -> R.array.theme_brown,
+    ThemeId.Green -> R.array.theme_green,
+    ThemeId.Orange -> R.array.theme_orange,
+    ThemeId.Pink -> R.array.theme_pink,
+    ThemeId.Red -> R.array.theme_red,
+    ThemeId.White -> R.array.theme_white
+  )
 
-  def rgb(colorId: ColorId.Value): Array[Float] = {
-    val c = colors(colorId)
-    return Array(Color.red(c)/255.0f, Color.green(c)/255.0f, Color.blue(c)/255.0f)
+  def apply(resources: Resources, arrayName: Int): Theme = {
+    val themeArray: Array[Int] = resources.getIntArray(arrayName)
+    return new Theme(
+      themeArray(0),
+      themeArray(1),
+      themeArray(2),
+      themeArray(3),
+      themeArray(4)
+    )
   }
-  
-  def rgba(colorId: ColorId.Value): Array[Float] = {
-    val c = colors(colorId)
-    return Array(Color.red(c)/255.0f, Color.green(c)/255.0f, Color.blue(c)/255.0f, Color.alpha(c)/255.0f)
-  }
 
-  def rgba(colorId: ColorId.Value, overrideAlpha: Float): Array[Float] = {
-    val c = colors(colorId)
-    return Array(Color.red(c)/255.0f, Color.green(c)/255.0f, Color.blue(c)/255.0f, overrideAlpha)
-  }
+  def apply(resources: Resources, themeId: ThemeId): Theme = apply(resources, names(themeId))
 
-  def android(colorId: ColorId.Value): Int = colors(colorId)
+  def all(resources: Resources): Map[ThemeId, Theme] = names.mapValues[Theme](arrayName => apply(resources, arrayName))
 }

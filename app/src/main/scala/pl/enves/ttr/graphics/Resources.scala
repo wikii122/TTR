@@ -7,13 +7,10 @@ package pl.enves.ttr.graphics
  * TODO: make it better
  */
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.IntBuffer
+import java.nio.{ByteBuffer, ByteOrder, IntBuffer}
 
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
-
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.themes._
 
@@ -25,15 +22,16 @@ object ShaderId extends Enumeration {
 }
 
 
-
-class Resources() extends Logging {
+class Resources(theme: Theme) extends Logging {
 
   private val textureProviders: mutable.ListBuffer[TextureProvider] = mutable.ListBuffer()
   private val geometryProviders: mutable.ListBuffer[GeometryProvider] = mutable.ListBuffer()
 
-  var theme = ThemeId.Blue
+  private var _theme = theme
 
-  def getTheme: Theme = Themes(theme)
+  def getTheme: Theme = _theme
+
+  def setTheme(theme: Theme): Unit = _theme = theme
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")

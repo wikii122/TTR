@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="common_outer_illegal">#FFB30000</color>
+    <color name="common_outer_winner">#FF00B300</color>
+    <color name="common_text">#FFB3B3B3</color>
+
+    <color name="blue_outer1">#FFB3B3B3</color>
+    <color name="blue_outer2">#FFFFFFFF</color>
+    <color name="blue_background">#FF1B1464</color>
+
+    <color name="brown_outer1">#FFD4145A</color>
+    <color name="brown_outer2">#FF6A0A2D</color>
+    <color name="brown_background">#FFC7B299</color>
+
+    <color name="green_outer1">#FF99DDD8</color>
+    <color name="green_outer2">#FF00A99D</color>
+    <color name="green_background">#FF002A27</color>
+
+    <color name="orange_outer1">#FFFBDDD8</color>
+    <color name="orange_outer2">#FFFFA99D</color>
+    <color name="orange_background">#FFCA4231</color>
+
+    <color name="pink_outer1">#FFFFC9BF</color>
+    <color name="pink_outer2">#FFFFFFFF</color>
+    <color name="pink_background">#FFED7979</color>
+
+    <color name="red_outer1">#FFE6E6E6</color>
+    <color name="red_outer2">#FF333333</color>
+    <color name="red_background">#FFC1272D</color>
+
+    <color name="white_outer1">#FF273A78</color>
+    <color name="white_outer2">#FFAEB8D9</color>
+    <color name="white_background">#FFFFFFFF</color>
+
+    <integer-array name="theme_blue">
+        <item>@color/blue_background</item>
+        <item>@color/blue_outer1</item>
+        <item>@color/blue_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <integer-array name="theme_brown">
+        <item>@color/brown_background</item>
+        <item>@color/brown_outer1</item>
+        <item>@color/brown_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <integer-array name="theme_green">
+        <item>@color/green_background</item>
+        <item>@color/green_outer1</item>
+        <item>@color/green_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <integer-array name="theme_orange">
+        <item>@color/orange_background</item>
+        <item>@color/orange_outer1</item>
+        <item>@color/orange_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <integer-array name="theme_pink">
+        <item>@color/pink_background</item>
+        <item>@color/pink_outer1</item>
+        <item>@color/pink_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <integer-array name="theme_red">
+        <item>@color/red_background</item>
+        <item>@color/red_outer1</item>
+        <item>@color/red_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <integer-array name="theme_white">
+        <item>@color/white_background</item>
+        <item>@color/white_outer1</item>
+        <item>@color/white_outer2</item>
+        <item>@color/common_text</item>
+        <item>@color/common_outer_winner</item>
+    </integer-array>
+
+    <!--
+    <integer-array name="themes">
+        <item>@array/theme_blue</item>
+        <item>@array/theme_brown</item>
+        <item>@array/theme_green</item>
+        <item>@array/theme_orange</item>
+        <item>@array/theme_pink</item>
+        <item>@array/theme_red</item>
+        <item>@array/theme_white</item>
+    </integer-array>
+    -->
+</resources>

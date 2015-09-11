@@ -9,11 +9,12 @@ import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
-import pl.enves.ttr.graphics.themes.{ThemeId, Red, ColorId, Blue}
-import ThemeId.ThemeId
+import pl.enves.ttr.graphics.ColorImplicits.AndroidToColor3
+import pl.enves.ttr.graphics.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.graphics.models.DefaultGeometries
-import pl.enves.ttr.graphics.themes.{Red, ColorId, Blue}
+import pl.enves.ttr.graphics.themes.ThemeId.ThemeId
+import pl.enves.ttr.graphics.themes._
 import pl.enves.ttr.logic._
 
 import scala.util.{Failure, Success, Try}
@@ -24,7 +25,7 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources()
+  private[this] val resources = new Resources(Theme(context.getResources, ThemeId(0)))
   resources.addBitmapProvider(new DefaultTextures(context))
   resources.addGeometryProvider(new DefaultGeometries)
   private[this] val board = new GameBoard(game, resources)
@@ -44,8 +45,8 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     //We don't use camera transformations
   }
 
-  def setTheme(theme: ThemeId): Unit = {
-    resources.theme = theme
+  def setTheme(themeId: ThemeId): Unit = {
+    resources.setTheme(Theme(context.getResources, themeId))
     themeNeedsUpdate = true
   }
 
@@ -106,9 +107,9 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     themeNeedsUpdate = true
   }
 
-  def updateTheme(): Unit = {
-    val backgroundColor = resources.getTheme.rgb(ColorId.background)
-    GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
+  private def updateTheme(): Unit = {
+    val backgroundColor: Color3 = resources.getTheme.background
+    GLES20.glClearColor(backgroundColor._1, backgroundColor._2, backgroundColor._3, 1.0f)
     board.updateTheme()
   }
 

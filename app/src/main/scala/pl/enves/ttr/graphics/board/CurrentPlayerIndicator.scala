@@ -1,20 +1,15 @@
 package pl.enves.ttr.graphics.board
 
-import android.graphics.Color
-import android.opengl.Matrix
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.models.DefaultGeometryId
-import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.text.StaticText
-import pl.enves.ttr.graphics.themes.{ColorId, Theme}
-import pl.enves.ttr.logic.{Quadrant, Game, Player}
+import pl.enves.ttr.logic.{Game, Quadrant}
 
 /**
  * Display current player in 1x0.25 rectangle
  */
 class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject {
 
-  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f, ColorId.text)
+  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f)
   playerText.translate(-0.125f, 0.0f, 0.0f)
   addChild(playerText)
 

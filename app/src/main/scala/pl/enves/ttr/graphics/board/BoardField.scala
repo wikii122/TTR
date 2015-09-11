@@ -1,7 +1,8 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.themes.{ColorId, Theme}
-import pl.enves.ttr.graphics.{Resources, DefaultTextureId, MatrixStack}
+import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
+import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
 import pl.enves.ttr.logic._
 
 class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(resources) {
@@ -13,12 +14,10 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   var empty: Option[Int] = None
 
   //TODO: Load from settings
-  var crossColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var ringColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var outerColor1 = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var outerColor2 = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var winnerOuterColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var illegalOuterColor = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var outerColor1: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var illegalOuterColor: ColorArray = Array(1.0f, 0.0f, 0.0f, 1.0f)
 
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
@@ -29,12 +28,9 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
 
   override protected def onUpdateTheme(): Unit = {
     super.onUpdateTheme()
-    crossColor = resources.getTheme.rgba(ColorId.cross)
-    ringColor = resources.getTheme.rgba(ColorId.ring)
-    outerColor1 = resources.getTheme.rgba(ColorId.outer1)
-    outerColor2 = resources.getTheme.rgba(ColorId.outer2)
-    winnerOuterColor = resources.getTheme.rgba(ColorId.outerWinner)
-    illegalOuterColor = resources.getTheme.rgba(ColorId.outerIllegal)
+    outerColor1 = resources.getTheme.outer1
+    outerColor2 = resources.getTheme.outer2
+    winnerOuterColor = resources.getTheme.winner
   }
 
   override protected def onAnimate(dt: Float): Unit = {
@@ -58,8 +54,8 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
 
     if (value.isDefined) {
       value.get match {
-        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, ringColor, outer, ring.get))
-        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, crossColor, outer, cross.get))
+        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, ring.get))
+        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, cross.get))
       }
     } else {
       maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, empty.get))

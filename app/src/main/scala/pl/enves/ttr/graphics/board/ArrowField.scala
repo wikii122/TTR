@@ -1,23 +1,24 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.themes.ColorId
-import pl.enves.ttr.graphics.{DefaultTextureId, Resources, MatrixStack}
+import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
+import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
 class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources) extends Field(resources) {
 
   var arrow: Option[Int] = None
 
-  var colorActive = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var colorInactive = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var colorActive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var colorInactive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   var active = false
 
   def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => ColorId.outer1
-    case Quadrant.second => ColorId.outer2
-    case Quadrant.third => ColorId.outer2
-    case Quadrant.fourth => ColorId.outer1
+    case Quadrant.first => resources.getTheme.outer1
+    case Quadrant.second => resources.getTheme.outer2
+    case Quadrant.third => resources.getTheme.outer2
+    case Quadrant.fourth => resources.getTheme.outer1
   }
 
   override protected def onUpdateResources(): Unit = {
@@ -30,8 +31,9 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
 
   override protected def onUpdateTheme(): Unit = {
     super.onUpdateTheme()
-    colorActive = resources.getTheme.rgba(defaultArrowColor(quadrant))
-    colorInactive = resources.getTheme.rgba(defaultArrowColor(quadrant), 0.25f)
+    colorActive = defaultArrowColor(quadrant)
+    colorInactive = defaultArrowColor(quadrant)
+    colorInactive(3) = 0.3f
   }
 
   override protected def onAnimate(dt: Float): Unit = {

@@ -4,7 +4,7 @@ import android.content.Context
 import android.graphics.{Canvas, Paint}
 import android.util.AttributeSet
 import android.view.{GestureDetector, MotionEvent, View}
-import pl.enves.ttr.graphics.themes.{ColorId, ThemeId, Themes}
+import pl.enves.ttr.graphics.themes.{Theme, ThemeId}
 
 class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, attrs) {
   private var rCenter: Float = 0
@@ -22,7 +22,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   private var drift = 0.0f
 
-  private val paints: Map[ThemeId.Value, Paint] = Themes.byName.mapValues(theme => makePaint(theme.android(ColorId.background)))
+  private val paints: Map[ThemeId.Value, Paint] = Theme.all(context.getResources).mapValues(theme => makePaint(theme.background))
 
   private var current: ThemeId.Value = ThemeId.Blue
 
