@@ -37,8 +37,6 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   private var changed = false
 
-  private var oldBackgroundColor = Color.WHITE
-
   private class gestureListener extends GestureDetector.SimpleOnGestureListener {
     var startX: Float = 0.0f
 
@@ -90,10 +88,12 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
         if (Math.abs(drift) < 0.001f) {
           drift = 0.0f
           state = State.Normal
-          oldBackgroundColor = backgrounds(current)
         }
-        getRootView.setBackgroundColor(lerpColor(oldBackgroundColor, backgrounds(current), 1 - 2 * Math.abs(drift)))
         invalidate()
+      }
+      if(state == State.Animation || state == State.Dragged) {
+        val otherColor = if(drift>0) backgrounds(right()) else backgrounds(left())
+        getRootView.setBackgroundColor(lerpColor(backgrounds(current), otherColor, Math.abs(drift)))
       }
     }
   }
@@ -165,13 +165,11 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   def getCurrent: String = current.toString
 
   def setCurrent(themeId: ThemeId.Value): Unit = {
-    oldBackgroundColor = backgrounds(current)
     current = themeId
   }
 
   def setCurrent(theme: String): Unit = {
     setCurrent(ThemeId.values.find(_.toString == theme).getOrElse(ThemeId(0)))
-    oldBackgroundColor = backgrounds(current)
     getRootView.setBackgroundColor(backgrounds(current))
   }
 
