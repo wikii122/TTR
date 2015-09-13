@@ -43,7 +43,7 @@ class Field(resources: Resources) extends SceneObject with Logging {
   override protected def onAnimate(dt: Float): Unit = {
     if (shaken) {
       val s = shakeAmplitude * Math.sin(shakeTimeElapsed * shakeFrequency * 2 * Math.PI).toFloat
-      objectRotationAngle = notStirred + s * Math.sin(shakeTimeElapsed * Math.PI).toFloat   //Apply Ease In And Ease Out
+      objectRotationAngle = notStirred + s * Math.sin((shakeTimeElapsed / shakeTime) * Math.PI).toFloat   //Apply Ease In And Ease Out
 
       shakeTimeElapsed += dt
       if (shakeTimeElapsed >= shakeTime) {
