@@ -1,14 +1,11 @@
 package pl.enves.ttr
 
-import java.util
-
 import android.content.{Context, SharedPreferences, Intent}
 import android.os.Bundle
 import android.view.View
-import android.widget.{ArrayAdapter, Spinner, Button}
+import android.widget.Button
 import pl.enves.androidx.{ThemePicker, ExtendedActivity}
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.graphics.themes.ThemeId
 import pl.enves.ttr.logic.{Game, GameState}
 
 class StartGameActivity extends ExtendedActivity {
@@ -85,12 +82,12 @@ class StartGameActivity extends ExtendedActivity {
 
   private[this] def getTheme(): String = {
     val themePicker = find[ThemePicker] (R.id.theme_picker)
-    return themePicker.getTheme()
+    return themePicker.getCurrent
   }
 
   private[this] def setPreviousTheme() = {
     val themePicker = find[ThemePicker] (R.id.theme_picker)
-    themePicker.setTheme(prefs.get.getString("THEME", themePicker.getDefaultTheme))
+    themePicker.setCurrent(prefs.get.getString("THEME", themePicker.getDefaultTheme))
   }
 
   /**
