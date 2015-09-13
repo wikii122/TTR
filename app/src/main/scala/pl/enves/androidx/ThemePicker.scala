@@ -37,6 +37,10 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   private var changed = false
 
+  type ColorChanger = (Int, Int, Int) => Unit
+
+  private var colorChanger: Option[ColorChanger] = None
+
   private class gestureListener extends GestureDetector.SimpleOnGestureListener {
     var startX: Float = 0.0f
 
@@ -91,10 +95,20 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
         }
         invalidate()
       }
-      if(state == State.Animation || state == State.Dragged) {
-        val otherColor = if(drift>0) backgrounds(right()) else backgrounds(left())
-        getRootView.setBackgroundColor(lerpColor(backgrounds(current), otherColor, Math.abs(drift)))
+      if (state == State.Animation || state == State.Dragged) {
+        changeColors()
       }
+    }
+  }
+
+  private def changeColors(): Unit = {
+    if (colorChanger.isDefined) {
+      val other = if (drift > 0) right() else left()
+      //getRootView.setBackgroundColor(lerpColor(backgrounds(current), otherColor, Math.abs(drift)))
+      val b = lerpColor(backgrounds(current), backgrounds(other), Math.abs(drift))
+      val c1 = lerpColor(paints(current)._1.getColor, paints(other)._1.getColor, Math.abs(drift))
+      val c2 = lerpColor(paints(current)._2.getColor, paints(other)._2.getColor, Math.abs(drift))
+      colorChanger get(b, c1, c2)
     }
   }
 
@@ -138,7 +152,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   override def onTouchEvent(event: MotionEvent): Boolean = {
     val result = detector.onTouchEvent(event)
     if (!result) {
-      if (event.getAction() == MotionEvent.ACTION_UP) {
+      if (event.getAction == MotionEvent.ACTION_UP) {
         state = State.Animation
       }
     }
@@ -170,10 +184,15 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   def setCurrent(theme: String): Unit = {
     setCurrent(ThemeId.values.find(_.toString == theme).getOrElse(ThemeId(0)))
-    getRootView.setBackgroundColor(backgrounds(current))
+    //getRootView.setBackgroundColor(backgrounds(current))
+    changeColors()
   }
 
   def getDefaultTheme: String = ThemeId(0).toString
 
   def hasChanged: Boolean = changed
+
+  def setColorChanger(cc: ColorChanger): Unit = {
+    colorChanger = Some(cc)
+  }
 }
