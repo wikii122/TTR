@@ -7,15 +7,17 @@ import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic.{Game, Quadrant}
 
 /**
- * Display current player in 1x0.25 rectangle
+ * Display winner in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject {
+class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
 
-  val playerText = new StaticText("Player:", resources, 0.75f, 0.25f)
-  playerText.translate(-0.125f, 0.0f, 0.0f)
-  addChild(playerText)
+  visible = false
 
-  val field = new BoardField(Quadrant.first, resources)
+  val winnerText = new StaticText("winner:", resources, 0.75f, 0.25f)
+  winnerText.translate(-0.125f, 0.0f, 0.0f)
+  addChild(winnerText)
+
+  val field = new BoardField(Quadrant.second, resources)
   field.translate(0.375f, 0.0f, 0.0f)
   field.scale(0.25f, 0.25f, 1.0f)
   addChild(field)
@@ -23,14 +25,17 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   override protected def onUpdateResources(): Unit = {}
 
   override protected def onUpdateTheme(): Unit = {
-    playerText.setTextColor(resources.getTheme.outer2)
+    winnerText.setTextColor(resources.getTheme.outer1)
     val noColor: ColorArray = resources.getTheme.background
     noColor(3) = 0.0f //To nicely fade-out on edges
-    playerText.setTextBackground(noColor)
+    winnerText.setTextBackground(noColor)
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    field.value = Some(game.player)
+    if(game.finished) {
+      visible = true
+      field.value = game.winner
+    }
   }
 
   override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false

@@ -16,6 +16,11 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
   addChild(currentPlayerIndicator)
 
+  val winnerIndicator = new WinnerIndicator(game, resources)
+  winnerIndicator.translate(0.0f, -4.5f, 0.0f)
+  winnerIndicator.scale(4.0f, 4.0f, 1.0f)
+  addChild(winnerIndicator)
+
   val quadrants = Map(
     (Quadrant.first, new GameQuadrant(game, Quadrant.first, resources)),
     (Quadrant.second, new GameQuadrant(game, Quadrant.second, resources)),

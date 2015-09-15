@@ -16,6 +16,8 @@ trait SceneObject {
   protected var objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
   protected var objectScale = Array[Float](1.0f, 1.0f, 1.0f)
 
+  protected var visible = true
+
   protected def onUpdateResources(): Unit
 
   protected def onUpdateTheme(): Unit
@@ -58,13 +60,15 @@ trait SceneObject {
   }
 
   def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    mvMatrix.push()
-    transformToPosition(mvMatrix)
-    onDraw(mvMatrix, pMatrix)
-    for (child <- children) {
-      child.draw(mvMatrix, pMatrix)
+    if(visible) {
+      mvMatrix.push()
+      transformToPosition(mvMatrix)
+      onDraw(mvMatrix, pMatrix)
+      for (child <- children) {
+        child.draw(mvMatrix, pMatrix)
+      }
+      mvMatrix.pop()
     }
-    mvMatrix.pop()
   }
 
   def click(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
