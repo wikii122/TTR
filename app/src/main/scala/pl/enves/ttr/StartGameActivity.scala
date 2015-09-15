@@ -93,6 +93,12 @@ class StartGameActivity extends ExtendedActivity {
     val continueGameButton = find[TextView](R.id.button_continue)
     continueGameButton.setTypeface(typeface)
 
+    val newGamePrompt = find[TextView](R.id.button_create_prompt)
+    newGamePrompt.setTypeface(typeface)
+
+    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    continueGamePrompt.setTypeface(typeface)
+
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTypeface(typeface)
 
@@ -139,6 +145,12 @@ class StartGameActivity extends ExtendedActivity {
 
     val continueGameButton = find[TextView](R.id.button_continue)
     continueGameButton.setTextColor(content1)
+
+    val newGamePrompt = find[TextView](R.id.button_create_prompt)
+    newGamePrompt.setTextColor(content2)
+
+    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    continueGamePrompt.setTextColor(content2)
 
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTextColor(content1)
