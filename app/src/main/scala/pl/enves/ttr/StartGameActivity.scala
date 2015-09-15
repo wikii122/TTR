@@ -133,7 +133,7 @@ class StartGameActivity extends ExtendedActivity {
   private[this] def alignUpsideDownText(text: TextView): Unit = {
     val fm = text.getPaint.getFontMetrics
     val descent = Math.round(fm.descent)
-    text.setPadding(0, -descent, 0, 0)
+    text.setPadding(0, 0, 0, descent)
   }
 
   private[this] def getPickedTheme: String = {

@@ -2,154 +2,149 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:weightSum="1">
+    android:orientation="vertical">
 
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="50dp">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        android:layout_weight="1">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
 
             <TextView
                 android:id="@+id/text_tt"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_column="1"
                 android:text="@string/tt"
-                android:textSize="66dp" />
+                android:textSize="100sp" />
 
             <TextView
                 android:id="@+id/text_t"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_column="2"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/text_tt"
+                android:layout_toRightOf="@+id/text_tt"
                 android:rotation="180"
                 android:text="@string/t"
-                android:textSize="66dp" />
-        </TableRow>
-    </TableLayout>
+                android:textSize="100sp" />
+        </RelativeLayout>
 
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="50dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp">
-
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom">
 
             <TextView
                 android:id="@+id/text_tic_tac"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_column="1"
                 android:text="@string/tic_tac"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
+                android:textSize="33sp" />
 
             <TextView
                 android:id="@+id/text_turn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_column="2"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/text_tic_tac"
+                android:layout_toRightOf="@+id/text_tic_tac"
                 android:rotation="180"
                 android:text="@string/turn"
-                android:textAppearance="?android:attr/textAppearanceLarge" />
-        </TableRow>
-    </TableLayout>
+                android:textSize="33sp" />
+        </RelativeLayout>
+    </FrameLayout>
 
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp">
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_weight="1">
 
-            <TextView
-                android:id="@+id/button_create_prompt"
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginRight="10dp"
-                android:text="@string/prompt"
-                android:textAllCaps="false"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp">
 
-            <TextView
-                android:id="@+id/button_create"
+
+                <TextView
+                    android:id="@+id/button_create_prompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="@string/prompt"
+                    android:textAllCaps="false"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+
+                <TextView
+                    android:id="@+id/button_create"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_create_prompt"
+                    android:layout_toRightOf="@+id/button_create_prompt"
+                    android:text="@string/new_game"
+                    android:textAllCaps="false"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </RelativeLayout>
+
+            <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/new_game"
-                android:textAllCaps="false"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
-    </TableLayout>
+                android:layout_marginBottom="5dp"
+                android:layout_marginTop="5dp">
 
-    <TableLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="10dp"
-        android:layout_marginLeft="10dp"
-        android:layout_marginRight="10dp"
-        android:layout_marginTop="10dp">
+                <TextView
+                    android:id="@+id/button_continue_prompt"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginRight="10dp"
+                    android:text="@string/prompt"
+                    android:textAllCaps="false"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <TableRow
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+                <TextView
+                    android:id="@+id/button_continue"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_continue_prompt"
+                    android:layout_toRightOf="@+id/button_continue_prompt"
+                    android:text="@string/continue_game"
+                    android:textAllCaps="false"
+                    android:textAppearance="?android:attr/textAppearanceMedium" />
+            </RelativeLayout>
 
             <TextView
-                android:id="@+id/button_continue_prompt"
+                android:id="@+id/text_pick_theme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:layout_marginRight="10dp"
-                android:text="@string/prompt"
-                android:textAllCaps="false"
+                android:layout_marginTop="5dp"
+                android:text="@string/pick_theme"
                 android:textAppearance="?android:attr/textAppearanceMedium" />
 
-            <TextView
-                android:id="@+id/button_continue"
+            <pl.enves.androidx.ThemePicker
+                android:id="@+id/theme_picker"
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_height="33dp"
                 android:layout_gravity="center_horizontal"
-                android:text="@string/continue_game"
-                android:textAllCaps="false"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-        </TableRow>
-    </TableLayout>
-
-    <TextView
-        android:id="@+id/text_pick_theme"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:layout_margin="10dp"
-        android:text="@string/pick_theme"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <pl.enves.androidx.ThemePicker
-        android:id="@+id/theme_picker"
-        android:layout_width="wrap_content"
-        android:layout_height="33dp"
-        android:layout_gravity="center_horizontal"
-        android:layout_weight="0.08" />
+                android:layout_marginBottom="5dp" />
+        </LinearLayout>
+    </FrameLayout>
 </LinearLayout>
