@@ -13,7 +13,6 @@ import pl.enves.ttr.graphics.ColorImplicits.AndroidToColor3
 import pl.enves.ttr.graphics.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.graphics.models.DefaultGeometries
-import pl.enves.ttr.graphics.themes.ThemeId.ThemeId
 import pl.enves.ttr.graphics.themes._
 import pl.enves.ttr.logic._
 
@@ -25,7 +24,7 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources(Theme(context.getResources, ThemeId(0)))
+  private[this] val resources = new Resources(Theme())
   resources.addBitmapProvider(new DefaultTextures(context))
   resources.addGeometryProvider(new DefaultGeometries)
   private[this] val board = new GameBoard(game, resources)
@@ -45,8 +44,8 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     //We don't use camera transformations
   }
 
-  def setTheme(themeId: ThemeId): Unit = {
-    resources.setTheme(Theme(context.getResources, themeId))
+  def setTheme(theme: Theme): Unit = {
+    resources.setTheme(theme)
     themeNeedsUpdate = true
   }
 

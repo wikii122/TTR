@@ -1,10 +1,15 @@
 package pl.enves.androidx
 
 import android.content.Context
+import android.content.res.TypedArray
 import android.graphics.{Canvas, Color, Paint}
 import android.util.AttributeSet
 import android.view.{GestureDetector, MotionEvent, View}
-import pl.enves.ttr.graphics.themes.{Theme, ThemeId}
+import pl.enves.ttr.R
+import pl.enves.ttr.graphics.themes.Theme
+
+import scala.collection.mutable
+import scala.collection.mutable.ArrayBuffer
 
 
 //TODO: Use Android animations
@@ -25,13 +30,16 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   private var drift = 0.0f
 
-  private val paints: Map[ThemeId.Value, (Paint, Paint)] = Theme.all(context.getResources).mapValues(
+  private val themes: mutable.ArrayBuffer[Theme] = readDefaultThemes
+  //TODO: append user-made themes
+
+  private val paints: ArrayBuffer[(Paint, Paint)] = themes.map(
     theme => (makePaint(theme.outer1), makePaint(theme.outer2))
   )
 
-  private val backgrounds: Map[ThemeId.Value, Int] = Theme.all(context.getResources).mapValues(theme => theme.background)
+  private val backgrounds: ArrayBuffer[Int] = themes.map(theme => theme.background)
 
-  private var current: ThemeId.Value = ThemeId.Blue
+  private var current: Int = 0
 
   private val detector = new GestureDetector(getContext, new gestureListener())
 
@@ -57,10 +65,10 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
         if (Math.abs(drift) >= 0.5f) {
           if (drift > 0) {
-            setCurrent(right())
+            current = right()
             drift = -0.5f
           } else {
-            setCurrent(left())
+            current = left()
             drift = 0.5f
           }
           state = State.Animation
@@ -104,7 +112,6 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   private def changeColors(): Unit = {
     if (colorChanger.isDefined) {
       val other = if (drift > 0) right() else left()
-      //getRootView.setBackgroundColor(lerpColor(backgrounds(current), otherColor, Math.abs(drift)))
       val b = lerpColor(backgrounds(current), backgrounds(other), Math.abs(drift))
       val c1 = lerpColor(paints(current)._1.getColor, paints(other)._1.getColor, Math.abs(drift))
       val c2 = lerpColor(paints(current)._2.getColor, paints(other)._2.getColor, Math.abs(drift))
@@ -112,12 +119,11 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     }
   }
 
-  private def drawSample(canvas: Canvas, x: Float, y: Float, size: Float, themeId: ThemeId.Value): Unit = {
-    //canvas.drawCircle(x, y, size, paints(themeId)._1)
-    canvas.drawRect(x - size, y, x, y + size, paints(themeId)._1) //First
-    canvas.drawRect(x, y, x + size, y + size, paints(themeId)._2) //Second
-    canvas.drawRect(x - size, y - size, x, y, paints(themeId)._2) //Third
-    canvas.drawRect(x, y - size, x + size, y, paints(themeId)._1) //Fourth
+  private def drawSample(canvas: Canvas, x: Float, y: Float, size: Float, theme: Int): Unit = {
+    canvas.drawRect(x - size, y, x, y + size, paints(theme)._1) //First
+    canvas.drawRect(x, y, x + size, y + size, paints(theme)._2) //Second
+    canvas.drawRect(x - size, y - size, x, y, paints(theme)._2) //Third
+    canvas.drawRect(x, y - size, x + size, y, paints(theme)._1) //Fourth
   }
 
   private def lerpChannel(channel1: Int, channel2: Int, t: Float): Int = {
@@ -131,6 +137,17 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     val b = lerpChannel(Color.blue(color1), Color.blue(color2), t)
 
     return Color.argb(a, r, g, b)
+  }
+
+  private def readDefaultThemes: mutable.ArrayBuffer[Theme] = {
+    val themes: mutable.ArrayBuffer[Theme] = new mutable.ArrayBuffer[Theme]()
+    val resources = context.getResources
+    val themeArrays: TypedArray = resources.obtainTypedArray(R.array.themes)
+    for (i <- 0 until themeArrays.length) {
+      themes.append(Theme(resources, themeArrays.getResourceId(i, -1)))
+    }
+    themeArrays.recycle()
+    return themes
   }
 
   override def onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int): Unit = {
@@ -160,35 +177,35 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     return result
   }
 
-  def left(): ThemeId.Value = {
-    var id = current.id - 1
-    if (id < 0) {
-      id = ThemeId.values.size - 1
+  def left(): Int = {
+    var i = current - 1
+    if (i < 0) {
+      i = themes.length - 1
     }
-    return ThemeId(id)
+    return i
   }
 
-  def right(): ThemeId.Value = {
-    var id = current.id + 1
-    if (id >= ThemeId.values.size) {
-      id = 0
+  def right(): Int = {
+    var i = current + 1
+    if (i >= themes.length) {
+      i = 0
     }
-    return ThemeId(id)
+    return i
   }
 
-  def getCurrent: String = current.toString
+  def getCurrentJSON: String = themes(current).toJsonObject.toString
 
-  def setCurrent(themeId: ThemeId.Value): Unit = {
-    current = themeId
-  }
+  def getDefaultJSON: String = themes.head.toJsonObject.toString
 
-  def setCurrent(theme: String): Unit = {
-    setCurrent(ThemeId.values.find(_.toString == theme).getOrElse(ThemeId(0)))
-    //getRootView.setBackgroundColor(backgrounds(current))
+  def setCurrentFromJSON(themeJSON: String): Unit = {
+    val theme = Theme(themeJSON)
+    var i = themes.indexOf(theme)
+    if (i == -1) {
+      i = 0
+    }
+    current = i
     changeColors()
   }
-
-  def getDefaultTheme: String = ThemeId(0).toString
 
   def hasChanged: Boolean = changed
 

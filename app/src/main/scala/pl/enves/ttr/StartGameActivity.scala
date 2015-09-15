@@ -44,7 +44,7 @@ class StartGameActivity extends ExtendedActivity {
     val themePicker = find[ThemePicker](R.id.theme_picker)
     if (themePicker.hasChanged) {
       val ed: SharedPreferences.Editor = prefs.get.edit()
-      ed.putString("THEME", getTheme())
+      ed.putString("THEME", getPickedTheme)
       ed.commit()
     }
   }
@@ -59,7 +59,7 @@ class StartGameActivity extends ExtendedActivity {
     itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
     itnt putExtra("TYPE", Game.STANDARD.toString)
-    itnt putExtra("THEME", getTheme())
+    itnt putExtra("THEME", getPickedTheme)
     itnt start()
   }
 
@@ -72,7 +72,7 @@ class StartGameActivity extends ExtendedActivity {
     val itnt = intent[GameActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
     itnt putExtra("TYPE", Game.CONTINUE.toString)
-    itnt putExtra("THEME", getTheme())
+    itnt putExtra("THEME", getPickedTheme)
     itnt start()
   }
 
@@ -109,15 +109,15 @@ class StartGameActivity extends ExtendedActivity {
     tText.setTypeface(typeface)
   }
 
-  private[this] def getTheme(): String = {
+  private[this] def getPickedTheme: String = {
     val themePicker = find[ThemePicker](R.id.theme_picker)
-    return themePicker.getCurrent
+    return themePicker.getCurrentJSON
   }
 
   private[this] def setPreviousTheme() = {
     val themePicker = find[ThemePicker](R.id.theme_picker)
     themePicker.setColorChanger(setColors)
-    themePicker.setCurrent(prefs.get.getString("THEME", themePicker.getDefaultTheme))
+    themePicker.setCurrentFromJSON(prefs.get.getString("THEME", themePicker.getDefaultJSON))
   }
 
   /**

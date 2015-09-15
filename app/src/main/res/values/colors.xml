@@ -88,8 +88,7 @@
         <item>@color/common_outer_winner</item>
     </integer-array>
 
-    <!--
-    <integer-array name="themes">
+    <array name="themes">
         <item>@array/theme_blue</item>
         <item>@array/theme_brown</item>
         <item>@array/theme_green</item>
@@ -97,6 +96,5 @@
         <item>@array/theme_pink</item>
         <item>@array/theme_red</item>
         <item>@array/theme_white</item>
-    </integer-array>
-    -->
+    </array>
 </resources>
