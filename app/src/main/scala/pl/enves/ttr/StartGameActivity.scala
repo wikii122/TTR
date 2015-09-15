@@ -1,7 +1,8 @@
 package pl.enves.ttr
 
+import android.content.res.ColorStateList
 import android.content.{Context, Intent, SharedPreferences}
-import android.graphics.Typeface
+import android.graphics.{Color, Typeface}
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
@@ -21,8 +22,14 @@ class StartGameActivity extends ExtendedActivity {
     val newGameButton = find[TextView](R.id.button_create)
     newGameButton onClick startStandardGame
 
+    val newGamePrompt = find[TextView](R.id.button_create_prompt)
+    newGamePrompt onClick startStandardGame
+
     val continueGameButton = find[TextView](R.id.button_continue)
     continueGameButton onClick continueGame
+
+    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    continueGamePrompt onClick continueGame
 
     GameState.onDataChanged(enableButtons)
     prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
@@ -80,8 +87,14 @@ class StartGameActivity extends ExtendedActivity {
   private[this] def enableButtons(): Unit = UiThread(() => {
     //val continueGameButton = find[Button](R.id.button_continue)
     val continueGameButton = find[TextView](R.id.button_continue)
-    if (activeGame) continueGameButton.enable()
-    else continueGameButton.disable()
+    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    if (activeGame) {
+      continueGameButton.enable()
+      continueGamePrompt.enable()
+    } else {
+      continueGameButton.disable()
+      continueGamePrompt.disable()
+    }
   })
 
   private[this] def applyCustomFont(path: String): Unit = {
@@ -90,11 +103,11 @@ class StartGameActivity extends ExtendedActivity {
     val newGameButton = find[TextView](R.id.button_create)
     newGameButton.setTypeface(typeface)
 
-    val continueGameButton = find[TextView](R.id.button_continue)
-    continueGameButton.setTypeface(typeface)
-
     val newGamePrompt = find[TextView](R.id.button_create_prompt)
     newGamePrompt.setTypeface(typeface)
+
+    val continueGameButton = find[TextView](R.id.button_continue)
+    continueGameButton.setTypeface(typeface)
 
     val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
     continueGamePrompt.setTypeface(typeface)
@@ -143,14 +156,14 @@ class StartGameActivity extends ExtendedActivity {
     val newGameButton = find[TextView](R.id.button_create)
     newGameButton.setTextColor(content1)
 
-    val continueGameButton = find[TextView](R.id.button_continue)
-    continueGameButton.setTextColor(content1)
-
     val newGamePrompt = find[TextView](R.id.button_create_prompt)
     newGamePrompt.setTextColor(content2)
 
+    val continueGameButton = find[TextView](R.id.button_continue)
+    continueGameButton.setTextColor(prepareColorStateList(content1))
+
     val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
-    continueGamePrompt.setTextColor(content2)
+    continueGamePrompt.setTextColor(prepareColorStateList(content2))
 
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTextColor(content1)
@@ -168,5 +181,23 @@ class StartGameActivity extends ExtendedActivity {
     tText.setTextColor(content2)
 
     newGameButton.getRootView.setBackgroundColor(background)
+  }
+
+  private[this] def colorTransparent(color: Int, alpha: Float): Int = {
+    return Color.argb(Math.round(alpha * 255), Color.red(color), Color.green(color), Color.blue(color))
+  }
+
+  private[this] def prepareColorStateList(baseColor: Int): ColorStateList = {
+    val states = Array[Array[Int]](
+      Array[Int](android.R.attr.state_enabled), // enabled
+      Array[Int](-android.R.attr.state_enabled) // disabled
+    )
+
+    val colors = Array[Int](
+      baseColor,
+      colorTransparent(baseColor, 0.25f)
+    )
+
+    return new ColorStateList(states, colors)
   }
 }
