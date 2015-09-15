@@ -1,8 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="common_outer_illegal">#FFB30000</color>
     <color name="common_outer_winner">#FF00B300</color>
-    <color name="common_text">#FFB3B3B3</color>
 
     <color name="blue_outer1">#FFB3B3B3</color>
     <color name="blue_outer2">#FFFFFFFF</color>
@@ -36,7 +34,6 @@
         <item>@color/blue_background</item>
         <item>@color/blue_outer1</item>
         <item>@color/blue_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 
@@ -44,7 +41,6 @@
         <item>@color/brown_background</item>
         <item>@color/brown_outer1</item>
         <item>@color/brown_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 
@@ -52,7 +48,6 @@
         <item>@color/green_background</item>
         <item>@color/green_outer1</item>
         <item>@color/green_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 
@@ -60,7 +55,6 @@
         <item>@color/orange_background</item>
         <item>@color/orange_outer1</item>
         <item>@color/orange_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 
@@ -68,7 +62,6 @@
         <item>@color/pink_background</item>
         <item>@color/pink_outer1</item>
         <item>@color/pink_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 
@@ -76,7 +69,6 @@
         <item>@color/red_background</item>
         <item>@color/red_outer1</item>
         <item>@color/red_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 
@@ -84,7 +76,6 @@
         <item>@color/white_background</item>
         <item>@color/white_outer1</item>
         <item>@color/white_outer2</item>
-        <item>@color/common_text</item>
         <item>@color/common_outer_winner</item>
     </integer-array>
 

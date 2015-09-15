@@ -1,5 +1,7 @@
 package pl.enves.ttr.graphics.board
 
+import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
+import pl.enves.ttr.graphics.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic.{Game, Quadrant}
@@ -18,7 +20,12 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   field.scale(0.25f, 0.25f, 1.0f)
   addChild(field)
 
-  override protected def onUpdateResources(): Unit = {}
+  override protected def onUpdateResources(): Unit = {
+    playerText.setTextColor(resources.getTheme.outer2)
+    val noColor: ColorArray = resources.getTheme.background
+    noColor(3) = 0.0f //To nicely fade-out on edges
+    playerText.setTextBackground(noColor)
+  }
 
   override protected def onUpdateTheme(): Unit = {}
 

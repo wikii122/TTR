@@ -9,6 +9,8 @@ package pl.enves.ttr.graphics
 
 import java.nio.{ByteBuffer, ByteOrder, IntBuffer}
 
+import android.content.res.AssetManager
+import android.graphics.Typeface
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.shaders._
@@ -22,16 +24,18 @@ object ShaderId extends Enumeration {
 }
 
 
-class Resources(theme: Theme) extends Logging {
+class Resources(assetManager: AssetManager) extends Logging {
 
   private val textureProviders: mutable.ListBuffer[TextureProvider] = mutable.ListBuffer()
   private val geometryProviders: mutable.ListBuffer[GeometryProvider] = mutable.ListBuffer()
 
-  private var _theme = theme
+  private var _theme: Option[Theme] = None
 
-  def getTheme: Theme = _theme
+  def getTheme: Theme = _theme.get
 
-  def setTheme(theme: Theme): Unit = _theme = theme
+  def setTheme(theme: Theme): Unit = _theme = Some(theme)
+
+  val comfortaa: Typeface = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")

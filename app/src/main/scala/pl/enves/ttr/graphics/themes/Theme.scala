@@ -9,7 +9,6 @@ case class Theme(
                   background: ColorAndroid,
                   outer1: ColorAndroid,
                   outer2: ColorAndroid,
-                  text: ColorAndroid,
                   winner: ColorAndroid
                   ) extends Logging {
 
@@ -19,7 +18,6 @@ case class Theme(
       jSONObject.put("background", background)
       jSONObject.put("outer1", outer1)
       jSONObject.put("outer2", outer2)
-      jSONObject.put("text", text)
       jSONObject.put("winner", winner)
     } catch {
       case (e: JSONException) => error(e.toString)
@@ -29,7 +27,7 @@ case class Theme(
 }
 
 object Theme extends Logging {
-  def apply(): Theme = new Theme(0, 0, 0, 0, 0)
+  def apply(): Theme = new Theme(0, 0, 0, 0)
 
   def apply(resources: Resources, arrayName: Int): Theme = {
     if (arrayName == -1) return Theme()
@@ -39,8 +37,7 @@ object Theme extends Logging {
       themeArray(0),
       themeArray(1),
       themeArray(2),
-      themeArray(3),
-      themeArray(4)
+      themeArray(3)
     )
   }
 
@@ -51,7 +48,6 @@ object Theme extends Logging {
         jSONObject.getInt("background"),
         jSONObject.getInt("outer1"),
         jSONObject.getInt("outer2"),
-        jSONObject.getInt("text"),
         jSONObject.getInt("winner")
       )
     } catch {
