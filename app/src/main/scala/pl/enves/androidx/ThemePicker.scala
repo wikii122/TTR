@@ -2,7 +2,7 @@ package pl.enves.androidx
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.{Canvas, Color, Paint}
+import android.graphics.{RectF, Canvas, Color, Paint}
 import android.util.AttributeSet
 import android.view.{GestureDetector, MotionEvent, View}
 import pl.enves.ttr.R
@@ -119,10 +119,11 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   }
 
   private def drawSample(canvas: Canvas, x: Float, y: Float, size: Float, theme: Int): Unit = {
-    canvas.drawRect(x - size, y, x, y + size, paints(theme)._1) //First
-    canvas.drawRect(x, y, x + size, y + size, paints(theme)._2) //Second
-    canvas.drawRect(x - size, y - size, x, y, paints(theme)._2) //Third
-    canvas.drawRect(x, y - size, x + size, y, paints(theme)._1) //Fourth
+    val rect: RectF = new RectF(x - size, y - size, x + size, y + size)
+    canvas.drawArc(rect, 0, 90, true, paints(theme)._2) //Second
+    canvas.drawArc(rect, 90, 180, true, paints(theme)._1) //First
+    canvas.drawArc(rect, 180, 270, true, paints(theme)._2) //Third
+    canvas.drawArc(rect, 0, -90, true, paints(theme)._1) //Fourth
   }
 
   private def lerpChannel(channel1: Int, channel2: Int, t: Float): Int = {
