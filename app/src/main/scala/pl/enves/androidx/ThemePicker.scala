@@ -13,8 +13,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 //TODO: Use Android animations
-//TODO: Use callback provided by activity instead of getRootView to change background
-class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, attrs) {
+class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, attrs) with Logging {
   private var rCenter: Float = 0
   private var rSide: Float = 0
   private var centerY: Float = 0
@@ -151,19 +150,17 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   }
 
   override def onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int): Unit = {
-    // Account for padding
-    val xpad = getPaddingLeft + getPaddingRight
-    val ypad = getPaddingTop + getPaddingBottom
+    super.onSizeChanged(w, h, oldw, oldh)
 
-    val ww = w - xpad
-    val hh = h - ypad
+    val ww = w - getPaddingLeft - getPaddingRight
+    val hh = h - getPaddingTop - getPaddingBottom
 
     rCenter = hh / 2
     rSide = rCenter / 1.5f
 
-    centerY = hh / 2
-    centerX = ww / 2
-    sideX = (ww / 2 - rSide) * 0.9f
+    centerY = getPaddingTop + hh / 2
+    centerX = getPaddingLeft + ww / 2
+    sideX = centerX - rSide
   }
 
   override def onTouchEvent(event: MotionEvent): Boolean = {

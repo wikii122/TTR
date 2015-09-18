@@ -64,16 +64,4 @@ class GameActivity extends ExtendedActivity with GameManager {
       this.finish()
     }
   }
-
-  def setGui() = {
-    getSupportActionBar.hide()
-
-    val window = getWindow
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-
-    getWindow.getDecorView.setSystemUiVisibility(
-      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    )
-  }
 }
