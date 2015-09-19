@@ -28,6 +28,9 @@ class GameActivity extends ExtendedActivity with GameManager {
         case Game.STANDARD =>
           game = Game.create(Game.STANDARD)
           view.startGame()
+        case Game.AI =>
+          game = Game.create(Game.AI)
+          view.startGame()
         case Game.CONTINUE =>
           game = Game.load(GameState.load())
         case s =>

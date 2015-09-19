@@ -21,6 +21,13 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="New AI Game"
+        android:id="@+id/button_create_ai"
+        android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:text="Continue Game"
         android:id="@+id/button_continue"
         android:layout_gravity="center_horizontal" />

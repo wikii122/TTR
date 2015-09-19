@@ -19,6 +19,9 @@ class StartGameActivity extends ExtendedActivity {
     val newGameButton = find[Button] (R.id.button_create)
     newGameButton onClick startStandardGame
 
+    val newAIGameButton = find[Button] (R.id.button_create_ai)
+    newAIGameButton onClick startAIGame
+
     val continueGameButton = find[Button] (R.id.button_continue)
     continueGameButton onClick continueGame
 
@@ -41,6 +44,15 @@ class StartGameActivity extends ExtendedActivity {
     itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
     itnt putExtra ("TYPE", Game.STANDARD.toString)
+    itnt start()
+  }
+
+  private[this] def startAIGame(v: View) = {
+    log("Intending to start new StandardGame")
+    val itnt = intent[GameActivity]
+    itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
+    itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
+    itnt putExtra ("TYPE", Game.AI.toString)
     itnt start()
   }
 
