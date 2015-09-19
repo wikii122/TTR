@@ -13,11 +13,13 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
 
   val rotationTime = 1.0f //seconds
 
-  var animateRotation = false
+  var rotationAnimated = false
 
   var rotationCCW = false
 
   var rotationLinear = 0.0f
+
+  var rotationOld = game.quadrantRotation(quadrant)
 
   val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
@@ -49,22 +51,6 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     game.finished && game.finishingMove != Nil && game.finishingMove.contains((ny, nx))
   }
 
-  def setRotationAnimation(qRotation: QRotation.Value): Unit = {
-    rotationLinear = 0.0f
-    rotationCCW = qRotation match {
-      case QRotation.r270 => false
-      case QRotation.r90 => true
-    }
-
-    animateRotation = true
-
-    for (x <- 0 until Quadrant.size) {
-      for (y <- 0 until Quadrant.size) {
-        fields(x)(y).discardIllegal()
-      }
-    }
-  }
-
   override def onAnimate(dt: Float): Unit = {
     this.synchronized {
       for (x <- 0 until Quadrant.size) {
@@ -72,6 +58,25 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
           fields(x)(y).value = game.quadrantField(quadrant, x, y)
         }
       }
+
+      val rotationNew = game.quadrantRotation(quadrant)
+      val rotationDiff = rotationNew sub rotationOld
+
+      if(rotationDiff != QRotation.r0) {
+        rotationAnimated = true
+
+        rotationLinear = 0.0f
+
+        //TODO: Consider 180 degrees rotations
+        rotationCCW = if(rotationDiff == QRotation.r90) true else false
+
+        for (x <- 0 until Quadrant.size) {
+          for (y <- 0 until Quadrant.size) {
+            fields(x)(y).discardIllegal()
+          }
+        }
+      }
+      rotationOld = rotationNew
     }
 
     //This doesn't have to be synchronized
@@ -81,12 +86,12 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
       }
     }
 
-    if (animateRotation) {
+    if (rotationAnimated) {
       rotationLinear += dt / rotationTime
 
       if (rotationLinear >= 1.0f) {
         rotationLinear = 1.0f
-        animateRotation = false
+        rotationAnimated = false
       }
 
       objectRotationAngle = ((Math.sin(Math.PI / 2 + rotationLinear * Math.PI) + 1.0) * 45.0).toFloat

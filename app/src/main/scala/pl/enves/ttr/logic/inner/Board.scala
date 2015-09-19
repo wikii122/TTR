@@ -65,6 +65,8 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int) = quadrants(quadrant).get(x, y)
 
+  def quadrantRotation(quadrant: Quadrant.Value) = quadrants(quadrant).getRotation
+
   def availableRotations = quadrants filter (_._2.canRotate) keys
 
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named

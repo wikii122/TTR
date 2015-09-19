@@ -51,6 +51,11 @@ abstract class Game(protected val board: Board) extends JsonMappable {
   def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int): Option[Player.Value] = board.quadrantField(quadrant, x, y)
 
   /**
+   * Get quadrant rotation
+   */
+  def quadrantRotation(quadrant: Quadrant.Value): QRotation.Value = board.quadrantRotation(quadrant)
+
+  /**
    * Get list of available rotations
    */
   def availableRotations: List[Quadrant.Value] = if (nonFinished) board.availableRotations.toList
