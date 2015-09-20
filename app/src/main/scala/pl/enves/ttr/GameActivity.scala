@@ -3,7 +3,7 @@ package pl.enves.ttr
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
-import pl.enves.ttr.graphics.themes.Theme
+import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.logic.{Game, GameState, GameManager, StandardGame}
 import pl.enves.androidx.ExtendedActivity
 

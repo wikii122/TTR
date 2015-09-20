@@ -9,12 +9,12 @@ import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
-import pl.enves.ttr.graphics.ColorImplicits.AndroidToColor3
-import pl.enves.ttr.graphics.ColorTypes.Color3
+import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
+import pl.enves.androidx.color.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.graphics.models.DefaultGeometries
-import pl.enves.ttr.graphics.themes._
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.themes._
 
 import scala.util.{Failure, Success, Try}
 

@@ -1,7 +1,6 @@
 package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
-import pl.enves.ttr.graphics.themes.Theme
 
 import scala.collection.mutable
 
@@ -60,7 +59,7 @@ trait SceneObject {
   }
 
   def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    if(visible) {
+    if (visible) {
       mvMatrix.push()
       transformToPosition(mvMatrix)
       onDraw(mvMatrix, pMatrix)

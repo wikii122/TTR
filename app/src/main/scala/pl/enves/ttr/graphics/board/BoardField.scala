@@ -1,7 +1,7 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
-import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.androidx.color.ColorImplicits.AndroidToArray
+import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
 import pl.enves.ttr.logic._
 

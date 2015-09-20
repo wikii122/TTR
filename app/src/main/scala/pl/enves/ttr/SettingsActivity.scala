@@ -4,7 +4,8 @@ import android.content.{Context, SharedPreferences}
 import android.graphics.Typeface
 import android.os.Bundle
 import android.widget.TextView
-import pl.enves.androidx.{ExtendedActivity, ThemePicker}
+import pl.enves.androidx.ExtendedActivity
+import pl.enves.ttr.utils.themes.ThemePicker
 
 class SettingsActivity extends ExtendedActivity {
   private[this] var prefs: Option[SharedPreferences] = None

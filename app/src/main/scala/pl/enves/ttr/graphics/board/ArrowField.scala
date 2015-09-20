@@ -1,11 +1,13 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
-import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.androidx.color.ColorImplicits.AndroidToArray
+import pl.enves.androidx.color.ColorManip
+import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
-class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources) extends Field(resources) {
+class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
+  extends Field(resources) with ColorManip {
 
   shakeAmplitude = 30.0f
 
@@ -34,8 +36,7 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
   override protected def onUpdateTheme(): Unit = {
     super.onUpdateTheme()
     colorActive = defaultArrowColor(quadrant)
-    colorInactive = defaultArrowColor(quadrant)
-    colorInactive(3) = 0.3f
+    colorInactive = colorTransparent(defaultArrowColor(quadrant), 0.3f)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

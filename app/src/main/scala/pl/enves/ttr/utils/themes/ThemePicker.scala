@@ -1,19 +1,21 @@
-package pl.enves.androidx
+package pl.enves.ttr.utils.themes
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.{RectF, Canvas, Color, Paint}
+import android.graphics.{Canvas, Paint, RectF}
 import android.util.AttributeSet
 import android.view.{GestureDetector, MotionEvent, View}
+import pl.enves.androidx.Logging
+import pl.enves.androidx.color.ColorManip
+import pl.enves.androidx.color.ColorTypes.ColorAndroid
 import pl.enves.ttr.R
-import pl.enves.ttr.graphics.themes.Theme
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 
 //TODO: Use Android animations
-class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, attrs) with Logging {
+class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, attrs) with Logging with ColorManip {
   private var rCenter: Float = 0
   private var rSide: Float = 0
   private var centerY: Float = 0
@@ -36,7 +38,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     theme => (makePaint(theme.outer1), makePaint(theme.outer2))
   )
 
-  private val backgrounds: ArrayBuffer[Int] = themes.map(theme => theme.background)
+  private val backgrounds: ArrayBuffer[ColorAndroid] = themes.map(theme => theme.background)
 
   private var current: Int = 0
 
@@ -44,7 +46,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   private var changed = false
 
-  type ColorChanger = (Int, Int, Int) => Unit
+  type ColorChanger = (ColorAndroid, ColorAndroid, ColorAndroid) => Unit
 
   private var colorChanger: Option[ColorChanger] = None
 
@@ -78,7 +80,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     }
   }
 
-  private def makePaint(color: Int): Paint = {
+  private def makePaint(color: ColorAndroid): Paint = {
     val p = new Paint(0)
     p.setStyle(Paint.Style.FILL_AND_STROKE)
     p.setAntiAlias(true)
@@ -111,9 +113,9 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   private def changeColors(): Unit = {
     if (colorChanger.isDefined) {
       val other = if (drift > 0) right() else left()
-      val b = lerpColor(backgrounds(current), backgrounds(other), Math.abs(drift))
-      val c1 = lerpColor(paints(current)._1.getColor, paints(other)._1.getColor, Math.abs(drift))
-      val c2 = lerpColor(paints(current)._2.getColor, paints(other)._2.getColor, Math.abs(drift))
+      val b = colorLerp(backgrounds(current), backgrounds(other), Math.abs(drift))
+      val c1 = colorLerp(paints(current)._1.getColor, paints(other)._1.getColor, Math.abs(drift))
+      val c2 = colorLerp(paints(current)._2.getColor, paints(other)._2.getColor, Math.abs(drift))
       colorChanger get(b, c1, c2)
     }
   }
@@ -124,19 +126,6 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     canvas.drawArc(rect, 90, 180, true, paints(theme)._1) //First
     canvas.drawArc(rect, 180, 270, true, paints(theme)._2) //Third
     canvas.drawArc(rect, 0, -90, true, paints(theme)._1) //Fourth
-  }
-
-  private def lerpChannel(channel1: Int, channel2: Int, t: Float): Int = {
-    return channel1 + (t * (channel2 - channel1)).toInt
-  }
-
-  private def lerpColor(color1: Int, color2: Int, t: Float): Int = {
-    val a = lerpChannel(Color.alpha(color1), Color.alpha(color2), t)
-    val r = lerpChannel(Color.red(color1), Color.red(color2), t)
-    val g = lerpChannel(Color.green(color1), Color.green(color2), t)
-    val b = lerpChannel(Color.blue(color1), Color.blue(color2), t)
-
-    return Color.argb(a, r, g, b)
   }
 
   private def readDefaultThemes: mutable.ArrayBuffer[Theme] = {

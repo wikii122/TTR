@@ -39,7 +39,7 @@
             android:text="@string/pick_theme"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <pl.enves.androidx.ThemePicker
+        <pl.enves.ttr.utils.themes.ThemePicker
             android:id="@+id/theme_picker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

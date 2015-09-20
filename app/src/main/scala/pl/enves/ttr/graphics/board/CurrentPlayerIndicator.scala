@@ -1,7 +1,8 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
-import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.androidx.color.{ColorManip, ColorImplicits, ColorTypes}
+import ColorImplicits.AndroidToArray
+import ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic.{Game, Quadrant}
@@ -9,7 +10,7 @@ import pl.enves.ttr.logic.{Game, Quadrant}
 /**
  * Display current player in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject {
+class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject with ColorManip {
 
   val playerText = new StaticText("Player:", resources, 0.75f, 0.25f)
   playerText.translate(-0.125f, 0.0f, 0.0f)
@@ -24,8 +25,7 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
 
   override protected def onUpdateTheme(): Unit = {
     playerText.setTextColor(resources.getTheme.outer2)
-    val noColor: ColorArray = resources.getTheme.background
-    noColor(3) = 0.0f //To nicely fade-out on edges
+    val noColor: ColorArray = colorTransparent(resources.getTheme.background, 0.0f)
     playerText.setTextBackground(noColor)
   }
 

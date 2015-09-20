@@ -3,7 +3,8 @@ package pl.enves.ttr.graphics.text
 import android.graphics._
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
-import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.androidx.color.ColorTypes
+import ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.models.Rectangle
 import pl.enves.ttr.graphics.shaders.MaskShader

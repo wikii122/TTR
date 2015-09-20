@@ -1,4 +1,4 @@
-package pl.enves.ttr.graphics
+package pl.enves.androidx.color
 
 object ColorTypes {
   type Color3 = (Float, Float, Float)

@@ -14,7 +14,7 @@ import android.graphics.Typeface
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics.shaders._
-import pl.enves.ttr.graphics.themes._
+import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
 

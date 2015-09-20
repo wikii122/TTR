@@ -1,7 +1,7 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.ColorImplicits.AndroidToArray
-import pl.enves.ttr.graphics.ColorTypes.ColorArray
+import pl.enves.androidx.color.ColorImplicits.AndroidToArray
+import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.logic.{Game, Quadrant}
@@ -32,7 +32,7 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    if(game.finished) {
+    if (game.finished) {
       visible = true
       field.value = game.winner
     }

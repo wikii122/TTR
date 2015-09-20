@@ -1,17 +1,18 @@
 package pl.enves.ttr
 
-import android.content.res.ColorStateList
 import android.content.{Context, Intent, SharedPreferences}
-import android.graphics.{Color, Typeface}
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.color.ColorTypes.ColorAndroid
+import pl.enves.androidx.color.ColorUiTweaks
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.graphics.themes.Theme
 import pl.enves.ttr.logic.{Game, GameState}
+import pl.enves.ttr.utils.themes.Theme
 
-class StartGameActivity extends ExtendedActivity {
+class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
   private[this] var gameActive = false
   private[this] var prefs: Option[SharedPreferences] = None
 
@@ -165,7 +166,7 @@ class StartGameActivity extends ExtendedActivity {
    */
   private[this] def activeGame: Boolean = GameState.active
 
-  def setColors(background: Int, content1: Int, content2: Int): Unit = {
+  def setColors(background: ColorAndroid, content1: ColorAndroid, content2: ColorAndroid): Unit = {
     val newGameButton = find[TextView](R.id.button_create)
     newGameButton.setTextColor(content1)
 
@@ -173,16 +174,16 @@ class StartGameActivity extends ExtendedActivity {
     newGamePrompt.setTextColor(content2)
 
     val continueGameButton = find[TextView](R.id.button_continue)
-    continueGameButton.setTextColor(prepareColorStateList(content1))
+    continueGameButton.setTextColor(colorStateList(content1, 0.25f))
 
     val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
-    continueGamePrompt.setTextColor(prepareColorStateList(content2))
+    continueGamePrompt.setTextColor(colorStateList(content2, 0.25f))
 
     val settingsButton = find[TextView](R.id.button_settings)
-    settingsButton.setTextColor(prepareColorStateList(content1))
+    settingsButton.setTextColor(colorStateList(content1, 0.25f))
 
     val settingsPrompt = find[TextView](R.id.button_settings_prompt)
-    settingsPrompt.setTextColor(prepareColorStateList(content2))
+    settingsPrompt.setTextColor(colorStateList(content2, 0.25f))
 
     val ticTacText = find[TextView](R.id.text_tic_tac)
     ticTacText.setTextColor(content1)
@@ -197,23 +198,5 @@ class StartGameActivity extends ExtendedActivity {
     tText.setTextColor(content2)
 
     newGameButton.getRootView.setBackgroundColor(background)
-  }
-
-  private[this] def colorTransparent(color: Int, alpha: Float): Int = {
-    return Color.argb(Math.round(alpha * 255), Color.red(color), Color.green(color), Color.blue(color))
-  }
-
-  private[this] def prepareColorStateList(baseColor: Int): ColorStateList = {
-    val states = Array[Array[Int]](
-      Array[Int](android.R.attr.state_enabled), // enabled
-      Array[Int](-android.R.attr.state_enabled) // disabled
-    )
-
-    val colors = Array[Int](
-      baseColor,
-      colorTransparent(baseColor, 0.25f)
-    )
-
-    return new ColorStateList(states, colors)
   }
 }

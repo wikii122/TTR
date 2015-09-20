@@ -1,9 +1,9 @@
-package pl.enves.ttr.graphics.themes
+package pl.enves.ttr.utils.themes
 
 import android.content.res.Resources
 import org.json.{JSONException, JSONObject}
 import pl.enves.androidx.Logging
-import pl.enves.ttr.graphics.ColorTypes.ColorAndroid
+import pl.enves.androidx.color.ColorTypes.ColorAndroid
 
 case class Theme(
                   background: ColorAndroid,
