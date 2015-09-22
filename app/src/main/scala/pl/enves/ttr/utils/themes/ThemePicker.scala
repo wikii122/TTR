@@ -38,11 +38,10 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   private val themes: mutable.ArrayBuffer[Theme] = readDefaultThemes
   //TODO: append user-made themes
 
-  private val paints: ArrayBuffer[(Paint, Paint, Paint, Paint)] = themes.map(
+  private val paints: ArrayBuffer[(Paint, Paint, Paint)] = themes.map(
     theme => (makePaint(theme.outer1),
       makePaint(theme.outer2),
-      makePaint(theme.background),
-      makeBorderPaint(theme.outer1))
+      makePaint(theme.background))
   )
 
   private val backgrounds: ArrayBuffer[ColorAndroid] = themes.map(theme => theme.background)
@@ -95,15 +94,6 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     return p
   }
 
-  private def makeBorderPaint(color: ColorAndroid): Paint = {
-    val p = new Paint(0)
-    p.setStyle(Paint.Style.STROKE)
-    p.setAntiAlias(true)
-    p.setColor(color)
-    p.setStrokeWidth(0)
-    return p
-  }
-
   private def sampleRadius(sideX: Float): Float = {
     val a = (rSide - rCenter) / sideXMax
     val b = rCenter
@@ -116,12 +106,14 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     if (!isInEditMode) {
       val driftedCenter = centerX - spacing * drift
 
-      drawSample(canvas, driftedCenter, centerY, current)
+      drawSample(canvas, driftedCenter, centerY, current, Math.abs(drift))
 
       for (i <- 1 to sideSamples) {
         val sideX = i * spacing
-        drawSample(canvas, driftedCenter - sideX, centerY, left(i))
-        drawSample(canvas, driftedCenter + sideX, centerY, right(i))
+        val bLeft = if(i == 1 && drift < 0) 1.0f - Math.abs(drift) else 1.0f
+        val bRight = if(i == 1 && drift > 0) 1.0f - Math.abs(drift) else 1.0f
+        drawSample(canvas, driftedCenter - sideX, centerY, left(i), bLeft)
+        drawSample(canvas, driftedCenter + sideX, centerY, right(i), bRight)
       }
 
       if (state == State.Animation) {
@@ -148,16 +140,15 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     }
   }
 
-  private def drawSample(canvas: Canvas, x: Float, y: Float, theme: Int): Unit = {
+  private def drawSample(canvas: Canvas, x: Float, y: Float, theme: Int, bgSize: Float): Unit = {
     val radius = sampleRadius(Math.abs(centerX - x))
     canvas.drawCircle(x, y, radius, paints(theme)._3)
-    val size = 0.6f * radius
+    val size = (1.0f - 0.4f * bgSize) * radius
     val rect: RectF = new RectF(x - size, y - size, x + size, y + size)
     canvas.drawArc(rect, 0, 90, true, paints(theme)._2) //Second
     canvas.drawArc(rect, 90, 180, true, paints(theme)._1) //First
     canvas.drawArc(rect, 180, 270, true, paints(theme)._2) //Third
     canvas.drawArc(rect, 0, -90, true, paints(theme)._1) //Fourth
-    canvas.drawCircle(x, y, radius, paints(theme)._4)
   }
 
   private def readDefaultThemes: mutable.ArrayBuffer[Theme] = {
