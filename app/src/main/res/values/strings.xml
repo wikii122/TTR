@@ -12,5 +12,6 @@
     <string name="turn">turn</string>
     <string name="tt">tt</string>
     <string name="t">t</string>
-    <string name="prompt">></string>
+    <string name="nav_prompt">></string>
+    <string name="nav_up">←</string>
 </resources>

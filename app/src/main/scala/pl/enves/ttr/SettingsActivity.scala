@@ -3,8 +3,10 @@ package pl.enves.ttr
 import android.content.{Context, SharedPreferences}
 import android.graphics.Typeface
 import android.os.Bundle
+import android.view.View
 import android.widget.TextView
 import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.helpers._
 import pl.enves.ttr.utils.themes.ThemePicker
 
 class SettingsActivity extends ExtendedActivity {
@@ -15,6 +17,9 @@ class SettingsActivity extends ExtendedActivity {
     setContentView(R.layout.settings_layout)
 
     prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
+
+    val navUpText = find[TextView](R.id.settings_nav_up)
+    navUpText onClick goBack
 
     applyCustomFont("fonts/comfortaa.ttf")
   }
@@ -36,6 +41,10 @@ class SettingsActivity extends ExtendedActivity {
       ed.putString("THEME", getPickedTheme)
       ed.commit()
     }
+  }
+
+  private[this] def goBack(v: View) = {
+    onBackPressed()
   }
 
   private[this] def applyCustomFont(path: String): Unit = {
@@ -60,6 +69,9 @@ class SettingsActivity extends ExtendedActivity {
   }
 
   def setColors(background: Int, content1: Int, content2: Int): Unit = {
+    val navUpText = find[TextView](R.id.settings_nav_up)
+    navUpText.setTextColor(content2)
+
     val settingsText = find[TextView](R.id.settings_title)
     settingsText.setTextColor(content1)
 
