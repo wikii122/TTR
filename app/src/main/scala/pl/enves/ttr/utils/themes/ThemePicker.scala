@@ -2,7 +2,7 @@ package pl.enves.ttr.utils.themes
 
 import android.content.Context
 import android.content.res.TypedArray
-import android.graphics.{Canvas, Paint, RectF}
+import android.graphics.{Canvas, Color, Paint, RectF}
 import android.util.AttributeSet
 import android.view.{GestureDetector, MotionEvent, View}
 import pl.enves.androidx.Logging
@@ -20,7 +20,11 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   private var rSide: Float = 0
   private var centerY: Float = 0
   private var centerX: Float = 0
-  private var sideX: Float = 0
+  private var sideXMax: Float = 0
+
+  private var sideSamples = 1
+
+  private def spacing = sideXMax / sideSamples
 
   private object State extends Enumeration {
     type State = Value
@@ -34,8 +38,8 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   private val themes: mutable.ArrayBuffer[Theme] = readDefaultThemes
   //TODO: append user-made themes
 
-  private val paints: ArrayBuffer[(Paint, Paint)] = themes.map(
-    theme => (makePaint(theme.outer1), makePaint(theme.outer2))
+  private val paints: ArrayBuffer[(Paint, Paint, Paint, Paint)] = themes.map(
+    theme => (makePaint(theme.outer1), makePaint(theme.outer2), makePaint(theme.background), makePaint(Color.BLACK))
   )
 
   private val backgrounds: ArrayBuffer[ColorAndroid] = themes.map(theme => theme.background)
@@ -62,7 +66,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     override def onScroll(e1: MotionEvent, e2: MotionEvent, distanceX: Float, distanceY: Float): Boolean = {
       if (state == State.Dragged) {
         val diff = startX - e2.getX
-        drift = diff / sideX
+        drift = diff / spacing
 
         if (Math.abs(drift) >= 0.5f) {
           if (drift > 0) {
@@ -88,13 +92,25 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     return p
   }
 
+  private def sampleRadius(sideX: Float): Float = {
+    val a = (rSide - rCenter) / sideXMax
+    val b = rCenter
+
+    return a * sideX + b
+  }
+
   override def onDraw(canvas: Canvas) {
     super.onDraw(canvas)
     if (!isInEditMode) {
-      val a = rCenter - rSide
-      drawSample(canvas, centerX - sideX * drift, centerY, -a * Math.abs(drift) + rCenter, current)
-      drawSample(canvas, centerX - sideX - sideX * drift, centerY, -a * drift + rSide, left())
-      drawSample(canvas, centerX + sideX - sideX * drift, centerY, a * drift + rSide, right())
+      val driftedCenter = centerX - spacing * drift
+
+      drawSample(canvas, driftedCenter, centerY, current)
+
+      for (i <- 1 to sideSamples) {
+        val sideX = i * spacing
+        drawSample(canvas, driftedCenter - sideX, centerY, left(i))
+        drawSample(canvas, driftedCenter + sideX, centerY, right(i))
+      }
 
       if (state == State.Animation) {
         drift *= 0.95f
@@ -120,7 +136,12 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     }
   }
 
-  private def drawSample(canvas: Canvas, x: Float, y: Float, size: Float, theme: Int): Unit = {
+  private def drawSample(canvas: Canvas, x: Float, y: Float, theme: Int): Unit = {
+    val radius = sampleRadius(Math.abs(centerX - x))
+
+    canvas.drawCircle(x, y, radius, paints(theme)._4)
+    canvas.drawCircle(x, y, 0.8f * radius, paints(theme)._3)
+    val size = 0.6f * radius
     val rect: RectF = new RectF(x - size, y - size, x + size, y + size)
     canvas.drawArc(rect, 0, 90, true, paints(theme)._2) //Second
     canvas.drawArc(rect, 90, 180, true, paints(theme)._1) //First
@@ -146,11 +167,21 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     val hh = h - getPaddingTop - getPaddingBottom
 
     rCenter = hh / 2
-    rSide = rCenter / 1.5f
+    rSide = rCenter / 2.0f
 
     centerY = getPaddingTop + hh / 2
     centerX = getPaddingLeft + ww / 2
-    sideX = centerX - rSide
+    sideXMax = centerX - rSide
+
+    sideSamples = 1
+    var done = false
+    while (!done) {
+      sideSamples += 1
+      if (rCenter + sampleRadius(spacing) > spacing) {
+        sideSamples -= 1
+        done = true
+      }
+    }
   }
 
   override def onTouchEvent(event: MotionEvent): Boolean = {
@@ -164,20 +195,13 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     return result
   }
 
-  def left(): Int = {
-    var i = current - 1
-    if (i < 0) {
-      i = themes.length - 1
-    }
-    return i
+  def left(n: Int = 1): Int = {
+    val s = themes.length
+    return (current - (n % s) + s) % s
   }
 
-  def right(): Int = {
-    var i = current + 1
-    if (i >= themes.length) {
-      i = 0
-    }
-    return i
+  def right(n: Int = 1): Int = {
+    return (current + n) % themes.length
   }
 
   def getCurrentJSON: String = themes(current).toJsonObject.toString
