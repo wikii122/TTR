@@ -20,7 +20,7 @@ import scala.collection.mutable
 
 object ShaderId extends Enumeration {
   type ShaderId = Value
-  val Color, Colors, Texture, Mask = Value
+  val Mask = Value
 }
 
 
@@ -59,9 +59,6 @@ class Resources(assetManager: AssetManager) extends Logging {
 
     //create shaders
     shaders = Map(
-      (ShaderId.Color, new ColorShader()),
-      (ShaderId.Colors, new ColorsShader()),
-      (ShaderId.Texture, new TextureShader()),
       (ShaderId.Mask, new MaskShader())
     )
   }
