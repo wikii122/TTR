@@ -1,9 +1,10 @@
 package pl.enves.androidx
 
-import android.content.{Context, Intent}
+import android.content.Intent
 import android.os.{Handler, Looper}
 import android.support.v7.app.AppCompatActivity
 import android.os.Build
+import android.view.{View, WindowManager}
 import pl.enves.androidx.context.ContextRegistry
 import scala.reflect.{ClassTag, classTag}
 
@@ -26,5 +27,17 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
       if (uiThread == Thread.currentThread) f()
       else handler.post(runnable)
     }
+  }
+
+  protected def setGui() = {
+    getSupportActionBar.hide()
+
+    val window = getWindow
+    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+
+    getWindow.getDecorView.setSystemUiVisibility(
+      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+    )
   }
 }

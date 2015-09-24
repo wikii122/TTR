@@ -9,9 +9,12 @@ import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
+import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
+import pl.enves.androidx.color.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.graphics.models.DefaultGeometries
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.themes._
 
 import scala.util.{Failure, Success, Try}
 
@@ -21,7 +24,7 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources()
+  private[this] val resources = new Resources(context.getResources.getAssets)
   resources.addBitmapProvider(new DefaultTextures(context))
   resources.addGeometryProvider(new DefaultGeometries)
   private[this] val board = new GameBoard(game, resources)
@@ -29,6 +32,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
+  private var themeNeedsUpdate = false
 
   val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
@@ -40,15 +44,26 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     //We don't use camera transformations
   }
 
-  override def onDrawFrame(gl: GL10) {
-    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
+  def setTheme(theme: Theme): Unit = {
+    resources.setTheme(theme)
+    themeNeedsUpdate = true
+  }
 
+  override def onDrawFrame(gl: GL10) {
+    if (themeNeedsUpdate) {
+      updateTheme()
+      themeNeedsUpdate = false
+    }
     val now = System.currentTimeMillis()
 
     if (lastFrame != 0) {
       setCamera(mvMatrix)
       board.animate((now - lastFrame) / 1000.0f)
-      board.draw(mvMatrix, pMatrix)
+
+      this.synchronized {
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
+        board.draw(mvMatrix, pMatrix)
+      }
 
       framesLastSecond += 1
 
@@ -76,9 +91,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
-    //TODO: Load from settings
-    val backgroundColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f)
-    GLES20.glClearColor(backgroundColor(0), backgroundColor(1), backgroundColor(2), 1.0f)
+    GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
     GLES20.glClearDepthf(1.0f)
     GLES20.glEnable(GLES20.GL_DEPTH_TEST)
     GLES20.glDepthFunc(GLES20.GL_LEQUAL)
@@ -86,10 +99,17 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     GLES20.glEnable(GLES20.GL_CULL_FACE)
     GLES20.glCullFace(GLES20.GL_BACK)
     GLES20.glEnable(GLES20.GL_BLEND)
-    GLES20.glBlendFunc(GLES20.GL_ONE, GLES20.GL_ONE_MINUS_SRC_ALPHA)
+    GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
     resources.createOpenGLResources()
     board.updateResources()
+    themeNeedsUpdate = true
+  }
+
+  private def updateTheme(): Unit = {
+    val backgroundColor: Color3 = resources.getTheme.background
+    GLES20.glClearColor(backgroundColor._1, backgroundColor._2, backgroundColor._3, 1.0f)
+    board.updateTheme()
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {

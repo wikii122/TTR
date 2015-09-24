@@ -7,14 +7,14 @@ package pl.enves.ttr.graphics
  * TODO: make it better
  */
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.nio.IntBuffer
+import java.nio.{ByteBuffer, ByteOrder, IntBuffer}
 
+import android.content.res.AssetManager
+import android.graphics.Typeface
 import android.opengl.GLES20
 import pl.enves.androidx.Logging
-
 import pl.enves.ttr.graphics.shaders._
+import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
 
@@ -23,11 +23,19 @@ object ShaderId extends Enumeration {
   val Color, Colors, Texture, Mask = Value
 }
 
-class Resources() extends Logging {
+
+class Resources(assetManager: AssetManager) extends Logging {
 
   private val textureProviders: mutable.ListBuffer[TextureProvider] = mutable.ListBuffer()
   private val geometryProviders: mutable.ListBuffer[GeometryProvider] = mutable.ListBuffer()
 
+  private var _theme: Option[Theme] = None
+
+  def getTheme: Theme = _theme.get
+
+  def setTheme(theme: Theme): Unit = _theme = Some(theme)
+
+  val comfortaa: Typeface = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")

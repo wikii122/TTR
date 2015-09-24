@@ -1,6 +1,8 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.ttr.graphics.{Resources, DefaultTextureId, MatrixStack}
+import pl.enves.androidx.color.ColorImplicits.AndroidToArray
+import pl.enves.androidx.color.ColorTypes.ColorArray
+import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
 import pl.enves.ttr.logic._
 
 class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(resources) {
@@ -12,18 +14,22 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   var empty: Option[Int] = None
 
   //TODO: Load from settings
-  var crossColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
-  var ringColor = Array(27.0f / 255.0f, 20.0f / 255.0f, 100.0f / 255.0f, 1.0f)
-  var outerColor1 = Array(179.0f / 255.0f, 179.0f / 255.0f, 179.0f / 255.0f, 1.0f)
-  var outerColor2 = Array(255.0f / 255.0f, 255.0f / 255.0f, 255.0f / 255.0f, 1.0f)
-  var winnerOuterColor = Array(0.0f / 255.0f, 179.0f / 255.0f, 0.0f / 255.0f, 1.0f)
-  var illegalOuterColor = Array(179.0f / 255.0f, 0.0f / 255.0f, 0.0f / 255.0f, 1.0f)
+  var outerColor1: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
     ring = Some(resources.getTexture(DefaultTextureId.MaskRing.toString))
     cross = Some(resources.getTexture(DefaultTextureId.MaskCross.toString))
     empty = Some(resources.getTexture(DefaultTextureId.MaskEmpty.toString))
+  }
+
+  override protected def onUpdateTheme(): Unit = {
+    super.onUpdateTheme()
+    outerColor1 = resources.getTheme.outer1
+    outerColor2 = resources.getTheme.outer2
+    winnerOuterColor = resources.getTheme.winner
   }
 
   override protected def onAnimate(dt: Float): Unit = {
@@ -35,20 +41,16 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   }
 
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    val outer = if (checkIllegal()) {
-      illegalOuterColor
+    val outer = if (winning) {
+      winnerOuterColor
     } else {
-      if (winning) {
-        winnerOuterColor
-      } else {
-        defaultOuterColor(quadrant)
-      }
+      defaultOuterColor(quadrant)
     }
 
     if (value.isDefined) {
       value.get match {
-        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, ringColor, outer, ring.get))
-        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, crossColor, outer, cross.get))
+        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, ring.get))
+        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, cross.get))
       }
     } else {
       maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, empty.get))

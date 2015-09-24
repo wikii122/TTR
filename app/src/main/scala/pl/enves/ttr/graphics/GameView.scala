@@ -4,7 +4,8 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.{GameManager, Player, StandardGame}
+import pl.enves.ttr.logic.{GameManager, Player}
+import pl.enves.ttr.utils.themes.Theme
 
 /**
  * Main view of the game.
@@ -15,15 +16,18 @@ class GameView(val context: Context with GameManager) extends GLSurfaceView(cont
   private[this] val renderer = GameRenderer(context)
 
   log("Creating")
-  setEGLConfigChooser(true)   //true, cause we need depth buffer
+  setEGLConfigChooser(true) //true, cause we need depth buffer
   setEGLContextClientVersion(2)
 
   setRenderer(renderer)
 
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
+
   //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
 
   def startGame() = context.game.start(Player.X)
+
+  def setTheme(theme: Theme) = renderer.setTheme(theme)
 
   override def onTouchEvent(e: MotionEvent): Boolean = renderer.onTouchEvent(e)
 }

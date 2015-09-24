@@ -41,9 +41,9 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     case Quadrant.fourth => (Quadrant.size, Quadrant.size)
   }
 
-  override def onUpdateResources(): Unit = {
+  override def onUpdateResources(): Unit = {}
 
-  }
+  override protected def onUpdateTheme(): Unit = {}
 
   def checkWinning(x: Int, y: Int): Boolean = {
     val nx = x + quadrantOffset(quadrant)._1

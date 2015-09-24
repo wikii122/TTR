@@ -3,6 +3,7 @@ package pl.enves.ttr
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
+import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.logic.{Game, GameState, GameManager, StandardGame}
 import pl.enves.androidx.ExtendedActivity
 
@@ -33,7 +34,7 @@ class GameActivity extends ExtendedActivity with GameManager {
         case s =>
           throw new IllegalArgumentException(s"Invalid game type: $s")
     }
-
+    view.setTheme(Theme(b.getString("THEME")))
     setContentView(view)
   }
 
@@ -62,17 +63,5 @@ class GameActivity extends ExtendedActivity with GameManager {
       GameState.clear()
       this.finish()
     }
-  }
-
-  def setGui() = {
-    getSupportActionBar.hide()
-
-    val window = getWindow
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-
-    getWindow.getDecorView.setSystemUiVisibility(
-      View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-    )
   }
 }

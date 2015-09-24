@@ -16,6 +16,11 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
   addChild(currentPlayerIndicator)
 
+  val winnerIndicator = new WinnerIndicator(game, resources)
+  winnerIndicator.translate(0.0f, -4.5f, 0.0f)
+  winnerIndicator.scale(4.0f, 4.0f, 1.0f)
+  addChild(winnerIndicator)
+
   val quadrants = Map(
     (Quadrant.first, new GameQuadrant(game, Quadrant.first, resources)),
     (Quadrant.second, new GameQuadrant(game, Quadrant.second, resources)),
@@ -58,6 +63,9 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onUpdateResources(): Unit = {
   }
 
+  override protected def onUpdateTheme(): Unit = {
+  }
+
   def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-1.5f, -1.5f)
     case Quadrant.second => (1.5f, -1.5f)
@@ -91,7 +99,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   override def onAnimate(dt: Float): Unit = {
     val availableRotations = game.availableRotations
     for ((name, arrow) <- arrows) {
-      arrow.active = !availableRotations.contains(name._1)
+      arrow.active = availableRotations.contains(name._1)
     }
   }
 
