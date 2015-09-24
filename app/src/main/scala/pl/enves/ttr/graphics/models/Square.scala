@@ -23,8 +23,6 @@ object Square {
     GLES20.GL_TRIANGLE_STRIP,
     new BuffersData(
       Some(coords),
-      None,
-      None,
       Some(texCoords)
     )
   )

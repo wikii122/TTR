@@ -81,8 +81,6 @@ class Resources(assetManager: AssetManager) extends Logging {
     val buffers: BuffersData = geometryData.getBuffers
     val vbos = new VBOs(
       if (buffers.positions.isDefined) createFloatBuffer(buffers.positions.get) else 0,
-      if (buffers.colors.isDefined) createFloatBuffer(buffers.colors.get) else 0,
-      if (buffers.normals.isDefined) createFloatBuffer(buffers.normals.get) else 0,
       if (buffers.texCoords.isDefined) createFloatBuffer(unflipY(buffers.texCoords.get)) else 0
     )
     val geometry = geometryData match {

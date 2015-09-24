@@ -5,17 +5,14 @@ import android.opengl.GLES20
 /**
  * Class to store Vertex Buffer Objects that belong to the same model
  */
-case class VBOs(positions: Int, colors: Int, normals: Int, texCoords: Int)
+case class VBOs(positions: Int, texCoords: Int)
 
 /**
  * Class that knows to which basic graphic primitives data in VBOs belongs
  * @param drawMode one of POINTS, LINE_STRIP, LINE_LOOP, LINES, TRIANGLE_STRIP, TRIANGLE_FAN, TRIANGLES
  */
 abstract class Geometry(drawMode: Int, vbos: VBOs) {
-
-  def getVBOS: VBOs = {
-    return vbos
-  }
+  def getVBOS: VBOs = vbos
 
   def draw(): Unit
 }
