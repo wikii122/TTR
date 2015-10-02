@@ -1,6 +1,7 @@
 package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
+import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics.{MatrixStack, Geometry}
 
 /**
@@ -44,13 +45,12 @@ class MaskShader extends Shader {
     uniform vec4 u_Color1;
     uniform vec4 u_Color2;
     uniform vec4 u_Color3;
+    uniform sampler2D u_Sampler;
 
     varying vec2 v_MaskTexCoord;
 
-    uniform sampler2D uSampler;
-
     void main(void) {
-      vec4 mask = texture2D(uSampler, vec2(v_MaskTexCoord.s, v_MaskTexCoord.t));
+      vec4 mask = texture2D(u_Sampler, vec2(v_MaskTexCoord.s, v_MaskTexCoord.t));
       vec4 color;
       color.r = u_Color1.r*mask.r + u_Color2.r*mask.g + u_Color3.r*mask.b;
       color.g = u_Color1.g*mask.r + u_Color2.g*mask.g + u_Color3.g*mask.b;
@@ -65,7 +65,7 @@ class MaskShader extends Shader {
   /**
    * (color1rgba, color2rgba, color3rgba, mask)
    */
-  override type dataType = (Array[Float], Array[Float], Array[Float], Int)
+  override type dataType = (ColorArray, ColorArray, ColorArray, Int)
 
   override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
     makeMVPMatrix(mvMatrix, pMatrix)
