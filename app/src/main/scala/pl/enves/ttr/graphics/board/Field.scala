@@ -33,7 +33,7 @@ class Field(resources: Resources) extends SceneObject with Logging with ColorMan
   override protected def onUpdateResources(): Unit = {
     square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
 
-    maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
+    maskShader = Some(resources.getMaskShader)
   }
 
   override protected def onUpdateTheme(): Unit = {

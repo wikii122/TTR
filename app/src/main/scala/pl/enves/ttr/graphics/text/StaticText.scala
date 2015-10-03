@@ -15,7 +15,7 @@ import pl.enves.ttr.graphics.shaders.MaskShader
 class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f)
   extends Logging with GeometryProvider with TextureProvider with SceneObject {
 
-  resources.addBitmapProvider(this)
+  resources.addTextureProvider(this)
   resources.addGeometryProvider(this)
 
   override def getGeometry: Map[String, GeometryData] = Map((modelName, modelGeometry))
@@ -35,7 +35,7 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
 
   val textPaint = new Paint()
   textPaint.setAntiAlias(true)
-  textPaint.setTypeface(resources.comfortaa)
+  textPaint.setTypeface(resources.getTypeFace)
   textPaint.setColor(Color.rgb(0, 0, 255))
 
   var textColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
@@ -80,7 +80,7 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   override def onUpdateResources(): Unit = {
     texture = Some(resources.getTexture(textureName))
     rectangle = Some(resources.getGeometry(modelName))
-    maskShader = Some(resources.getShader(ShaderId.Mask).asInstanceOf[MaskShader])
+    maskShader = Some(resources.getMaskShader)
   }
 
   override protected def onUpdateTheme(): Unit = {}

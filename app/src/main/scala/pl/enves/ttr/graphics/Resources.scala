@@ -18,24 +18,20 @@ import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
 
-object ShaderId extends Enumeration {
-  type ShaderId = Value
-  val Mask = Value
-}
-
-
 class Resources(assetManager: AssetManager) extends Logging {
 
   private val textureProviders: mutable.ListBuffer[TextureProvider] = mutable.ListBuffer()
   private val geometryProviders: mutable.ListBuffer[GeometryProvider] = mutable.ListBuffer()
 
+  private val models: mutable.HashMap[String, Geometry] = mutable.HashMap()
+  
+  private val textures: mutable.HashMap[String, Int] = mutable.HashMap()
+
+  private var maskShader: Option[MaskShader] = None
+  
   private var _theme: Option[Theme] = None
 
-  def getTheme: Theme = _theme.get
-
-  def setTheme(theme: Theme): Unit = _theme = Some(theme)
-
-  val comfortaa: Typeface = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
+  private val typeFace = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")
@@ -53,19 +49,17 @@ class Resources(assetManager: AssetManager) extends Logging {
       log("Polling Geometry Provider: " + geometryProvider)
       for (geometry <- geometryProvider.getGeometry) {
         log("Adding Geometry: " + geometry._1)
-        addModel(geometry._1, geometry._2)
+        addGeometry(geometry._1, geometry._2)
       }
     }
 
     //create shaders
-    shaders = Map(
-      (ShaderId.Mask, new MaskShader())
-    )
+    maskShader = Some(new MaskShader())
   }
 
-  def addBitmapProvider(provider: TextureProvider): Unit = {
+  def addTextureProvider(provider: TextureProvider): Unit = {
     textureProviders.append(provider)
-    log("Added Bitmap Provider: " + provider.getClass.getName)
+    log("Added Texture Provider: " + provider.getClass.getName)
   }
 
   def addGeometryProvider(provider: GeometryProvider): Unit = {
@@ -73,11 +67,7 @@ class Resources(assetManager: AssetManager) extends Logging {
     log("Added Geometry Provider: " + provider.getClass.getName)
   }
 
-  //create models
-  private val models: mutable.HashMap[String, Geometry] = mutable.HashMap()
-
-  private def addModel(name: String, geometryData: GeometryData): Unit = {
-    log("adding model: " + name)
+  private def addGeometry(name: String, geometryData: GeometryData): Unit = {
     val buffers = geometryData.buffers
     val buffersGpu = new Buffers[Int] (
       createFloatBuffer(buffers.positions),
@@ -90,23 +80,21 @@ class Resources(assetManager: AssetManager) extends Logging {
     models.update(name, geometry)
   }
 
-  private val textures: mutable.HashMap[String, Int] = mutable.HashMap()
-
   private def addTexture(name: String, texture: Int): Unit = {
     textures.update(name, texture)
   }
 
-  private var shaders: Map[ShaderId.ShaderId, Shader] = Map()
-
-  //  def getTexture(texture: TextureId.TextureId): Int = textures(texture.toString)
-
   def getTexture(texture: String): Int = textures(texture)
-
-  //def getGeometry(model: DefaultGeometryId.ModelId): Geometry = models(model.toString)
 
   def getGeometry(model: String): Geometry = models(model)
 
-  def getShader(shader: ShaderId.ShaderId): Shader = shaders(shader)
+  def getMaskShader: MaskShader = maskShader.get
+
+  def getTheme: Theme = _theme.get
+
+  def setTheme(theme: Theme): Unit = _theme = Some(theme)
+
+  def getTypeFace: Typeface = typeFace
 
   // Buffer in GPU memory
   private def createFloatBuffer(arr: Array[Float]): Int = {
@@ -122,25 +110,6 @@ class Resources(assetManager: AssetManager) extends Logging {
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffer)
 
     GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, arr.length * 4, floatBuffer, GLES20.GL_STATIC_DRAW)
-
-    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
-
-    return buffer
-  }
-
-  private def createShortBuffer(arr: Array[Short]): Int = {
-    val shortBuffer = ByteBuffer.allocateDirect(arr.length * 2)
-      .order(ByteOrder.nativeOrder()).asShortBuffer()
-
-    shortBuffer.put(arr).position(0)
-
-    val name = IntBuffer.allocate(1)
-    GLES20.glGenBuffers(1, name)
-    val buffer = name.get(0)
-
-    GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, buffer)
-
-    GLES20.glBufferData(GLES20.GL_ARRAY_BUFFER, arr.length * 2, shortBuffer, GLES20.GL_STATIC_DRAW)
 
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, 0)
 

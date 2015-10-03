@@ -25,7 +25,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
   private[this] val resources = new Resources(context.getResources.getAssets)
-  resources.addBitmapProvider(new DefaultTextures(context))
+  resources.addTextureProvider(new DefaultTextures(context))
   resources.addGeometryProvider(new DefaultGeometries)
   private[this] val board = new GameBoard(game, resources)
   private[this] var viewportWidth: Int = 1
