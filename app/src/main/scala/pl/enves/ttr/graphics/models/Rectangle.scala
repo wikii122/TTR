@@ -17,8 +17,6 @@ object Rectangle {
     x, y + h, 0.0f,
     x + w, y + h, 0.0f)
 
-  val numVertex = 4
-
   def texCoords(x: Float, y: Float, w: Float, h: Float) = Array(
     x, y,
     x + w, y,

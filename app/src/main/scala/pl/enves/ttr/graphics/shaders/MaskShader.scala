@@ -70,8 +70,8 @@ class MaskShader extends Shader {
   override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
     makeMVPMatrix(mvMatrix, pMatrix)
 
-    val positionsBuffer = model.getVBOS.positions
-    val texCoordsBuffer = model.getVBOS.texCoords
+    val positionsBuffer = model.buffers.positions
+    val texCoordsBuffer = model.buffers.texCoords
 
     GLES20.glUseProgram(program)
 

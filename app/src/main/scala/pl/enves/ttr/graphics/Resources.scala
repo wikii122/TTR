@@ -78,22 +78,15 @@ class Resources(assetManager: AssetManager) extends Logging {
 
   private def addModel(name: String, geometryData: GeometryData): Unit = {
     log("adding model: " + name)
-    val buffers: BuffersData = geometryData.getBuffers
-    val vbos = new VBOs(
-      if (buffers.positions.isDefined) createFloatBuffer(buffers.positions.get) else 0,
-      if (buffers.texCoords.isDefined) createFloatBuffer(unflipY(buffers.texCoords.get)) else 0
+    val buffers = geometryData.buffers
+    val buffersGpu = new Buffers[Int] (
+      createFloatBuffer(buffers.positions),
+      createFloatBuffer(unflipY(buffers.texCoords))
     )
-    val geometry = geometryData match {
-      case ArraysGeometryData(numVertices, drawMode, b) => new GeometryArrays(
-        numVertices,
-        drawMode,
-        vbos)
-      case ElementsGeometryData(numIndices, indices, drawMode, b) => new GeometryElements(
-        numIndices,
-        createShortBuffer(indices),
-        drawMode,
-        vbos)
-    }
+    val geometry = new Geometry(
+        geometryData.buffers.positions.length,
+        geometryData.drawMode,
+        buffersGpu)
     models.update(name, geometry)
   }
 

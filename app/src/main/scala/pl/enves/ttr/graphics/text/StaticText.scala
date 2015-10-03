@@ -98,12 +98,11 @@ class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: F
   def modelName: String = text + "Model"
 
   def modelGeometry: GeometryData = {
-    val buffers = new BuffersData(
-      Some(Rectangle.coords(textWidth / sizePx, fontHeight / sizePx)),
-      Some(Rectangle.texCoords(0, 1.0f - fontHeight / sizePx, textWidth / sizePx, fontHeight / sizePx))
+    val buffers = new Buffers[Array[Float]](
+      Rectangle.coords(textWidth / sizePx, fontHeight / sizePx),
+      Rectangle.texCoords(0, 1.0f - fontHeight / sizePx, textWidth / sizePx, fontHeight / sizePx)
     )
-    return new ArraysGeometryData(
-      Rectangle.numVertex,
+    return new GeometryData(
       GLES20.GL_TRIANGLE_STRIP,
       buffers
     )
