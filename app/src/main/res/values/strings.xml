@@ -14,4 +14,7 @@
     <string name="t">t</string>
     <string name="nav_prompt">></string>
     <string name="nav_up">←</string>
+    <string name="board_player">player:</string>
+    <string name="board_winner">winner:</string>
+    <string name="board_locked">locked</string>
 </resources>

@@ -45,9 +45,9 @@ class Resources(context: Context) extends Logging {
     addTexture(TextureId.MaskArrowLeft, new DrawableTexture(context, R.drawable.pat_arrow_left_mod_mask).getTexture)
     addTexture(TextureId.MaskArrowRight, new DrawableTexture(context, R.drawable.pat_arrow_right_mod_mask).getTexture)
 
-    val playerTextString = "player:"
-    val winnerTextString = "winner:"
-    val lockedTextString = "locked"
+    val playerTextString = context.getString(R.string.board_player)
+    val winnerTextString = context.getString(R.string.board_winner)
+    val lockedTextString = context.getString(R.string.board_locked)
 
     val words = Array(playerTextString, winnerTextString, lockedTextString)
 
