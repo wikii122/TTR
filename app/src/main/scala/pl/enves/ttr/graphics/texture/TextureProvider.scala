@@ -3,12 +3,11 @@ package pl.enves.ttr.graphics
 import java.nio.IntBuffer
 
 import android.graphics.Bitmap
-import android.opengl.{GLUtils, GLES20}
-import android.util.Log
+import android.opengl.{GLES20, GLUtils}
 
 trait TextureProvider {
-  def getTextures: Map[String, Int]
-  
+  def getTexture: Int
+
   def createTexture(bitmap: Bitmap): Int = {
     val name = IntBuffer.allocate(1)
     GLES20.glGenTextures(1, name)

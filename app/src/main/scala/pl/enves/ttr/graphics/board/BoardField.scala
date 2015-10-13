@@ -2,7 +2,8 @@ package pl.enves.ttr.graphics.board
 
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorTypes.ColorArray
-import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
+import pl.enves.ttr.graphics.texture.TextureId
+import pl.enves.ttr.graphics.{MatrixStack, Resources}
 import pl.enves.ttr.logic._
 
 class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(resources) {
@@ -20,9 +21,9 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
 
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
-    ring = Some(resources.getTexture(DefaultTextureId.MaskRing.toString))
-    cross = Some(resources.getTexture(DefaultTextureId.MaskCross.toString))
-    empty = Some(resources.getTexture(DefaultTextureId.MaskEmpty.toString))
+    ring = Some(resources.getTexture(TextureId.MaskRing))
+    cross = Some(resources.getTexture(TextureId.MaskCross))
+    empty = Some(resources.getTexture(TextureId.MaskEmpty))
   }
 
   override protected def onUpdateTheme(): Unit = {

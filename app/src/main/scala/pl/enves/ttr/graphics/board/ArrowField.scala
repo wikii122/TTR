@@ -3,7 +3,8 @@ package pl.enves.ttr.graphics.board
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
-import pl.enves.ttr.graphics.{DefaultTextureId, MatrixStack, Resources}
+import pl.enves.ttr.graphics.texture.TextureId
+import pl.enves.ttr.graphics.{MatrixStack, Resources}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
 class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
@@ -28,8 +29,8 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
   override protected def onUpdateResources(): Unit = {
     super.onUpdateResources()
     rotation match {
-      case QRotation.r90 => arrow = Some(resources.getTexture(DefaultTextureId.MaskArrowLeft.toString))
-      case QRotation.r270 => arrow = Some(resources.getTexture(DefaultTextureId.MaskArrowRight.toString))
+      case QRotation.r90 => arrow = Some(resources.getTexture(TextureId.MaskArrowLeft))
+      case QRotation.r270 => arrow = Some(resources.getTexture(TextureId.MaskArrowRight))
     }
   }
 

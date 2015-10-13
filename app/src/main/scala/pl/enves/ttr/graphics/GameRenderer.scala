@@ -12,7 +12,6 @@ import pl.enves.androidx.Logging
 import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
 import pl.enves.androidx.color.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
-import pl.enves.ttr.graphics.models.DefaultGeometries
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.themes._
 
@@ -24,9 +23,7 @@ import scala.util.{Failure, Success, Try}
 class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources(context.getResources.getAssets)
-  resources.addTextureProvider(new DefaultTextures(context))
-  resources.addGeometryProvider(new DefaultGeometries)
+  private[this] val resources = new Resources(context)
   private[this] val board = new GameBoard(game, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1

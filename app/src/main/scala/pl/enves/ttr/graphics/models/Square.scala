@@ -1,9 +1,10 @@
 package pl.enves.ttr.graphics.models
 
 import android.opengl.GLES20
-import pl.enves.ttr.graphics.{Buffers, GeometryData}
+import pl.enves.ttr.graphics.GeometryProvider
+import pl.enves.ttr.graphics.geometry.Buffers
 
-object Square {
+object Square extends GeometryProvider {
   private val coords = Array(
     -0.5f, -0.5f, 0.0f,
     0.5f, -0.5f, 0.0f,
@@ -16,7 +17,8 @@ object Square {
     0.0f, 1.0f,
     1.0f, 1.0f)
 
-  val squareGeometry = new GeometryData(
+  override def getGeometry = createBaseGeometry(
+    4,
     GLES20.GL_TRIANGLE_STRIP,
     new Buffers[Array[Float]](
       coords,

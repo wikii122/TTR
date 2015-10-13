@@ -5,13 +5,13 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.models.DefaultGeometryId
+import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.shaders.MaskShader
 
 class Field(resources: Resources) extends SceneObject with Logging with ColorManip {
   objectScale = Array(0.9f, 0.9f, 1.0f)
 
-  var square: Option[Geometry] = None
+  var square: Option[AbstractGeometry] = None
 
   var maskShader: Option[MaskShader] = None
 
@@ -31,7 +31,7 @@ class Field(resources: Resources) extends SceneObject with Logging with ColorMan
   private var notStirred = 0.0f
 
   override protected def onUpdateResources(): Unit = {
-    square = Some(resources.getGeometry(DefaultGeometryId.Square.toString))
+    square = Some(resources.getGeometry(GeometryId.Square))
 
     maskShader = Some(resources.getMaskShader)
   }
