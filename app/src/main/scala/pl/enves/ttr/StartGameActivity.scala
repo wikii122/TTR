@@ -53,6 +53,7 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
 
     enableButtons()
     setPreviousTheme()
+    launchTutorialIfFirstrun()
   }
 
   override def onPause() {
@@ -94,6 +95,19 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
     val itnt = intent[SettingsActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
     itnt start()
+  }
+
+  private[this] def launchTutorialIfFirstrun() = {
+    if(prefs.get.getBoolean("FIRSTRUN", true)) {
+      val ed: SharedPreferences.Editor = prefs.get.edit()
+      ed.putBoolean("FIRSTRUN", false)
+      ed.commit()
+      log("Intending to launch tutorial")
+      val itnt = intent[TutorialActivity]
+      itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+      itnt putExtra("FIRSTRUN", true)
+      itnt start()
+    }
   }
 
   private[this] def enableButtons(): Unit = UiThread(() => {

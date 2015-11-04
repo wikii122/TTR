@@ -1,15 +1,18 @@
 package pl.enves.ttr
 
-import android.content.{Context, SharedPreferences}
-import android.graphics.Typeface
+import android.content.{Intent, Context, SharedPreferences}
+import android.graphics.{Color, Typeface}
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.View
+import android.support.v7.widget.Toolbar
+import android.view.{WindowManager, MenuItem, View}
 import android.widget.TextView
 import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.utils.themes.ThemePicker
 
-class SettingsActivity extends ExtendedActivity {
+class SettingsActivity extends ExtendedActivity with ColorManip {
   private[this] var prefs: Option[SharedPreferences] = None
 
   override def onCreate(savedInstanceState: Bundle) {
@@ -18,8 +21,11 @@ class SettingsActivity extends ExtendedActivity {
 
     prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
 
-    val navUpText = find[TextView](R.id.settings_nav_up)
-    navUpText onClick goBack
+    val tutorialButton = find[TextView](R.id.button_tutorial)
+    tutorialButton onClick startTutorial
+
+    val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
+    tutorialPrompt onClick startTutorial
 
     applyCustomFont("fonts/comfortaa.ttf")
   }
@@ -27,7 +33,9 @@ class SettingsActivity extends ExtendedActivity {
   override def onStart() = {
     super.onStart()
 
-    setGui()
+    setToolbarGui()
+
+    getSupportActionBar.setDisplayHomeAsUpEnabled(true)
 
     setPreviousTheme()
   }
@@ -43,18 +51,24 @@ class SettingsActivity extends ExtendedActivity {
     }
   }
 
-  private[this] def goBack(v: View) = {
-    onBackPressed()
+  private[this] def startTutorial(v: View) = {
+    log("Intending to start tutorial")
+    val itnt = intent[TutorialActivity]
+    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+    itnt start()
   }
 
   private[this] def applyCustomFont(path: String): Unit = {
     val typeface: Typeface = Typeface.createFromAsset(getAssets, path)
 
-    val settingsText = find[TextView](R.id.settings_title)
-    settingsText.setTypeface(typeface)
-
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTypeface(typeface)
+
+    val tutorialButton = find[TextView](R.id.button_tutorial)
+    tutorialButton.setTypeface(typeface)
+
+    val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
+    tutorialPrompt.setTypeface(typeface)
   }
 
   private[this] def getPickedTheme: String = {
@@ -69,15 +83,24 @@ class SettingsActivity extends ExtendedActivity {
   }
 
   def setColors(background: Int, content1: Int, content2: Int): Unit = {
-    val navUpText = find[TextView](R.id.settings_nav_up)
-    navUpText.setTextColor(content2)
-
-    val settingsText = find[TextView](R.id.settings_title)
-    settingsText.setTextColor(content1)
-
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTextColor(content1)
 
+    val tutorialButton = find[TextView](R.id.button_tutorial)
+    tutorialButton.setTextColor(content1)
+
+    val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
+    tutorialPrompt.setTextColor(content2)
+
     pickThemeText.getRootView.setBackgroundColor(background)
+  }
+
+  override def onOptionsItemSelected(item: MenuItem): Boolean = {
+    item.getItemId match {
+      // Respond to the action bar's Up/Home button
+      case android.R.id.home =>
+        onBackPressed()
+    }
+    return super.onOptionsItemSelected(item)
   }
 }
