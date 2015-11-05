@@ -2,10 +2,10 @@ package pl.enves.ttr
 
 import android.content.{Intent, Context, SharedPreferences}
 import android.graphics.{Color, Typeface}
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
+import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.Toolbar
-import android.view.{WindowManager, MenuItem, View}
+import android.view.{MenuItem, View}
 import android.widget.TextView
 import pl.enves.androidx.ExtendedActivity
 import pl.enves.androidx.color.ColorManip
@@ -17,7 +17,11 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
+    supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
     setContentView(R.layout.settings_layout)
+
+    val toolbar = find[Toolbar](R.id.settings_toolbar)
+    setSupportActionBar(toolbar)
 
     prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
 
@@ -69,6 +73,15 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
 
     val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
     tutorialPrompt.setTypeface(typeface)
+
+    val toolbar = find[Toolbar](R.id.settings_toolbar)
+    for (i <- 0 until  toolbar.getChildCount) {
+      toolbar.getChildAt(i) match {
+        case view: TextView =>
+          view.setTypeface(typeface)
+        case _ =>
+      }
+    }
   }
 
   private[this] def getPickedTheme: String = {
@@ -82,7 +95,7 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     themePicker.setCurrentFromJSON(prefs.get.getString("THEME", themePicker.getDefaultJSON))
   }
 
-  def setColors(background: Int, content1: Int, content2: Int): Unit = {
+  private[this] def setColors(background: Int, content1: Int, content2: Int): Unit = {
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTextColor(content1)
 
@@ -91,6 +104,10 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
 
     val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
     tutorialPrompt.setTextColor(content2)
+
+    val toolbar = find[Toolbar](R.id.settings_toolbar)
+    toolbar.setTitleTextColor(content1)
+    //toolbar.setBackgroundColor(color)
 
     pickThemeText.getRootView.setBackgroundColor(background)
   }

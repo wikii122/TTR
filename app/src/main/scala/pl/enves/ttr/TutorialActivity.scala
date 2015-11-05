@@ -6,13 +6,18 @@ import android.os.Bundle
 import android.support.design.widget.TabLayout
 import android.support.v4.app.{Fragment, FragmentManager, FragmentPagerAdapter}
 import android.support.v4.view.ViewPager
+import android.support.v7.widget.Toolbar
+import android.text.{SpannableStringBuilder, Spanned}
 import android.view._
 import android.widget.TextView
-import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.{CustomTypefaceSpan, ExtendedActivity, Logging}
 import pl.enves.ttr.utils.themes.Theme
 
 class ExtendedFragment extends Fragment {
   protected def find[A](view: View, id: Int) = view.findViewById(id).asInstanceOf[A]
+
+  protected def changeFont(view: View, path: String): Unit = {
+  }
 }
 
 class RulesFragment extends ExtendedFragment {
@@ -90,7 +95,8 @@ class NetworkFragment extends ExtendedFragment {
   }
 }
 
-class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) {
+
+class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   final val PAGE_COUNT = 3
 
   override def getCount: Int = {
@@ -109,11 +115,15 @@ class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extend
   }
 
   override def getPageTitle(position: Int): CharSequence = {
-    return position match {
+    val text = position match {
       case 0 => context.getString(R.string.tutorial_rules_title)
       case 1 => context.getString(R.string.tutorial_standard_title)
       case 2 => context.getString(R.string.tutorial_network_title)
     }
+    val typeface: Typeface = Typeface.createFromAsset(context.getAssets, "fonts/comfortaa.ttf")
+    val ssb: SpannableStringBuilder = new SpannableStringBuilder(text)
+    ssb.setSpan(new CustomTypefaceSpan(typeface), 0, text.length, Spanned.SPAN_EXCLUSIVE_INCLUSIVE)
+    return ssb
   }
 }
 
@@ -123,6 +133,9 @@ class TutorialActivity extends ExtendedActivity {
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.tutorial_layout)
+
+    val toolbar = find[Toolbar](R.id.tutorial_toolbar)
+    setSupportActionBar(toolbar)
 
     // Get the ViewPager and set it's PagerAdapter so that it can display items
     val viewPager: ViewPager = find[ViewPager](R.id.tutorial_viewpager)
@@ -144,9 +157,11 @@ class TutorialActivity extends ExtendedActivity {
     setToolbarGui()
 
     getSupportActionBar.setDisplayHomeAsUpEnabled(displayUp)
-    
+
+    applyCustomFont("fonts/comfortaa.ttf")
+
     val theme = Theme(getResources, R.array.theme_five)
-    setBackgroundColor(theme.background)
+    setColors(theme.background, theme.outer1, theme.outer2)
   }
 
   override def onPause() {
@@ -158,9 +173,25 @@ class TutorialActivity extends ExtendedActivity {
     return true
   }
 
-  def setBackgroundColor(background: Int): Unit = {
-    val view = find[TabLayout](R.id.tutorial_tabs)
-    view.getRootView.setBackgroundColor(background)
+  private[this] def applyCustomFont(path: String): Unit = {
+    val typeface: Typeface = Typeface.createFromAsset(getAssets, path)
+
+    val toolbar = find[Toolbar](R.id.tutorial_toolbar)
+    for (i <- 0 until toolbar.getChildCount) {
+      toolbar.getChildAt(i) match {
+        case view: TextView =>
+          view.setTypeface(typeface)
+        case _ =>
+      }
+    }
+  }
+
+  private[this] def setColors(background: Int, content1: Int, content2: Int): Unit = {
+    val toolbar = find[Toolbar](R.id.tutorial_toolbar)
+    toolbar.setTitleTextColor(content1)
+    //toolbar.setBackgroundColor(color)
+
+    toolbar.getRootView.setBackgroundColor(background)
   }
 
   override def onOptionsItemSelected(item: MenuItem): Boolean = {

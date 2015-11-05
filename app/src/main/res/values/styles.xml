@@ -1,12 +1,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
     </style>
 
-    <style name="FiveTheme" parent="Base.Theme.AppCompat.Light.DarkActionBar">
-        <!-- Customize your theme here. -->
+    <style name="FiveTheme" parent="@style/Theme.AppCompat.Light.NoActionBar">
         <item name="android:textColor">@color/five_outer1</item>
         <item name="android:textColorSecondary">@color/five_outer2</item>
         <item name="android:background">@color/five_background</item>

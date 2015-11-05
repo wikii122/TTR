@@ -6,7 +6,7 @@ import android.graphics.drawable.ColorDrawable
 import android.os.{Handler, Looper}
 import android.support.v7.app.AppCompatActivity
 import android.os.Build
-import android.view.{Window, View, WindowManager}
+import android.view.{View, WindowManager}
 import pl.enves.androidx.context.ContextRegistry
 import scala.reflect.{ClassTag, classTag}
 
@@ -32,7 +32,7 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
   }
 
   protected def setGui() = {
-    getSupportActionBar.hide()
+//    getSupportActionBar.hide()
 
     val window = getWindow
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
@@ -50,5 +50,6 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
     //dark action bar default color is #212121
     val color = Color.argb(0x80, 0x21, 0x21, 0x21)
     getSupportActionBar.setBackgroundDrawable(new ColorDrawable(color))
+    //getSupportActionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT))
   }
 }
