@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentManager, FragmentPagerAdapter}
 import android.support.v4.view.ViewPager
 import android.view._
-import android.widget.{Button, TextView}
+import android.widget.{ImageView, Button, TextView}
 import pl.enves.androidx.helpers._
 import pl.enves.androidx.{ExtendedActivity, Logging}
 
@@ -20,81 +20,87 @@ abstract class ExtendedFragment extends Fragment {
     textView.setTypeface(typeface)
   }
 
+  protected def changeText(view: View, id: Int, textId: Int): Unit = {
+    val textView = find[TextView](view, id)
+    textView.setText(textId)
+  }
+
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
   }
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, savedInstanceState: Bundle): View = {
-    val view: View = inflater.inflate(getLayout, container, false)
+    val view: View = inflater.inflate(layout, container, false)
     val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeFont(view, getTitle, typeface)
-    changeFont(view, getText, typeface)
+    changeText(view, title, getTitleRes)
+    changeText(view, text, getTextRes)
+    changeFont(view, title, typeface)
+    changeFont(view, text, typeface)
+    val imageView = find[ImageView](view, image)
+    imageView.setImageResource(getImageRes)
+
     return view
   }
 
-  def getLayout: Int
+  private val layout: Int = R.layout.fragment_tutorial
 
-  def getTitle: Int
+  private val title: Int = R.id.tutorial_title
 
-  def getText: Int
+  private val text: Int = R.id.tutorial_text
+
+  private val image: Int = R.id.tutorial_image
+
+  def getTitleRes: Int = 0
+
+  def getTextRes: Int = 0
+
+  def getImageRes: Int = R.drawable.tutorial_placeholder
 }
 
 class FiguresFragment extends ExtendedFragment {
-  override def getLayout = R.layout.fragment_tutorial_figures
+  override def getTitleRes = R.string.tutorial_figures_title
 
-  override def getTitle = R.id.tutorial_figures_title
-
-  override def getText = R.id.tutorial_figures_text
+  override def getTextRes = R.string.tutorial_figures
 }
 
 class RotationsFragment extends ExtendedFragment {
-  override def getLayout = R.layout.fragment_tutorial_rotations
+  override def getTitleRes = R.string.tutorial_rotations_title
 
-  override def getTitle = R.id.tutorial_rotations_title
-
-  override def getText = R.id.tutorial_rotations_text
+  override def getTextRes = R.string.tutorial_rotations
 }
 
 class GoalsFragment extends ExtendedFragment {
-  override def getLayout = R.layout.fragment_tutorial_goals
+  override def getTitleRes = R.string.tutorial_goals_title
 
-  override def getTitle = R.id.tutorial_goals_title
-
-  override def getText = R.id.tutorial_goals_text
+  override def getTextRes = R.string.tutorial_goals
 }
 
 class StandardFragment extends ExtendedFragment {
-  override def getLayout = R.layout.fragment_tutorial_standard
+  override def getTitleRes = R.string.tutorial_standard_title
 
-  override def getTitle = R.id.tutorial_standard_title
-
-  override def getText = R.id.tutorial_standard_text
+  override def getTextRes = R.string.tutorial_standard
 }
 
 class NetworkFragment extends ExtendedFragment {
-  override def getLayout = R.layout.fragment_tutorial_network
+  override def getTitleRes = R.string.tutorial_network_title
 
-  override def getTitle = R.id.tutorial_network_title
-
-  override def getText = R.id.tutorial_network_text
+  override def getTextRes = R.string.tutorial_network
 }
 
 class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
-  final val PAGE_COUNT = 5
+  val items = Array(
+    new FiguresFragment(),
+    new RotationsFragment(),
+    new GoalsFragment(),
+    new StandardFragment(),
+    new NetworkFragment()
+  )
 
-  override def getCount: Int = {
-    return PAGE_COUNT
-  }
+  override def getCount: Int = items.length
 
   override def getItem(position: Int): Fragment = {
     val args: Bundle = new Bundle()
-    val fragment = position match {
-      case 0 => new FiguresFragment()
-      case 1 => new RotationsFragment
-      case 2 => new GoalsFragment
-      case 3 => new StandardFragment()
-      case 4 => new NetworkFragment()
-    }
+    val fragment = items(position)
     fragment.setArguments(args)
     return fragment
   }

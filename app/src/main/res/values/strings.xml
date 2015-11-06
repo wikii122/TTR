@@ -28,7 +28,7 @@
     <string name="tutorial_standard">Play with a friend on one device</string>
     <string name="tutorial_network_title">network</string>
     <string name="tutorial_network">Or play online</string>
-    <string name="tutorial_placeholder_image_description">Image that shows game</string>
+    <string name="tutorial_image_description">Image that shows game</string>
     <string name="tutorial_skip">skip</string>
     <string name="tutorial_next">next</string>
     <string name="tutorial_done">done</string>
