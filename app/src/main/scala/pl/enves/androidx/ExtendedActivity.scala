@@ -43,6 +43,12 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
     )
   }
 
+  protected def setBottomBarGui() = {
+    val window = getWindow
+    window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
+    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
+  }
+
   protected def setToolbarGui() = {
     val window = getWindow
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
