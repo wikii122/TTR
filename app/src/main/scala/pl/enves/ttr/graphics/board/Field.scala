@@ -37,7 +37,7 @@ class Field(resources: Resources) extends SceneObject with Logging with ColorMan
   }
 
   override protected def onUpdateTheme(): Unit = {
-    val noColor: ColorArray = colorTransparent(resources.getTheme.background, 0.0f)
+    noColor = colorTransparent(resources.getTheme.background, 0.0f)
   }
 
   override protected def onAnimate(dt: Float): Unit = {
