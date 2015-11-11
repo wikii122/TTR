@@ -46,35 +46,29 @@ abstract class ExtendedFragment extends Fragment {
 
   protected val layout: Int = R.layout.fragment_tutorial
 
-  protected val title: Int = R.id.tutorial_title
-
   protected val text: Int = R.id.tutorial_text
 
   protected val image: Int = R.id.tutorial_image
 }
 
-class ImageFragment(titleRes: Int, textRes: Int, imageRes: Int) extends ExtendedFragment {
+class ImageFragment(textRes: Int, imageRes: Int) extends ExtendedFragment {
   override def setupView(view: View): Unit = {
     val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(view, title, titleRes)
     changeText(view, text, textRes)
-    changeFont(view, title, typeface)
     changeFont(view, text, typeface)
     val imageView = find[ImageView](view, image)
     imageView.setImageResource(imageRes)
   }
 }
 
-class AnimationFragment(titleRes: Int, textRes: Int, animationRes: Int) extends ExtendedFragment with Logging {
+class AnimationFragment(textRes: Int, animationRes: Int) extends ExtendedFragment with Logging {
   private val frames: util.ArrayList[MyFrame] = new util.ArrayList[MyFrame]()
 
   private var animate = false
 
   override def setupView(view: View): Unit = {
     val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(view, title, titleRes)
     changeText(view, text, textRes)
-    changeFont(view, title, typeface)
     changeFont(view, text, typeface)
 
     loadAnimation(animationRes, getContext)
@@ -247,11 +241,11 @@ class AnimationFragment(titleRes: Int, textRes: Int, animationRes: Int) extends 
 
 class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   val items = Array(
-    new AnimationFragment(R.string.tutorial_figures_title, R.string.tutorial_figures, R.drawable.tutorial_figures_animation),
-    new AnimationFragment(R.string.tutorial_rotations_title, R.string.tutorial_rotations, R.drawable.tutorial_rotations_animation),
-    new AnimationFragment(R.string.tutorial_goals_title, R.string.tutorial_goals, R.drawable.tutorial_goals_animation),
-    new ImageFragment(R.string.tutorial_standard_title, R.string.tutorial_standard, R.drawable.tutorial_placeholder),
-    new ImageFragment(R.string.tutorial_network_title, R.string.tutorial_network, R.drawable.tutorial_placeholder)
+    new AnimationFragment(R.string.tutorial_figures, R.drawable.tutorial_figures_animation),
+    new AnimationFragment(R.string.tutorial_rotations, R.drawable.tutorial_rotations_animation),
+    new AnimationFragment(R.string.tutorial_goals, R.drawable.tutorial_goals_animation),
+    new ImageFragment(R.string.tutorial_standard, R.drawable.tutorial_placeholder),
+    new ImageFragment(R.string.tutorial_network, R.drawable.tutorial_placeholder)
   )
 
   val args: Bundle = new Bundle()

@@ -18,15 +18,10 @@
     <string name="board_player">player:</string>
     <string name="board_winner">winner:</string>
     <string name="board_locked">locked</string>
-    <string name="tutorial_figures_title">figures</string>
     <string name="tutorial_figures">You can play either noughts or crosses. Cross player moves first.</string>
-    <string name="tutorial_rotations_title">rotations</string>
     <string name="tutorial_rotations">When quadrant\'s arrows are active, you can rotate it instead of marking a field</string>
-    <string name="tutorial_goals_title">goals</string>
-    <string name="tutorial_goals">Try to put 5 of your marks in straight line to win the game</string>
-    <string name="tutorial_standard_title">standard</string>
+    <string name="tutorial_goals">Try to put 5 of your marks straight in line to win the game</string>
     <string name="tutorial_standard">Play with a friend on one device</string>
-    <string name="tutorial_network_title">network</string>
     <string name="tutorial_network">Or play online</string>
     <string name="tutorial_image_description">Image that shows game</string>
     <string name="tutorial_skip">skip</string>

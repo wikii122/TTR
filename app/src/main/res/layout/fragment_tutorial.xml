@@ -4,16 +4,8 @@
               android:layout_height="match_parent"
               android:gravity="center"
               android:orientation="vertical"
-              android:weightSum="10">
-
-    <TextView
-        android:id="@+id/tutorial_title"
-        android:layout_width="wrap_content"
-        android:layout_height="fill_parent"
-        android:layout_weight="4"
-        android:gravity="center"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:textColor="@color/five_outer1"/>
+              android:weightSum="6"
+              android:paddingTop="20dp">
 
     <ImageView
         android:id="@+id/tutorial_image"
