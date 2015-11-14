@@ -1,24 +1,27 @@
 package pl.enves.ttr
 
+import java.io.{IOException, InputStream}
 import java.util
+import java.util.concurrent.LinkedBlockingQueue
 
 import android.content.Context
 import android.content.res.XmlResourceParser
-import android.graphics.drawable.{BitmapDrawable, Drawable}
-import android.graphics.{BitmapFactory, Typeface}
-import android.os.{Bundle, Handler}
+import android.graphics.{Bitmap, BitmapFactory, Typeface}
+import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentManager, FragmentPagerAdapter}
 import android.support.v4.view.ViewPager
 import android.view._
 import android.widget.{Button, ImageView, TextView}
 import org.xmlpull.v1.{XmlPullParser, XmlPullParserException}
 import pl.enves.androidx.helpers._
-import pl.enves.androidx.{ExtendedActivity, Logging}
+import pl.enves.androidx.{ExtendedActivity, IOUtils, Logging}
 
 abstract class ExtendedFragment extends Fragment {
   protected def find[A](view: View, id: Int) = view.findViewById(id).asInstanceOf[A]
 
   protected val fontPath = "fonts/comfortaa.ttf"
+
+  protected var number = 0
 
   protected def changeFont(view: View, id: Int, typeface: Typeface): Unit = {
     val textView = find[TextView](view, id)
@@ -30,15 +33,16 @@ abstract class ExtendedFragment extends Fragment {
     textView.setText(textId)
   }
 
-  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
-    val view: View = inflater.inflate(layout, container, false)
+  override def onStart() {
+    super.onStart()
 
-    setupView(view)
-
-    return view
+    number = getArguments.getInt("NUMBER", 0)
   }
 
-  protected def setupView(view: View): Unit = {}
+  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
+    val view: View = inflater.inflate(layout, container, false)
+    return view
+  }
 
   def onSelected(): Unit = {}
 
@@ -51,94 +55,166 @@ abstract class ExtendedFragment extends Fragment {
   protected val image: Int = R.id.tutorial_image
 }
 
-class ImageFragment(textRes: Int, imageRes: Int) extends ExtendedFragment {
-  override def setupView(view: View): Unit = {
+class ImageFragment extends ExtendedFragment with Logging {
+  private var textRes = 0
+  private var imagePath = ""
+
+  override def onStart(): Unit = {
+    super.onStart()
+
+    textRes = getArguments.getInt("TEXT_RES", 0)
+    imagePath = getArguments.getString("IMAGE_PATH", "")
+
     val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(view, text, textRes)
-    changeFont(view, text, typeface)
-    val imageView = find[ImageView](view, image)
-    imageView.setImageResource(imageRes)
+    changeText(getView, text, textRes)
+    changeFont(getView, text, typeface)
+    val imageView = find[ImageView](getView, image)
+    try {
+      val stream: InputStream = getContext.getResources.getAssets.open(imagePath)
+      val rawData = IOUtils.readBytes(stream)
+      stream.close()
+      imageView.setImageBitmap(BitmapFactory.decodeByteArray(rawData, 0, rawData.length))
+    } catch {
+      case e: IOException =>
+        error(e.getMessage)
+    }
   }
 }
 
-class AnimationFragment(textRes: Int, animationRes: Int) extends ExtendedFragment with Logging {
-  private val frames: util.ArrayList[MyFrame] = new util.ArrayList[MyFrame]()
+object ImageFragment {
+  def apply(textRes: Int, imagePath: String, number: Int): ImageFragment = {
+    val imageFragment = new ImageFragment
+    val args: Bundle = new Bundle()
+    args.putInt("TEXT_RES", textRes)
+    args.putString("IMAGE_PATH", imagePath)
+    args.putInt("NUMBER", number)
+    imageFragment.setArguments(args)
+    return imageFragment
+  }
+}
+
+class AnimationFragment extends ExtendedFragment with Logging {
+
+  private var textRes = 0
+  private var animationRes = 0
+
+  private val frameSpecs: util.ArrayList[FrameSpec] = new util.ArrayList[FrameSpec]()
+
+  private val framesLoaded = new LinkedBlockingQueue[FrameData](2)
+
+  private var frameToLoad = 0
+
+  private var producerThread: Option[Thread] = None
+  private var consumerThread: Option[Thread] = None
+
+  private var lastFrameData: Option[FrameData] = None
 
   private var animate = false
 
-  override def setupView(view: View): Unit = {
-    val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(view, text, textRes)
-    changeFont(view, text, typeface)
+  private var autoPlay = false
 
-    loadAnimation(animationRes, getContext)
+  private var wasAutoPlayed = false
+
+  override def onCreate(savedInstanceState: Bundle): Unit = {
+    super.onCreate(savedInstanceState)
+    log("onCreate" + number)
+    if (savedInstanceState != null) {
+      autoPlay = savedInstanceState.getBoolean("AUTO_PLAY", false)
+      wasAutoPlayed = false
+    }
   }
 
-  override def onSelected(): Unit = {
-    log("onSelected")
-    val imageView = find[ImageView](getView, image)
-    startAnimation(imageView)
-  }
-
-  override def onDeSelected(): Unit = {
-    log("onDeSelected")
-    val imageView = find[ImageView](getView, image)
-    stopAnimation(imageView)
+  override def onSaveInstanceState(outState: Bundle): Unit = {
+    super.onSaveInstanceState(outState)
+    log("onSaveInstanceState" + number)
+    outState.putBoolean("AUTO_PLAY", animate)
   }
 
   override def onStart(): Unit = {
     super.onStart()
-    if (getArguments != null) {
-      if (getArguments.getBoolean("AUTOPLAY", false)) {
-        onSelected()
-      }
+    log("onStart" + number)
+
+    textRes = getArguments.getInt("TEXT_RES", 0)
+    animationRes = getArguments.getInt("ANIMATION_RES", 0)
+
+    val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
+    changeText(getView, text, textRes)
+    changeFont(getView, text, typeface)
+
+    loadAnimation(animationRes, getContext)
+    val imageView = find[ImageView](getView, image)
+    displayFirstFrame(imageView, getContext)
+    autoPlay = autoPlay || getArguments.getBoolean("AUTO_PLAY", false)
+    if (autoPlay && !wasAutoPlayed) {
+      wasAutoPlayed = true
+      startAnimation(imageView, getContext)
     }
+  }
+
+  override def onSelected(): Unit = {
+    log("onSelected" + number)
+    val imageView = find[ImageView](getView, image)
+    startAnimation(imageView, getContext)
+  }
+
+  override def onDeSelected(): Unit = {
+    log("onDeSelected" + number)
+    stopAnimation()
   }
 
   override def onStop(): Unit = {
     super.onStop()
-    log("onStop")
-    onDeSelected()
+    log("onStop" + number)
+    autoPlay = animate
+    stopAnimation()
+    if (lastFrameData.isDefined) {
+      lastFrameData.get.recycle()
+    }
+    lastFrameData = None
+    frameToLoad = 0
+    producerThread = None
+    consumerThread = None
+    wasAutoPlayed = false
   }
 
-  class MyFrame(drawableId: Int, duration: Int) {
-    private var drawable: Option[Drawable] = None
+  override def onDestroy(): Unit = {
+    super.onDestroy()
+    log("onDestroy" + number)
+    frameSpecs.clear()
+  }
 
+  private def setImage(imageView: ImageView, frameData: FrameData) {
+    getActivity.runOnUiThread(new Runnable() {
+      override def run(): Unit = {
+        imageView.setImageBitmap(frameData.getBitmap)
+        if (lastFrameData.isDefined) {
+          lastFrameData.get.recycle()
+        }
+        lastFrameData = Some(frameData)
+      }
+    })
+  }
+
+  class FrameData(bitmap: Bitmap, duration: Int) {
+    def getBitmap: Bitmap = bitmap
+
+    def getDuration: Int = duration
+
+    def recycle(): Unit = bitmap.recycle()
+  }
+
+  class FrameSpec(rawData: Array[Byte], duration: Int) {
     def getDuration = duration
 
-    def isReady = {
-      drawable.synchronized {
-        drawable.isDefined
-      }
-    }
-
-    def getDrawable = {
-      drawable.synchronized {
-        drawable.get
-      }
-    }
-
-    def makeDrawable(context: Context): Unit = {
-      drawable.synchronized {
-        val resources = context.getResources
-        val d = new BitmapDrawable(resources, BitmapFactory.decodeResource(resources, drawableId))
-        drawable = Some(d)
-      }
-    }
-
-    def discardDrawable(): Unit = {
-      drawable.synchronized {
-        if (drawable.isDefined) {
-          drawable.get.asInstanceOf[BitmapDrawable].getBitmap.recycle()
-          drawable = None
-        }
-      }
+    def makeData(context: Context): FrameData = {
+      return new FrameData(BitmapFactory.decodeByteArray(rawData, 0, rawData.length), duration)
     }
   }
+
 
   def loadAnimation(resourceId: Int, context: Context): Unit = {
     val parser: XmlResourceParser = context.getResources.getXml(resourceId)
-    frames.clear()
+    frameSpecs.clear()
     try {
       var eventType = parser.getEventType
       while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -147,20 +223,28 @@ class AnimationFragment(textRes: Int, animationRes: Int) extends ExtendedFragmen
           case XmlPullParser.START_TAG =>
 
             if (parser.getName.equals("item")) {
-              var drawableId = 0
+              var imagePath = ""
               var duration = 0
 
               for (i <- 0 until parser.getAttributeCount) {
                 if (parser.getAttributeName(i).equals("drawable")) {
-                  drawableId = Integer.parseInt(parser.getAttributeValue(i).substring(1))
+                  imagePath = parser.getAttributeValue(i).substring(0)
                 }
                 else if (parser.getAttributeName(i).equals("duration")) {
                   duration = parser.getAttributeIntValue(i, 1000)
                 }
               }
 
-              val myFrame = new MyFrame(drawableId, duration)
-              frames.add(myFrame)
+              try {
+                val stream: InputStream = context.getAssets.open(imagePath)
+                val rawData = IOUtils.readBytes(stream)
+                stream.close()
+                val frameSpec = new FrameSpec(rawData, duration)
+                frameSpecs.add(frameSpec)
+              } catch {
+                case e: IOException =>
+                  error(e.getMessage)
+              }
             }
 
           case XmlPullParser.END_TAG =>
@@ -175,82 +259,100 @@ class AnimationFragment(textRes: Int, animationRes: Int) extends ExtendedFragmen
     }
   }
 
-  def startAnimation(imageView: ImageView): Unit = {
-    frames.synchronized {
-      log("starting")
-      if (!animate) {
-        animate = true
-
-        val thisFrame = frames.get(0)
-        thisFrame.makeDrawable(imageView.getContext)
-        imageView.setImageDrawable(thisFrame.getDrawable)
-
-        val nextFrame = frames.get(1)
-        nextFrame.makeDrawable(imageView.getContext)
-
-        new Handler().postDelayed(new Runnable() {
-          override def run(): Unit = {
-            animateNext(imageView, 1)
-          }
-        }, thisFrame.getDuration)
-      }
-    }
-  }
-
-  def stopAnimation(imageView: ImageView): Unit = {
-    frames.synchronized {
-      log("stopping")
-      animate = false
-      val current = imageView.getDrawable
-      for (i <- 0 until frames.size()) {
-        val frame = frames.get(i)
-        if (frame.isReady) {
-          if (frame.getDrawable != current) {
-            frame.discardDrawable()
-          }
+  class Producer(context: Context) extends Runnable {
+    override def run(): Unit = {
+      while (true) {
+        val frameData = frameSpecs.get(frameToLoad).makeData(context)
+        try {
+          framesLoaded.put(frameData)
+        } catch {
+          case e: InterruptedException =>
+            frameData.recycle()
+            return
+        }
+        frameToLoad += 1
+        if (frameToLoad == frameSpecs.size()) {
+          frameToLoad = 0
         }
       }
     }
   }
 
-  def animateNext(imageView: ImageView, frameNumber: Int) {
+  class Consumer(imageView: ImageView) extends Runnable {
+    override def run(): Unit = {
+      while (true) {
+        var frameData: Option[FrameData] = None
+        try {
+          frameData = Some(framesLoaded.take())
+        } catch {
+          case e: InterruptedException =>
+            return
+        }
+        setImage(imageView, frameData.get)
+        try {
+          Thread.sleep(frameData.get.getDuration)
+        } catch {
+          case e: InterruptedException =>
+            return
+        }
+      }
+    }
+  }
+
+  def displayFirstFrame(imageView: ImageView, context: Context): Unit = {
+    val frameData = frameSpecs.get(0).makeData(context)
+    setImage(imageView, frameData)
+  }
+
+  def startAnimation(imageView: ImageView, context: Context): Unit = {
+    if (!animate) {
+      animate = true
+      consumerThread = Some(new Thread(new Consumer(imageView)))
+      consumerThread.get.start()
+      producerThread = Some(new Thread(new Producer(context)))
+      producerThread.get.start()
+    }
+  }
+
+  def stopAnimation(): Unit = {
     if (animate) {
-      val prevFrameNumber = if (frameNumber > 0) frameNumber - 1 else frames.size() - 1
-      val nextFrameNumber = if (frameNumber < frames.size() - 1) frameNumber + 1 else 0
+      animate = false
+      producerThread.get.interrupt()
+      producerThread.get.join()
+      producerThread = None
+      consumerThread.get.interrupt()
+      consumerThread.get.join()
+      consumerThread = None
 
-      val thisFrame = frames.get(frameNumber)
-      log("setting image " + frameNumber)
-      imageView.setImageDrawable(thisFrame.getDrawable)
-
-      val prevFrame = frames.get(prevFrameNumber)
-      prevFrame.discardDrawable()
-
-      val nextFrame = frames.get(nextFrameNumber)
-      nextFrame.makeDrawable(imageView.getContext)
-
-      new Handler().postDelayed(new Runnable() {
-        override def run(): Unit = {
-          frames.synchronized {
-            animateNext(imageView, nextFrameNumber)
-          }
-        }
-      }, thisFrame.getDuration)
+      while (framesLoaded.size() != 0) {
+        framesLoaded.take().recycle()
+      }
+      frameToLoad = 0
     }
+  }
+}
+
+object AnimationFragment {
+  def apply(textRes: Int, animationRes: Int, autoPlay: Boolean, number: Int): AnimationFragment = {
+    val animationFragment = new AnimationFragment
+    val args: Bundle = new Bundle()
+    args.putInt("TEXT_RES", textRes)
+    args.putInt("ANIMATION_RES", animationRes)
+    args.putBoolean("AUTO_PLAY", autoPlay)
+    args.putInt("NUMBER", number)
+    animationFragment.setArguments(args)
+    return animationFragment
   }
 }
 
 class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   val items = Array(
-    new AnimationFragment(R.string.tutorial_figures, R.drawable.tutorial_figures_animation),
-    new AnimationFragment(R.string.tutorial_rotations, R.drawable.tutorial_rotations_animation),
-    new AnimationFragment(R.string.tutorial_goals, R.drawable.tutorial_goals_animation),
-    new ImageFragment(R.string.tutorial_standard, R.drawable.tutorial_placeholder),
-    new ImageFragment(R.string.tutorial_network, R.drawable.tutorial_placeholder)
+    AnimationFragment(R.string.tutorial_figures, R.xml.tutorial_figures_animation, autoPlay = true, 1),
+    AnimationFragment(R.string.tutorial_rotations, R.xml.tutorial_rotations_animation, autoPlay = false, 2),
+    AnimationFragment(R.string.tutorial_goals, R.xml.tutorial_goals_animation, autoPlay = false, 3),
+    ImageFragment(R.string.tutorial_standard, "images/tutorial_placeholder.png", 4),
+    ImageFragment(R.string.tutorial_network, "images/tutorial_placeholder.png", 5)
   )
-
-  val args: Bundle = new Bundle()
-  args.putBoolean("AUTOPLAY", true)
-  items(0).setArguments(args)
 
   override def getCount: Int = items.length
 
@@ -292,9 +394,9 @@ class TutorialActivity extends ExtendedActivity {
           doneButton.setVisibility(View.GONE)
           nextButton.setVisibility(View.VISIBLE)
         }
-        adapter.get.getItem(currentFragment).asInstanceOf[ExtendedFragment].onDeSelected()
+        viewPager.getAdapter.instantiateItem(viewPager, currentFragment).asInstanceOf[ExtendedFragment].onDeSelected()
         currentFragment = position
-        adapter.get.getItem(position).asInstanceOf[ExtendedFragment].onSelected()
+        viewPager.getAdapter.instantiateItem(viewPager, currentFragment).asInstanceOf[ExtendedFragment].onSelected()
       }
 
       override def onPageScrollStateChanged(state: Int): Unit = {}

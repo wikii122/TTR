@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list>
+    <item
+        drawable="images/tutorial_rotations_1.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_rotations_2.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_3.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_4.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_5.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_6.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_7.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_8.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_9.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_10.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_11.png"
+        duration="100"/>
+    <item
+        drawable="images/tutorial_rotations_12.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_rotations_13.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_rotations_14.png"
+        duration="1000"/>
+</animation-list>
