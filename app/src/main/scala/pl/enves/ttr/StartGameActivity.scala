@@ -4,7 +4,7 @@ import android.content.{Context, Intent, SharedPreferences}
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
-import android.widget.TextView
+import android.widget.{Button, TextView}
 import pl.enves.androidx.ExtendedActivity
 import pl.enves.androidx.color.ColorTypes.ColorAndroid
 import pl.enves.androidx.color.ColorUiTweaks
@@ -21,22 +21,22 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.start_game_layout)
 
-    val newGameButton = find[TextView](R.id.button_create)
+    val newGameButton = find[Button](R.id.button_create)
     newGameButton onClick startStandardGame
 
-    val newGamePrompt = find[TextView](R.id.button_create_prompt)
+    val newGamePrompt = find[Button](R.id.button_create_prompt)
     newGamePrompt onClick startStandardGame
 
-    val continueGameButton = find[TextView](R.id.button_continue)
+    val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton onClick continueGame
 
-    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    val continueGamePrompt = find[Button](R.id.button_continue_prompt)
     continueGamePrompt onClick continueGame
 
-    val settingsButton = find[TextView](R.id.button_settings)
+    val settingsButton = find[Button](R.id.button_settings)
     settingsButton onClick launchSettings
 
-    val settingsPrompt = find[TextView](R.id.button_settings_prompt)
+    val settingsPrompt = find[Button](R.id.button_settings_prompt)
     settingsPrompt onClick launchSettings
 
     GameState.onDataChanged(enableButtons)
@@ -98,8 +98,8 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
 
   private[this] def enableButtons(): Unit = UiThread(() => {
     //val continueGameButton = find[Button](R.id.button_continue)
-    val continueGameButton = find[TextView](R.id.button_continue)
-    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    val continueGameButton = find[Button](R.id.button_continue)
+    val continueGamePrompt = find[Button](R.id.button_continue_prompt)
     if (activeGame) {
       continueGameButton.enable()
       continueGamePrompt.enable()
@@ -112,22 +112,22 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
   private[this] def applyCustomFont(path: String): Unit = {
     val typeface: Typeface = Typeface.createFromAsset(getAssets, path)
 
-    val newGameButton = find[TextView](R.id.button_create)
+    val newGameButton = find[Button](R.id.button_create)
     newGameButton.setTypeface(typeface)
 
-    val newGamePrompt = find[TextView](R.id.button_create_prompt)
+    val newGamePrompt = find[Button](R.id.button_create_prompt)
     newGamePrompt.setTypeface(typeface)
 
-    val continueGameButton = find[TextView](R.id.button_continue)
+    val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton.setTypeface(typeface)
 
-    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    val continueGamePrompt = find[Button](R.id.button_continue_prompt)
     continueGamePrompt.setTypeface(typeface)
 
-    val settingsButton = find[TextView](R.id.button_settings)
+    val settingsButton = find[Button](R.id.button_settings)
     settingsButton.setTypeface(typeface)
 
-    val settingsPrompt = find[TextView](R.id.button_settings_prompt)
+    val settingsPrompt = find[Button](R.id.button_settings_prompt)
     settingsPrompt.setTypeface(typeface)
 
     val ticTacText = find[TextView](R.id.text_tic_tac)
@@ -167,22 +167,22 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
   private[this] def activeGame: Boolean = GameState.active
 
   def setColors(background: ColorAndroid, content1: ColorAndroid, content2: ColorAndroid): Unit = {
-    val newGameButton = find[TextView](R.id.button_create)
+    val newGameButton = find[Button](R.id.button_create)
     newGameButton.setTextColor(content1)
 
-    val newGamePrompt = find[TextView](R.id.button_create_prompt)
+    val newGamePrompt = find[Button](R.id.button_create_prompt)
     newGamePrompt.setTextColor(content2)
 
-    val continueGameButton = find[TextView](R.id.button_continue)
+    val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton.setTextColor(colorStateList(content1, 0.25f))
 
-    val continueGamePrompt = find[TextView](R.id.button_continue_prompt)
+    val continueGamePrompt = find[Button](R.id.button_continue_prompt)
     continueGamePrompt.setTextColor(colorStateList(content2, 0.25f))
 
-    val settingsButton = find[TextView](R.id.button_settings)
+    val settingsButton = find[Button](R.id.button_settings)
     settingsButton.setTextColor(colorStateList(content1, 0.25f))
 
-    val settingsPrompt = find[TextView](R.id.button_settings_prompt)
+    val settingsPrompt = find[Button](R.id.button_settings_prompt)
     settingsPrompt.setTextColor(colorStateList(content2, 0.25f))
 
     val ticTacText = find[TextView](R.id.text_tic_tac)
