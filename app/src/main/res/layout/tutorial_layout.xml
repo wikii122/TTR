@@ -22,35 +22,23 @@
 
         <Button
             android:id="@+id/tutorial_skip_button"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/WiderButtonStyle"
             android:layout_gravity="start"
-            android:background="@null"
             android:text="@string/tutorial_skip"
-            android:textAllCaps="false"
             android:textColor="@color/five_outer1"/>
 
         <Button
             android:id="@+id/tutorial_next_button"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/WiderButtonStyle"
             android:layout_gravity="end"
-            android:background="@null"
             android:text="@string/tutorial_next"
-            android:textAllCaps="false"
             android:textColor="@color/five_outer1"/>
 
         <Button
             android:id="@+id/tutorial_done_button"
-            style="?attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            style="@style/WiderButtonStyle"
             android:layout_gravity="end"
-            android:background="@null"
             android:text="@string/tutorial_done"
-            android:textAllCaps="false"
             android:textColor="@color/five_outer1"
             android:visibility="gone"/>
     </FrameLayout>

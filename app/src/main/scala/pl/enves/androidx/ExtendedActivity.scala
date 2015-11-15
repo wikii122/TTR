@@ -32,8 +32,6 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
   }
 
   protected def setGui() = {
-//    getSupportActionBar.hide()
-
     val window = getWindow
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)

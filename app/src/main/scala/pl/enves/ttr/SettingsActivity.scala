@@ -1,12 +1,11 @@
 package pl.enves.ttr
 
-import android.content.{Intent, Context, SharedPreferences}
-import android.graphics.{Color, Typeface}
+import android.content.{Context, Intent, SharedPreferences}
+import android.graphics.Typeface
 import android.os.Bundle
-import android.support.v7.app.AppCompatDelegate
 import android.support.v7.widget.Toolbar
 import android.view.{MenuItem, View}
-import android.widget.TextView
+import android.widget.{Button, TextView}
 import pl.enves.androidx.ExtendedActivity
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
@@ -17,7 +16,6 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    supportRequestWindowFeature(AppCompatDelegate.FEATURE_SUPPORT_ACTION_BAR_OVERLAY)
     setContentView(R.layout.settings_layout)
 
     val toolbar = find[Toolbar](R.id.settings_toolbar)
@@ -25,10 +23,10 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
 
     prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
 
-    val tutorialButton = find[TextView](R.id.button_tutorial)
+    val tutorialButton = find[Button](R.id.button_tutorial)
     tutorialButton onClick startTutorial
 
-    val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
+    val tutorialPrompt = find[Button](R.id.button_tutorial_prompt)
     tutorialPrompt onClick startTutorial
 
     applyCustomFont("fonts/comfortaa.ttf")
@@ -68,14 +66,14 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTypeface(typeface)
 
-    val tutorialButton = find[TextView](R.id.button_tutorial)
+    val tutorialButton = find[Button](R.id.button_tutorial)
     tutorialButton.setTypeface(typeface)
 
-    val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
+    val tutorialPrompt = find[Button](R.id.button_tutorial_prompt)
     tutorialPrompt.setTypeface(typeface)
 
     val toolbar = find[Toolbar](R.id.settings_toolbar)
-    for (i <- 0 until  toolbar.getChildCount) {
+    for (i <- 0 until toolbar.getChildCount) {
       toolbar.getChildAt(i) match {
         case view: TextView =>
           view.setTypeface(typeface)
@@ -99,10 +97,10 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     val pickThemeText = find[TextView](R.id.text_pick_theme)
     pickThemeText.setTextColor(content1)
 
-    val tutorialButton = find[TextView](R.id.button_tutorial)
+    val tutorialButton = find[Button](R.id.button_tutorial)
     tutorialButton.setTextColor(content1)
 
-    val tutorialPrompt = find[TextView](R.id.button_tutorial_prompt)
+    val tutorialPrompt = find[Button](R.id.button_tutorial_prompt)
     tutorialPrompt.setTextColor(content2)
 
     val toolbar = find[Toolbar](R.id.settings_toolbar)
