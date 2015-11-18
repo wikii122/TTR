@@ -1,9 +1,10 @@
 package pl.enves.androidx.helpers
 
-import android.content.{Context, Intent}
+import android.content.Intent
+import pl.enves.androidx.context.ContextRegistry
 
 trait IntentHelper {
   implicit class intentHelper(intent: Intent) {
-    def start()(implicit context: Context) = context.startActivity(intent)
+    def start() = ContextRegistry.context.startActivity(intent)
   }
 }

@@ -12,8 +12,8 @@ import spray.json._
 private[inner] class BoardQuadrant extends Logging with JsonMappable {
   private val rotationIndicator = 3
   private[this] val _fields = Array.fill[Option[Player.Value]] (3, 3) (None)
-  private[this] var rotation = 0
-  private[this] var rotationCooldown = 0
+  private[this] var rotation = QRotation.r0
+  private[this] var rotationCooldown = rotationIndicator
 
   def move(xv: Int, yv: Int, player: Player.Value) = {
     log(s"Move $player at ($xv, $yv)")
@@ -27,16 +27,10 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
   def rotate(rot: QRotation.Value) = {
     log(s"Rotate with $rot")
     if (!canRotate) throw new RotationLocked("Rotation cooldown has not expired.")
-    val mod = rot match {
-      case QRotation.r90 => 1
-      case QRotation.r180 => 2
-      case QRotation.r270 => 3
-      case _ => 0
-    }
 
     rotationCooldown = rotationIndicator
 
-    rotation = (rotation + mod) % 4
+    rotation = rotation add rot
   }
 
   def get(xv: Int, yv: Int): Option[Player.Value] = {
@@ -44,6 +38,8 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
 
     return _fields(x)(y)
   }
+
+  def getRotation: QRotation.Value = rotation
 
   def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 until Quadrant.size) yield get(x, y)
 
@@ -58,20 +54,20 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
 
   // Lines are horizontal, and assumption is they are vertical, thus x and y must be swapped
   private def readCoordinates(y: Int, x: Int): (Int, Int) = rotation match {
-    case 0 => (x, y)
-    case 1 => (Quadrant.size - y - 1, x)
-    case 2 => (Quadrant.size - x - 1, Quadrant.size - y - 1)
-    case 3 => (y, Quadrant.size - x - 1)
+    case QRotation.r0 => (x, y)
+    case QRotation.r90 => (Quadrant.size - y - 1, x)
+    case QRotation.r180 => (Quadrant.size - x - 1, Quadrant.size - y - 1)
+    case QRotation.r270 => (y, Quadrant.size - x - 1)
   }
 
   override def toMap: Map[String, Any] = Map(
     "cooldown" -> rotationCooldown,
     // FIXME Arrays are not supported in protocol
     "fields" -> (_fields.toList map { arr => (arr.toList map { p => p.toJson}).toJson }),
-    "rotation" -> rotation
+    "rotation" -> rotation.id
   )
 
-  private[inner] def setRotation(i: Int) = rotation = i
+  private[inner] def setRotation(i: Int) = rotation = QRotation(i)
   private[inner] def setCooldown(i: Int) = rotationCooldown = i
   private[inner] def fields = _fields
 }

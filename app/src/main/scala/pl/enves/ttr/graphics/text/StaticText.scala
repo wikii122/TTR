@@ -1,83 +1,56 @@
 package pl.enves.ttr.graphics.text
 
-import android.graphics.{Typeface, Paint, Canvas, Bitmap}
-import android.opengl.GLES20
 import pl.enves.androidx.Logging
+import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.shaders.TextureShaderData
-import pl.enves.ttr.graphics.models.Rectangle
+import pl.enves.ttr.graphics.geometry.{GeometryId, TextGeometry}
+import pl.enves.ttr.graphics.shaders.MaskShader
+import pl.enves.ttr.graphics.texture.TextureId
 
-/**
- * Display string pre-rendered to texture
- */
-class StaticText(text: String, resources: Resources, maxW: Float = 1.0f, maxH: Float = 1.0f)
-  extends Logging {
+class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: TextureId.Value, maxW: Float, maxH: Float)
+  extends Logging with SceneObject {
 
-  var fontHeight, textWidth = 0.0f
+  private var textColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private var backgroundColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  val sizePx = 256
+  private var texture: Option[Int] = None
+  private var geometry: Option[AbstractGeometry] = None
+  private var maskShader: Option[MaskShader] = None
 
-  val scale = 1.0f
+  override def onUpdateResources(): Unit = {
+    texture = Some(resources.getTexture(textureId))
+    geometry = Some(resources.getGeometry(geometryId))
+    maskShader = Some(resources.getMaskShader)
 
-  val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_4444)
-  bitmap.eraseColor(0)
+    val textGeometry = resources.getGeometry(geometryId).asInstanceOf[TextGeometry]
 
-  // get a canvas to paint over the bitmap
-  val canvas = new Canvas(bitmap)
+    var scaleW, scaleH = 1.0f
+    if (textGeometry.width > maxW) {
+      scaleW = maxW / textGeometry.width
+    }
+    if (textGeometry.height > maxH) {
+      scaleH = maxH / textGeometry.height
+    }
 
-  val textPaint = new Paint()
-  textPaint.setAntiAlias(true)
-  textPaint.setTypeface(Typeface.SANS_SERIF)
-  textPaint.setARGB(0xff, 0xff, 0x00, 0x00)
-
-  //Find optimal font size
-  //TODO: more optimal
-  //TODO: respect font ascent and descent
-  var fontSize = 10
-  var fm = textPaint.getFontMetrics
-  while (fontHeight < sizePx * maxH && textWidth < sizePx * maxW && fontSize < 128) {
-    textPaint.setTextSize(fontSize)
-    fm = textPaint.getFontMetrics
-    fontHeight = math.ceil(math.abs(fm.bottom) + math.abs(fm.top)).toFloat
-    textWidth = textPaint.measureText(text)
-    fontSize += 1
+    val s = Math.min(scaleW, scaleH)
+    scale(s, s, 1.0f)
   }
 
+  override protected def onUpdateTheme(): Unit = {}
 
-  log("Font size: " + fontSize)
-  log("Font height: " + fontHeight)
-  log("Font top: " + fm.top)
-  log("Font bottom: " + fm.bottom)
-  log("Text width: " + textWidth)
-
-  canvas.drawText(text, 0, math.ceil(math.abs(fm.top)).toFloat, textPaint)
-
-  resources.addProcTexture(textureName, bitmap)
-  resources.addProcModel(modelName, modelGeometry)
-
-  val drawData = new TextureShaderData(resources.getTexture(textureName))
-  val rectangle = resources.getGeometry(modelName)
-  val textureShader = resources.getShader(resources.ShaderId.Texture)
-
-  def textureName: String = text + "Texture"
-
-  def textureBitmap: Bitmap = bitmap
-
-  def modelName: String = text + "Model"
-
-  def modelGeometry: ProcGeometry = {
-    val buffers = new ProcBuffers(Some(Rectangle.coords(textWidth / sizePx, fontHeight / sizePx)),
-      None,
-      None,
-      Some(Rectangle.texCoords(0, 1.0f - fontHeight / sizePx, textWidth / sizePx, fontHeight / sizePx)))
-    return new ProcGeometryArrays(
-      Rectangle.numVertex,
-      GLES20.GL_TRIANGLE_STRIP,
-      buffers
-    )
+  def setTextColor(color: ColorArray): Unit = {
+    textColor = color
   }
 
-  def draw(): Unit = {
-    textureShader.draw(rectangle, drawData)
+  def setTextBackground(color: ColorArray): Unit = {
+    backgroundColor = color
+  }
+
+  override def onAnimate(dt: Float): Unit = {}
+
+  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
+
+  override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
+    maskShader.get.draw(mvMatrix, pMatrix, geometry.get, (backgroundColor, backgroundColor, textColor, texture.get))
   }
 }

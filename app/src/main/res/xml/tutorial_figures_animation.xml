@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animation-list>
+    <item
+        drawable="images/tutorial_figures_1.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_figures_2.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_figures_3.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_figures_4.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_figures_5.png"
+        duration="1000"/>
+    <item
+        drawable="images/tutorial_figures_6.png"
+        duration="1000"/>
+</animation-list>

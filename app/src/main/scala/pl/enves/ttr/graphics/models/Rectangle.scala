@@ -1,27 +1,26 @@
 package pl.enves.ttr.graphics.models
 
+/**
+ * Rectangle of GL_TRIANGLES
+ */
 object Rectangle {
-  def coords(width: Float, height: Float): Array[Float] = {
-    val w = width / 2.0f
+  def positionsCenterYTriangles(x: Float, y: Float, width: Float, height: Float): Array[Float] = {
+    val w = width
     val h = height / 2.0f
     return Array(
-      -w, -h, 0.0f,
-      w, -h, 0.0f,
-      -w, h, 0.0f,
-      w, h, 0.0f)
+      x - 0, y - h, 0.0f, //0
+      x + w, y - h, 0.0f, //1
+      x - 0, y + h, 0.0f, //2
+      x - 0, y + h, 0.0f, //2
+      x + w, y - h, 0.0f, //1
+      x + w, y + h, 0.0f) //3
   }
 
-  def coords(x: Float, y: Float, w: Float, h: Float): Array[Float] = Array(
-    x, y, 0.0f,
-    x + w, y, 0.0f,
-    x, y + h, 0.0f,
-    x + w, y + h, 0.0f)
-
-  val numVertex = 4
-
-  def texCoords(x: Float, y: Float, w: Float, h: Float) = Array(
-    x, y,
-    x + w, y,
-    x, y + h,
-    x + w, y + h)
+  def texCoordinatesTriangles(x: Float, y: Float, w: Float, h: Float) = Array(
+    x, y, //0
+    x + w, y, //1
+    x, y + h, //2
+    x, y + h, //2
+    x + w, y, //1
+    x + w, y + h) //3
 }

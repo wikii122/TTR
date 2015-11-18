@@ -7,11 +7,9 @@ package pl.enves.ttr.graphics.shaders
  * per-vertex: position and (color or texture coords)
  */
 
+import android.opengl.{GLES20, Matrix}
 import android.util.Log
-import android.opengl.{Matrix, GLES20}
-import pl.enves.ttr.graphics.{MVMatrix, PMatrix, Geometry}
-
-class AdditionalData
+import pl.enves.ttr.graphics.{AbstractGeometry, MatrixStack}
 
 abstract class Shader {
   // prepare shaders and OpenGL program
@@ -44,15 +42,15 @@ abstract class Shader {
     Log.e("Shader", "NoProgram")
   }
 
+  val mvpMatrix = new Array[Float](16)
+
   protected def getVertexShaderCode: String
 
   protected def getFragmentShaderCode: String
 
-  final val COORD_SIZE = 3
-  final val COLOR_SIZE = 4
-  final val TEX_COORD_SIZE = 2
-  
-  def draw(model: Geometry, data: AdditionalData = new AdditionalData)
+  type dataType
+
+  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: AbstractGeometry, data: dataType)
 
   def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()
@@ -81,9 +79,7 @@ abstract class Shader {
     return shader
   }
 
-  def makeMVPMatrix: Array[Float] = {
-    val mvpMatrix = new Array[Float](16)
-    Matrix.multiplyMM(mvpMatrix, 0, PMatrix(), 0, MVMatrix(), 0)
-    return mvpMatrix
+  def makeMVPMatrix(mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
+    Matrix.multiplyMM(mvpMatrix, 0, pMatrix.get(), 0, mvMatrix.get(), 0)
   }
 }
