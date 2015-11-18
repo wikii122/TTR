@@ -10,31 +10,28 @@ import spray.json._
 
 /**
  * AI
- * Plays Os
- * TODO: Shutdown and resume
  */
 class AIGame private(board: Board = Board()) extends Game(board) with Logging {
   override protected val gameType = Game.AI
 
   private var human = Player.X
-  private var _locked = false
 
   private var ai: Option[MinMax] = None
 
-  def makeAIMove(move: LightMove): Unit = {
-    implicit val player = Player.O
-    log(s"Move: $move for $player")
-    // Make a move
-    move match {
-      case LightPosition(q, x, y) => board move(Quadrant(q), x, y)
-      case LightRotation(q, r) => board rotate(Quadrant(q), r)
-    }
-    switchPlayer()
-  }
-
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {
-    ai = Some(new MinMax(board, makeAIMove))
+    def makeAIMove(move: LightMove): Unit = this.synchronized {
+      implicit val player = if (human == Player.X) Player.O else Player.X
+      log(s"AI Move: $move for $player")
+      // Make a move
+      move match {
+        case LightPosition(q, x, y) => board move(Quadrant(q), x, y)
+        case LightRotation(q, r) => board rotate(Quadrant(q), r)
+      }
+      switchPlayer()
+    }
+
+    ai = Some(new MinMax(board, Player.O, 2000, 4, makeAIMove))
   }
 
   /**
@@ -54,7 +51,7 @@ class AIGame private(board: Board = Board()) extends Game(board) with Logging {
    * and ImpossibleMove when Position is taken or game finished.
    * If called before start, throws NoSuchElementException.
    */
-  protected def onMove(move: Move): Boolean = {
+  protected def onMove(move: Move): Boolean = this.synchronized {
     implicit val player = human
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (finished) throw new GameWon(s"Game is finished. $winner has won.")
@@ -71,30 +68,34 @@ class AIGame private(board: Board = Board()) extends Game(board) with Logging {
     return res
   }
 
-  def switchPlayer(): Unit = {
+  private def switchPlayer(): Unit = {
     _player = if (player == Player.X) Player.O else Player.X
     log(s"Player set to ${_player}")
     if (_player == human) {
-      _locked = false
       ai = None
     } else {
-      _locked = true
       if (!board.finished) {
         startThinking()
       }
     }
   }
 
-  def locked: Boolean = _locked
+  def locked: Boolean = player != human
 
   protected def boardVersion = board.version
 
-  override final def toMap = Map(
-    "player" -> _player,
-    "human" -> human,
-    "board" -> board.toJson,
-    "type" -> gameType
-  )
+  override final def toMap = this.synchronized {
+    if(ai.isDefined) {
+      ai.get.stop()
+    }
+
+    Map(
+      "player" -> _player,
+      "human" -> human,
+      "board" -> board.toJson,
+      "type" -> gameType
+    )
+  }
 }
 
 object AIGame {
@@ -106,6 +107,9 @@ object AIGame {
     val game = new AIGame(board)
     game._player = fields("player").convertTo[Player.Value]
     game.human = fields("human").convertTo[Player.Value]
+    if(game._player != game.human) {
+      game.startThinking()
+    }
 
     return game
   }

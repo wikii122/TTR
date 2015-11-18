@@ -2,15 +2,26 @@ package pl.enves.ttr.logic.ai
 
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.logic.{Quadrant, QRotation}
+import pl.enves.ttr.logic.{Player, QRotation, Quadrant}
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
-import scala.concurrent.ExecutionContext.Implicits.global
+class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, success: LightMove => Unit) extends Logging {
 
-class MinMax(board: Board, success: LightMove => Unit) extends Logging {
+  private class TimedOutException extends RuntimeException
+
+  private class StoppedException extends RuntimeException
+
+  private var stopped = false
+
+  def stop(): Unit = {
+    this.synchronized {
+      stopped = true
+    }
+  }
 
   //TODO: more heuristic optimizations
   //Like taking quadrants centers first
@@ -50,7 +61,17 @@ class MinMax(board: Board, success: LightMove => Unit) extends Logging {
    * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning#Pseudocode
    * Instead of copying board when creating next child state, last move is reversed
    */
-  def minMax(b: LightBoard, playerMM: Int, depth: Int, alpha: Int, beta: Int): Int = {
+  def minMax(b: LightBoard, playerMM: Int, depth: Int, alpha: Int, beta: Int, startTime: Long): Int = {
+    if (System.currentTimeMillis() > startTime + maxTime) {
+      throw new TimedOutException
+    }
+
+    this.synchronized {
+      if (stopped) {
+        throw new StoppedException
+      }
+    }
+
     val opponent = LightField.opponent(playerMM)
 
     val stateValue = Heuristics.check(b.state())
@@ -74,7 +95,7 @@ class MinMax(board: Board, success: LightMove => Unit) extends Logging {
           case LightRotation(q, r) => b rotate(q, r, playerMM)
         }
 
-        v = math.max(v, minMax(b, opponent, depth - 1, al, be))
+        v = math.max(v, minMax(b, opponent, depth - 1, al, be, startTime))
         moves(i) match {
           case LightPosition(q, x, y) => b unMove(q, x, y, playerMM)
           case LightRotation(q, r) => b unRotate(q, r, playerMM)
@@ -99,7 +120,7 @@ class MinMax(board: Board, success: LightMove => Unit) extends Logging {
           case LightRotation(q, r) => b rotate(q, r, playerMM)
         }
 
-        v = math.min(v, minMax(b, opponent, depth - 1, al, be))
+        v = math.min(v, minMax(b, opponent, depth - 1, al, be, startTime))
         moves(i) match {
           case LightPosition(q, x, y) => b unMove(q, x, y, playerMM)
           case LightRotation(q, r) => b unRotate(q, r, playerMM)
@@ -115,27 +136,17 @@ class MinMax(board: Board, success: LightMove => Unit) extends Logging {
     }
   }
 
-  private val f: Future[LightMove] = Future {
-    val b = LightBoard(board)
-    val moves = availableMoves(b)
-
-    val depth = //2
-      if (moves.length <= 12) 3
-      else if (moves.length <= 40) 2
-      else 1
-
-    //Computer plays with Os, so first step is Min
-    val al = -1000000
-    var be = 1000000
+  private def startO(b: LightBoard, moves: ArrayBuffer[LightMove], depth: Int, alpha: Int, beta: Int, startTime: Long): LightMove = {
+    val al = alpha
+    var be = beta
     var bestMove = moves.head
     var i = 0
     while (i < moves.size) {
-
       moves(i) match {
         case LightPosition(q, x, y) => b move(q, x, y, LightField.O)
         case LightRotation(q, r) => b rotate(q, r, LightField.O)
       }
-      val v = minMax(b, LightField.X, depth - 1, al, be)
+      val v = minMax(b, LightField.X, depth - 1, al, be, startTime)
       if (v < be) {
         be = v
         bestMove = moves(i)
@@ -145,21 +156,73 @@ class MinMax(board: Board, success: LightMove => Unit) extends Logging {
         case LightRotation(q, r) => b unRotate(q, r, LightField.O)
       }
 
-      if (al >= be)
-        error("Something went wrong")
       i += 1
     }
 
+    return bestMove
+  }
+
+  private def startX(b: LightBoard, moves: ArrayBuffer[LightMove], depth: Int, alpha: Int, beta: Int, startTime: Long): LightMove = {
+    var al = alpha
+    val be = beta
+    var bestMove = moves.head
+    var i = 0
+    while (i < moves.size) {
+      moves(i) match {
+        case LightPosition(q, x, y) => b move(q, x, y, LightField.X)
+        case LightRotation(q, r) => b rotate(q, r, LightField.X)
+      }
+      val v = minMax(b, LightField.O, depth - 1, al, be, startTime)
+      if (v > al) {
+        al = v
+        bestMove = moves(i)
+      }
+      moves(i) match {
+        case LightPosition(q, x, y) => b unMove(q, x, y, LightField.X)
+        case LightRotation(q, r) => b unRotate(q, r, LightField.X)
+      }
+      i += 1
+    }
+
+    return bestMove
+  }
+
+  private val f: Future[LightMove] = Future {
+    val startTime = System.currentTimeMillis()
+    val b = LightBoard(board)
+    val moves = availableMoves(b)
+    val al = -1000000
+    val be = 1000000
+
+    var depth = 1
+
+    var bestMove = moves.head
+    var run = true
+    while (depth <= maxDepth && run) {
+      try {
+        bestMove = if (player == Player.X) {
+          startX(b, moves, depth, al, be, startTime)
+        } else {
+          startO(b, moves, depth, al, be, startTime)
+        }
+      } catch {
+        case e: TimedOutException =>
+          run = false
+          log("timed out after: " + (System.currentTimeMillis() - startTime) + "ms, depth: " + depth)
+      }
+      depth += 1
+    }
     bestMove
   }
   f onSuccess {
-    case move => success(move)
+    case move =>
+      success(move)
   }
-
   f onFailure {
-    case t => {
-      error(t.getMessage)
+    case e: StoppedException =>
+      log("stopped")
+    case _ =>
+      log("switching to random")
       val nb = new NoBrainer(board, success)
-    }
   }
 }
