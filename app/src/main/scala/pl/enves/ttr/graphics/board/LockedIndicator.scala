@@ -15,7 +15,7 @@ class LockedIndicator(game: Game, resources: Resources) extends SceneObject {
 
   visible = false
 
-  val lockedText = new StaticText(resources, GeometryId.LockedText, TextureId.Font, 1.0f, 0.25f)
+  val lockedText = new StaticText(resources, GeometryId.LockedText, TextureId.Font, 1.0f, 0.20f)
   addChild(lockedText)
 
   override protected def onUpdateResources(): Unit = {}
