@@ -23,6 +23,8 @@ abstract class ExtendedFragment extends Fragment {
 
   protected var number = 0
 
+  protected val layout: Int
+
   protected def changeFont(view: View, id: Int, typeface: Typeface): Unit = {
     val textView = find[TextView](view, id)
     textView.setTypeface(typeface)
@@ -47,49 +49,41 @@ abstract class ExtendedFragment extends Fragment {
   def onSelected(): Unit = {}
 
   def onDeSelected(): Unit = {}
-
-  protected val layout: Int = R.layout.fragment_tutorial
-
-  protected val text: Int = R.id.tutorial_text
-
-  protected val image: Int = R.id.tutorial_image
 }
 
-class ImageFragment extends ExtendedFragment with Logging {
-  private var textRes = 0
-  private var imagePath = ""
+class DoubleTextFragment extends ExtendedFragment with Logging {
+  private var text1Res = 0
+  private var text2Res = 0
+
+  override protected val layout: Int = R.layout.fragment_tutorial_double_text
+
+  protected val text1: Int = R.id.tutorial_text_1
+
+  protected val text2: Int = R.id.tutorial_text_2
 
   override def onStart(): Unit = {
     super.onStart()
 
-    textRes = getArguments.getInt("TEXT_RES", 0)
-    imagePath = getArguments.getString("IMAGE_PATH", "")
+    text1Res = getArguments.getInt("TEXT_1_RES", 0)
+    text2Res = getArguments.getInt("TEXT_2_RES", 0)
 
     val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(getView, text, textRes)
-    changeFont(getView, text, typeface)
-    val imageView = find[ImageView](getView, image)
-    try {
-      val stream: InputStream = getContext.getResources.getAssets.open(imagePath)
-      val rawData = IOUtils.readBytes(stream)
-      stream.close()
-      imageView.setImageBitmap(BitmapFactory.decodeByteArray(rawData, 0, rawData.length))
-    } catch {
-      case e: IOException =>
-        error(e.getMessage)
-    }
+    changeText(getView, text1, text1Res)
+    changeText(getView, text2, text2Res)
+    changeFont(getView, text1, typeface)
+    changeFont(getView, text2, typeface)
   }
 }
 
-object ImageFragment {
-  def apply(textRes: Int, imagePath: String, number: Int): ImageFragment = {
-    val imageFragment = new ImageFragment
+object DoubleTextFragment {
+  def apply(text1Res: Int, text2Res: Int, number: Int): DoubleTextFragment = {
+    val doubleTextFragment = new DoubleTextFragment
     val args: Bundle = new Bundle()
-    args.putInt("TEXT_RES", textRes)
-    args.putString("IMAGE_PATH", imagePath)
+    args.putInt("TEXT_1_RES", text1Res)
+    args.putInt("TEXT_2_RES", text2Res)
     args.putInt("NUMBER", number)
-    imageFragment.setArguments(args)
-    return imageFragment
+    doubleTextFragment.setArguments(args)
+    return doubleTextFragment
   }
 }
 
@@ -97,6 +91,12 @@ class AnimationFragment extends ExtendedFragment with Logging {
 
   private var textRes = 0
   private var animationRes = 0
+
+  override protected val layout: Int = R.layout.fragment_tutorial_image_text
+
+  protected val text: Int = R.id.tutorial_text
+
+  protected val image: Int = R.id.tutorial_image
 
   private val frameSpecs: util.ArrayList[FrameSpec] = new util.ArrayList[FrameSpec]()
 
@@ -350,8 +350,7 @@ class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extend
     AnimationFragment(R.string.tutorial_figures, R.xml.tutorial_figures_animation, autoPlay = true, 1),
     AnimationFragment(R.string.tutorial_rotations, R.xml.tutorial_rotations_animation, autoPlay = false, 2),
     AnimationFragment(R.string.tutorial_goals, R.xml.tutorial_goals_animation, autoPlay = false, 3),
-    ImageFragment(R.string.tutorial_standard, "images/tutorial_placeholder.png", 4),
-    ImageFragment(R.string.tutorial_network, "images/tutorial_placeholder.png", 5)
+    DoubleTextFragment(R.string.tutorial_standard, R.string.tutorial_network, 4)
   )
 
   override def getCount: Int = items.length
