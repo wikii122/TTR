@@ -39,6 +39,10 @@
             android:name=".ThemesActivity"
             android:label="@string/title_activity_themes" >
         </activity>
+        <activity
+            android:name=".CreditsActivity"
+            android:label="@string/title_activity_credits" >
+        </activity>
     </application>
 
 </manifest>

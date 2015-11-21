@@ -53,10 +53,9 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
     val window = getWindow
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-    //dark action bar default color is #212121
-    val color = Color.argb(0x80, 0x21, 0x21, 0x21)
+
+    val color = getResources.getColor(R.color.toolbar_dark_transparent)
     getSupportActionBar.setBackgroundDrawable(new ColorDrawable(color))
-    //getSupportActionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT))
   }
 
   protected def getSavedTheme(prefs: SharedPreferences): Theme = {

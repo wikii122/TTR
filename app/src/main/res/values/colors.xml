@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <color name="toolbar_dark_transparent">#80212121</color>
+
     <color name="common_outer_winner">#FF00B300</color>
 
     <color name="five_outer1">#FF273A78</color>

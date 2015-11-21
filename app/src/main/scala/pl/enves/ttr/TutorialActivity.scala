@@ -14,42 +14,7 @@ import android.view._
 import android.widget.{Button, ImageView, TextView}
 import org.xmlpull.v1.{XmlPullParser, XmlPullParserException}
 import pl.enves.androidx.helpers._
-import pl.enves.androidx.{ExtendedActivity, IOUtils, Logging}
-
-abstract class ExtendedFragment extends Fragment {
-  protected def find[A](view: View, id: Int) = view.findViewById(id).asInstanceOf[A]
-
-  protected val fontPath = "fonts/comfortaa.ttf"
-
-  protected var number = 0
-
-  protected val layout: Int
-
-  protected def changeFont(view: View, id: Int, typeface: Typeface): Unit = {
-    val textView = find[TextView](view, id)
-    textView.setTypeface(typeface)
-  }
-
-  protected def changeText(view: View, id: Int, textId: Int): Unit = {
-    val textView = find[TextView](view, id)
-    textView.setText(textId)
-  }
-
-  override def onStart() {
-    super.onStart()
-
-    number = getArguments.getInt("NUMBER", 0)
-  }
-
-  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
-    val view: View = inflater.inflate(layout, container, false)
-    return view
-  }
-
-  def onSelected(): Unit = {}
-
-  def onDeSelected(): Unit = {}
-}
+import pl.enves.androidx.{ExtendedFragment, ExtendedActivity, IOUtils, Logging}
 
 class DoubleTextFragment extends ExtendedFragment with Logging {
   private var text1Res = 0

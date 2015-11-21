@@ -6,6 +6,7 @@
     <string name="title_activity_game">TicTacRotate</string>
     <string name="title_activity_tutorial">tutorial</string>
     <string name="title_activity_themes">themes</string>
+    <string name="title_activity_credits">credits</string>
     <string name="pick_theme">theme</string>
     <string name="new_game">new game</string>
     <string name="new_ai_game">new ai game</string>
@@ -30,4 +31,7 @@
     <string name="tutorial_next">next</string>
     <string name="tutorial_done">done</string>
     <string name="button_symbol_description">pick noughts or crosses</string>
+    <string name="credits_enves">enves</string>
+    <string name="credits_spray">spray</string>
+    <string name="credits_font">comfortaa</string>
 </resources>
