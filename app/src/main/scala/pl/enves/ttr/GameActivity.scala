@@ -1,5 +1,6 @@
 package pl.enves.ttr
 
+import android.content.{Context, SharedPreferences}
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
@@ -37,7 +38,8 @@ class GameActivity extends ExtendedActivity with GameManager {
         case s =>
           throw new IllegalArgumentException(s"Invalid game type: $s")
     }
-    view.setTheme(Theme(b.getString("THEME")))
+    val prefs = getSharedPreferences("preferences", Context.MODE_PRIVATE)
+    view.setTheme(getSavedTheme(prefs))
     setContentView(view)
   }
 

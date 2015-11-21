@@ -35,6 +35,10 @@
             android:name=".TutorialActivity"
             android:label="@string/title_activity_tutorial" >
         </activity>
+        <activity
+            android:name=".ThemesActivity"
+            android:label="@string/title_activity_themes" >
+        </activity>
     </application>
 
 </manifest>

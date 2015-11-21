@@ -12,7 +12,6 @@ import pl.enves.androidx.color.ColorTypes.ColorAndroid
 import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.{Game, GameState, Player}
-import pl.enves.ttr.utils.themes.Theme
 
 class StartGameActivity extends ExtendedActivity with ColorUiTweaks with DrawableManip {
   private[this] var gameActive = false
@@ -52,9 +51,8 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     settingsPrompt onClick launchSettings
 
     GameState.onDataChanged(enableButtons)
-    prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
 
-    applyCustomFont("fonts/comfortaa.ttf")
+    prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
   }
 
   override def onStart() = {
@@ -64,9 +62,15 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     setGui()
 
     enableButtons()
-    setPreviousTheme()
+
+    applyCustomFont("fonts/comfortaa.ttf")
+
+    val theme = getSavedTheme(prefs.get)
+    setColors(theme.background, theme.outer1, theme.outer2)
+
     symbol = getSavedSymbol
     setSymbolImage(symbol)
+
     launchTutorialIfFirstrun()
   }
 
@@ -88,7 +92,6 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
     itnt putExtra("TYPE", Game.STANDARD.toString)
-    itnt putExtra("THEME", getPickedTheme)
     itnt start()
   }
 
@@ -98,7 +101,6 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
     itnt putExtra("TYPE", Game.AI.toString)
-    itnt putExtra("THEME", getPickedTheme)
     itnt putExtra("AI_HUMAN_SYMBOL", symbol.toString)
     itnt start()
   }
@@ -112,7 +114,6 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     val itnt = intent[GameActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
     itnt putExtra("TYPE", Game.CONTINUE.toString)
-    itnt putExtra("THEME", getPickedTheme)
     itnt start()
   }
 
@@ -174,7 +175,7 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     val drawable = new BitmapDrawable(res, BitmapFactory.decodeResource(res, imgRes))
     drawable.setAntiAlias(true)
 
-    val theme = Theme(getPickedTheme)
+    val theme = getSavedTheme(prefs.get)
     maskColors(theme.background, theme.background, theme.outer1, drawable)
 
     val newAIGameSymbol = find[ImageButton](R.id.button_symbol)
@@ -227,16 +228,6 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks with Drawabl
     val fm = text.getPaint.getFontMetrics
     val descent = Math.round(fm.descent)
     text.setPadding(0, 0, 0, descent)
-  }
-
-  private[this] def getPickedTheme: String = {
-    val defaultTheme = Theme(getResources, R.array.theme_five)
-    return prefs.get.getString("THEME", defaultTheme.toJsonObject.toString)
-  }
-
-  private[this] def setPreviousTheme() = {
-    val pickedTheme = Theme(getPickedTheme)
-    setColors(pickedTheme.background, pickedTheme.outer1, pickedTheme.outer2)
   }
 
   /**
