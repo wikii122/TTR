@@ -1,20 +1,23 @@
 package pl.enves.ttr
 
 import android.content.{Context, Intent, SharedPreferences}
-import android.graphics.Typeface
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.{BitmapFactory, Typeface}
 import android.os.Bundle
 import android.view.View
-import android.widget.{Button, TextView}
+import android.widget.{Button, ImageButton, TextView}
 import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
 import pl.enves.androidx.color.ColorTypes.ColorAndroid
-import pl.enves.androidx.color.ColorUiTweaks
+import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.logic.{Game, GameState}
+import pl.enves.ttr.logic.{Game, GameState, Player}
 import pl.enves.ttr.utils.themes.Theme
 
-class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
+class StartGameActivity extends ExtendedActivity with ColorUiTweaks with DrawableManip {
   private[this] var gameActive = false
   private[this] var prefs: Option[SharedPreferences] = None
+  private[this] var symbol = Player.X
 
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
@@ -32,6 +35,9 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
 
     val newAIGamePrompt = find[Button](R.id.button_create_ai_prompt)
     newAIGamePrompt onClick startAIGame
+
+    val newAIGameSymbol = find[ImageButton](R.id.button_symbol)
+    newAIGameSymbol onClick changeSymbol
 
     val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton onClick continueGame
@@ -59,11 +65,17 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
 
     enableButtons()
     setPreviousTheme()
+    symbol = getSavedSymbol
+    setSymbolImage(symbol)
     launchTutorialIfFirstrun()
   }
 
   override def onPause() {
     super.onPause()
+
+    if (symbol != getSavedSymbol) {
+      saveSymbol(symbol)
+    }
   }
 
 
@@ -87,6 +99,7 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
     itnt putExtra("TYPE", Game.AI.toString)
     itnt putExtra("THEME", getPickedTheme)
+    itnt putExtra("AI_HUMAN_SYMBOL", symbol.toString)
     itnt start()
   }
 
@@ -138,6 +151,35 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
       continueGamePrompt.disable()
     }
   })
+
+  private[this] def changeSymbol(v: View): Unit = {
+    symbol = if (symbol == Player.X) Player.O else Player.X
+
+    setSymbolImage(symbol)
+  }
+
+  private[this] def saveSymbol(symbol: Player.Value) = {
+    val ed: SharedPreferences.Editor = prefs.get.edit()
+    ed.putString("AI_HUMAN_SYMBOL", symbol.toString)
+    ed.commit()
+  }
+
+  private[this] def getSavedSymbol: Player.Value = {
+    return Player.withName(prefs.get.getString("AI_HUMAN_SYMBOL", Player.X.toString))
+  }
+
+  private[this] def setSymbolImage(symbol: Player.Value): Unit = {
+    val imgRes = if (symbol == Player.X) R.drawable.pat_cross_mod_mask else R.drawable.pat_ring_mod_mask
+    val res = getResources
+    val drawable = new BitmapDrawable(res, BitmapFactory.decodeResource(res, imgRes))
+    drawable.setAntiAlias(true)
+
+    val theme = Theme(getPickedTheme)
+    maskColors(theme.background, theme.background, theme.outer1, drawable)
+
+    val newAIGameSymbol = find[ImageButton](R.id.button_symbol)
+    newAIGameSymbol.setBackground(drawable)
+  }
 
   private[this] def applyCustomFont(path: String): Unit = {
     val typeface: Typeface = Typeface.createFromAsset(getAssets, path)

@@ -11,17 +11,16 @@ import spray.json._
 /**
  * AI
  */
-class AIGame private(board: Board = Board()) extends Game(board) with Logging {
+class AIGame private(human: Player.Value, board: Board = Board()) extends Game(board) with Logging {
   override protected val gameType = Game.AI
-
-  private var human = Player.X
 
   private var ai: Option[MinMax] = None
 
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {
+    implicit val player = if (human == Player.X) Player.O else Player.X
+
     def makeAIMove(move: LightMove): Unit = this.synchronized {
-      implicit val player = if (human == Player.X) Player.O else Player.X
       log(s"AI Move: $move for $player")
       // Make a move
       move match {
@@ -31,7 +30,7 @@ class AIGame private(board: Board = Board()) extends Game(board) with Logging {
       switchPlayer()
     }
 
-    ai = Some(new MinMax(board, Player.O, 2000, 4, makeAIMove))
+    ai = Some(new MinMax(board, player, 2000, 4, makeAIMove))
   }
 
   /**
@@ -40,8 +39,11 @@ class AIGame private(board: Board = Board()) extends Game(board) with Logging {
   protected def onStart(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
-    human = startingPlayer
     _player = startingPlayer
+
+    if(_player != human) {
+      startThinking()
+    }
   }
 
   /**
@@ -99,15 +101,16 @@ class AIGame private(board: Board = Board()) extends Game(board) with Logging {
 }
 
 object AIGame {
-  def apply() = new AIGame()
+  def apply(human: Player.Value) = new AIGame(human)
 
   def apply(jsValue: JsValue): Game = {
     val fields = jsValue.asJsObject.fields
     val board = Board(fields("board"))
-    val game = new AIGame(board)
+    val human = fields("human").convertTo[Player.Value]
+    val game = new AIGame(human, board)
     game._player = fields("player").convertTo[Player.Value]
-    game.human = fields("human").convertTo[Player.Value]
-    if(game._player != game.human) {
+
+    if(game._player != human) {
       game.startThinking()
     }
 

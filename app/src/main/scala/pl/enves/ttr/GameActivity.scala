@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.logic.{Game, GameState, GameManager, StandardGame}
+import pl.enves.ttr.logic._
 import pl.enves.androidx.ExtendedActivity
 
 import scala.concurrent.Future
@@ -30,7 +30,7 @@ class GameActivity extends ExtendedActivity with GameManager {
           game = Game.create(Game.STANDARD)
           view.startGame()
         case Game.AI =>
-          game = Game.create(Game.AI)
+          game = Game.createAI(Player.withName(b.getString("AI_HUMAN_SYMBOL")))
           view.startGame()
         case Game.CONTINUE =>
           game = Game.load(GameState.load())

@@ -107,6 +107,15 @@
                     android:layout_toEndOf="@+id/button_create_ai_prompt"
                     android:layout_toRightOf="@+id/button_create_ai_prompt"
                     android:text="@string/new_ai_game"/>
+
+                <ImageButton
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:id="@+id/button_symbol"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@+id/button_create_ai"
+                    android:layout_toRightOf="@+id/button_create_ai"
+                    android:contentDescription="@string/button_symbol_description"/>
             </RelativeLayout>
 
             <RelativeLayout
