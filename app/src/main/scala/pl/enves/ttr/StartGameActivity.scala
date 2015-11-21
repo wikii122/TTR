@@ -27,6 +27,12 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
     val newGamePrompt = find[Button](R.id.button_create_prompt)
     newGamePrompt onClick startStandardGame
 
+    val newAIGameButton = find[Button] (R.id.button_create_ai)
+    newAIGameButton onClick startAIGame
+
+    val newAIGamePrompt = find[Button](R.id.button_create_ai_prompt)
+    newAIGamePrompt onClick startAIGame
+
     val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton onClick continueGame
 
@@ -74,6 +80,16 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
     itnt start()
   }
 
+  private[this] def startAIGame(v: View) = {
+    log("Intending to start new StandardGame")
+    val itnt = intent[GameActivity]
+    itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
+    itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
+    itnt putExtra("TYPE", Game.AI.toString)
+    itnt putExtra("THEME", getPickedTheme)
+    itnt start()
+  }
+
   /**
    * Used to continue game in progress
    * Currently, only last game is taken into account.
@@ -98,7 +114,7 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
   }
 
   private[this] def launchTutorialIfFirstrun() = {
-    if(prefs.get.getBoolean("FIRSTRUN", true)) {
+    if (prefs.get.getBoolean("FIRSTRUN", true)) {
       val ed: SharedPreferences.Editor = prefs.get.edit()
       ed.putBoolean("FIRSTRUN", false)
       ed.commit()
@@ -131,6 +147,12 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
 
     val newGamePrompt = find[Button](R.id.button_create_prompt)
     newGamePrompt.setTypeface(typeface)
+
+    val newAIGameButton = find[Button] (R.id.button_create_ai)
+    newAIGameButton.setTypeface(typeface)
+
+    val newAIGamePrompt = find[Button](R.id.button_create_ai_prompt)
+    newAIGamePrompt.setTypeface(typeface)
 
     val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton.setTypeface(typeface)
@@ -186,6 +208,12 @@ class StartGameActivity extends ExtendedActivity with ColorUiTweaks {
 
     val newGamePrompt = find[Button](R.id.button_create_prompt)
     newGamePrompt.setTextColor(content2)
+
+    val newAIGameButton = find[Button] (R.id.button_create_ai)
+    newAIGameButton.setTextColor(content1)
+
+    val newAIGamePrompt = find[Button](R.id.button_create_ai_prompt)
+    newAIGamePrompt.setTextColor(content2)
 
     val continueGameButton = find[Button](R.id.button_continue)
     continueGameButton.setTextColor(colorStateList(content1, 0.25f))

@@ -69,7 +69,8 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
 
   private[inner] def setRotation(i: Int) = rotation = QRotation(i)
   private[inner] def setCooldown(i: Int) = rotationCooldown = i
-  private[inner] def fields = _fields
+  private[logic] def getCooldown = rotationCooldown
+  private[logic] def fields = _fields
 }
 
 object BoardQuadrant {

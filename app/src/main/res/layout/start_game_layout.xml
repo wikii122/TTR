@@ -96,6 +96,25 @@
                 android:layout_gravity="center_horizontal">
 
                 <Button
+                    android:id="@+id/button_create_ai_prompt"
+                    style="@style/ButtonStyle"
+                    android:text="@string/nav_prompt"/>
+
+                <Button
+                    android:id="@+id/button_create_ai"
+                    style="@style/ButtonStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_create_ai_prompt"
+                    android:layout_toRightOf="@+id/button_create_ai_prompt"
+                    android:text="@string/new_ai_game"/>
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
                     android:id="@+id/button_continue_prompt"
                     style="@style/ButtonStyle"
                     android:text="@string/nav_prompt"/>

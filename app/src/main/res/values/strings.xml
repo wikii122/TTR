@@ -7,6 +7,7 @@
     <string name="title_activity_tutorial">tutorial</string>
     <string name="pick_theme">theme</string>
     <string name="new_game">new game</string>
+    <string name="new_ai_game">new ai game</string>
     <string name="settings">settings</string>
     <string name="continue_game">continue</string>
     <string name="tic_tac">tictac</string>
