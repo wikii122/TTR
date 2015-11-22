@@ -22,8 +22,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   addChild(winnerIndicator)
 
   val lockedIndicator = new LockedIndicator(game, resources)
-  lockedIndicator.translate(0.0f, -5.5f, 0.0f)
-  lockedIndicator.scale(4.0f, 4.0f, 1.0f)
   addChild(lockedIndicator)
 
   val quadrants = Map(
@@ -155,6 +153,8 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
         arrows(a).discardIllegal()
       } catch {
         case e: RotationLocked =>
+          arrows(a).setIllegal()
+        case e: BoardLocked =>
           arrows(a).setIllegal()
       }
       return true

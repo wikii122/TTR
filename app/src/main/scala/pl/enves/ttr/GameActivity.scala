@@ -1,10 +1,11 @@
 package pl.enves.ttr
 
+import android.content.{Context, SharedPreferences}
 import android.os.Bundle
 import android.view.{View, WindowManager}
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.logic.{Game, GameState, GameManager, StandardGame}
+import pl.enves.ttr.logic._
 import pl.enves.androidx.ExtendedActivity
 
 import scala.concurrent.Future
@@ -29,12 +30,16 @@ class GameActivity extends ExtendedActivity with GameManager {
         case Game.STANDARD =>
           game = Game.create(Game.STANDARD)
           view.startGame()
+        case Game.AI =>
+          game = Game.createAI(Player.withName(b.getString("AI_HUMAN_SYMBOL")))
+          view.startGame()
         case Game.CONTINUE =>
           game = Game.load(GameState.load())
         case s =>
           throw new IllegalArgumentException(s"Invalid game type: $s")
     }
-    view.setTheme(Theme(b.getString("THEME")))
+    val prefs = getSharedPreferences("preferences", Context.MODE_PRIVATE)
+    view.setTheme(getSavedTheme(prefs))
     setContentView(view)
   }
 

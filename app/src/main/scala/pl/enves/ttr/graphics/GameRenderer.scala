@@ -118,22 +118,13 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
       val tempPMatrix = new MatrixStack()
       pMatrix.get().copyToArray(tempPMatrix.get())
       setCamera(tempMVMatrix)
-      Try {
+      try {
         board.click(clickX, clickY, viewport, tempMVMatrix, tempPMatrix)
-      } match {
-        case Success(true) => if (game.finished) {
-          val text = game.winner match {
-            case Some(x) => s"Player $x wins"
-            case None => "Game finished with a draw"
-          }
-
-          log(text)
-
-          new AlertDialog.Builder(context).setMessage(text).create().show()
-        }
-
-        case Failure(err) => error(err.getMessage)
-        case _ =>
+      } catch {
+        //TODO: remind user that game has ended
+        case e: GameFinished =>
+        case e: GameWon =>
+        case e: GameDrawn =>
       }
     }
 

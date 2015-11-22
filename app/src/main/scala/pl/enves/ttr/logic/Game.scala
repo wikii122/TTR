@@ -72,7 +72,7 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 
   protected def boardVersion: Int
 
-  override final def toMap = Map(
+  override def toMap = Map(
     "player" -> _player,
     "board" -> board.toJson,
     "type" -> gameType
@@ -107,15 +107,18 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 }
 
 object Game extends Enumeration {
-  val STANDARD, CONTINUE = Value
+  val STANDARD, CONTINUE, AI = Value
 
   def create(typo: Game.Value): Game = typo match {
     case STANDARD => StandardGame()
   }
 
+  def createAI(human: Player.Value): Game = AIGame(human)
+
   def load(jsValue: JsValue): Game = {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
       case STANDARD => StandardGame(jsValue)
+      case AI => AIGame(jsValue)
     }
   }
 

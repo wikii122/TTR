@@ -15,7 +15,7 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
 
   visible = false
 
-  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.75f, 0.25f)
+  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.75f, 0.20f)
   winnerText.translate(-0.125f, 0.0f, 0.0f)
   addChild(winnerText)
 

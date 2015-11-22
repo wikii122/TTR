@@ -40,6 +40,16 @@ private[logic] class Board private () extends Logging with JsonMappable {
     return checkVictory()
   }
 
+  def move(quadrant: Quadrant.Value, x: Int, y: Int)(implicit player: Player.Value): Boolean = {
+    log(s"Move of $player at ($x, $y) in $quadrant quadrant")
+    quadrants.move(quadrant, x, y, player)
+
+    _version += 1
+    freeFields -= 1
+
+    return checkVictory()
+  }
+
   def rotate(quadrant: Quadrant.Value, rotation: QRotation.Value)(implicit player: Player.Value): Boolean = {
     log(s"Rotation for $quadrant by $rotation for player $player")
     quadrants.rotate(quadrant, rotation)
@@ -108,6 +118,9 @@ private[logic] class Board private () extends Logging with JsonMappable {
     "version" -> _version,
     "quadrants" -> quadrants.toJson
   )
+
+  def getFreeFields = freeFields
+  def getQuadrant(quadrant: Quadrant.Value) = quadrants(quadrant)
 }
 
 object Board {
