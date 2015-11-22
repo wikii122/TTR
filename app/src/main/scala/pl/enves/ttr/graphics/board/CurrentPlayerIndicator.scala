@@ -14,7 +14,7 @@ import pl.enves.ttr.logic.{Game, Quadrant}
  */
 class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject with ColorManip {
 
-  val playerText = new StaticText(resources, GeometryId.PlayerText, TextureId.Font, 0.75f, 0.25f)
+  val playerText = new StaticText(resources, GeometryId.PlayerText, TextureId.Font, 0.75f, 0.20f)
   playerText.translate(-0.125f, 0.0f, 0.0f)
   addChild(playerText)
 

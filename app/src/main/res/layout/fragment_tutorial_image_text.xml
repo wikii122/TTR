@@ -4,8 +4,13 @@
               android:layout_height="match_parent"
               android:gravity="center"
               android:orientation="vertical"
-              android:weightSum="6"
-              android:paddingTop="20dp">
+              android:weightSum="11">
+
+    <Space
+        android:layout_width="wrap_content"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center_horizontal"
+        android:layout_weight="5"/>
 
     <ImageView
         android:id="@+id/tutorial_image"

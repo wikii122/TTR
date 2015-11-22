@@ -143,6 +143,8 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
       } catch {
         case e: FieldTaken =>
           fields(x)(y).setIllegal()
+        case e: BoardLocked =>
+          fields(x)(y).setIllegal()
       }
       return true
     }

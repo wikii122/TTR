@@ -1,6 +1,6 @@
 package pl.enves.androidx
 
-import android.content.Intent
+import android.content.{SharedPreferences, Intent}
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.{Handler, Looper}
@@ -8,6 +8,8 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Build
 import android.view.{View, WindowManager}
 import pl.enves.androidx.context.ContextRegistry
+import pl.enves.ttr.R
+import pl.enves.ttr.utils.themes.Theme
 import scala.reflect.{ClassTag, classTag}
 
 abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry with Logging {
@@ -51,9 +53,13 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
     val window = getWindow
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-    //dark action bar default color is #212121
-    val color = Color.argb(0x80, 0x21, 0x21, 0x21)
+
+    val color = getResources.getColor(R.color.toolbar_dark_transparent)
     getSupportActionBar.setBackgroundDrawable(new ColorDrawable(color))
-    //getSupportActionBar.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT))
+  }
+
+  protected def getSavedTheme(prefs: SharedPreferences): Theme = {
+    val defaultTheme = Theme(getResources, R.array.theme_five)
+    return Theme(prefs.getString("THEME", defaultTheme.toJsonObject.toString))
   }
 }

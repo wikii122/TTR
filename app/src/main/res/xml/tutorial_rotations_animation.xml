@@ -101,5 +101,5 @@
         duration="1000"/>
     <item
         drawable="images/tutorial_rotations_34.png"
-        duration="1000"/>
+        duration="3000"/>
 </animation-list>
