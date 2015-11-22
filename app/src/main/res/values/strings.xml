@@ -1,9 +1,9 @@
 <resources>
-    <string name="app_name">TicTacRotate</string>
+    <string name="app_name">TicTacTurn</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_settings">settings</string>
-    <string name="title_activity_game">TicTacRotate</string>
+    <string name="title_activity_game">TicTacTurn</string>
     <string name="title_activity_tutorial">tutorial</string>
     <string name="title_activity_themes">themes</string>
     <string name="title_activity_licenses">licenses</string>
