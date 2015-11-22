@@ -40,8 +40,8 @@
             android:label="@string/title_activity_themes" >
         </activity>
         <activity
-            android:name=".CreditsActivity"
-            android:label="@string/title_activity_credits" >
+            android:name=".LicensesActivity"
+            android:label="@string/title_activity_licenses" >
         </activity>
     </application>
 

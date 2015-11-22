@@ -64,17 +64,17 @@
         android:layout_marginTop="5dp">
 
         <Button
-            android:id="@+id/button_credits_prompt"
+            android:id="@+id/button_licenses_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt"/>
 
         <Button
-            android:id="@+id/button_credits"
+            android:id="@+id/button_licenses"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_credits_prompt"
-            android:layout_toRightOf="@+id/button_credits_prompt"
-            android:text="@string/title_activity_credits"/>
+            android:layout_toEndOf="@+id/button_licenses_prompt"
+            android:layout_toRightOf="@+id/button_licenses_prompt"
+            android:text="@string/title_activity_licenses"/>
     </RelativeLayout>
 
 </LinearLayout>

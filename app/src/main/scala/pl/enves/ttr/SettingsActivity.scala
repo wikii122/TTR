@@ -34,11 +34,11 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     val tutorialPrompt = find[Button](R.id.button_tutorial_prompt)
     tutorialPrompt onClick startTutorial
 
-    val creditsButton = find[Button](R.id.button_credits)
-    creditsButton onClick startCredits
+    val licensesButton = find[Button](R.id.button_licenses)
+    licensesButton onClick startLicenses
 
-    val creditsPrompt = find[Button](R.id.button_credits_prompt)
-    creditsPrompt onClick startCredits
+    val licensesPrompt = find[Button](R.id.button_licenses_prompt)
+    licensesPrompt onClick startLicenses
   }
 
   override def onStart() = {
@@ -72,9 +72,9 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     itnt start()
   }
 
-  private[this] def startCredits(v: View) = {
-    log("Intending to start credits")
-    val itnt = intent[CreditsActivity]
+  private[this] def startLicenses(v: View) = {
+    log("Intending to start licenses")
+    val itnt = intent[LicensesActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
     itnt start()
   }
@@ -94,11 +94,11 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     val tutorialPrompt = find[Button](R.id.button_tutorial_prompt)
     tutorialPrompt.setTypeface(typeface)
 
-    val creditsButton = find[Button](R.id.button_credits)
-    creditsButton.setTypeface(typeface)
+    val licensesButton = find[Button](R.id.button_licenses)
+    licensesButton.setTypeface(typeface)
 
-    val creditsPrompt = find[Button](R.id.button_credits_prompt)
-    creditsPrompt.setTypeface(typeface)
+    val licensesPrompt = find[Button](R.id.button_licenses_prompt)
+    licensesPrompt.setTypeface(typeface)
 
     val toolbar = find[Toolbar](R.id.settings_toolbar)
     for (i <- 0 until toolbar.getChildCount) {
@@ -123,11 +123,11 @@ class SettingsActivity extends ExtendedActivity with ColorManip {
     val tutorialPrompt = find[Button](R.id.button_tutorial_prompt)
     tutorialPrompt.setTextColor(content2)
 
-    val creditsButton = find[Button](R.id.button_credits)
-    creditsButton.setTextColor(content1)
+    val licensesButton = find[Button](R.id.button_licenses)
+    licensesButton.setTextColor(content1)
 
-    val creditsPrompt = find[Button](R.id.button_credits_prompt)
-    creditsPrompt.setTextColor(content2)
+    val licensesPrompt = find[Button](R.id.button_licenses_prompt)
+    licensesPrompt.setTextColor(content2)
 
     val toolbar = find[Toolbar](R.id.settings_toolbar)
     toolbar.setTitleTextColor(content1)

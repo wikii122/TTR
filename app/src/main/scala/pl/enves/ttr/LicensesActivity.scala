@@ -12,21 +12,21 @@ import android.view.MenuItem
 import android.widget.TextView
 import pl.enves.androidx._
 
-class CreditsActivity extends ExtendedActivity {
+class LicensesActivity extends ExtendedActivity {
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
-    setContentView(R.layout.credits_layout)
+    setContentView(R.layout.licenses_layout)
 
-    val toolbar = find[Toolbar](R.id.credits_toolbar)
+    val toolbar = find[Toolbar](R.id.licenses_toolbar)
     setSupportActionBar(toolbar)
 
     // Get the ViewPager and set it's PagerAdapter so that it can display items
-    val viewPager: ViewPager = find[ViewPager](R.id.credits_viewpager)
-    viewPager.setAdapter(new CreditsFragmentPagerAdapter(getSupportFragmentManager, CreditsActivity.this))
+    val viewPager: ViewPager = find[ViewPager](R.id.licenses_viewpager)
+    viewPager.setAdapter(new LicenseFragmentPagerAdapter(getSupportFragmentManager, LicensesActivity.this))
 
     // Give the TabLayout the ViewPager
-    val tabLayout: TabLayout = find[TabLayout](R.id.credits_tabs)
+    val tabLayout: TabLayout = find[TabLayout](R.id.licenses_tabs)
     tabLayout.setupWithViewPager(viewPager)
   }
 
@@ -51,7 +51,7 @@ class CreditsActivity extends ExtendedActivity {
   private[this] def applyCustomFont(path: String): Unit = {
     val typeface: Typeface = Typeface.createFromAsset(getAssets, path)
 
-    val toolbar = find[Toolbar](R.id.credits_toolbar)
+    val toolbar = find[Toolbar](R.id.licenses_toolbar)
     for (i <- 0 until toolbar.getChildCount) {
       toolbar.getChildAt(i) match {
         case view: TextView =>
@@ -62,10 +62,10 @@ class CreditsActivity extends ExtendedActivity {
   }
 
   private[this] def setColors(background: Int, content1: Int, content2: Int): Unit = {
-    val toolbar = find[Toolbar](R.id.credits_toolbar)
+    val toolbar = find[Toolbar](R.id.licenses_toolbar)
     toolbar.setTitleTextColor(content1)
 
-    val tabLayout: TabLayout = find[TabLayout](R.id.credits_tabs)
+    val tabLayout: TabLayout = find[TabLayout](R.id.licenses_tabs)
     tabLayout.setTabTextColors(content1, content2)
     tabLayout.setSelectedTabIndicatorColor(content2)
 
@@ -83,9 +83,9 @@ class CreditsActivity extends ExtendedActivity {
 }
 
 class LicenseFragment extends ExtendedFragment with Logging {
-  override protected val layout: Int = R.layout.fragment_credits_license
+  override protected val layout: Int = R.layout.fragment_license
 
-  protected val text: Int = R.id.credits_license
+  protected val text: Int = R.id.license_text
 
   override def onStart(): Unit = {
     super.onStart()
@@ -104,7 +104,7 @@ class LicenseFragment extends ExtendedFragment with Logging {
   }
 
   private[this] def setColors(background: Int, content1: Int, content2: Int): Unit = {
-    val text = find[TextView](getView, R.id.credits_license)
+    val text = find[TextView](getView, R.id.license_text)
     text.setTextColor(content1)
   }
 }
@@ -120,11 +120,10 @@ object LicenseFragment {
   }
 }
 
-class CreditsFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
+class LicenseFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   val items = Array(
-    (context.getString(R.string.credits_enves), LicenseFragment("licenses/enves.txt", 0)),
-    (context.getString(R.string.credits_spray), LicenseFragment("licenses/APL2.txt", 1)),
-    (context.getString(R.string.credits_font), LicenseFragment("licenses/OFL.txt", 2))
+    (context.getString(R.string.credits_spray), LicenseFragment("licenses/APL2.txt", 0)),
+    (context.getString(R.string.credits_font), LicenseFragment("licenses/OFL.txt", 1))
   )
 
   override def getPageTitle(position: Int): CharSequence = {
