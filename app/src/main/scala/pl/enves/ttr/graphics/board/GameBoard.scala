@@ -154,6 +154,8 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       } catch {
         case e: RotationLocked =>
           arrows(a).setIllegal()
+        case e: BoardLocked =>
+          arrows(a).setIllegal()
       }
       return true
     }
