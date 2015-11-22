@@ -109,3 +109,6 @@ project/plugins/project/
 
 #Git conflicts
 *.orig
+
+# Dolphin
+.directory
