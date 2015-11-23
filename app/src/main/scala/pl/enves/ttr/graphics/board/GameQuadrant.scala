@@ -24,12 +24,6 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
     for (y <- 0 until Quadrant.size) {
-      // Position from the quadrant center
-      // TODO: calculate from Quadrant.size
-      val nx = x - 1.0f
-      val ny = y - 1.0f
-      fields(x)(y).translate(nx, ny, 0.0f)
-
       addChild(fields(x)(y))
     }
   }
@@ -41,7 +35,17 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     case Quadrant.fourth => (Quadrant.size, Quadrant.size)
   }
 
-  override def onUpdateResources(): Unit = {}
+  override def onUpdateResources(): Unit = {
+    for (x <- 0 until Quadrant.size) {
+      for (y <- 0 until Quadrant.size) {
+        // Position from the quadrant center
+        // TODO: calculate from Quadrant.size
+        val nx = x - 1.0f
+        val ny = y - 1.0f
+        fields(x)(y).translate(nx, ny, 0.0f)
+      }
+    }
+  }
 
   override protected def onUpdateTheme(): Unit = {}
 

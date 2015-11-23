@@ -17,18 +17,20 @@ class LockedIndicator(game: Game, resources: Resources) extends SceneObject with
   visible = false
 
   val lockedText1 = new StaticText(resources, GeometryId.LockedText, TextureId.Font, 1.0f, 0.20f)
-  lockedText1.translate(3.5f, 0.0f, 0.0f)
-  lockedText1.rotate(-90.0f)
-  lockedText1.scale(4.0f, 4.0f, 1.0f)
   addChild(lockedText1)
 
   val lockedText2 = new StaticText(resources, GeometryId.LockedText, TextureId.Font, 1.0f, 0.20f)
-  lockedText2.translate(-3.5f, 0.0f, 0.0f)
-  lockedText2.rotate(90.0f)
-  lockedText2.scale(4.0f, 4.0f, 1.0f)
   addChild(lockedText2)
 
-  override protected def onUpdateResources(): Unit = {}
+  override protected def onUpdateResources(): Unit = {
+    lockedText1.translate(3.5f, 0.0f, 0.0f)
+    lockedText1.rotate(-90.0f)
+    lockedText1.scale(4.0f, 4.0f, 1.0f)
+
+    lockedText2.translate(-3.5f, 0.0f, 0.0f)
+    lockedText2.rotate(90.0f)
+    lockedText2.scale(4.0f, 4.0f, 1.0f)
+  }
 
   override protected def onUpdateTheme(): Unit = {
     lockedText1.setTextColor(resources.getTheme.outer1)

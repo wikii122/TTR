@@ -16,15 +16,17 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
   visible = false
 
   val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.75f, 0.20f)
-  winnerText.translate(-0.125f, 0.0f, 0.0f)
   addChild(winnerText)
 
   val field = new BoardField(Quadrant.second, resources)
-  field.translate(0.375f, 0.0f, 0.0f)
-  field.scale(0.25f, 0.25f, 1.0f)
   addChild(field)
 
-  override protected def onUpdateResources(): Unit = {}
+  override protected def onUpdateResources(): Unit = {
+    winnerText.translate(-0.125f, 0.0f, 0.0f)
+
+    field.translate(0.375f, 0.0f, 0.0f)
+    field.scale(0.25f, 0.25f, 1.0f)
+  }
 
   override protected def onUpdateTheme(): Unit = {
     winnerText.setTextColor(resources.getTheme.outer1)

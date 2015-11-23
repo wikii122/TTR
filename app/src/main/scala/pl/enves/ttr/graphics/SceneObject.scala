@@ -38,10 +38,12 @@ trait SceneObject {
   }
 
   def updateResources(): Unit = {
-    onUpdateResources()
+    reset()
+    //Allow children to setup first
     for (child <- children) {
       child.updateResources()
     }
+    onUpdateResources()
   }
 
   def updateTheme(): Unit = {
@@ -107,5 +109,12 @@ trait SceneObject {
     objectRotation(0) = x
     objectRotation(1) = y
     objectRotation(2) = z
+  }
+
+  def reset(): Unit = {
+    objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
+    objectRotationAngle = 0.0f
+    objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
+    objectScale = Array[Float](1.0f, 1.0f, 1.0f)
   }
 }

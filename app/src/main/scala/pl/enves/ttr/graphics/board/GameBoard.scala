@@ -12,13 +12,9 @@ import pl.enves.ttr.utils.Algebra
 class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
 
   val currentPlayerIndicator = new CurrentPlayerIndicator(game, resources)
-  currentPlayerIndicator.translate(0.0f, 4.5f, 0.0f)
-  currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
   addChild(currentPlayerIndicator)
 
   val winnerIndicator = new WinnerIndicator(game, resources)
-  winnerIndicator.translate(0.0f, -4.5f, 0.0f)
-  winnerIndicator.scale(4.0f, 4.0f, 1.0f)
   addChild(winnerIndicator)
 
   val lockedIndicator = new LockedIndicator(game, resources)
@@ -45,25 +41,36 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   val arrows = allArrows map { key => key -> new ArrowField(key._1, key._2, resources) } toMap
 
   for ((name, arrow) <- arrows) {
-    val pos = name._2 match {
-      case QRotation.r90 => arrowLeftPosition(name._1)
-      case QRotation.r270 => arrowRightPosition(name._1)
-    }
-    val rot = arrowsRotation(name._1)
-    arrow.translate(pos._1, pos._2, 0.0f)
-    arrow.rotate(rot)
     addChild(arrow)
   }
 
   for (quadrant <- Quadrant.values) {
-    val centre = quadrantCentre(quadrant)
-    quadrants(quadrant).translate(centre._1, centre._2, 0.0f)
     addChild(quadrants(quadrant))
   }
 
-  objectScale = Array(0.25f, 0.25f, 1.0f)
-
   override def onUpdateResources(): Unit = {
+    currentPlayerIndicator.translate(0.0f, 4.5f, 0.0f)
+    currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
+
+    winnerIndicator.translate(0.0f, -4.5f, 0.0f)
+    winnerIndicator.scale(4.0f, 4.0f, 1.0f)
+
+    for ((name, arrow) <- arrows) {
+      val pos = name._2 match {
+        case QRotation.r90 => arrowLeftPosition(name._1)
+        case QRotation.r270 => arrowRightPosition(name._1)
+      }
+      val rot = arrowsRotation(name._1)
+      arrow.translate(pos._1, pos._2, 0.0f)
+      arrow.rotate(rot)
+    }
+
+    for (quadrant <- Quadrant.values) {
+      val centre = quadrantCentre(quadrant)
+      quadrants(quadrant).translate(centre._1, centre._2, 0.0f)
+    }
+
+    scale(0.25f, 0.25f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {
