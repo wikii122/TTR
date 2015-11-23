@@ -53,4 +53,8 @@ class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: 
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     maskShader.get.draw(mvMatrix, pMatrix, geometry.get, (backgroundColor, backgroundColor, textColor, texture.get))
   }
+
+  def getWidth = geometry.get.asInstanceOf[TextGeometry].width * objectScale(0)
+
+  def getHeight = geometry.get.asInstanceOf[TextGeometry].height * objectScale(1)
 }

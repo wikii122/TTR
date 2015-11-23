@@ -12,7 +12,7 @@ import spray.json._
  * AI
  */
 class AIGame private(human: Player.Value, board: Board = Board()) extends Game(board) with Logging {
-  override protected val gameType = Game.AI
+  override val gameType = Game.AI
 
   private var ai: Option[MinMax] = None
 

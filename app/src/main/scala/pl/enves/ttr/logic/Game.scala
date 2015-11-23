@@ -12,7 +12,7 @@ import pl.enves.ttr.utils.JsonProtocol._
  * the what Board is responsible for.
  */
 abstract class Game(protected val board: Board) extends JsonMappable {
-  protected val gameType: Game.Value
+  val gameType: Game.Value
 
   type State = Seq[Seq[Option[Player.Value]]]
 

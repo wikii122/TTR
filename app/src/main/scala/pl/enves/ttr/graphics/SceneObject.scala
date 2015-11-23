@@ -117,4 +117,8 @@ trait SceneObject {
     objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
     objectScale = Array[Float](1.0f, 1.0f, 1.0f)
   }
+
+  def setRotationAngle(a: Float) = objectRotationAngle = a
+
+  def setVisible(v: Boolean) = visible = v
 }

@@ -11,7 +11,7 @@ import pl.enves.ttr.utils.JsonProtocol._
  * Wrapper for game logic.
  */
 class StandardGame private (board: Board = Board()) extends Game(board) with Logging {
-  override protected val gameType = Game.STANDARD
+  override val gameType = Game.STANDARD
 
   /**
    * Initiates the game with given player.
