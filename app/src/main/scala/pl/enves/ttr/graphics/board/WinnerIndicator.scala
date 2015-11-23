@@ -25,7 +25,7 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
     winnerText.translate(-0.125f, 0.0f, 0.0f)
 
     field.translate(0.375f, 0.0f, 0.0f)
-    field.scale(0.25f, 0.25f, 1.0f)
+    field.scale(0.2f, 0.2f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {
