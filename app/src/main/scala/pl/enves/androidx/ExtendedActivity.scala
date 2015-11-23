@@ -4,6 +4,7 @@ import android.content.{SharedPreferences, Intent}
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.os.{Handler, Looper}
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.os.Build
 import android.view.{View, WindowManager}
@@ -54,7 +55,7 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
 
-    val color = getResources.getColor(R.color.toolbar_dark_transparent)
+    val color = ContextCompat.getColor(this, R.color.toolbar_dark_transparent)
     getSupportActionBar.setBackgroundDrawable(new ColorDrawable(color))
   }
 
