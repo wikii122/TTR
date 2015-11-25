@@ -2,7 +2,6 @@ package pl.enves.ttr.utils.styled
 
 import android.graphics.Typeface
 import android.view.WindowManager
-import pl.enves.androidx.ExtendedActivity
 import pl.enves.ttr.utils.themes.Theme
 
 class BottomBarActivity extends StyledActivity {

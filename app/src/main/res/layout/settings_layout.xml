@@ -77,4 +77,27 @@
             android:text="@string/title_activity_licenses"/>
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:id="@+id/text_bot_symbol"
+            style="@style/ButtonStyle"
+            android:text="@string/bots_symbol"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:layout_marginRight="10dp" />
+
+        <ImageButton
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:id="@+id/button_symbol"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/text_bot_symbol"
+            android:layout_toRightOf="@+id/text_bot_symbol"
+            android:contentDescription="@string/button_symbol_description"/>
+    </RelativeLayout>
 </LinearLayout>

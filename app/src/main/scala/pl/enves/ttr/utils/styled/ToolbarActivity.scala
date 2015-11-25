@@ -5,7 +5,6 @@ import android.graphics.drawable.ColorDrawable
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.Toolbar
 import android.view.{MenuItem, WindowManager}
-import pl.enves.androidx.ExtendedActivity
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.R
 import pl.enves.ttr.utils.themes.Theme

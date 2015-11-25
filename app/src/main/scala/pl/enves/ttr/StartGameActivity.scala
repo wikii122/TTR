@@ -1,12 +1,10 @@
 package pl.enves.ttr
 
 import android.content.{Intent, SharedPreferences}
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.{BitmapFactory, Typeface}
+import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
-import android.widget.{Button, ImageButton, TextView}
-import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
+import android.widget.{Button, TextView}
 import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.{Game, GameState, Player}
@@ -15,13 +13,11 @@ import pl.enves.ttr.utils.themes.Theme
 
 class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
   private[this] var gameActive = false
-  private[this] var symbol = Player.X
 
   private[this] var newGameButton: Option[(Button, Button)] = None
   private[this] var newAIGameButton: Option[(Button, Button)] = None
   private[this] var continueGameButton: Option[(Button, Button)] = None
   private[this] var settingsButton: Option[(Button, Button)] = None
-  private[this] var newAIGameSymbol: Option[ImageButton] = None
 
   private[this] var ticTacText: Option[TextView] = None
   private[this] var turnText: Option[TextView] = None
@@ -35,7 +31,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     newGameButton = Some((find[Button](R.id.button_create), find[Button](R.id.button_create_prompt)))
     newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
-    newAIGameSymbol = Some(find[ImageButton](R.id.button_symbol))
     continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
     settingsButton = Some((find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt)))
 
@@ -46,7 +41,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     newGameButton.get onClick startStandardGame
     newAIGameButton.get onClick startAIGame
-    newAIGameSymbol.get onClick changeSymbol
     continueGameButton.get onClick continueGame
     settingsButton.get onClick launchSettings
 
@@ -59,18 +53,11 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     enableButtons()
 
-    symbol = getSavedSymbol
-    setSymbolImage(symbol)
-
     launchTutorialIfFirstrun()
   }
 
   override def onPause() {
     super.onPause()
-
-    if (symbol != getSavedSymbol) {
-      saveSymbol(symbol)
-    }
   }
 
 
@@ -87,12 +74,14 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
   }
 
   private[this] def startAIGame(v: View) = {
-    log("Intending to start new StandardGame")
+    log("Intending to start new AIGame")
+    val botSymbol = Player.withName(prefs.get.getString("BOT_SYMBOL", Player.X.toString))
+    val humanSymbol = if (botSymbol == Player.X) Player.O else Player.X
     val itnt = intent[GameActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
     itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
     itnt putExtra("TYPE", Game.AI.toString)
-    itnt putExtra("AI_HUMAN_SYMBOL", symbol.toString)
+    itnt putExtra("AI_HUMAN_SYMBOL", humanSymbol.toString)
     itnt start()
   }
 
@@ -138,34 +127,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
       continueGameButton.get.disable()
     }
   })
-
-  private[this] def changeSymbol(v: View): Unit = {
-    symbol = if (symbol == Player.X) Player.O else Player.X
-
-    setSymbolImage(symbol)
-  }
-
-  private[this] def saveSymbol(symbol: Player.Value) = {
-    val ed: SharedPreferences.Editor = prefs.get.edit()
-    ed.putString("AI_HUMAN_SYMBOL", symbol.toString)
-    ed.commit()
-  }
-
-  private[this] def getSavedSymbol: Player.Value = {
-    return Player.withName(prefs.get.getString("AI_HUMAN_SYMBOL", Player.X.toString))
-  }
-
-  private[this] def setSymbolImage(symbol: Player.Value): Unit = {
-    val imgRes = if (symbol == Player.X) R.drawable.pat_cross_mod_mask else R.drawable.pat_ring_mod_mask
-    val res = getResources
-    val drawable = new BitmapDrawable(res, BitmapFactory.decodeResource(res, imgRes))
-    drawable.setAntiAlias(true)
-
-    val theme = getSavedTheme(getResources, prefs.get)
-    maskColors(theme.background, theme.background, theme.color1, drawable)
-
-    newAIGameSymbol.get.setBackground(drawable)
-  }
 
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
