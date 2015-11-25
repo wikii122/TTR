@@ -53,7 +53,7 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
       player1TurnText.setVisible(true)
     }
 
-    if (game.locked) {
+    if (game.locked && !game.finished) {
       field.rotate(omega * dt)
     } else {
       field.setRotationAngle(0.0f)
