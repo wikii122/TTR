@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:orientation="vertical">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/tt"
-                android:textSize="100sp"/>
+                android:textSize="100sp" />
 
             <TextView
                 android:id="@+id/text_t"
@@ -31,7 +31,7 @@
                 android:layout_toRightOf="@+id/text_tt"
                 android:rotation="180"
                 android:text="@string/t"
-                android:textSize="100sp"/>
+                android:textSize="100sp" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -44,7 +44,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/tic_tac"
-                android:textSize="33sp"/>
+                android:textSize="33sp" />
 
             <TextView
                 android:id="@+id/text_turn"
@@ -55,21 +55,21 @@
                 android:layout_toRightOf="@+id/text_tic_tac"
                 android:rotation="180"
                 android:text="@string/turn"
-                android:textSize="33sp"/>
+                android:textSize="33sp" />
         </RelativeLayout>
     </FrameLayout>
 
-
-    <FrameLayout
+    <ViewSwitcher
+        android:id="@+id/menuViewSwitcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:layout_gravity="center"
-                      android:orientation="vertical">
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
 
             <RelativeLayout
                 android:layout_width="wrap_content"
@@ -77,37 +77,17 @@
                 android:layout_gravity="center_horizontal">
 
                 <Button
-                    android:id="@+id/button_create_prompt"
+                    android:id="@+id/button_new_prompt"
                     style="@style/ButtonStyle"
-                    android:text="@string/nav_prompt"/>
+                    android:text="@string/nav_prompt" />
 
                 <Button
-                    android:id="@+id/button_create"
+                    android:id="@+id/button_new"
                     style="@style/ButtonStyle"
                     android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/button_create_prompt"
-                    android:layout_toRightOf="@+id/button_create_prompt"
-                    android:text="@string/new_game"/>
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
-
-                <Button
-                    android:id="@+id/button_create_ai_prompt"
-                    style="@style/ButtonStyle"
-                    android:text="@string/nav_prompt"/>
-
-                <Button
-                    android:id="@+id/button_create_ai"
-                    style="@style/ButtonStyle"
-                    android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/button_create_ai_prompt"
-                    android:layout_toRightOf="@+id/button_create_ai_prompt"
-                    android:text="@string/new_ai_game"/>
-
+                    android:layout_toEndOf="@+id/button_new_prompt"
+                    android:layout_toRightOf="@+id/button_new_prompt"
+                    android:text="@string/new_game" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -118,7 +98,7 @@
                 <Button
                     android:id="@+id/button_continue_prompt"
                     style="@style/ButtonStyle"
-                    android:text="@string/nav_prompt"/>
+                    android:text="@string/nav_prompt" />
 
                 <Button
                     android:id="@+id/button_continue"
@@ -126,7 +106,7 @@
                     android:layout_alignParentTop="true"
                     android:layout_toEndOf="@+id/button_continue_prompt"
                     android:layout_toRightOf="@+id/button_continue_prompt"
-                    android:text="@string/continue_game"/>
+                    android:text="@string/continue_game" />
             </RelativeLayout>
 
             <RelativeLayout
@@ -137,7 +117,7 @@
                 <Button
                     android:id="@+id/button_settings_prompt"
                     style="@style/ButtonStyle"
-                    android:text="@string/nav_prompt"/>
+                    android:text="@string/nav_prompt" />
 
                 <Button
                     android:id="@+id/button_settings"
@@ -145,8 +125,91 @@
                     android:layout_alignParentTop="true"
                     android:layout_toEndOf="@+id/button_settings_prompt"
                     android:layout_toRightOf="@+id/button_settings_prompt"
-                    android:text="@string/settings"/>
+                    android:text="@string/settings" />
             </RelativeLayout>
         </LinearLayout>
-    </FrameLayout>
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical">
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/button_create_standard_prompt"
+                    style="@style/ButtonStyle"
+                    android:text="@string/nav_prompt" />
+
+                <Button
+                    android:id="@+id/button_create_standard"
+                    style="@style/ButtonStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_create_standard_prompt"
+                    android:layout_toRightOf="@+id/button_create_standard_prompt"
+                    android:text="@string/new_standard_game" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/button_create_ai_prompt"
+                    style="@style/ButtonStyle"
+                    android:text="@string/nav_prompt" />
+
+                <Button
+                    android:id="@+id/button_create_ai"
+                    style="@style/ButtonStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_create_ai_prompt"
+                    android:layout_toRightOf="@+id/button_create_ai_prompt"
+                    android:text="@string/new_ai_game" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/button_create_network_prompt"
+                    style="@style/ButtonStyle"
+                    android:text="@string/nav_prompt" />
+
+                <Button
+                    android:id="@+id/button_create_network"
+                    style="@style/ButtonStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_create_network_prompt"
+                    android:layout_toRightOf="@+id/button_create_network_prompt"
+                    android:text="@string/new_network_game" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/button_back_to_main_prompt"
+                    style="@style/ButtonStyle"
+                    android:text="@string/nav_up" />
+
+                <Button
+                    android:id="@+id/button_back_to_main"
+                    style="@style/ButtonStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_back_to_main_prompt"
+                    android:layout_toRightOf="@+id/button_back_to_main_prompt"
+                    android:text="@string/back_to_main" />
+            </RelativeLayout>
+        </LinearLayout>
+    </ViewSwitcher>
 </LinearLayout>

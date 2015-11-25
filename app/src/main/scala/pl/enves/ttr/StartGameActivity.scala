@@ -4,7 +4,8 @@ import android.content.{Intent, SharedPreferences}
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
-import android.widget.{Button, TextView}
+import android.view.animation.AnimationUtils
+import android.widget.{ViewSwitcher, Button, TextView}
 import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.{Game, GameState, Player}
@@ -13,11 +14,16 @@ import pl.enves.ttr.utils.themes.Theme
 
 class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
   private[this] var gameActive = false
+  private[this] var viewSwitcher: Option[ViewSwitcher] = None
 
   private[this] var newGameButton: Option[(Button, Button)] = None
-  private[this] var newAIGameButton: Option[(Button, Button)] = None
   private[this] var continueGameButton: Option[(Button, Button)] = None
   private[this] var settingsButton: Option[(Button, Button)] = None
+
+  private[this] var newStandardButton: Option[(Button, Button)] = None
+  private[this] var newAIGameButton: Option[(Button, Button)] = None
+  private[this] var newNetworkButton: Option[(Button, Button)] = None
+  private[this] var backToMainButton: Option[(Button, Button)] = None
 
   private[this] var ticTacText: Option[TextView] = None
   private[this] var turnText: Option[TextView] = None
@@ -29,20 +35,35 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     super.onCreate(savedInstanceState)
     setContentView(R.layout.start_game_layout)
 
-    newGameButton = Some((find[Button](R.id.button_create), find[Button](R.id.button_create_prompt)))
-    newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
+    viewSwitcher = Some(find[ViewSwitcher](R.id.menuViewSwitcher))
+
+    newGameButton = Some((find[Button](R.id.button_new), find[Button](R.id.button_new_prompt)))
     continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
     settingsButton = Some((find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt)))
+
+    newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
+    newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
+    newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
+    backToMainButton = Some((find[Button] (R.id.button_back_to_main), find[Button](R.id.button_back_to_main_prompt)))
 
     ticTacText = Some(find[TextView](R.id.text_tic_tac))
     turnText = Some(find[TextView](R.id.text_turn))
     ttText = Some(find[TextView](R.id.text_tt))
     tText = Some(find[TextView](R.id.text_t))
 
-    newGameButton.get onClick startStandardGame
-    newAIGameButton.get onClick startAIGame
+    newGameButton.get onClick flip
     continueGameButton.get onClick continueGame
     settingsButton.get onClick launchSettings
+
+    newStandardButton.get onClick startStandardGame
+    newAIGameButton.get onClick startAIGame
+    backToMainButton.get onClick unflip
+
+    val inAnimation = AnimationUtils.loadAnimation(this,  android.R.anim.fade_in)
+    val outAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
+
+    viewSwitcher.get.setInAnimation(inAnimation)
+    viewSwitcher.get.setOutAnimation(outAnimation)
 
     GameState.onDataChanged(enableButtons)
   }
@@ -120,6 +141,16 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     }
   }
 
+  private[this] def flip(v: View) = {
+    log("Showing new game menu")
+    viewSwitcher.get.showNext()
+  }
+
+  private[this] def unflip(v: View) = {
+    log("Showing main menu")
+    viewSwitcher.get.showPrevious()
+  }
+
   private[this] def enableButtons(): Unit = UiThread(() => {
     if (activeGame) {
       continueGameButton.get.enable()
@@ -132,9 +163,13 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     super.setTypeface(typeface)
 
     newGameButton.get.setTypeface(typeface)
-    newAIGameButton.get.setTypeface(typeface)
     continueGameButton.get.setTypeface(typeface)
     settingsButton.get.setTypeface(typeface)
+
+    newStandardButton.get.setTypeface(typeface)
+    newAIGameButton.get.setTypeface(typeface)
+    newNetworkButton.get.setTypeface(typeface)
+    backToMainButton.get.setTypeface(typeface)
 
     ticTacText.get.setTypeface(typeface)
     turnText.get.setTypeface(typeface)
@@ -159,9 +194,13 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     super.setColorTheme(theme)
 
     newGameButton.get.setTextColor(theme.color1, theme.color2)
-    newAIGameButton.get.setTextColor(theme.color1, theme.color2)
     continueGameButton.get.setTextColor(colorStateList(theme.color1, 0.25f), colorStateList(theme.color2, 0.25f))
     settingsButton.get.setTextColor(theme.color1, theme.color2)
+
+    newStandardButton.get.setTextColor(theme.color1, theme.color2)
+    newAIGameButton.get.setTextColor(theme.color1, theme.color2)
+    newNetworkButton.get.setTextColor(theme.color1, theme.color2)
+    backToMainButton.get.setTextColor(theme.color1, theme.color2)
 
     ticTacText.get.setTextColor(theme.color1)
     turnText.get.setTextColor(theme.color2)
