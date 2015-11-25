@@ -29,7 +29,7 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
   }
 
   override protected def onUpdateTheme(): Unit = {
-    winnerText.setTextColor(resources.getTheme.outer1)
+    winnerText.setTextColor(resources.getTheme.color1)
     val noColor: ColorArray = resources.getTheme.background
     noColor(3) = 0.0f //To nicely fade-out on edges
     winnerText.setTextBackground(noColor)

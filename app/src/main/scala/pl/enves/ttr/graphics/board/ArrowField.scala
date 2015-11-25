@@ -20,10 +20,10 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
   var active = false
 
   def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => resources.getTheme.outer1
-    case Quadrant.second => resources.getTheme.outer2
-    case Quadrant.third => resources.getTheme.outer2
-    case Quadrant.fourth => resources.getTheme.outer1
+    case Quadrant.first => resources.getTheme.color1
+    case Quadrant.second => resources.getTheme.color2
+    case Quadrant.third => resources.getTheme.color2
+    case Quadrant.fourth => resources.getTheme.color1
   }
 
   override protected def onUpdateResources(): Unit = {

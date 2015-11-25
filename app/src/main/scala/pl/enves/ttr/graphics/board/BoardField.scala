@@ -28,8 +28,8 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
 
   override protected def onUpdateTheme(): Unit = {
     super.onUpdateTheme()
-    outerColor1 = resources.getTheme.outer1
-    outerColor2 = resources.getTheme.outer2
+    outerColor1 = resources.getTheme.color1
+    outerColor2 = resources.getTheme.color2
     winnerOuterColor = resources.getTheme.winner
   }
 

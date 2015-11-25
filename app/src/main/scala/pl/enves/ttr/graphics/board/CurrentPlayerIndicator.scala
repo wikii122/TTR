@@ -33,8 +33,8 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   }
 
   override protected def onUpdateTheme(): Unit = {
-    player1TurnText.setTextColor(resources.getTheme.outer2)
-    player2TurnText.setTextColor(resources.getTheme.outer2)
+    player1TurnText.setTextColor(resources.getTheme.color2)
+    player2TurnText.setTextColor(resources.getTheme.color2)
 
     val noColor: ColorArray = colorTransparent(resources.getTheme.background, 0.0f)
     player1TurnText.setTextBackground(noColor)
