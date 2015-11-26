@@ -19,8 +19,8 @@ class BoardField(quadrant: Quadrant.Value, resources: Resources) extends Field(r
   var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
   var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  override protected def onUpdateResources(): Unit = {
-    super.onUpdateResources()
+  override protected def onUpdateResources(screenRatio: Float): Unit = {
+    super.onUpdateResources(screenRatio)
     ring = Some(resources.getTexture(TextureId.MaskRing))
     cross = Some(resources.getTexture(TextureId.MaskCross))
     empty = Some(resources.getTexture(TextureId.MaskEmpty))

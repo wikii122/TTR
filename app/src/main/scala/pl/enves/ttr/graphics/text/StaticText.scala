@@ -17,7 +17,7 @@ class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: 
   private var geometry: Option[AbstractGeometry] = None
   private var maskShader: Option[MaskShader] = None
 
-  override def onUpdateResources(): Unit = {
+  override def onUpdateResources(screenRatio: Float): Unit = {
     texture = Some(resources.getTexture(textureId))
     geometry = Some(resources.getGeometry(geometryId))
     maskShader = Some(resources.getMaskShader)

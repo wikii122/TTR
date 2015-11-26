@@ -72,19 +72,24 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     lastFrame = now
   }
 
+  /**
+   * Called after the surface is created
+   */
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int) {
     GLES20.glViewport(0, 0, width, height)
     viewportWidth = width
     viewportHeight = height
 
     Matrix.setIdentityM(pMatrix.get(), 0)
+    var ratio = 1.0f
     if (height > width) {
-      val ratio = height.toFloat / width.toFloat
+      ratio = height.toFloat / width.toFloat
       Matrix.orthoM(pMatrix.get(), 0, -1.0f, 1.0f, -ratio, ratio, -1.0f, 1.0f)
     } else {
-      val ratio = width.toFloat / height.toFloat
+      ratio = width.toFloat / height.toFloat
       Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
     }
+    board.updateResources(ratio)
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
@@ -99,7 +104,6 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
     GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
     resources.createOpenGLResources()
-    board.updateResources()
     themeNeedsUpdate = true
   }
 

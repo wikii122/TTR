@@ -17,7 +17,7 @@ trait SceneObject {
 
   protected var visible = true
 
-  protected def onUpdateResources(): Unit
+  protected def onUpdateResources(screenRatio: Float): Unit
 
   protected def onUpdateTheme(): Unit
 
@@ -37,13 +37,13 @@ trait SceneObject {
     Matrix.scaleM(mvMatrix.get(), 0, objectScale(0), objectScale(1), objectScale(2))
   }
 
-  def updateResources(): Unit = {
+  def updateResources(screenRatio: Float): Unit = {
     reset()
     //Allow children to setup first
     for (child <- children) {
-      child.updateResources()
+      child.updateResources(screenRatio)
     }
-    onUpdateResources()
+    onUpdateResources(screenRatio)
   }
 
   def updateTheme(): Unit = {

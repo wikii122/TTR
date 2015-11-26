@@ -26,8 +26,8 @@ class ArrowField(quadrant: Quadrant.Value, rotation: QRotation.Value, resources:
     case Quadrant.fourth => resources.getTheme.color1
   }
 
-  override protected def onUpdateResources(): Unit = {
-    super.onUpdateResources()
+  override protected def onUpdateResources(screenRatio: Float): Unit = {
+    super.onUpdateResources(screenRatio)
     rotation match {
       case QRotation.r90 => arrow = Some(resources.getTexture(TextureId.MaskArrowLeft))
       case QRotation.r270 => arrow = Some(resources.getTexture(TextureId.MaskArrowRight))

@@ -28,7 +28,7 @@ class Field(resources: Resources) extends SceneObject with Logging with ColorMan
 
   private var notStirred = 0.0f
 
-  override protected def onUpdateResources(): Unit = {
+  override protected def onUpdateResources(screenRatio: Float): Unit = {
     square = Some(resources.getGeometry(GeometryId.Square))
 
     maskShader = Some(resources.getMaskShader)

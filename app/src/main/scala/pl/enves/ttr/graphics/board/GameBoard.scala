@@ -6,7 +6,7 @@ import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
 /**
- * Size: Outer: ~2.0x~2.0, inner: ~8.0x~8.0
+ * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)
  * (0.0, 0.0) is in the middle
  */
 class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
@@ -45,11 +45,24 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     addChild(quadrants(quadrant))
   }
 
-  override def onUpdateResources(): Unit = {
-    currentPlayerIndicator.translate(0.0f, 4.5f, 0.0f)
+  override def onUpdateResources(screenRatio: Float): Unit = {
+    scale(0.25f, 0.25f, 1.0f)
+
+    //screenRatio should be >= 1, as is ensured in GameRenderer
+    val halfScreenHeight = 4.0f * screenRatio
+    //board is square, takes whole width
+    val heightLeft = halfScreenHeight - 4.0f
+    //fit indicator between arrows when there is little space left
+    var indicatorPositionY = 3.5f + heightLeft / 2
+    //but do not allow it to be too distant
+    if(indicatorPositionY > 4.5f) {
+      indicatorPositionY = 4.5f
+    }
+
+    currentPlayerIndicator.translate(0.0f, indicatorPositionY, 0.0f)
     currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
 
-    winnerIndicator.translate(0.0f, -4.5f, 0.0f)
+    winnerIndicator.translate(0.0f, -indicatorPositionY, 0.0f)
     winnerIndicator.scale(4.0f, 4.0f, 1.0f)
 
     for ((name, arrow) <- arrows) {
@@ -66,8 +79,6 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
       val centre = quadrantCentre(quadrant)
       quadrants(quadrant).translate(centre._1, centre._2, 0.0f)
     }
-
-    scale(0.25f, 0.25f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {

@@ -23,7 +23,7 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   val field = new BoardField(Quadrant.first, resources)
   addChild(field)
 
-  override protected def onUpdateResources(): Unit = {
+  override protected def onUpdateResources(screenRatio: Float): Unit = {
     val s1 = player1TurnText.getWidth / 2
     player1TurnText.translate(-0.5f + player1TurnText.getWidth / 2, 0.0f, 0.0f)
     player2TurnText.translate(-0.5f + player2TurnText.getWidth / 2, 0.0f, 0.0f)

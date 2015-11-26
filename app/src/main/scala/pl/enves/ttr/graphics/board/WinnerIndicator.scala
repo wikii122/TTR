@@ -21,7 +21,7 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
   val field = new BoardField(Quadrant.second, resources)
   addChild(field)
 
-  override protected def onUpdateResources(): Unit = {
+  override protected def onUpdateResources(screenRatio: Float): Unit = {
     winnerText.translate(-0.125f, 0.0f, 0.0f)
 
     field.translate(0.375f, 0.0f, 0.0f)

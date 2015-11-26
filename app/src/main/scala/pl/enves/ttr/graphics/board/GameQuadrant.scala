@@ -35,7 +35,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     case Quadrant.fourth => (Quadrant.size, Quadrant.size)
   }
 
-  override def onUpdateResources(): Unit = {
+  override def onUpdateResources(screenRatio: Float): Unit = {
     for (x <- 0 until Quadrant.size) {
       for (y <- 0 until Quadrant.size) {
         // Position from the quadrant center
