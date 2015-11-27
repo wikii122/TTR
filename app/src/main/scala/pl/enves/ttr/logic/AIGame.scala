@@ -98,6 +98,8 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
       "type" -> gameType
     )
   }
+
+  def getHuman: Player.Value = human
 }
 
 object AIGame {

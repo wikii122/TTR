@@ -76,5 +76,10 @@ trait DoubleButtonHelper {
       buttons._1.setTextColor(color1)
       buttons._2.setTextColor(color2)
     }
+
+    def setVisibility(visibility: Int): Unit = {
+      buttons._1.setVisibility(visibility)
+      buttons._2.setVisibility(visibility)
+    }
   }
 }

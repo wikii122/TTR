@@ -40,4 +40,7 @@
     <string name="credits_spray">spray</string>
     <string name="credits_font">comfortaa</string>
     <string name="bots_symbol">bot\'s symbol:</string>
+    <string name="play_again">play again</string>
+    <string name="game_course">game course</string>
+    <string name="contemplate">contemplate</string>
 </resources>

@@ -3,7 +3,6 @@ package pl.enves.ttr.graphics
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-import android.app.AlertDialog
 import android.content.Context
 import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
@@ -15,12 +14,10 @@ import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.themes._
 
-import scala.util.{Failure, Success, Try}
-
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
+class GameRenderer(context: Context, game: Game, onEnd: Option[Player.Value] => Unit) extends Renderer with Logging {
   log("Creating")
 
   private[this] val resources = new Resources(context, game)
@@ -115,6 +112,11 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
   def onTouchEvent(e: MotionEvent): Boolean = {
     if (e.getAction == MotionEvent.ACTION_DOWN) {
+      if (game.finished) {
+        onEnd(game.winner)
+        return true
+      }
+
       val clickX = e.getX
       val clickY = viewportHeight - e.getY
       val viewport = Array(0, 0, viewportWidth, viewportHeight)
@@ -137,7 +139,7 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 }
 
 object GameRenderer {
-  def apply(context: Context with GameManager) = new GameRenderer(context, context.game)
+  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, context.game, onEnd)
 
-  def apply(context: Context, game: Game) = new GameRenderer(context, game)
+  def apply(context: Context, game: Game, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, game, onEnd)
 }
