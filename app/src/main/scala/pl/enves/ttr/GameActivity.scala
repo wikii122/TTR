@@ -5,6 +5,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view._
 import android.widget.{Button, FrameLayout}
+import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
@@ -16,7 +17,7 @@ import pl.enves.ttr.utils.themes.Theme
  *
  * Basically it wraps and configures all things that can display other things.
  */
-class GameActivity extends StyledActivity with GameManager {
+class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
   private[this] var afterGameMenuLayer: Option[View] = None
 
@@ -93,6 +94,8 @@ class GameActivity extends StyledActivity with GameManager {
 
   override def setColorTheme(theme: Theme): Unit = {
     view.setTheme(theme)
+
+    afterGameMenuLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
     playAgainButton.get.setTextColor(theme.color1, theme.color2)
     gameCourseButton.get.setTextColor(theme.color1, theme.color2)
