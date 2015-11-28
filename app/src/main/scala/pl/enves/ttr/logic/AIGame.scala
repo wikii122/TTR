@@ -11,7 +11,7 @@ import spray.json._
 /**
  * AI
  */
-class AIGame private(human: Player.Value, board: Board = Board()) extends Game(board) with Logging {
+class AIGame(human: Player.Value, board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.AI
 
   private var ai: Option[MinMax] = None
@@ -20,14 +20,10 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
   def startThinking(): Unit = {
     implicit val player = if (human == Player.X) Player.O else Player.X
 
-    def makeAIMove(move: LightMove): Unit = this.synchronized {
-      log(s"AI Move: $move for $player")
-      // Make a move
-      move match {
-        case LightPosition(q, x, y) => board move(Quadrant(q), x, y)
-        case LightRotation(q, r) => board rotate(Quadrant(q), r)
-      }
-      switchPlayer()
+    def makeAIMove(lm: LightMove): Unit = {
+      log(s"AI Move: $lm for $player")
+      val move = LightMove.toNormalMove(lm, this)
+      onMove(move)
     }
 
     ai = Some(new MinMax(board, player, 2000, 4, makeAIMove))
@@ -41,7 +37,7 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
     log(s"Starting player: ${_player}")
     _player = startingPlayer
 
-    if(_player != human) {
+    if (_player != human) {
       startThinking()
     }
   }
@@ -53,8 +49,8 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
    * and ImpossibleMove when Position is taken or game finished.
    * If called before start, throws NoSuchElementException.
    */
-  protected def onMove(move: Move): Boolean = this.synchronized {
-    implicit val player = human
+  protected def onMove(move: Game#Move): Boolean = this.synchronized {
+    implicit val player = _player
     if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (finished) throw new GameWon(s"Game is finished. $winner has won.")
 
@@ -64,6 +60,8 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
       case Position(x, y) => board move(x, y)
       case Rotation(b, r) => board rotate(b, r)
     }
+
+    movesLog.append(LogEntry(player, move))
 
     switchPlayer()
 
@@ -86,8 +84,8 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
 
   protected def boardVersion = board.version
 
-  override final def toMap = this.synchronized {
-    if(ai.isDefined) {
+  override def toMap = this.synchronized {
+    if (ai.isDefined) {
       ai.get.stop()
     }
 
@@ -95,6 +93,7 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
       "player" -> _player,
       "human" -> human,
       "board" -> board.toJson,
+      "log" -> (movesLog.toList map { entry => entry.toJson }),
       "type" -> gameType
     )
   }
@@ -105,14 +104,17 @@ class AIGame private(human: Player.Value, board: Board = Board()) extends Game(b
 object AIGame {
   def apply(human: Player.Value) = new AIGame(human)
 
+  def apply(human: Player.Value, board: Board) = new AIGame(human, board)
+
   def apply(jsValue: JsValue): Game = {
     val fields = jsValue.asJsObject.fields
     val board = Board(fields("board"))
     val human = fields("human").convertTo[Player.Value]
     val game = new AIGame(human, board)
     game._player = fields("player").convertTo[Player.Value]
+    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject, game)))
 
-    if(game._player != human) {
+    if (game._player != human) {
       game.startThinking()
     }
 

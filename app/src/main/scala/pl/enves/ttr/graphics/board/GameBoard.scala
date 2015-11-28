@@ -1,5 +1,6 @@
 package pl.enves.ttr.graphics.board
 
+import android.content.Context
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.logic._
@@ -9,19 +10,19 @@ import pl.enves.ttr.utils.Algebra
  * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)
  * (0.0, 0.0) is in the middle
  */
-class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameBoard(context: Context with GameManager, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  val currentPlayerIndicator = new CurrentPlayerIndicator(game, resources)
+  val currentPlayerIndicator = new CurrentPlayerIndicator(context, resources)
   addChild(currentPlayerIndicator)
 
-  val winnerIndicator = new WinnerIndicator(game, resources)
+  val winnerIndicator = new WinnerIndicator(context, resources)
   addChild(winnerIndicator)
 
   val quadrants = Map(
-    (Quadrant.first, new GameQuadrant(game, Quadrant.first, resources)),
-    (Quadrant.second, new GameQuadrant(game, Quadrant.second, resources)),
-    (Quadrant.third, new GameQuadrant(game, Quadrant.third, resources)),
-    (Quadrant.fourth, new GameQuadrant(game, Quadrant.fourth, resources))
+    (Quadrant.first, new GameQuadrant(context, Quadrant.first, resources)),
+    (Quadrant.second, new GameQuadrant(context, Quadrant.second, resources)),
+    (Quadrant.third, new GameQuadrant(context, Quadrant.third, resources)),
+    (Quadrant.fourth, new GameQuadrant(context, Quadrant.fourth, resources))
   )
 
   val allArrows = Array(
@@ -115,7 +116,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   type Arrow = (Quadrant.Value, QRotation.Value)
 
   override def onAnimate(dt: Float): Unit = {
-    val availableRotations = game.availableRotations
+    val availableRotations = context.game.availableRotations
     for ((name, arrow) <- arrows) {
       arrow.active = availableRotations.contains(name._1)
     }
@@ -157,6 +158,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   }
 
   def processClick(fx: Float, fy: Float): Boolean = {
+    val game = context.game
     val arrow = matchArrow(fx, fy)
     if (arrow.nonEmpty) {
       val a = arrow.get

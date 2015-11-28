@@ -44,6 +44,10 @@ class GameActivity extends StyledActivity with GameManager {
         throw new IllegalArgumentException(s"Invalid game type: $s")
     }
 
+    if (game.isReplaying) {
+      view.startReplaying()
+    }
+
     val frameLayout = new FrameLayout(this)
     val gameLayoutParams = new ViewGroup.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
@@ -68,6 +72,7 @@ class GameActivity extends StyledActivity with GameManager {
     backToMainButton = Some((find[Button](R.id.button_back_to_main), find[Button](R.id.button_back_to_main_prompt)))
 
     playAgainButton.get onClick onPlayAgain
+    gameCourseButton.get onClick onReplay
     contemplateButton.get onClick onCloseMenu
     backToMainButton.get onClick onBackToMainMenu
   }
@@ -101,7 +106,7 @@ class GameActivity extends StyledActivity with GameManager {
     super.onPause()
     view.onPause()
 
-    if (game.nonFinished) GameState store game
+    if (game.nonFinished || game.isReplaying) GameState store game
     else GameState clear()
   }
 
@@ -116,7 +121,7 @@ class GameActivity extends StyledActivity with GameManager {
     super.onStop()
 
     // There is no point to keep finished game in memory.
-    if (game.finished) {
+    if (game.finished && !game.isReplaying) {
       GameState.clear()
       this.finish()
     }
@@ -171,6 +176,12 @@ class GameActivity extends StyledActivity with GameManager {
     }
     finish()
     itnt start()
+  }
+
+  private[this] def onReplay(v: View): Unit = {
+    onCloseMenu(v)
+    replayGame()
+    view.startReplaying()
   }
 
   private[this] def onBackToMainMenu(v: View) = {

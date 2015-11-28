@@ -17,16 +17,17 @@ import pl.enves.ttr.utils.themes._
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context, game: Game, onEnd: Option[Player.Value] => Unit) extends Renderer with Logging {
+class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources(context, game)
-  private[this] val board = new GameBoard(game, resources)
+  private[this] val resources = new Resources(context, context.game)
+  private[this] val board = new GameBoard(context, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
   private var themeNeedsUpdate = false
+  private var replaying = false
 
   val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
@@ -41,6 +42,10 @@ class GameRenderer(context: Context, game: Game, onEnd: Option[Player.Value] => 
   def setTheme(theme: Theme): Unit = {
     resources.setTheme(theme)
     themeNeedsUpdate = true
+  }
+
+  def startReplaying(): Unit = {
+    replaying = true
   }
 
   override def onDrawFrame(gl: GL10) {
@@ -63,6 +68,12 @@ class GameRenderer(context: Context, game: Game, onEnd: Option[Player.Value] => 
 
       if (now / 1000 > lastFrame / 1000) {
         log("FPS: " + framesLastSecond)
+        if (replaying) {
+          if (!context.game.replayNextMove()) {
+            replaying = false
+            onEnd(context.game.winner)
+          }
+        }
         framesLastSecond = 0
       }
     }
@@ -112,8 +123,8 @@ class GameRenderer(context: Context, game: Game, onEnd: Option[Player.Value] => 
 
   def onTouchEvent(e: MotionEvent): Boolean = {
     if (e.getAction == MotionEvent.ACTION_DOWN) {
-      if (game.finished) {
-        onEnd(game.winner)
+      if (context.game.finished) {
+        onEnd(context.game.winner)
         return true
       }
 
@@ -139,7 +150,5 @@ class GameRenderer(context: Context, game: Game, onEnd: Option[Player.Value] => 
 }
 
 object GameRenderer {
-  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, context.game, onEnd)
-
-  def apply(context: Context, game: Game, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, game, onEnd)
+  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, onEnd)
 }

@@ -1,5 +1,6 @@
 package pl.enves.ttr.graphics.board
 
+import android.content.Context
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
@@ -7,12 +8,12 @@ import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
-import pl.enves.ttr.logic.{Game, Player, Quadrant}
+import pl.enves.ttr.logic._
 
 /**
  * Display current player in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObject with ColorManip {
+class CurrentPlayerIndicator(context: Context with GameManager, resources: Resources) extends SceneObject with ColorManip {
   val omega = 360.0f //degrees per second
 
   val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.20f)
@@ -42,18 +43,30 @@ class CurrentPlayerIndicator(game: Game, resources: Resources) extends SceneObje
   }
 
   override protected def onAnimate(dt: Float): Unit = {
+    val game = context.game
     field.value = Some(game.player)
 
-    //In standard game locked is false
-    if (game.locked || (game.gameType == Game.STANDARD && game.player == Player.O)) {
-      player1TurnText.setVisible(false)
-      player2TurnText.setVisible(true)
-    } else {
-      player2TurnText.setVisible(false)
-      player1TurnText.setVisible(true)
+    if (game.gameType == Game.STANDARD) {
+      if (game.player == Player.O) {
+        player1TurnText.setVisible(false)
+        player2TurnText.setVisible(true)
+      } else {
+        player2TurnText.setVisible(false)
+        player1TurnText.setVisible(true)
+      }
     }
 
-    if (game.locked && !game.finished) {
+    if (game.gameType == Game.AI) {
+      if (game.player != game.asInstanceOf[AIGame].getHuman) {
+        player1TurnText.setVisible(false)
+        player2TurnText.setVisible(true)
+      } else {
+        player2TurnText.setVisible(false)
+        player1TurnText.setVisible(true)
+      }
+    }
+
+    if (game.locked && (!game.finished || game.isReplaying)) {
       field.rotate(omega * dt)
     } else {
       field.setRotationAngle(0.0f)

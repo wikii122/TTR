@@ -1,5 +1,6 @@
 package pl.enves.ttr.graphics.board
 
+import android.content.Context
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.logic._
@@ -9,7 +10,7 @@ import pl.enves.ttr.utils.Algebra
  * Basic size: 3.0x3.0
  * (0.0, 0.0) - in the middle
  */
-class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
 
   val rotationTime = 1.0f //seconds
 
@@ -19,20 +20,13 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
 
   var rotationLinear = 0.0f
 
-  var rotationOld = game.quadrantRotation(quadrant)
+  var rotationOld = context.game.quadrantRotation(quadrant)
 
   val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
     for (y <- 0 until Quadrant.size) {
       addChild(fields(x)(y))
     }
-  }
-
-  def quadrantOffset(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => (0, 0)
-    case Quadrant.second => (Quadrant.size, 0)
-    case Quadrant.third => (0, Quadrant.size)
-    case Quadrant.fourth => (Quadrant.size, Quadrant.size)
   }
 
   override def onUpdateResources(screenRatio: Float): Unit = {
@@ -50,8 +44,9 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
   override protected def onUpdateTheme(): Unit = {}
 
   def checkWinning(x: Int, y: Int): Boolean = {
-    val nx = x + quadrantOffset(quadrant)._1
-    val ny = y + quadrantOffset(quadrant)._2
+    val game = context.game
+    val nx = x + Quadrant.offset(quadrant)._1
+    val ny = y + Quadrant.offset(quadrant)._2
     game.finished && game.finishingMove != Nil && game.finishingMove.contains((ny, nx))
   }
 
@@ -59,20 +54,20 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     this.synchronized {
       for (x <- 0 until Quadrant.size) {
         for (y <- 0 until Quadrant.size) {
-          fields(x)(y).value = game.quadrantField(quadrant, x, y)
+          fields(x)(y).value = context.game.quadrantField(quadrant, x, y)
         }
       }
 
-      val rotationNew = game.quadrantRotation(quadrant)
+      val rotationNew = context.game.quadrantRotation(quadrant)
       val rotationDiff = rotationNew sub rotationOld
 
-      if(rotationDiff != QRotation.r0) {
+      if (rotationDiff != QRotation.r0) {
         rotationAnimated = true
 
         rotationLinear = 0.0f
 
         //TODO: Consider 180 degrees rotations
-        rotationCCW = if(rotationDiff == QRotation.r90) true else false
+        rotationCCW = if (rotationDiff == QRotation.r90) true else false
 
         for (x <- 0 until Quadrant.size) {
           for (y <- 0 until Quadrant.size) {
@@ -138,9 +133,10 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
       // Although quadrants are now independent, fields inside them are still not
       val x = Math.floor(fx + 1.5f).toInt
       val y = Math.floor(fy + 1.5f).toInt
-      val nx = x + quadrantOffset(quadrant)._1
-      val ny = y + quadrantOffset(quadrant)._2
+      val nx = x + Quadrant.offset(quadrant)._1
+      val ny = y + Quadrant.offset(quadrant)._2
       try {
+        val game = context.game
         val move = new game.Position(nx, ny)
         game.make(move)
         fields(x)(y).discardIllegal()

@@ -1,17 +1,18 @@
 package pl.enves.ttr.graphics.board
 
+import android.content.Context
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
-import pl.enves.ttr.logic.{Game, Quadrant}
+import pl.enves.ttr.logic.{GameManager, Quadrant}
 
 /**
  * Display winner in 1x0.25 rectangle
  */
-class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
+class WinnerIndicator(context: Context with GameManager, resources: Resources) extends SceneObject {
 
   visible = false
 
@@ -36,9 +37,13 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject {
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    if (game.finished) {
+    val game = context.game
+    if (game.finished || game.isReplaying) {
       visible = true
       field.value = game.winner
+    } else {
+      visible = false
+      field.value = None
     }
   }
 
