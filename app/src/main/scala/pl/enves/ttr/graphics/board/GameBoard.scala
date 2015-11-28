@@ -46,6 +46,9 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     addChild(quadrants(quadrant))
   }
 
+  val replayIndicator = new ReplayIndicator(context, resources)
+  addChild(replayIndicator)
+
   override def onUpdateResources(screenRatio: Float): Unit = {
     scale(0.25f, 0.25f, 1.0f)
 
@@ -65,6 +68,10 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
 
     winnerIndicator.translate(0.0f, -indicatorPositionY, 0.0f)
     winnerIndicator.scale(4.0f, 4.0f, 1.0f)
+
+    replayIndicator.translate(0.0f, 0.0f, 0.5f)
+    replayIndicator.rotate(45.0f)
+    replayIndicator.scale(12.0f, 12.0f, 1.0f)
 
     for ((name, arrow) <- arrows) {
       val pos = name._2 match {
