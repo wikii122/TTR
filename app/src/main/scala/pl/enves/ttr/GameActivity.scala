@@ -109,7 +109,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onPause()
     view.onPause()
 
-    if (game.nonFinished || game.isReplaying) GameState store game
+    if (game.canBeSaved) GameState store game
     else GameState clear()
   }
 
@@ -123,8 +123,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     log("Stopping")
     super.onStop()
 
-    // There is no point to keep finished game in memory.
-    if (game.finished && !game.isReplaying) {
+    // There is no point to keep game that cannot be saved.
+    if (!game.canBeSaved) {
       GameState.clear()
       this.finish()
     }

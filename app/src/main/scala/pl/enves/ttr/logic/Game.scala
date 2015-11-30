@@ -23,7 +23,6 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 
   /**
    * log all successful moves for replay
-   * TODO: saving this
    */
   protected val movesLog = ListBuffer[LogEntry]()
 
@@ -36,6 +35,8 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
     error("replaying non Replay game")
     return false
   }
+
+  def canBeSaved = true
 
   def isReplaying = false
 

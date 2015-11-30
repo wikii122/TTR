@@ -114,7 +114,7 @@ object AIGame {
     game._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject, game)))
 
-    if (game._player != human) {
+    if (game._player != human && game.nonFinished) {
       game.startThinking()
     }
 
