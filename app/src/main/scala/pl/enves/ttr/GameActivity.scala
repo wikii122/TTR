@@ -24,7 +24,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var playAgainButton: Option[(Button, Button)] = None
   private[this] var gameCourseButton: Option[(Button, Button)] = None
   private[this] var contemplateButton: Option[(Button, Button)] = None
-  private[this] var backToMainButton: Option[(Button, Button)] = None
+  private[this] var backToMainButton: Option[ThemedOneImageButton] = None
 
   private[this] var chooseSymbolLayer: Option[View] = None
   private[this] var chooseSymbolText: Option[TextView] = None
@@ -54,6 +54,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     }
 
     val frameLayout = new FrameLayout(this)
+    frameLayout.setFitsSystemWindows(true)
     val gameLayoutParams = new ViewGroup.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
       ViewGroup.LayoutParams.MATCH_PARENT)
@@ -83,7 +84,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
     gameCourseButton = Some((find[Button](R.id.button_game_course), find[Button](R.id.button_game_course_prompt)))
     contemplateButton = Some((find[Button](R.id.button_contemplate), find[Button](R.id.button_contemplate_prompt)))
-    backToMainButton = Some((find[Button](R.id.button_back_to_main), find[Button](R.id.button_back_to_main_prompt)))
+    backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
 
     playAgainButton.get onClick onPlayAgain
     gameCourseButton.get onClick onReplay
@@ -115,7 +116,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     playAgainButton.get.setTypeface(typeface)
     gameCourseButton.get.setTypeface(typeface)
     contemplateButton.get.setTypeface(typeface)
-    backToMainButton.get.setTypeface(typeface)
 
     chooseSymbolText.get.setTypeface(typeface)
   }
@@ -128,7 +128,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     playAgainButton.get.setTextColor(theme.color1, theme.color2)
     gameCourseButton.get.setTextColor(theme.color1, theme.color2)
     contemplateButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setTextColor(theme.color1, theme.color2)
+    backToMainButton.get.setColorTheme(theme)
 
     chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
