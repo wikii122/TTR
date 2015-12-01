@@ -2,13 +2,23 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
     android:orientation="vertical">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-
         android:layout_weight="1">
+
+        <ImageButton
+            android:id="@+id/button_back_to_main"
+            android:layout_width="56dp"
+            android:layout_height="56dp"
+            android:layout_gravity="left|top"
+            android:background="@null"
+            android:contentDescription="@string/abc_action_bar_up_description"
+            android:scaleType="center"
+            android:visibility="gone" />
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -135,6 +145,14 @@
             android:layout_gravity="center"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/text_game_type"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                style="@style/ButtonStyle"
+                android:text="@string/game_type" />
+
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -190,25 +208,6 @@
                     android:layout_toEndOf="@+id/button_create_network_prompt"
                     android:layout_toRightOf="@+id/button_create_network_prompt"
                     android:text="@string/new_network_game" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
-
-                <Button
-                    android:id="@+id/button_back_to_main_prompt"
-                    style="@style/ButtonStyle"
-                    android:text="@string/nav_up" />
-
-                <Button
-                    android:id="@+id/button_back_to_main"
-                    style="@style/ButtonStyle"
-                    android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/button_back_to_main_prompt"
-                    android:layout_toRightOf="@+id/button_back_to_main_prompt"
-                    android:text="@string/back_to_main" />
             </RelativeLayout>
         </LinearLayout>
     </ViewSwitcher>

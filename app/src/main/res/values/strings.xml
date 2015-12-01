@@ -11,6 +11,7 @@
     <string name="new_game">new game</string>
     <string name="settings">settings</string>
     <string name="continue_game">continue</string>
+    <string name="game_type">game type:</string>
     <string name="new_standard_game">pvp offline</string>
     <string name="new_ai_game">pvc</string>
     <string name="new_network_game">pvp online</string>
