@@ -57,12 +57,20 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
     }
 
     if (game.gameType == Game.AI) {
-      if (game.player != game.asInstanceOf[AIGame].getHuman) {
-        player1TurnText.setVisible(false)
-        player2TurnText.setVisible(true)
+      val human = game.asInstanceOf[AIGame].getHuman
+      if(human.isDefined) {
+        field.setVisible(true)
+        if (game.player != human.get) {
+          player1TurnText.setVisible(false)
+          player2TurnText.setVisible(true)
+        } else {
+          player2TurnText.setVisible(false)
+          player1TurnText.setVisible(true)
+        }
       } else {
+        field.setVisible(false)
+        player1TurnText.setVisible(false)
         player2TurnText.setVisible(false)
-        player1TurnText.setVisible(true)
       }
     }
 

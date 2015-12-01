@@ -45,4 +45,7 @@
     <string name="play_again">play again</string>
     <string name="game_course">game course</string>
     <string name="contemplate">contemplate</string>
+    <string name="choose_symbol">choose your symbol</string>
+    <string name="button_symbol_X_description">choose X</string>
+    <string name="button_symbol_O_description">choose O</string>
 </resources>

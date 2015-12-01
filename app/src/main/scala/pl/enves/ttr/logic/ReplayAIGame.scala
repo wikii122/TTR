@@ -5,11 +5,13 @@ import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
-class ReplayAIGame(human: Player.Value, board: Board = Board()) extends AIGame(human, board) with Logging {
+class ReplayAIGame(_human: Player.Value, board: Board = Board()) extends AIGame(board) with Logging {
 
   private var replayMove = 0
 
   override def isReplaying = replayMove < movesLog.size
+
+  setHumanSymbol(_human)
 
   override protected def onMove(move: Game#Move): Boolean = {
     throw new GameWon(s"Game is finished. $winner has won.")
@@ -53,7 +55,7 @@ object ReplayAIGame {
   def apply(game: AIGame): ReplayAIGame = {
     val human = game.getHuman
     val winner = game.winner
-    val replayGame = new ReplayAIGame(human)
+    val replayGame = new ReplayAIGame(human.get)
     replayGame.movesLog.appendAll(game.getMovesLog)
     replayGame.board.setWinner(winner)
     return replayGame
@@ -62,8 +64,8 @@ object ReplayAIGame {
   def apply(jsValue: JsValue): Game = {
     val fields = jsValue.asJsObject.fields
     val board = Board(fields("board"))
-    val human = fields("human").convertTo[Player.Value]
-    val replayGame = new ReplayAIGame(human, board)
+    val human = fields("human").convertTo[Option[Player.Value]]
+    val replayGame = new ReplayAIGame(human.get, board)
     replayGame._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject, replayGame)))
     replayGame.replayMove = fields("replayMove").convertTo[Int]

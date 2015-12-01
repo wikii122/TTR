@@ -4,13 +4,13 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view._
-import android.widget.{Button, FrameLayout}
+import android.widget.{ImageButton, TextView, Button, FrameLayout}
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.styled.StyledActivity
-import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
 
 /**
  * Core game activity.
@@ -26,6 +26,11 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var contemplateButton: Option[(Button, Button)] = None
   private[this] var backToMainButton: Option[(Button, Button)] = None
 
+  private[this] var chooseSymbolLayer: Option[View] = None
+  private[this] var chooseSymbolText: Option[TextView] = None
+  private[this] var chooseXButton: Option[ThemedOneImageButton] = None
+  private[this] var chooseOButton: Option[ThemedOneImageButton] = None
+
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
 
@@ -37,8 +42,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         game = Game.create(Game.STANDARD)
         view.startGame()
       case Game.AI =>
-        game = Game.createAI(Player.withName(b.getString("AI_HUMAN_SYMBOL")))
-        view.startGame()
+        game = Game.create(Game.AI)
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
       case s =>
@@ -65,6 +69,15 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       Gravity.CENTER)
     frameLayout.addView(afterGameMenuLayer.get, afterGameMenuLayoutParams)
 
+    chooseSymbolLayer = Some(inflater.inflate(R.layout.choose_symbol_layout, null))
+    chooseSymbolLayer.get.setVisibility(View.GONE)
+
+    val chooseSymbolLayoutParams = new FrameLayout.LayoutParams(
+      ViewGroup.LayoutParams.MATCH_PARENT,
+      ViewGroup.LayoutParams.MATCH_PARENT,
+      Gravity.TOP)
+    frameLayout.addView(chooseSymbolLayer.get, chooseSymbolLayoutParams)
+
     setContentView(frameLayout)
 
     playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
@@ -76,6 +89,19 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     gameCourseButton.get onClick onReplay
     contemplateButton.get onClick onCloseMenu
     backToMainButton.get onClick onBackToMainMenu
+
+    chooseSymbolText = Some(find[TextView](R.id.text_choose_symbol))
+    chooseXButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_symbol_X), R.drawable.pat_cross_mod_mask))
+    chooseOButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_symbol_O), R.drawable.pat_ring_mod_mask))
+
+    chooseXButton.get onClick onPlayWithBotAsX
+    chooseOButton.get onClick onPlayWithBotAsO
+
+    if(game.gameType == Game.AI) {
+      if(game.asInstanceOf[AIGame].getHuman.isEmpty) {
+        showChooser()
+      }
+    }
   }
 
   override def onTouchEvent(e: MotionEvent): Boolean = {
@@ -90,6 +116,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     gameCourseButton.get.setTypeface(typeface)
     contemplateButton.get.setTypeface(typeface)
     backToMainButton.get.setTypeface(typeface)
+
+    chooseSymbolText.get.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -101,6 +129,12 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     gameCourseButton.get.setTextColor(theme.color1, theme.color2)
     contemplateButton.get.setTextColor(theme.color1, theme.color2)
     backToMainButton.get.setTextColor(theme.color1, theme.color2)
+
+    chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
+
+    chooseSymbolText.get.setTextColor(theme.color2)
+    chooseXButton.get.setColorTheme(theme)
+    chooseOButton.get.setColorTheme(theme)
   }
 
   override def onPause(): Unit = {
@@ -155,6 +189,26 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     backToMainButton.get.setVisibility(View.GONE)
   }
 
+  def showChooser(): Unit = {
+    log("showing chooser")
+    chooseSymbolLayer.get.setVisibility(View.VISIBLE)
+
+    //make sure that all buttons are visible, android gets crazy sometimes
+    chooseSymbolText.get.setVisibility(View.VISIBLE)
+    chooseXButton.get.setVisibility(View.VISIBLE)
+    chooseOButton.get.setVisibility(View.VISIBLE)
+  }
+
+  def closeChooser(): Unit = {
+    log("closing chooser")
+    chooseSymbolLayer.get.setVisibility(View.GONE)
+
+    //make sure that all buttons are gone, android gets crazy sometimes
+    chooseSymbolText.get.setVisibility(View.GONE)
+    chooseXButton.get.setVisibility(View.GONE)
+    chooseOButton.get.setVisibility(View.GONE)
+  }
+
   /**
    * Starts new game with the same options
    */
@@ -189,5 +243,17 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
   private[this] def onBackToMainMenu(v: View) = {
     finish()
+  }
+
+  private[this] def onPlayWithBotAsX(v: View) = {
+    game.asInstanceOf[AIGame].setHumanSymbol(Player.X)
+    view.startGame()
+    closeChooser()
+  }
+
+  private[this] def onPlayWithBotAsO(v: View) = {
+    game.asInstanceOf[AIGame].setHumanSymbol(Player.O)
+    view.startGame()
+    closeChooser()
   }
 }

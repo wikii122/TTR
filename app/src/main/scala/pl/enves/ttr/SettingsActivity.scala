@@ -15,8 +15,6 @@ class SettingsActivity extends ToolbarActivity {
   private[this] var themesButton: Option[(Button, Button)] = None
   private[this] var tutorialButton: Option[(Button, Button)] = None
   private[this] var licensesButton: Option[(Button, Button)] = None
-  private[this] var symbolText: Option[TextView] = None
-  private[this] var symbolButton: Option[SymbolButton] = None
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -27,24 +25,10 @@ class SettingsActivity extends ToolbarActivity {
     themesButton = Some((find[Button](R.id.button_themes), find[Button](R.id.button_themes_prompt)))
     tutorialButton = Some((find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt)))
     licensesButton = Some((find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt)))
-    symbolText = Some(find[TextView](R.id.text_bot_symbol))
-    symbolButton = Some(new SymbolButton(this, find[ImageButton](R.id.button_symbol)))
 
     themesButton.get onClick startThemes
     tutorialButton.get onClick startTutorial
     licensesButton.get onClick startLicenses
-  }
-
-  override def onStart(): Unit = {
-    super.onStart()
-    symbolButton.get.setSymbol(Player.withName(prefs.get.getString("BOT_SYMBOL", Player.X.toString)))
-  }
-
-  override def onPause(): Unit = {
-    super.onPause()
-    val ed: SharedPreferences.Editor = prefs.get.edit()
-    ed.putString("BOT_SYMBOL", symbolButton.get.getSymbol.toString)
-    ed.commit()
   }
 
   private[this] def startTutorial(v: View) = {
@@ -74,7 +58,6 @@ class SettingsActivity extends ToolbarActivity {
     themesButton.get.setTypeface(typeface)
     tutorialButton.get.setTypeface(typeface)
     licensesButton.get.setTypeface(typeface)
-    symbolText.get.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -83,7 +66,5 @@ class SettingsActivity extends ToolbarActivity {
     themesButton.get.setTextColor(theme.color1, theme.color2)
     tutorialButton.get.setTextColor(theme.color1, theme.color2)
     licensesButton.get.setTextColor(theme.color1, theme.color2)
-    symbolText.get.setTextColor(theme.color1)
-    symbolButton.get.setColorTheme(theme)
   }
 }

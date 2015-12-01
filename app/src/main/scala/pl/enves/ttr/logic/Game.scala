@@ -134,9 +134,8 @@ object Game extends Enumeration {
 
   def create(typo: Game.Value): Game = typo match {
     case STANDARD => StandardGame()
+    case AI => AIGame()
   }
-
-  def createAI(human: Player.Value): Game = AIGame(human)
 
   def load(jsValue: JsValue): Game = {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
