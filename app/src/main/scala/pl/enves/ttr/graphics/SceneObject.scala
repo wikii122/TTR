@@ -102,6 +102,12 @@ trait SceneObject {
 
   def rotate(a: Float): Unit = {
     objectRotationAngle += a
+    if(objectRotationAngle >= 360.0f) {
+      objectRotationAngle -= 360.0f
+    }
+    if(objectRotationAngle <= -360.0f) {
+      objectRotationAngle += 360.0f
+    }
   }
 
   def rotation(a: Float, x: Float, y: Float, z: Float): Unit = {

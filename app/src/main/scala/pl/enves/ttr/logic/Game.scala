@@ -1,9 +1,12 @@
 package pl.enves.ttr.logic
 
+import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonMappable
 import spray.json._
 import pl.enves.ttr.utils.JsonProtocol._
+
+import scala.collection.mutable.ListBuffer
 
 /**
  * The Game instance is responsible for handling players and managing board.
@@ -11,12 +14,31 @@ import pl.enves.ttr.utils.JsonProtocol._
  * It is not aware of any of the game rules by itself, as this is
  * the what Board is responsible for.
  */
-abstract class Game(protected val board: Board) extends JsonMappable {
+abstract class Game(protected val board: Board) extends JsonMappable with Logging{
   val gameType: Game.Value
 
   type State = Seq[Seq[Option[Player.Value]]]
 
   protected var _player: Player.Value = Player.X
+
+  /**
+   * log all successful moves for replay
+   */
+  protected val movesLog = ListBuffer[LogEntry]()
+
+  def getMovesLog: ListBuffer[LogEntry] = {
+    log("movesLog.size: "+movesLog.size)
+    return movesLog
+  }
+
+  def replayNextMove(): Boolean = {
+    error("replaying non Replay game")
+    return false
+  }
+
+  def canBeSaved = true
+
+  def isReplaying = false
 
   def player = _player
 
@@ -68,13 +90,14 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 
   protected def onStart(player: Player.Value)
 
-  protected def onMove(move: Move): Boolean
+  protected def onMove(move: Game#Move): Boolean
 
   protected def boardVersion: Int
 
   override def toMap = Map(
     "player" -> _player,
     "board" -> board.toJson,
+    "log" -> (movesLog.toList map { entry => entry.toJson}),
     "type" -> gameType
   )
 
@@ -107,7 +130,7 @@ abstract class Game(protected val board: Board) extends JsonMappable {
 }
 
 object Game extends Enumeration {
-  val STANDARD, CONTINUE, AI = Value
+  val STANDARD, CONTINUE, AI, REPLAY_STANDARD, REPLAY_AI = Value
 
   def create(typo: Game.Value): Game = typo match {
     case STANDARD => StandardGame()
@@ -119,6 +142,8 @@ object Game extends Enumeration {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
       case STANDARD => StandardGame(jsValue)
       case AI => AIGame(jsValue)
+      case REPLAY_STANDARD => ReplayStandardGame(jsValue)
+      case REPLAY_AI => ReplayAIGame(jsValue)
     }
   }
 

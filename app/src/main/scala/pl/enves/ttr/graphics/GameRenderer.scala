@@ -3,7 +3,6 @@ package pl.enves.ttr.graphics
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-import android.app.AlertDialog
 import android.content.Context
 import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
@@ -15,21 +14,20 @@ import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.themes._
 
-import scala.util.{Failure, Success, Try}
-
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
+class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources(context, game)
-  private[this] val board = new GameBoard(game, resources)
+  private[this] val resources = new Resources(context, context.game)
+  private[this] val board = new GameBoard(context, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
   private var themeNeedsUpdate = false
+  private var replaying = false
 
   val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
@@ -44,6 +42,10 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   def setTheme(theme: Theme): Unit = {
     resources.setTheme(theme)
     themeNeedsUpdate = true
+  }
+
+  def startReplaying(): Unit = {
+    replaying = true
   }
 
   override def onDrawFrame(gl: GL10) {
@@ -66,6 +68,12 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
       if (now / 1000 > lastFrame / 1000) {
         log("FPS: " + framesLastSecond)
+        if (replaying) {
+          if (!context.game.replayNextMove()) {
+            replaying = false
+            onEnd(context.game.winner)
+          }
+        }
         framesLastSecond = 0
       }
     }
@@ -115,6 +123,11 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
   def onTouchEvent(e: MotionEvent): Boolean = {
     if (e.getAction == MotionEvent.ACTION_DOWN) {
+      if (context.game.finished) {
+        onEnd(context.game.winner)
+        return true
+      }
+
       val clickX = e.getX
       val clickY = viewportHeight - e.getY
       val viewport = Array(0, 0, viewportWidth, viewportHeight)
@@ -137,7 +150,5 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 }
 
 object GameRenderer {
-  def apply(context: Context with GameManager) = new GameRenderer(context, context.game)
-
-  def apply(context: Context, game: Game) = new GameRenderer(context, game)
+  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, onEnd)
 }

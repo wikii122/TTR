@@ -4,11 +4,9 @@ import android.graphics._
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 
-class CharactersTexture(typeface: Typeface, charset: Array[Char]) extends Logging with TextureProvider {
+class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) extends Logging with TextureProvider {
 
   private val size: Int = Math.ceil(Math.sqrt(charset.length)).toInt
-
-  private val sizePx = 256
 
   private val cellPx = sizePx / size
 
