@@ -54,7 +54,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     }
 
     val frameLayout = new FrameLayout(this)
-    frameLayout.setFitsSystemWindows(true)
     val gameLayoutParams = new ViewGroup.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
       ViewGroup.LayoutParams.MATCH_PARENT)
