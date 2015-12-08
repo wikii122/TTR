@@ -71,7 +71,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     }
 
     def checkClick(clickX: Float, clickY: Float, x: Float, y: Float): Boolean = {
-      val r = sampleRadius(x)
+      val r = rCenter
       val dx = clickX - x
       val dy = clickY - y
       return dx * dx + dy * dy < r * r
