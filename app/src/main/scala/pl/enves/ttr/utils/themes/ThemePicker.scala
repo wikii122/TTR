@@ -1,8 +1,12 @@
 package pl.enves.ttr.utils.themes
 
+import android.animation.Animator.AnimatorListener
+import android.animation.ValueAnimator.AnimatorUpdateListener
+import android.animation.{Animator, ValueAnimator}
 import android.content.Context
 import android.graphics.{Canvas, Paint}
 import android.util.AttributeSet
+import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.{GestureDetector, MotionEvent, View}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.color.ColorManip
@@ -42,6 +46,8 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   private val detector = new GestureDetector(getContext, new GestureListener())
 
   private var changeListener: Option[Styled] = None
+
+  private var animator: Option[ValueAnimator] = None
 
   /**
    * Positions in pixels only
@@ -147,29 +153,57 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
       foreachVisible(f)
 
-      if (state == State.Animation) {
-        val diff = getRingDistance(currentPicked, listPosition, paints.length.toFloat)
-        val a = if (diff > 0) 0.03f else -0.03f
-        movePosition(a)
-
-        if (Math.abs(diff) < 0.06f) {
-          state = State.Normal
-          listPosition = currentPicked
-        }
-        invalidate()
-      }
       if (state == State.Animation || state == State.Dragged) {
         changeColors()
       }
     }
   }
 
+  private def setupAnimation(): Unit = {
+    state = State.Animation
+    val diff = getRingDistance(currentPicked, listPosition, paints.length.toFloat)
+
+    animator = Some(ValueAnimator.ofFloat(listPosition, listPosition + diff))
+    animator.get.setDuration((500 * Math.abs(diff)).toInt)
+    animator.get.setInterpolator(new AccelerateDecelerateInterpolator())
+    animator.get.addUpdateListener(new AnimatorUpdateListener {
+      override def onAnimationUpdate(animation: ValueAnimator): Unit = {
+        setPosition(animation.getAnimatedValue.asInstanceOf[Float])
+        invalidate()
+      }
+    })
+    animator.get.addListener(new AnimatorListener {
+      override def onAnimationEnd(animation: Animator): Unit = {
+        state = State.Normal
+        animator = None
+      }
+
+      override def onAnimationRepeat(animation: Animator): Unit = {}
+
+      override def onAnimationStart(animation: Animator): Unit = {}
+
+      override def onAnimationCancel(animation: Animator): Unit = {}
+    })
+    animator.get.start()
+  }
+
+  private def cancelAnimation(): Unit = {
+    state = State.Normal
+    if (animator.isDefined) {
+      animator.get.cancel()
+    }
+    animator = None
+  }
+
   private def checkClick(clickX: Float, clickY: Float): Boolean = {
     def f(index: Int, positionX: Float): Unit = {
       if (Circle.checkClick(clickX, clickY, positionX, centerY)) {
         log("clicked " + index.toString)
-        currentPicked = index
-        state = State.Animation
+        if (index != currentPicked) {
+          currentPicked = index
+          cancelAnimation()
+          setupAnimation()
+        }
       }
     }
 
@@ -237,7 +271,8 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     val result = detector.onTouchEvent(event)
     if (!result) {
       if (event.getAction == MotionEvent.ACTION_UP) {
-        state = State.Animation
+        cancelAnimation()
+        setupAnimation()
       }
     }
     invalidate()
@@ -250,16 +285,19 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
   }
 
   def movePosition(dx: Float) = {
-    val s = paints.length.toFloat
-    listPosition += dx
+    setPosition(listPosition + dx)
+  }
 
-    //assume abs(dx) < s
+  def setPosition(x: Float) = {
+    val s = paints.length.toFloat
+    listPosition = x
+
     if (listPosition < 0.0f) {
-      listPosition = listPosition + s
+      listPosition = listPosition % s + s
     }
 
     if (listPosition >= s) {
-      listPosition = listPosition - s
+      listPosition = listPosition % s
     }
   }
 
