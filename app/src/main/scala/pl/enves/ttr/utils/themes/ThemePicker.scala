@@ -4,7 +4,7 @@ import android.animation.Animator.AnimatorListener
 import android.animation.ValueAnimator.AnimatorUpdateListener
 import android.animation.{Animator, ValueAnimator}
 import android.content.Context
-import android.graphics.{Canvas, Paint}
+import android.graphics.{Color, Canvas, Paint}
 import android.util.AttributeSet
 import android.view.animation.AccelerateDecelerateInterpolator
 import android.view.{GestureDetector, MotionEvent, View}
@@ -66,6 +66,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
       val a = (radius / 4) * Math.sqrt(2).toFloat
       canvas.drawCircle(x - a, y - a, radius / 2, paints.color1Paint)
       canvas.drawCircle(x + a, y + a, radius / 2, paints.color2Paint)
+      canvas.drawCircle(x, y, radius, paints.borderPaint)
     }
 
     def checkClick(clickX: Float, clickY: Float, x: Float, y: Float): Boolean = {
@@ -80,12 +81,23 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
     val color1Paint = makePaint(theme.color1)
     val color2Paint = makePaint(theme.color2)
     val backgroundPaint = makePaint(theme.background)
+    val borderPaint = makeBorderPaint(theme.background)
 
     private def makePaint(color: ColorAndroid): Paint = {
       val p = new Paint(0)
       p.setStyle(Paint.Style.FILL_AND_STROKE)
       p.setAntiAlias(true)
       p.setColor(color)
+      return p
+    }
+
+    private def makeBorderPaint(color: ColorAndroid): Paint = {
+      val borderColor = if(colorBrightness(color) > 0.5f) Color.BLACK else Color.WHITE
+      val p = new Paint(0)
+      p.setStyle(Paint.Style.STROKE)
+      p.setAntiAlias(true)
+      p.setStrokeWidth(1.0f)
+      p.setColor(borderColor)
       return p
     }
 
