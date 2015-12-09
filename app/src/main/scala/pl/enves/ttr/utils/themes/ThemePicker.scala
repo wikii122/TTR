@@ -39,8 +39,6 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   private var state = State.Normal
 
-  private var themes: Array[Theme] = Array[Theme]()
-
   private var paints: Array[Paints] = Array[Paints]()
 
   private val detector = new GestureDetector(getContext, new GestureListener())
@@ -259,6 +257,11 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
     val space = rightEdge - leftEdge
     var sideSamples = Math.floor((space - 2 * rCenter) / (2 * (2 * rCenter + minSpace))).toInt
+
+    if (2 * sideSamples + 1 > paints.length) {
+      sideSamples = (paints.length - 1) / 2
+    }
+
     if (sideSamples < 1) {
       sideSamples = 1
     }
@@ -310,8 +313,7 @@ class ThemePicker(context: Context, attrs: AttributeSet) extends View(context, a
 
   def setChangeListener(listener: Styled) = changeListener = Some(listener)
 
-  def setThemes(t: Array[Theme]): Unit = {
-    themes = t
+  def setThemes(themes: Array[Theme]): Unit = {
     paints = themes.map(theme => new Paints(theme))
   }
 
