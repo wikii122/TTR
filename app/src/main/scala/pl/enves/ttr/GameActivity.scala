@@ -9,6 +9,7 @@ import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
+import pl.enves.ttr.logic.ai.PositionsChoosing
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
 
@@ -36,6 +37,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var maxTimeText: Option[TextView] = None
   private[this] var maxDepthSpinner: Option[Spinner] = None
   private[this] var maxDepthText: Option[TextView] = None
+  private[this] var positionsChoosingSpinner: Option[Spinner] = None
+  private[this] var positionsChoosingText: Option[TextView] = None
 
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
@@ -109,8 +112,13 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxDepthSpinner = Some(find[Spinner](R.id.spinner_max_depth))
     maxDepthText = Some(find[TextView](R.id.text_max_depth))
 
-    maxTimeSpinner.get.setSelection(2)
-    maxDepthSpinner.get.setSelection(2)
+    positionsChoosingSpinner = Some(find[Spinner](R.id.spinner_positions_choosing))
+    positionsChoosingText = Some(find[TextView](R.id.text_positions_choosing))
+
+    maxTimeSpinner.get.setSelection(5)
+    maxDepthSpinner.get.setSelection(3)
+    positionsChoosingSpinner.get.setAdapter(PositionsChoosing.getAdapter(this))
+    positionsChoosingSpinner.get.setSelection(0)
 
     if(game.gameType == Game.AI) {
       if(game.asInstanceOf[AIGame].getHuman.isEmpty) {
@@ -135,6 +143,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     maxDepthText.get.setTypeface(typeface)
     maxTimeText.get.setTypeface(typeface)
+    positionsChoosingText.get.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -155,6 +164,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     maxTimeText.get.setTextColor(theme.color2)
     maxDepthText.get.setTextColor(theme.color2)
+    positionsChoosingText.get.setTextColor(theme.color2)
   }
 
   override def onPause(): Unit = {
@@ -222,6 +232,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxTimeSpinner.get.setVisibility(View.VISIBLE)
     maxDepthText.get.setVisibility(View.VISIBLE)
     maxDepthSpinner.get.setVisibility(View.VISIBLE)
+    positionsChoosingText.get.setVisibility(View.VISIBLE)
+    positionsChoosingSpinner.get.setVisibility(View.VISIBLE)
   }
 
   def closeChooser(): Unit = {
@@ -237,6 +249,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxTimeSpinner.get.setVisibility(View.GONE)
     maxDepthText.get.setVisibility(View.GONE)
     maxDepthSpinner.get.setVisibility(View.GONE)
+    positionsChoosingText.get.setVisibility(View.GONE)
+    positionsChoosingSpinner.get.setVisibility(View.GONE)
   }
 
   /**
@@ -279,6 +293,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val g = game.asInstanceOf[AIGame]
     g.setMaxTime(maxTimeSpinner.get.getSelectedItem.toString.toInt)
     g.setMaxDepth(maxDepthSpinner.get.getSelectedItem.toString.toInt)
+    g.setPositionsChoosing(PositionsChoosing.withName(positionsChoosingSpinner.get.getSelectedItem.toString))
   }
 
   private[this] def onPlayWithBotAsX(v: View) = {

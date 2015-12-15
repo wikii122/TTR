@@ -22,6 +22,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   private var maxDepth: Int = 3
 
+  private var positionsChoosing = PositionsChoosing.Reasonable
+
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
@@ -32,7 +34,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
       onMove(move)
     }
 
-    ai = Some(new MinMax(board, player, maxTime, maxDepth, makeAIMove))
+    ai = Some(new MinMax(board, player, maxTime, maxDepth, positionsChoosing, makeAIMove))
   }
 
   /**
@@ -43,13 +45,13 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     log(s"Starting player: ${_player}")
     _player = startingPlayer
 
-    if(_player != human.get) {
+    if (_player != human.get) {
       startThinking()
     }
   }
 
   def setHumanSymbol(symbol: Player.Value): Unit = {
-    if(human.isEmpty) {
+    if (human.isEmpty) {
       human = Some(symbol)
 
     } else {
@@ -97,7 +99,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     }
   }
 
-  def locked: Boolean = if(human.isDefined) {
+  def locked: Boolean = if (human.isDefined) {
     player != human.get
   } else {
     true
@@ -115,6 +117,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
       "human" -> human,
       "maxTime" -> maxTime,
       "maxDepth" -> maxDepth,
+      "positionsChoosing" -> positionsChoosing.id,
       "board" -> board.toJson,
       "log" -> (movesLog.toList map { entry => entry.toJson }),
       "type" -> gameType
@@ -126,6 +129,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   def setMaxTime(max: Int): Unit = maxTime = max
 
   def setMaxDepth(max: Int): Unit = maxDepth = max
+
+  def setPositionsChoosing(pc: PositionsChoosing.Value): Unit = positionsChoosing = pc
 }
 
 object AIGame {
@@ -146,6 +151,9 @@ object AIGame {
 
     val maxDepth = fields("maxDepth").convertTo[Int]
     game.setMaxDepth(maxDepth)
+
+    val pc = PositionsChoosing(fields("positionsChoosing").convertTo[Int])
+    game.setPositionsChoosing(pc)
 
     if (human.isDefined) {
       game.setHumanSymbol(human.get)

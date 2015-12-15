@@ -86,4 +86,25 @@
             android:entries="@array/max_depth_array"
             android:spinnerMode="dropdown" />
     </LinearLayout>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="Positions Choosing:"
+            android:id="@+id/text_positions_choosing"
+            android:layout_gravity="left|center_vertical" />
+
+        <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner_positions_choosing"
+            android:spinnerMode="dropdown" />
+    </LinearLayout>
 </LinearLayout>

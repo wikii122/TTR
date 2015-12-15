@@ -4,17 +4,13 @@ import pl.enves.ttr.logic.{Game, QRotation, Quadrant}
 
 class LightMove
 
-case class LightPosition(quadrant: Int, x: Int, y: Int) extends LightMove
+case class LightPosition(x: Int, y: Int) extends LightMove
 
 case class LightRotation(quadrant: Int, r: QRotation.Value) extends LightMove
 
 object LightMove {
   def toNormalMove(lm: LightMove, game: Game): Game#Move = lm match {
-    case LightPosition(q, x, y) => {
-      val quadrant = Quadrant(q)
-      val offset = Quadrant.offset(quadrant)
-      new game.Position(x + offset._1, y + offset._2)
-    }
+    case LightPosition(x, y) => new game.Position(x, y)
     case LightRotation(q, r) => new game.Rotation(Quadrant(q), r)
   }
 }
