@@ -18,6 +18,10 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   protected var human: Option[Player.Value] = None
 
+  private var maxTime: Int = 3000
+
+  private var maxDepth: Int = 3
+
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
@@ -28,7 +32,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
       onMove(move)
     }
 
-    ai = Some(new MinMax(board, player, 2000, 4, makeAIMove))
+    ai = Some(new MinMax(board, player, maxTime, maxDepth, makeAIMove))
   }
 
   /**
@@ -109,6 +113,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     Map(
       "player" -> _player,
       "human" -> human,
+      "maxTime" -> maxTime,
+      "maxDepth" -> maxDepth,
       "board" -> board.toJson,
       "log" -> (movesLog.toList map { entry => entry.toJson }),
       "type" -> gameType
@@ -116,6 +122,10 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   }
 
   def getHuman: Option[Player.Value] = human
+
+  def setMaxTime(max: Int): Unit = maxTime = max
+
+  def setMaxDepth(max: Int): Unit = maxDepth = max
 }
 
 object AIGame {
@@ -130,6 +140,12 @@ object AIGame {
     val game = new AIGame(board)
     game._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject, game)))
+
+    val maxTime = fields("maxTime").convertTo[Int]
+    game.setMaxTime(maxTime)
+
+    val maxDepth = fields("maxDepth").convertTo[Int]
+    game.setMaxDepth(maxDepth)
 
     if (human.isDefined) {
       game.setHumanSymbol(human.get)
