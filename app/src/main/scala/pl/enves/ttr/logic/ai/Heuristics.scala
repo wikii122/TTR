@@ -13,7 +13,7 @@ object Heuristics {
   private val five = for (x <- 0 until 5) yield x
   private val six = for (x <- 0 until 6) yield x
   private val two = for (x <- 0 until 2) yield x
-  private val sequences: mutable.ListBuffer[Array[(Int, Int)]] = mutable.ListBuffer[Array[(Int, Int)]]()
+  private val sequences: mutable.ArrayBuffer[Array[(Int, Int)]] = mutable.ArrayBuffer[Array[(Int, Int)]]()
 
   val winnerValue = 10000
   prepareVerticalSequences()
