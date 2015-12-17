@@ -41,7 +41,12 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
     val opponent = LightField.opponent(playerMM)
 
     val stateValue = b.check()
-    if (depth == 0 || stateValue == Heuristics.winnerValue || stateValue == -Heuristics.winnerValue) {
+
+    if(stateValue == Heuristics.winnerValue || stateValue == -Heuristics.winnerValue) {
+      return stateValue * (depth + 1)
+    }
+
+    if (depth == 0) {
       return stateValue
     }
 
