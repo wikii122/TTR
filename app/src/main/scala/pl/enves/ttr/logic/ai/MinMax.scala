@@ -122,6 +122,9 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
     var bestValue = 0
     var bestMove = availableMoves.head
 
+    //TODO: remove in production
+    val researchPositionValues = Array.fill(6, 6) { "  #  " }
+
     if (playerMM == LightField.X) {
       //Max
       bestValue = -infinity
@@ -143,6 +146,11 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
         move match {
           case LightPosition(x, y) => b unMove(x, y, playerMM)
           case LightRotation(q, r) => b unRotate(q, r, playerMM)
+        }
+
+        move match {
+          case LightPosition(x, y) => researchPositionValues(x)(y) = "%05d".format(v)
+          case LightRotation(q, r) =>
         }
 
         //There won't be any cutoffs, as beta is still max
@@ -172,10 +180,26 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
           case LightRotation(q, r) => b unRotate(q, r, playerMM)
         }
 
+        move match {
+          case LightPosition(x, y) => researchPositionValues(x)(y) = "%05d".format(v)
+          case LightRotation(q, r) =>
+        }
+
         //There won't be any cutoffs, as alpha is still min
         i += 1
       }
     }
+
+    for (y <- 0 until 6) {
+      val s0 = researchPositionValues(0)(5 - y)
+      val s1 = researchPositionValues(1)(5 - y)
+      val s2 = researchPositionValues(2)(5 - y)
+      val s3 = researchPositionValues(3)(5 - y)
+      val s4 = researchPositionValues(4)(5 - y)
+      val s5 = researchPositionValues(5)(5 - y)
+      log(s"values: $s0 $s1 $s2 $s3 $s4 $s5")
+    }
+
     return (bestValue, bestMove)
   }
 
@@ -184,9 +208,6 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
     val startTime = System.currentTimeMillis()
     val b = BoardModel(board, positionsChoosing)
     val p = if (player == Player.X) LightField.X else LightField.O
-
-    b.printState()
-    b.printNeighbours()
 
     var depth = 1
 
@@ -209,9 +230,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
     }
     log("finished after: " + (System.currentTimeMillis() - startTime) + "ms, bestMove: " + bestMove)
 
-    b.printCountersNum()
-    b.printState()
-    b.printNeighbours()
+    b.printImportance()
 
     bestMove
   }
@@ -222,7 +241,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
   f onFailure {
     case e: StoppedException =>
       log("stopped")
-    case _ =>
+    case e: Exception =>
+      e.printStackTrace()
       log("switching to random")
       val nb = new NoBrainer(board, success)
   }

@@ -28,7 +28,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   val state = Array.fill[Int] (6, 6) { LightField.None }
 
-  val fieldNeighbours = Array.fill[Int] (6, 6) { 0 }
+  val fieldImportance = Array.fill[Int] (6, 6) { 0 }
 
   private val countersMap = Array.fill(6, 6) {
     ArrayBuffer[Counter]()
@@ -85,7 +85,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   }
 
   private def prepareRowCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
+    val counter = new Counter(fieldImportance)
     buf.append(counter)
     five foreach (i => {
       countersMap(x + i)(y).append(counter)
@@ -94,7 +94,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   }
 
   private def prepareColumnCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
+    val counter = new Counter(fieldImportance)
     buf.append(counter)
     five foreach (i => {
       countersMap(x)(y + i).append(counter)
@@ -103,7 +103,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   }
 
   private def prepareNormalDiagonalCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
+    val counter = new Counter(fieldImportance)
     buf.append(counter)
     five foreach (i => {
       countersMap(x + i)(y + i).append(counter)
@@ -112,7 +112,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   }
 
   private def prepareReverseDiagonalCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
+    val counter = new Counter(fieldImportance)
     buf.append(counter)
     five foreach (i => {
       countersMap(x - i)(y + i).append(counter)
@@ -197,13 +197,6 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
       while (i < countersLength) {
         val counter = counters(i)
         counter.add(f)
-
-        j = 0
-        while (j < 5) {
-          // field can be its own neighbour, no check
-          fieldNeighbours(counter.getCoordinateX(j))(counter.getCoordinateY(j)) += 1
-          j += 1
-        }
         i += 1
       }
     }
@@ -219,13 +212,6 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
       while (i < countersLength) {
         val counter = counters(i)
         counter.sub(f)
-
-        j = 0
-        while (j < 5) {
-          // field can be its own neighbour, no check
-          fieldNeighbours(counter.getCoordinateX(j))(counter.getCoordinateY(j)) -= 1
-          j += 1
-        }
         i += 1
       }
     }
@@ -349,7 +335,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
     var x = 0
     var y = 0
-    var neighbours = 0
+    var importance = 0
     var sum = 0
     val valuedPositions: ArrayBuffer[ValuedPosition] = ArrayBuffer[ValuedPosition]()
     while (x < 6) {
@@ -357,10 +343,10 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
       while (y < 6) {
         if (state(x)(y) == 0) {
           //Don't bother fields that lays in empty sequences
-          neighbours = fieldNeighbours(x)(y)
-          if (neighbours > 0) {
-            sum += neighbours
-            valuedPositions.append(new ValuedPosition(neighbours, _cached_moves_positions(x)(y)))
+          importance = fieldImportance(x)(y)
+          if (importance > 0) {
+            sum += importance
+            valuedPositions.append(new ValuedPosition(importance, _cached_moves_positions(x)(y)))
           }
         }
         y += 1
@@ -368,8 +354,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
       x += 1
     }
 
-    //Fields with more neighbours are more likely to be important
-    //Checking them first increases possibility of alpha-beta cutoff
+    //Checking more important fields first increases possibility of alpha-beta cutoff
     val sortedValuedPositions = valuedPositions.toArray
     scala.util.Sorting.quickSort(sortedValuedPositions)
     val positionsLength: Int = sortedValuedPositions.length
@@ -500,15 +485,20 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     }
   }
 
-  def printNeighbours(): Unit = {
+  def printImportance(): Unit = {
+    def importanceOrField(x: Int, y: Int): String = {
+      return if(state(x)(y) == LightField.X) "  X  "
+      else if(state(x)(y) == LightField.O) "  O  "
+      else "%05d".format(fieldImportance(x)(y))
+    }
     for (y <- six) {
-      val s0 = fieldNeighbours(0)(5 - y)
-      val s1 = fieldNeighbours(1)(5 - y)
-      val s2 = fieldNeighbours(2)(5 - y)
-      val s3 = fieldNeighbours(3)(5 - y)
-      val s4 = fieldNeighbours(4)(5 - y)
-      val s5 = fieldNeighbours(5)(5 - y)
-      log(s"neighbours: $s0 $s1 $s2 $s3 $s4 $s5")
+      val s0 = importanceOrField(0, 5 - y)
+      val s1 = importanceOrField(1, 5 - y)
+      val s2 = importanceOrField(2, 5 - y)
+      val s3 = importanceOrField(3, 5 - y)
+      val s4 = importanceOrField(4, 5 - y)
+      val s5 = importanceOrField(5, 5 - y)
+      log(s"importance: $s0 $s1 $s2 $s3 $s4 $s5")
     }
   }
 }

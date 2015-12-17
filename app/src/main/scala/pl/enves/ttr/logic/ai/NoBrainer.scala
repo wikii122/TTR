@@ -11,7 +11,7 @@ class NoBrainer(board: Board, success: LightMove => Unit) {
     for (x <- 0 until Quadrant.size) {
       for (y <- 0 until Quadrant.size) {
         if (board.lines(x)(y).isEmpty) {
-          moves.append(new LightPosition(x, y))
+          moves.append(new LightPosition(y, x))
         }
       }
     }

@@ -1,30 +1,50 @@
 package pl.enves.ttr.logic.ai
 
-class Counter() {
+class Counter(fieldImportance: Array[Array[Int]]) {
   private var nx: Int = 0
   private var no: Int = 0
 
   private val coordinates = Array.fill[Int](10) { 0 }
 
   def add(player: Int): Unit = {
+    val oldImportance = getImportance
     if (player == LightField.X) {
       nx += 1
     }
     if (player == LightField.O) {
       no += 1
     }
+    adjustImportances(getImportance - oldImportance)
   }
 
   def sub(player: Int): Unit = {
+    val oldImportance = getImportance
     if (player == LightField.X) {
       nx -= 1
     }
     if (player == LightField.O) {
       no -= 1
     }
+    adjustImportances(getImportance - oldImportance)
   }
 
   def getTaken: Int = nx + no
+
+  def getImportance: Int = {
+    val x = nx
+    val o = no
+    return if (o == 0 && x > 0) x * x * x
+    else if (x == 0 && o > 0) o * o * o
+    else 0
+  }
+
+  def adjustImportances(diff: Int): Unit = {
+    var i = 0
+    while(i < 5) {
+      fieldImportance(getCoordinateX(i))(getCoordinateY(i)) += diff
+      i += 1
+    }
+  }
 
   def getValue: Int = {
     val x = nx
