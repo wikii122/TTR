@@ -24,6 +24,9 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   private var positionsChoosing = PositionsChoosing.Reasonable
 
+  //TODO: remove in production
+  private var enabled = true
+
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
@@ -45,7 +48,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     log(s"Starting player: ${_player}")
     _player = startingPlayer
 
-    if (_player != human.get) {
+    if (_player != human.get && enabled) {
       startThinking()
     }
   }
@@ -93,14 +96,14 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     if (_player == human.get) {
       ai = None
     } else {
-      if (!board.finished) {
+      if (!board.finished && enabled) {
         startThinking()
       }
     }
   }
 
   def locked: Boolean = if (human.isDefined) {
-    player != human.get
+    player != human.get && enabled
   } else {
     true
   }
@@ -118,6 +121,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
       "maxTime" -> maxTime,
       "maxDepth" -> maxDepth,
       "positionsChoosing" -> positionsChoosing.id,
+      "enabled" -> enabled,
       "board" -> board.toJson,
       "log" -> (movesLog.toList map { entry => entry.toJson }),
       "type" -> gameType
@@ -131,6 +135,19 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   def setMaxDepth(max: Int): Unit = maxDepth = max
 
   def setPositionsChoosing(pc: PositionsChoosing.Value): Unit = positionsChoosing = pc
+
+  def setEnabled(e: Boolean): Unit = this.synchronized {
+    enabled = e
+    if(enabled) {
+      if (human.isDefined && _player != human.get && !board.finished) {
+        startThinking()
+      }
+    } else {
+      if(ai.isDefined) {
+        ai.get.stop()
+      }
+    }
+  }
 }
 
 object AIGame {
@@ -155,10 +172,12 @@ object AIGame {
     val pc = PositionsChoosing(fields("positionsChoosing").convertTo[Int])
     game.setPositionsChoosing(pc)
 
+    game.enabled = fields("enabled").convertTo[Boolean]
+
     if (human.isDefined) {
       game.setHumanSymbol(human.get)
 
-      if (game._player != human.get && game.nonFinished) {
+      if (game._player != human.get && game.nonFinished && game.enabled) {
         game.startThinking()
       }
     }

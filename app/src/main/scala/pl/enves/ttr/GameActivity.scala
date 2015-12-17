@@ -40,6 +40,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var positionsChoosingSpinner: Option[Spinner] = None
   private[this] var positionsChoosingText: Option[TextView] = None
 
+  private[this] var botTestingLayer: Option[View] = None
+  private[this] var botEnableSwitch: Option[Switch] = None
+
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
 
@@ -87,6 +90,16 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       Gravity.TOP)
     frameLayout.addView(chooseSymbolLayer.get, chooseSymbolLayoutParams)
 
+    botTestingLayer = Some(inflater.inflate(R.layout.bot_testing_layout, null))
+    botTestingLayer.get.setVisibility(View.GONE)
+
+    val botTestingLayoutParams = new FrameLayout.LayoutParams(
+      ViewGroup.LayoutParams.MATCH_PARENT,
+      ViewGroup.LayoutParams.WRAP_CONTENT,
+      Gravity.BOTTOM)
+
+    frameLayout.addView(botTestingLayer.get, botTestingLayoutParams)
+
     setContentView(frameLayout)
 
     playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
@@ -120,9 +133,15 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     positionsChoosingSpinner.get.setAdapter(PositionsChoosing.getAdapter(this))
     positionsChoosingSpinner.get.setSelection(0)
 
+    botEnableSwitch = Some(find[Switch](R.id.bot_enabled_switch))
+    botEnableSwitch.get onCheck onBotEnabledCheck
+
     if(game.gameType == Game.AI) {
       if(game.asInstanceOf[AIGame].getHuman.isEmpty) {
         showChooser()
+      }
+      if(!game.isReplaying) {
+        showBotTesting()
       }
     }
   }
@@ -144,6 +163,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxDepthText.get.setTypeface(typeface)
     maxTimeText.get.setTypeface(typeface)
     positionsChoosingText.get.setTypeface(typeface)
+
+    botEnableSwitch.get.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -165,6 +186,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxTimeText.get.setTextColor(theme.color2)
     maxDepthText.get.setTextColor(theme.color2)
     positionsChoosingText.get.setTextColor(theme.color2)
+
+    botEnableSwitch.get.setTextColor(theme.color2)
   }
 
   override def onPause(): Unit = {
@@ -253,6 +276,20 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     positionsChoosingSpinner.get.setVisibility(View.GONE)
   }
 
+  def showBotTesting(): Unit = {
+    log("showing bot testing")
+    botTestingLayer.get.setVisibility(View.VISIBLE)
+
+    botEnableSwitch.get.setVisibility(View.VISIBLE)
+  }
+
+  def closeBotTesting(): Unit = {
+    log("closing bot testing")
+    botTestingLayer.get.setVisibility(View.GONE)
+
+    botEnableSwitch.get.setVisibility(View.GONE)
+  }
+
   /**
    * Starts new game with the same options
    */
@@ -281,6 +318,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
   private[this] def onReplay(v: View): Unit = {
     onCloseMenu(v)
+    closeBotTesting()
     replayGame()
     view.startReplaying()
   }
@@ -308,5 +346,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     setupBot()
     view.startGame()
     closeChooser()
+  }
+
+  private[this] def onBotEnabledCheck(buttonView: CompoundButton, isChecked: Boolean): Unit = {
+    game.asInstanceOf[AIGame].setEnabled(isChecked)
   }
 }
