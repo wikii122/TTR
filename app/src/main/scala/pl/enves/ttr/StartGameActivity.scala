@@ -15,6 +15,7 @@ import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
 class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
   private[this] var gameActive = false
   private[this] var viewSwitcher: Option[ViewSwitcher] = None
+  private[this] var viewSwitcherSwitched: Boolean = false
 
   private[this] var newGameButton: Option[(Button, Button)] = None
   private[this] var continueGameButton: Option[(Button, Button)] = None
@@ -77,6 +78,10 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     enableButtons()
 
     launchTutorialIfFirstrun()
+
+    if(viewSwitcherSwitched) {
+      unflip(viewSwitcher.get)
+    }
   }
 
   override def onPause() {
@@ -147,12 +152,14 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     log("Showing new game menu")
     viewSwitcher.get.showNext()
     backToMainButton.get.setVisibility(View.VISIBLE)
+    viewSwitcherSwitched = true
   }
 
   private[this] def unflip(v: View) = {
     log("Showing main menu")
     viewSwitcher.get.showPrevious()
     backToMainButton.get.setVisibility(View.GONE)
+    viewSwitcherSwitched = false
   }
 
   private[this] def enableButtons(): Unit = UiThread(() => {
