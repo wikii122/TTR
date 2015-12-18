@@ -9,9 +9,9 @@ import scala.concurrent.Future
 
 class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, positionsChoosing: PositionsChoosing.Value, success: LightMove => Unit) extends Logging {
 
-  private class TimedOutException extends RuntimeException
+  private class TimedOutException extends Exception
 
-  private class StoppedException extends RuntimeException
+  private class StoppedException extends Exception
 
   private var stopped = false
 
