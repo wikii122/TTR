@@ -36,10 +36,6 @@
             android:label="@string/title_activity_tutorial" >
         </activity>
         <activity
-            android:name=".ThemesActivity"
-            android:label="@string/title_activity_themes" >
-        </activity>
-        <activity
             android:name=".LicensesActivity"
             android:label="@string/title_activity_licenses" >
         </activity>
