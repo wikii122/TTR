@@ -25,4 +25,21 @@ trait ColorManip {
 
     return Color.argb(a, r, g, b)
   }
+
+  def colorDistance(color1: ColorAndroid, color2: ColorAndroid): Float = {
+    val a = Math.abs(Color.alpha(color1) - Color.alpha(color2))
+    val r = Math.abs(Color.red(color1) - Color.red(color2))
+    val g = Math.abs(Color.green(color1) - Color.green(color2))
+    val b = Math.abs(Color.blue(color1) - Color.blue(color2))
+
+    return (a + r + g + b) / (256 * 4.0f)
+  }
+
+  def colorBrightness(color: ColorAndroid): Float = {
+    val r = Color.red(color)
+    val g = Color.green(color)
+    val b = Color.blue(color)
+
+    return (r + g + b) / (256 * 3.0f)
+  }
 }
