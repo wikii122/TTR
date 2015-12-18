@@ -42,7 +42,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
 
     val stateValue = b.check()
 
-    if(stateValue == Heuristics.winnerValue || stateValue == -Heuristics.winnerValue) {
+    if (stateValue == Heuristics.winnerValue || stateValue == -Heuristics.winnerValue) {
       return stateValue * (depth + 1)
     }
 
@@ -117,13 +117,15 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
 
     val availableMoves = b.availableMoves()
 
-    val al = -infinity
-    val be = infinity
+    var al = -infinity
+    var be = infinity
     var bestValue = 0
     var bestMove = availableMoves.head
 
     //TODO: remove in production
-    val researchPositionValues = Array.fill(6, 6) { "  #  " }
+    val researchPositionValues = Array.fill(6, 6) {
+      "  #  "
+    }
 
     if (playerMM == LightField.X) {
       //Max
@@ -153,6 +155,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
           case LightRotation(q, r) =>
         }
 
+        al = math.max(al, bestValue)
         //There won't be any cutoffs, as beta is still max
         i += 1
       }
@@ -185,6 +188,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
           case LightRotation(q, r) =>
         }
 
+        be = math.min(be, bestValue)
         //There won't be any cutoffs, as alpha is still min
         i += 1
       }
