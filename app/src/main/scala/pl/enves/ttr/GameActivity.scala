@@ -131,7 +131,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxTimeSpinner.get.setSelection(5)
     maxDepthSpinner.get.setSelection(3)
     positionsChoosingSpinner.get.setAdapter(PositionsChoosing.getAdapter(this))
-    positionsChoosingSpinner.get.setSelection(1)
+    positionsChoosingSpinner.get.setSelection(PositionsChoosing.Reasonable.id)
 
     botEnableSwitch = Some(find[Switch](R.id.bot_enabled_switch))
     botEnableSwitch.get onCheck onBotEnabledCheck

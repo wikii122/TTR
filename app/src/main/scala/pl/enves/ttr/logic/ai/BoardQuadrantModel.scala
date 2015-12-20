@@ -9,40 +9,39 @@ import scala.collection.mutable
  * Takes care of cooldown
  */
 class BoardQuadrantModel extends Logging {
-  private val rotationIndicator = 3
-  private[this] var rotationCooldown = rotationIndicator
-  private[this] var oldRotationCooldowns = mutable.Stack[Int]()
+  private[this] var cooldown = BoardQuadrantModel.rotationIndicator
+  private[this] val oldCooldowns = mutable.Stack[Int]()
 
   def rotate(rot: QRotation.Value) = {
     //Substitution is an irreversible operation
-    oldRotationCooldowns.push(rotationCooldown)
-    rotationCooldown = rotationIndicator
+    oldCooldowns.push(cooldown)
+    cooldown = BoardQuadrantModel.rotationIndicator
   }
 
   def unRotate(rot: QRotation.Value) = {
-    rotationCooldown = oldRotationCooldowns.pop()
+    cooldown = oldCooldowns.pop()
   }
 
-  def canRotate = rotationCooldown <= 0
+  def canRotate = cooldown <= 0
 
   /**
    * Must be called *AFTER* rotate function to work correctly.
    * This was created as separate function because quadrant is not aware of about ¾ moves that
    * happen on the board.
    */
-  def tickCooldown() = rotationCooldown = rotationCooldown - 1
+  def tickCooldown() = cooldown = cooldown - 1
 
-  def unTickCooldown() = rotationCooldown = rotationCooldown + 1
+  def unTickCooldown() = cooldown = cooldown + 1
 
-  private[ai] def setCooldown(i: Int) = rotationCooldown = i
+  private[ai] def setCooldown(i: Int) = cooldown = i
 
-  private[ai] def getCooldown = rotationCooldown
-
-  private[ai] def setOldCooldowns(stack: mutable.Stack[Int]) = oldRotationCooldowns = stack
-
-  private[ai] def getOldCooldowns = oldRotationCooldowns
+  /**
+   * should return value between 0 and rotationIndicator
+   */
+  private[ai] def getCooldown = if (cooldown > 0) cooldown else 0
 }
 
 object BoardQuadrantModel {
+  val rotationIndicator = 3
   def apply() = new BoardQuadrantModel
 }

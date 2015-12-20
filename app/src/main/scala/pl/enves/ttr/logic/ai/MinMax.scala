@@ -5,6 +5,7 @@ import pl.enves.ttr.logic.Player
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.ExecutorContext
 
+import scala.collection.mutable
 import scala.concurrent.Future
 
 class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, positionsChoosing: PositionsChoosing.Value, success: LightMove => Unit) extends Logging {
@@ -13,9 +14,20 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
 
   private class StoppedException extends Exception
 
+  private class CacheTooBigException extends Exception
+
   private var stopped = false
 
   private val infinity = 1000000
+
+  private val maxCachedEntries = 500000
+
+  private var minMaxCalls = 0
+  private val thisValues = mutable.HashMap[Int, Int]()
+  private var thisBestMoves = mutable.HashMap[Int, LightMove]()
+  private var previousBestMoves = mutable.HashMap[Int, LightMove]()
+
+  val startTime = System.currentTimeMillis()
 
   def stop(): Unit = {
     this.synchronized {
@@ -27,7 +39,9 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
    * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning#Pseudocode
    * Instead of copying board when creating next child state, last move is reversed
    */
-  def minMax(b: BoardModel, playerMM: Int, depth: Int, alpha: Int, beta: Int, startTime: Long): Int = {
+  def minMax(b: BoardModel, maximizing: Boolean, depth: Int, alpha: Int, beta: Int, predictedValue: Int): Int = {
+    minMaxCalls += 1
+
     if (System.currentTimeMillis() > startTime + maxTime) {
       throw new TimedOutException
     }
@@ -38,125 +52,74 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
       }
     }
 
-    val opponent = LightField.opponent(playerMM)
-
-    val stateValue = b.check()
-
-    if (stateValue == Heuristics.winnerValue || stateValue == -Heuristics.winnerValue) {
-      return stateValue * (depth + 1)
+    val signature = b.getZobristSignature
+    if (thisValues.contains(signature)) {
+      var value = thisValues(signature)
+      if (value >= Heuristics.winnerValue || predictedValue <= -Heuristics.winnerValue) {
+        value = Heuristics.winnerValue * depth
+      }
+      return value
     }
 
-    if (depth == 0) {
-      return stateValue
+    // Saving return value on leaves is memory expensive, so no saving here
+    if (predictedValue == Heuristics.winnerValue || predictedValue == -Heuristics.winnerValue) {
+      return predictedValue * depth
     }
 
-    val availableMoves = b.availableMoves()
+    def save(signature: Int, move: LightMove, value: Int): Unit = {
+      thisValues.put(signature, value)
+      thisBestMoves.put(signature, move)
+      if (thisValues.size >= maxCachedEntries) {
+        throw new CacheTooBigException
+      }
+    }
 
+    // There is no point to search for leaves values as they are calculated in BoardModel
+    if (depth == 1) {
+      val best = b.findBestMove(maximizing)
+      save(signature, best.move, best.value)
+      return best.value
+    }
+
+    val availableMoves = if (previousBestMoves.contains(signature)) {
+      b.availableMovesSorted(previousBestMoves(signature), maximizing)
+    } else {
+      b.availableMovesSorted(maximizing)
+    }
     var al = alpha
     var be = beta
     var bestValue = 0
+    var bestMove = availableMoves.head.move
 
-    if (playerMM == LightField.X) {
+    if (maximizing) {
       //Max
       bestValue = -infinity
 
       var i = 0
       while (i < availableMoves.size) {
-        val move = availableMoves(i)
-        move match {
-          case LightPosition(x, y) => b move(x, y, playerMM)
-          case LightRotation(q, r) => b rotate(q, r, playerMM)
-        }
-
-        bestValue = math.max(bestValue, minMax(b, opponent, depth - 1, al, be, startTime))
+        val move = availableMoves(i).move
 
         move match {
-          case LightPosition(x, y) => b unMove(x, y, playerMM)
-          case LightRotation(q, r) => b unRotate(q, r, playerMM)
+          case LightPosition(x, y) => b.position(x, y, LightField.X)
+          case LightRotation(q, r) => b.rotate(q, r, LightField.X)
         }
 
-        al = math.max(al, bestValue)
-        if (al >= be) {
-          return bestValue
-        }
-        i += 1
-      }
-    } else {
-      //Min
-      bestValue = infinity
-
-      var i = 0
-      while (i < availableMoves.size) {
-        val move = availableMoves(i)
-
-        move match {
-          case LightPosition(x, y) => b move(x, y, playerMM)
-          case LightRotation(q, r) => b rotate(q, r, playerMM)
-        }
-
-        bestValue = math.min(bestValue, minMax(b, opponent, depth - 1, al, be, startTime))
-
-        move match {
-          case LightPosition(x, y) => b unMove(x, y, playerMM)
-          case LightRotation(q, r) => b unRotate(q, r, playerMM)
-        }
-
-        be = math.min(be, bestValue)
-        if (al >= be) {
-          return bestValue
-        }
-        i += 1
-      }
-    }
-    return bestValue
-  }
-
-  def minMaxStart(b: BoardModel, playerMM: Int, depth: Int, startTime: Long): (Int, LightMove) = {
-
-    val opponent = LightField.opponent(playerMM)
-
-    val availableMoves = b.availableMoves()
-
-    var al = -infinity
-    var be = infinity
-    var bestValue = 0
-    var bestMove = availableMoves.head
-
-    //TODO: remove in production
-    val researchPositionValues = Array.fill(6, 6) {
-      "  #  "
-    }
-
-    if (playerMM == LightField.X) {
-      //Max
-      bestValue = -infinity
-
-      var i = 0
-      while (i < availableMoves.size) {
-        val move = availableMoves(i)
-        move match {
-          case LightPosition(x, y) => b move(x, y, playerMM)
-          case LightRotation(q, r) => b rotate(q, r, playerMM)
-        }
-
-        val v = minMax(b, opponent, depth - 1, al, be, startTime)
+        val v = minMax(b, false, depth - 1, al, be, availableMoves(i).value)
         if (v > bestValue) {
           bestValue = v
           bestMove = move
         }
 
         move match {
-          case LightPosition(x, y) => b unMove(x, y, playerMM)
-          case LightRotation(q, r) => b unRotate(q, r, playerMM)
-        }
-
-        move match {
-          case LightPosition(x, y) => researchPositionValues(x)(y) = "%05d".format(v)
-          case LightRotation(q, r) =>
+          case LightPosition(x, y) => b.unPosition(x, y, LightField.X)
+          case LightRotation(q, r) => b.unRotate(q, r, LightField.X)
         }
 
         al = math.max(al, bestValue)
-        //There won't be any cutoffs, as beta is still max
+        if (al >= be) {
+          save(signature, bestMove, bestValue)
+          return bestValue
+        }
         i += 1
       }
     } else {
@@ -165,76 +128,96 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
 
       var i = 0
       while (i < availableMoves.size) {
-        val move = availableMoves(i)
+        val move = availableMoves(i).move
 
         move match {
-          case LightPosition(x, y) => b move(x, y, playerMM)
-          case LightRotation(q, r) => b rotate(q, r, playerMM)
+          case LightPosition(x, y) => b.position(x, y, LightField.O)
+          case LightRotation(q, r) => b.rotate(q, r, LightField.O)
         }
 
-        val v = minMax(b, opponent, depth - 1, al, be, startTime)
+        val v = minMax(b, true, depth - 1, al, be, availableMoves(i).value)
         if (v < bestValue) {
           bestValue = v
           bestMove = move
         }
 
         move match {
-          case LightPosition(x, y) => b unMove(x, y, playerMM)
-          case LightRotation(q, r) => b unRotate(q, r, playerMM)
-        }
-
-        move match {
-          case LightPosition(x, y) => researchPositionValues(x)(y) = "%05d".format(v)
-          case LightRotation(q, r) =>
+          case LightPosition(x, y) => b.unPosition(x, y, LightField.O)
+          case LightRotation(q, r) => b.unRotate(q, r, LightField.O)
         }
 
         be = math.min(be, bestValue)
-        //There won't be any cutoffs, as alpha is still min
+        if (al >= be) {
+          save(signature, bestMove, bestValue)
+          return bestValue
+        }
         i += 1
       }
     }
+    save(signature, bestMove, bestValue)
+    return bestValue
+  }
 
-    for (y <- 0 until 6) {
-      val s0 = researchPositionValues(0)(5 - y)
-      val s1 = researchPositionValues(1)(5 - y)
-      val s2 = researchPositionValues(2)(5 - y)
-      val s3 = researchPositionValues(3)(5 - y)
-      val s4 = researchPositionValues(4)(5 - y)
-      val s5 = researchPositionValues(5)(5 - y)
-      log(s"values: $s0 $s1 $s2 $s3 $s4 $s5")
+  def printPredicted(b: BoardModel, maximizing: Boolean): Unit = {
+    val sig = b.getZobristSignature
+    val player = if (maximizing) LightField.X else LightField.O
+    val pc = if (maximizing) "X" else "O"
+    if (thisBestMoves.contains(sig)) {
+      val move = thisBestMoves(sig)
+
+      move match {
+        case LightPosition(x, y) => b.position(x, y, player)
+        case LightRotation(q, r) => b.rotate(q, r, player)
+      }
+      val boardValue = b.check()
+      log(s"predicted move for $pc: $move, board value: $boardValue")
+      printPredicted(b, !maximizing)
+
+      move match {
+        case LightPosition(x, y) => b.unPosition(x, y, player)
+        case LightRotation(q, r) => b.unRotate(q, r, player)
+      }
     }
-
-    return (bestValue, bestMove)
   }
 
   implicit val ec = ExecutorContext.context
   private val f: Future[LightMove] = Future {
-    val startTime = System.currentTimeMillis()
     val b = BoardModel(board, positionsChoosing)
-    val p = if (player == Player.X) LightField.X else LightField.O
+    val maximizing = player == Player.X
 
     var depth = 1
 
-    var bestMove = b.availableMoves().head
+    var bestMove = b.availableMovesSorted(maximizing).head.move
     var bestValue = 0
     var run = true
     while (depth <= maxDepth && run) {
       log(s"starting with depth: $depth")
+      minMaxCalls = 0
+      thisValues.clear()
+      previousBestMoves = thisBestMoves
+      thisBestMoves = mutable.HashMap[Int, LightMove]()
       try {
-        val (v, m) = minMaxStart(b, p, depth, startTime)
-        bestMove = m
-        bestValue = v
-        log(s"depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
+        val signature = b.getZobristSignature
+        minMax(b, maximizing, depth, -infinity, infinity, 0)
+        bestMove = thisBestMoves(signature)
+        bestValue = thisValues(signature)
+        val states = thisValues.size
+        log(s"depth: $depth, calls: $minMaxCalls, saved states: $states, bestMove: $bestMove, bestValue: $bestValue")
+        printPredicted(b, maximizing)
       } catch {
         case e: TimedOutException =>
           run = false
-          log(s"timed out during depth: $depth")
+          error(s"timed out during depth: $depth")
+        case e: CacheTooBigException =>
+          run = false
+          error(s"out of memory during depth: $depth")
+        case e: OutOfMovesException =>
+          run = false
+          error(s"out of moves during depth: $depth")
       }
       depth += 1
     }
     log("finished after: " + (System.currentTimeMillis() - startTime) + "ms, bestMove: " + bestMove)
-
-    b.printImportance()
 
     bestMove
   }

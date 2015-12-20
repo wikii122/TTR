@@ -1,52 +1,35 @@
 package pl.enves.ttr.logic.ai
 
-class Counter(fieldImportance: Array[Array[Int]]) {
+class Counter() {
   private var nx: Int = 0
   private var no: Int = 0
-
-  private val coordinates = Array.fill[Int](10) { 0 }
+  private var value = 0
 
   def add(player: Int): Unit = {
-    val oldImportance = getImportance
     if (player == LightField.X) {
       nx += 1
     }
     if (player == LightField.O) {
       no += 1
     }
-    adjustImportances(getImportance - oldImportance)
+    value = calculateValue()
   }
 
   def sub(player: Int): Unit = {
-    val oldImportance = getImportance
     if (player == LightField.X) {
       nx -= 1
     }
     if (player == LightField.O) {
       no -= 1
     }
-    adjustImportances(getImportance - oldImportance)
+    value = calculateValue()
   }
 
   def getTaken: Int = nx + no
 
-  def getImportance: Int = {
-    val x = nx
-    val o = no
-    return if (o == 0 && x > 0) x * x * x
-    else if (x == 0 && o > 0) o * o * o
-    else 0
-  }
+  def getValue = value
 
-  def adjustImportances(diff: Int): Unit = {
-    var i = 0
-    while(i < 5) {
-      fieldImportance(getCoordinateX(i))(getCoordinateY(i)) += diff
-      i += 1
-    }
-  }
-
-  def getValue: Int = {
+  private def calculateValue(): Int = {
     val x = nx
     val o = no
     return if (x == 5) Heuristics.winnerValue
@@ -55,18 +38,4 @@ class Counter(fieldImportance: Array[Array[Int]]) {
     else if (x == 0 && o > 0) -(o * o * o)
     else 0
   }
-
-  def setCoordinates(i: Int, x: Int, y: Int): Unit = {
-    coordinates(2 * i) = x
-    coordinates(2 * i + 1) = y
-  }
-
-  def getCoordinateX(i: Int): Int = coordinates(2 * i)
-
-  def getCoordinateY(i: Int): Int = coordinates(2 * i + 1)
-
-  def getCoordinates(i: Int): (Int, Int) = (
-    coordinates(2 * i),
-    coordinates(2 * i + 1)
-    )
 }
