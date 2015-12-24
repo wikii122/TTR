@@ -59,6 +59,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     newStandardButton.get onClick startStandardGame
     newAIGameButton.get onClick startAIGame
+    newNetworkButton.get onClick startNetworkGame
     backToMainButton.get onClick unflip
 
     val inAnimation = AnimationUtils.loadAnimation(this,  android.R.anim.fade_in)
@@ -107,6 +108,8 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     itnt putExtra("AI_HUMAN_SYMBOL", humanSymbol.toString)
     itnt start()
   }
+
+  private[this] def startNetworkGame(v: View) = ???
 
   /**
    * Used to continue game in progress
