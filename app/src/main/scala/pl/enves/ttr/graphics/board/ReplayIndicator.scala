@@ -23,7 +23,7 @@ class ReplayIndicator(context: Context with GameManager, resources: Resources) e
   }
 
   override protected def onUpdateTheme(): Unit = {
-    replayText.setTextColor(colorTransparent(resources.getTheme.winner, 0.75f))
+    replayText.setTextColor(colorTransparent(resources.getTheme.winner, 0.5f))
     val noColor = colorTransparent(resources.getTheme.winner, 0.0f)
     replayText.setTextBackground(noColor)
   }

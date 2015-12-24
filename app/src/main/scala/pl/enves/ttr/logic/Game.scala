@@ -90,7 +90,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 
   protected def onStart(player: Player.Value)
 
-  protected def onMove(move: Game#Move): Boolean
+  protected def onMove(move: Move): Boolean
 
   protected def boardVersion: Int
 
@@ -100,33 +100,6 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
     "log" -> (movesLog.toList map { entry => entry.toJson}),
     "type" -> gameType
   )
-
-  /**
-   * Used to mark that data depend on Board version.
-   */
-  private[logic] class Move {
-    private[this] val state = board.version
-
-    def valid = state == board.version
-  }
-
-  /**
-   * Class used to pass board position.
-   *
-   * Invalidates after any change in the board layout, such as rotation.
-   */
-  case class Position(x: Int, y: Int) extends Move
-
-  /**
-   * Used to represent rotation move information.
-   *
-   * Invalidates after any change in the board layout, such as rotation.
-   * @param board in form of
-   *              1 2
-   *              3 4
-   * @param r in rotation enumerator counted in degrees clockwise.
-   */
-  case class Rotation(board: Quadrant.Value, r: QRotation.Value) extends Move
 }
 
 object Game extends Enumeration {

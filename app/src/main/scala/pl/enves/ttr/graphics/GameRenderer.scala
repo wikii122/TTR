@@ -102,10 +102,6 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
     GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
-    GLES20.glClearDepthf(1.0f)
-    GLES20.glEnable(GLES20.GL_DEPTH_TEST)
-    GLES20.glDepthFunc(GLES20.GL_LEQUAL)
-    GLES20.glDepthMask(true)
     GLES20.glEnable(GLES20.GL_CULL_FACE)
     GLES20.glCullFace(GLES20.GL_BACK)
     GLES20.glEnable(GLES20.GL_BLEND)

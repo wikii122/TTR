@@ -1,8 +1,8 @@
 package pl.enves.ttr.logic.ai
 
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.logic.{QRotation, Quadrant}
 
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
@@ -39,21 +39,21 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   //Their purpose is reducing GC pressure by reducing fresh allocations
   private val _cached_moves_positions = Array.tabulate(6, 6) {
-    (x: Int, y: Int) => new LightPosition(x, y)
+    (x: Int, y: Int) => new Position(x, y)
   }
 
   private val _cached_moves_rotations_left = Array(
-    new LightRotation(0, QRotation.r90),
-    new LightRotation(1, QRotation.r90),
-    new LightRotation(2, QRotation.r90),
-    new LightRotation(3, QRotation.r90)
+    new Rotation(Quadrant.first, QRotation.r90),
+    new Rotation(Quadrant.second, QRotation.r90),
+    new Rotation(Quadrant.third, QRotation.r90),
+    new Rotation(Quadrant.fourth, QRotation.r90)
   )
 
   private val _cached_moves_rotations_right = Array(
-    new LightRotation(0, QRotation.r270),
-    new LightRotation(1, QRotation.r270),
-    new LightRotation(2, QRotation.r270),
-    new LightRotation(3, QRotation.r270)
+    new Rotation(Quadrant.first, QRotation.r270),
+    new Rotation(Quadrant.second, QRotation.r270),
+    new Rotation(Quadrant.third, QRotation.r270),
+    new Rotation(Quadrant.fourth, QRotation.r270)
   )
 
   private val zobristTableFields = Array.fill(6, 6, 3) {
@@ -218,10 +218,10 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     return ret
   }
 
-  def checkMove(m: LightMove, player: Int): Int = {
+  def checkMove(m: Move, player: Int): Int = {
     return m match {
-      case LightPosition(x, y) => checkPosition(x, y, player)
-      case LightRotation(q, r) => checkRotate(q, r, player)
+      case Position(x, y) => checkPosition(x, y, player)
+      case Rotation(q, r) => checkRotate(q, r, player)
     }
   }
 
@@ -232,7 +232,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     return value
   }
 
-  def checkRotate(q: Int, r: QRotation.Value, player: Int): Int = {
+  def checkRotate(q: Quadrant.Value, r: QRotation.Value, player: Int): Int = {
     rotate(q, r, player)
     val value = check()
     unRotate(q, r, player)
@@ -257,7 +257,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     zobristTick()
   }
 
-  def rotate(quadrant: Int, rotation: QRotation.Value, player: Int): Unit = {
+  def rotate(q: Quadrant.Value, rotation: QRotation.Value, player: Int): Unit = {
+    val quadrant = q.id
     zobristTick()
     unCountQuadrantForRotation(quadrant)
     rotation match {
@@ -270,7 +271,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     zobristTick()
   }
 
-  def unRotate(quadrant: Int, rotation: QRotation.Value, player: Int): Unit = {
+  def unRotate(q: Quadrant.Value, rotation: QRotation.Value, player: Int): Unit = {
+    val quadrant = q.id
     zobristTick()
     unTick()
     quadrants(quadrant).unRotate(rotation)
@@ -457,10 +459,10 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     while (quadrant < 4) {
       if (canRotate(quadrant) && !isRotationImmune(quadrant)) {
 
-        val value = checkRotate(quadrant, QRotation.r90, player)
+        val value = checkRotate(Quadrant(quadrant), QRotation.r90, player)
         moves.append(new ValuedMove(value, _cached_moves_rotations_left(quadrant)))
 
-        val value2 = checkRotate(quadrant, QRotation.r270, player)
+        val value2 = checkRotate(Quadrant(quadrant), QRotation.r270, player)
         moves.append(new ValuedMove(value2, _cached_moves_rotations_right(quadrant)))
       }
       quadrant += 1
@@ -561,7 +563,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     return moves2
   }
 
-  def availableMovesSorted(previousBest: LightMove, maximizing: Boolean): ArrayBuffer[ValuedMove] = {
+  def availableMovesSorted(previousBest: Move, maximizing: Boolean): ArrayBuffer[ValuedMove] = {
     val moves = availableMovesSorted(maximizing)
     val player = if (maximizing) LightField.X else LightField.O
     val size = moves.size

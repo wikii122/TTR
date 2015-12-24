@@ -1,14 +1,14 @@
 package pl.enves.ttr.logic.ai
 
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.Player
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.logic.{Move, Player, Position, Rotation}
 import pl.enves.ttr.utils.ExecutorContext
 
 import scala.collection.mutable
 import scala.concurrent.Future
 
-class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, positionsChoosing: PositionsChoosing.Value, success: LightMove => Unit) extends Logging {
+class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, positionsChoosing: PositionsChoosing.Value, success: Move => Unit) extends Logging {
 
   private class TimedOutException extends Exception
 
@@ -24,8 +24,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
 
   private var minMaxCalls = 0
   private val thisValues = mutable.HashMap[Int, Int]()
-  private var thisBestMoves = mutable.HashMap[Int, LightMove]()
-  private var previousBestMoves = mutable.HashMap[Int, LightMove]()
+  private var thisBestMoves = mutable.HashMap[Int, Move]()
+  private var previousBestMoves = mutable.HashMap[Int, Move]()
 
   val startTime = System.currentTimeMillis()
 
@@ -66,7 +66,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
       return predictedValue * depth
     }
 
-    def save(signature: Int, move: LightMove, value: Int): Unit = {
+    def save(signature: Int, move: Move, value: Int): Unit = {
       thisValues.put(signature, value)
       thisBestMoves.put(signature, move)
       if (thisValues.size >= maxCachedEntries) {
@@ -100,8 +100,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
         val move = availableMoves(i).move
 
         move match {
-          case LightPosition(x, y) => b.position(x, y, LightField.X)
-          case LightRotation(q, r) => b.rotate(q, r, LightField.X)
+          case Position(x, y) => b.position(x, y, LightField.X)
+          case Rotation(q, r) => b.rotate(q, r, LightField.X)
         }
 
         val v = minMax(b, false, depth - 1, al, be, availableMoves(i).value)
@@ -111,8 +111,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
         }
 
         move match {
-          case LightPosition(x, y) => b.unPosition(x, y, LightField.X)
-          case LightRotation(q, r) => b.unRotate(q, r, LightField.X)
+          case Position(x, y) => b.unPosition(x, y, LightField.X)
+          case Rotation(q, r) => b.unRotate(q, r, LightField.X)
         }
 
         al = math.max(al, bestValue)
@@ -131,8 +131,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
         val move = availableMoves(i).move
 
         move match {
-          case LightPosition(x, y) => b.position(x, y, LightField.O)
-          case LightRotation(q, r) => b.rotate(q, r, LightField.O)
+          case Position(x, y) => b.position(x, y, LightField.O)
+          case Rotation(q, r) => b.rotate(q, r, LightField.O)
         }
 
         val v = minMax(b, true, depth - 1, al, be, availableMoves(i).value)
@@ -142,8 +142,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
         }
 
         move match {
-          case LightPosition(x, y) => b.unPosition(x, y, LightField.O)
-          case LightRotation(q, r) => b.unRotate(q, r, LightField.O)
+          case Position(x, y) => b.unPosition(x, y, LightField.O)
+          case Rotation(q, r) => b.unRotate(q, r, LightField.O)
         }
 
         be = math.min(be, bestValue)
@@ -166,22 +166,22 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
       val move = thisBestMoves(sig)
 
       move match {
-        case LightPosition(x, y) => b.position(x, y, player)
-        case LightRotation(q, r) => b.rotate(q, r, player)
+        case Position(x, y) => b.position(x, y, player)
+        case Rotation(q, r) => b.rotate(q, r, player)
       }
       val boardValue = b.check()
       log(s"predicted move for $pc: $move, board value: $boardValue")
       printPredicted(b, !maximizing)
 
       move match {
-        case LightPosition(x, y) => b.unPosition(x, y, player)
-        case LightRotation(q, r) => b.unRotate(q, r, player)
+        case Position(x, y) => b.unPosition(x, y, player)
+        case Rotation(q, r) => b.unRotate(q, r, player)
       }
     }
   }
 
   implicit val ec = ExecutorContext.context
-  private val f: Future[LightMove] = Future {
+  private val f: Future[Move] = Future {
     val b = BoardModel(board, positionsChoosing)
     val maximizing = player == Player.X
 
@@ -195,7 +195,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, po
       minMaxCalls = 0
       thisValues.clear()
       previousBestMoves = thisBestMoves
-      thisBestMoves = mutable.HashMap[Int, LightMove]()
+      thisBestMoves = mutable.HashMap[Int, Move]()
       try {
         val signature = b.getZobristSignature
         minMax(b, maximizing, depth, -infinity, infinity, 0)

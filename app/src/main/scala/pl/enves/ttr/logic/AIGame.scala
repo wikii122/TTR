@@ -1,7 +1,5 @@
 package pl.enves.ttr.logic
 
-import java.security.InvalidParameterException
-
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.ai._
 import pl.enves.ttr.logic.inner._
@@ -31,9 +29,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
 
-    def makeAIMove(lm: LightMove): Unit = {
-      log(s"AI Move: $lm for $player")
-      val move = LightMove.toNormalMove(lm, this)
+    def makeAIMove(move: Move): Unit = {
+      log(s"AI Move: $move for $player")
       onMove(move)
     }
 
@@ -71,9 +68,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
    * and ImpossibleMove when Position is taken or game finished.
    * If called before start, throws NoSuchElementException.
    */
-  protected def onMove(move: Game#Move): Boolean = this.synchronized {
+  protected def onMove(move: Move): Boolean = this.synchronized {
     implicit val player = _player
-    if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (finished) throw new GameWon(s"Game is finished. $winner has won.")
 
     log(s"Move: $move for $player")
@@ -138,12 +134,12 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   def setEnabled(e: Boolean): Unit = this.synchronized {
     enabled = e
-    if(enabled) {
+    if (enabled) {
       if (human.isDefined && _player != human.get && !board.finished) {
         startThinking()
       }
     } else {
-      if(ai.isDefined) {
+      if (ai.isDefined) {
         ai.get.stop()
       }
     }

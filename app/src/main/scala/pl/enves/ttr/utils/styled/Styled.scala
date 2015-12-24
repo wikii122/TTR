@@ -12,7 +12,7 @@ trait Styled {
 
   protected def setTypeface(typeface: Typeface): Unit
 
-  protected def setColorTheme(theme: Theme): Unit
+  def setColorTheme(theme: Theme): Unit
 
   protected def getSavedTheme(resources: Resources, prefs: SharedPreferences): Theme = {
     val defaultTheme = Theme(resources, defaultColorThemeId)
