@@ -13,7 +13,7 @@ class ReplayAIGame(_human: Player.Value, board: Board = Board()) extends AIGame(
 
   setHumanSymbol(_human)
 
-  override protected def onMove(move: Game#Move): Boolean = {
+  override protected def onMove(move: Move): Boolean = {
     throw new GameWon(s"Game is finished. $winner has won.")
   }
 

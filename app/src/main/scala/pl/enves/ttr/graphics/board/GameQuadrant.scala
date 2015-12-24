@@ -137,7 +137,7 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
       val ny = y + Quadrant.offset(quadrant)._2
       try {
         val game = context.game
-        val move = new game.Position(nx, ny)
+        val move = new Position(nx, ny)
         game.make(move)
         fields(x)(y).discardIllegal()
       } catch {

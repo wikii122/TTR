@@ -62,9 +62,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
    * and ImpossibleMove when Position is taken or game finished.
    * If called before start, throws NoSuchElementException.
    */
-  protected def onMove(move: Game#Move): Boolean = this.synchronized {
+  protected def onMove(move: Move): Boolean = this.synchronized {
     implicit val player = _player
-    if (!move.valid) throw new InvalidParameterException("Given move has expired!")
     if (finished) throw new GameWon(s"Game is finished. $winner has won.")
 
     log(s"Move: $move for $player")

@@ -5,7 +5,7 @@ import pl.enves.ttr.utils.JsonMappable
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
-class LogEntry(player: Player.Value, move: Game#Move) extends Logging with JsonMappable {
+class LogEntry(player: Player.Value, move: Move) extends Logging with JsonMappable {
   def getPlayer = player
 
   def getMove = move
@@ -17,7 +17,7 @@ class LogEntry(player: Player.Value, move: Game#Move) extends Logging with JsonM
 }
 
 object LogEntry {
-  def apply(player: Player.Value, move: Game#Move) = new LogEntry(player, move)
+  def apply(player: Player.Value, move: Move) = new LogEntry(player, move)
 
   def apply(jsValue: JsValue, game: Game): LogEntry = {
     val fields = jsValue.asJsObject.fields
@@ -29,15 +29,15 @@ object LogEntry {
 
 //TODO: remove when changes to JsonProtocol from Networking become available
 object TemporaryWorkaround {
-  def moveToInt(move: Game#Move): Int = move match {
-    case p: Game#Position => p.x * 6 + p.y
-    case r: Game#Rotation => 36 + r.board.id * 4 + r.r.id
+  def moveToInt(move: Move): Int = move match {
+    case p: Position => p.x * 6 + p.y
+    case r: Rotation => 36 + r.board.id * 4 + r.r.id
   }
 
-  def intToMove(i: Int, game: Game): Game#Move = if (i < 36) {
-    game.Position(i / 6, i % 6)
+  def intToMove(i: Int, game: Game): Move = if (i < 36) {
+    Position(i / 6, i % 6)
   } else {
     val j = i - 36
-    game.Rotation(Quadrant(j / 4), QRotation(j % 4))
+    Rotation(Quadrant(j / 4), QRotation(j % 4))
   }
 }
