@@ -9,8 +9,6 @@ import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.shaders.MaskShader
 
 class Field(resources: Resources) extends SceneObject with Logging with ColorManip {
-  objectScale = Array(0.9f, 0.9f, 1.0f)
-
   var square: Option[AbstractGeometry] = None
 
   var maskShader: Option[MaskShader] = None
@@ -30,10 +28,12 @@ class Field(resources: Resources) extends SceneObject with Logging with ColorMan
 
   private var notStirred = 0.0f
 
-  override protected def onUpdateResources(): Unit = {
+  override protected def onUpdateResources(screenRatio: Float): Unit = {
     square = Some(resources.getGeometry(GeometryId.Square))
 
     maskShader = Some(resources.getMaskShader)
+
+    scale(0.9f, 0.9f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {

@@ -13,30 +13,35 @@ import android.support.v4.view.ViewPager
 import android.view._
 import android.widget.{Button, ImageView, TextView}
 import org.xmlpull.v1.{XmlPullParser, XmlPullParserException}
+import pl.enves.androidx._
 import pl.enves.androidx.helpers._
-import pl.enves.androidx.{ExtendedFragment, ExtendedActivity, IOUtils, Logging}
+import pl.enves.ttr.utils.styled.{BottomBarActivity, StyledFragment}
+import pl.enves.ttr.utils.themes.Theme
 
-class DoubleTextFragment extends ExtendedFragment with Logging {
-  private var text1Res = 0
-  private var text2Res = 0
+class DoubleTextFragment extends StyledFragment with Logging {
+  private var textView1: Option[TextView] = None
+  private var textView2: Option[TextView] = None
 
-  override protected val layout: Int = R.layout.fragment_tutorial_double_text
+  override protected def getLayoutId: Int = R.layout.fragment_tutorial_double_text
 
-  protected val text1: Int = R.id.tutorial_text_1
-
-  protected val text2: Int = R.id.tutorial_text_2
+  override def onOnCreateView(view: View): Unit = {
+    textView1 = Some(find[TextView](view, R.id.tutorial_text_1))
+    textView2 = Some(find[TextView](view, R.id.tutorial_text_2))
+  }
 
   override def onStart(): Unit = {
     super.onStart()
 
-    text1Res = getArguments.getInt("TEXT_1_RES", 0)
-    text2Res = getArguments.getInt("TEXT_2_RES", 0)
+    val text1Res = getArguments.getInt("TEXT_1_RES", 0)
+    val text2Res = getArguments.getInt("TEXT_2_RES", 0)
 
-    val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(getView, text1, text1Res)
-    changeText(getView, text2, text2Res)
-    changeFont(getView, text1, typeface)
-    changeFont(getView, text2, typeface)
+    textView1.get.setText(text1Res)
+    textView2.get.setText(text2Res)
+  }
+
+  override def setTypeface(typeface: Typeface): Unit = {
+    textView1.get.setTypeface(typeface)
+    textView2.get.setTypeface(typeface)
   }
 }
 
@@ -52,16 +57,9 @@ object DoubleTextFragment {
   }
 }
 
-class AnimationFragment extends ExtendedFragment with Logging {
-
-  private var textRes = 0
-  private var animationRes = 0
-
-  override protected val layout: Int = R.layout.fragment_tutorial_image_text
-
-  protected val text: Int = R.id.tutorial_text
-
-  protected val image: Int = R.id.tutorial_image
+class AnimationFragment extends StyledFragment with Logging {
+  private var textView: Option[TextView] = None
+  private var imageView: Option[ImageView] = None
 
   private val frameSpecs: util.ArrayList[FrameSpec] = new util.ArrayList[FrameSpec]()
 
@@ -80,6 +78,8 @@ class AnimationFragment extends ExtendedFragment with Logging {
 
   private var wasAutoPlayed = false
 
+  override protected def getLayoutId: Int = R.layout.fragment_tutorial_image_text
+
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
     log("onCreate" + number)
@@ -89,42 +89,47 @@ class AnimationFragment extends ExtendedFragment with Logging {
     }
   }
 
-  override def onSaveInstanceState(outState: Bundle): Unit = {
-    super.onSaveInstanceState(outState)
-    log("onSaveInstanceState" + number)
-    outState.putBoolean("AUTO_PLAY", animate)
+  override def onOnCreateView(view: View): Unit = {
+    textView = Some(find[TextView](view, R.id.tutorial_text))
+    imageView = Some(find[ImageView](view, R.id.tutorial_image))
   }
 
   override def onStart(): Unit = {
     super.onStart()
     log("onStart" + number)
 
-    textRes = getArguments.getInt("TEXT_RES", 0)
-    animationRes = getArguments.getInt("ANIMATION_RES", 0)
+    val textRes = getArguments.getInt("TEXT_RES", 0)
+    val animationRes = getArguments.getInt("ANIMATION_RES", 0)
 
-    val typeface: Typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
-    changeText(getView, text, textRes)
-    changeFont(getView, text, typeface)
+    textView.get.setText(textRes)
 
     loadAnimation(animationRes, getContext)
-    val imageView = find[ImageView](getView, image)
-    displayFirstFrame(imageView, getContext)
+    displayFirstFrame(imageView.get, getContext)
     autoPlay = autoPlay || getArguments.getBoolean("AUTO_PLAY", false)
     if (autoPlay && !wasAutoPlayed) {
       wasAutoPlayed = true
-      startAnimation(imageView, getContext)
+      startAnimation(imageView.get, getContext)
     }
+  }
+
+  override def setTypeface(typeface: Typeface): Unit = {
+    textView.get.setTypeface(typeface)
   }
 
   override def onSelected(): Unit = {
     log("onSelected" + number)
-    val imageView = find[ImageView](getView, image)
-    startAnimation(imageView, getContext)
+    startAnimation(imageView.get, getContext)
   }
 
   override def onDeSelected(): Unit = {
     log("onDeSelected" + number)
     stopAnimation()
+  }
+
+  override def onSaveInstanceState(outState: Bundle): Unit = {
+    super.onSaveInstanceState(outState)
+    log("onSaveInstanceState" + number)
+    outState.putBoolean("AUTO_PLAY", animate)
   }
 
   override def onStop(): Unit = {
@@ -323,73 +328,65 @@ class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extend
   override def getItem(position: Int): Fragment = items(position)
 }
 
-class TutorialActivity extends ExtendedActivity {
-  var adapter: Option[TutorialFragmentPagerAdapter] = None
+class TutorialActivity extends BottomBarActivity {
+  private[this] var adapter: Option[TutorialFragmentPagerAdapter] = None
+  private[this] var viewPager: Option[ViewPager] = None
 
-  var currentFragment = 0
+  private[this] var skipButton: Option[Button] = None
+  private[this] var nextButton: Option[Button] = None
+  private[this] var doneButton: Option[Button] = None
+
+  private[this] var currentFragment = 0
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.tutorial_layout)
 
-    val viewPager: ViewPager = find[ViewPager](R.id.tutorial_viewpager)
+    viewPager = Some(find[ViewPager](R.id.tutorial_viewpager))
     adapter = Some(new TutorialFragmentPagerAdapter(getSupportFragmentManager, TutorialActivity.this))
-    viewPager.setAdapter(adapter.get)
 
-    val skipButton = find[Button](R.id.tutorial_skip_button)
-    skipButton onClick onSkipPressed
+    skipButton = Some(find[Button](R.id.tutorial_skip_button))
+    nextButton = Some(find[Button](R.id.tutorial_next_button))
+    doneButton = Some(find[Button](R.id.tutorial_done_button))
 
-    val nextButton = find[Button](R.id.tutorial_next_button)
-    nextButton onClick onNextPressed
+    skipButton.get onClick onSkipPressed
+    nextButton.get onClick onNextPressed
+    doneButton.get onClick onDonePressed
 
-    val doneButton = find[Button](R.id.tutorial_done_button)
-    doneButton onClick onDonePressed
+    viewPager.get.setAdapter(adapter.get)
 
-    viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+    viewPager.get.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
       override def onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int): Unit = {}
 
       override def onPageSelected(position: Int): Unit = {
         if (position == adapter.get.getCount - 1) {
-          skipButton.setVisibility(View.INVISIBLE)
-          nextButton.setVisibility(View.GONE)
-          doneButton.setVisibility(View.VISIBLE)
+          skipButton.get.setVisibility(View.INVISIBLE)
+          nextButton.get.setVisibility(View.GONE)
+          doneButton.get.setVisibility(View.VISIBLE)
         } else {
-          skipButton.setVisibility(View.VISIBLE)
-          doneButton.setVisibility(View.GONE)
-          nextButton.setVisibility(View.VISIBLE)
+          skipButton.get.setVisibility(View.VISIBLE)
+          doneButton.get.setVisibility(View.GONE)
+          nextButton.get.setVisibility(View.VISIBLE)
         }
-        viewPager.getAdapter.instantiateItem(viewPager, currentFragment).asInstanceOf[ExtendedFragment].onDeSelected()
+        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[ExtendedFragment].onDeSelected()
         currentFragment = position
-        viewPager.getAdapter.instantiateItem(viewPager, currentFragment).asInstanceOf[ExtendedFragment].onSelected()
+        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[ExtendedFragment].onSelected()
       }
 
       override def onPageScrollStateChanged(state: Int): Unit = {}
     })
   }
 
-  override def onStart() = {
-    super.onStart()
+  override def setTypeface(typeface: Typeface): Unit = {
+    super.setTypeface(typeface)
 
-    setBottomBarGui()
-
-    applyCustomFont("fonts/comfortaa.ttf")
+    skipButton.get.setTypeface(typeface)
+    nextButton.get.setTypeface(typeface)
+    doneButton.get.setTypeface(typeface)
   }
 
-  override def onPause() {
-    super.onPause()
-  }
-
-  private[this] def applyCustomFont(path: String): Unit = {
-    val typeface: Typeface = Typeface.createFromAsset(getAssets, path)
-
-    val skipButton = find[Button](R.id.tutorial_skip_button)
-    skipButton.setTypeface(typeface)
-
-    val nextButton = find[Button](R.id.tutorial_next_button)
-    nextButton.setTypeface(typeface)
-
-    val doneButton = find[Button](R.id.tutorial_done_button)
-    doneButton.setTypeface(typeface)
+  override def setColorTheme(theme: Theme): Unit = {
+    //we don't want to change default background color here, so no call to super
   }
 
   private[this] def onSkipPressed(v: View) = {
@@ -397,8 +394,7 @@ class TutorialActivity extends ExtendedActivity {
   }
 
   private[this] def onNextPressed(v: View) = {
-    val viewPager: ViewPager = find[ViewPager](R.id.tutorial_viewpager)
-    viewPager.setCurrentItem(viewPager.getCurrentItem + 1)
+    viewPager.get.setCurrentItem(viewPager.get.getCurrentItem + 1)
   }
 
   private[this] def onDonePressed(v: View) = {

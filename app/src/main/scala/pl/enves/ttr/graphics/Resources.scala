@@ -16,11 +16,12 @@ import pl.enves.ttr.graphics.geometry.{GeometryId, TextGeometryProvider}
 import pl.enves.ttr.graphics.models.Square
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
+import pl.enves.ttr.logic.Game
 import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
 
-class Resources(context: Context) extends Logging {
+class Resources(context: Context, game: Game) extends Logging {
 
   private val assetManager: AssetManager = context.getResources.getAssets
 
@@ -45,19 +46,39 @@ class Resources(context: Context) extends Logging {
     addTexture(TextureId.MaskArrowLeft, new DrawableTexture(context, R.drawable.pat_arrow_left_mod_mask).getTexture)
     addTexture(TextureId.MaskArrowRight, new DrawableTexture(context, R.drawable.pat_arrow_right_mod_mask).getTexture)
 
-    val playerTextString = context.getString(R.string.board_player)
+    val player1TurnTextString = game.gameType match {
+      case Game.STANDARD => context.getString(R.string.board_player1)
+      case Game.AI => context.getString(R.string.board_your_turn)
+      case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_your_turn)
+    }
+
+    val player2TurnTextString = game.gameType match {
+      case Game.STANDARD => context.getString(R.string.board_player2)
+      case Game.AI => context.getString(R.string.board_bots_turn)
+      case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_opponents_turn)
+    }
     val winnerTextString = context.getString(R.string.board_winner)
-    val lockedTextString = context.getString(R.string.board_locked)
+    val replayTextString = context.getString(R.string.board_replay)
 
-    val words = Array(playerTextString, winnerTextString, lockedTextString)
+    val words = Array(
+      player1TurnTextString,
+      player2TurnTextString,
+      winnerTextString)
 
-    val charactersTexture = new CharactersTexture(typeFace, allChars(words))
+    val words2 = Array(
+      replayTextString
+    )
+
+    val charactersTexture = new CharactersTexture(256, typeFace, allChars(words))
     addTexture(TextureId.Font, charactersTexture.getTexture)
 
-    addGeometry(GeometryId.PlayerText, new TextGeometryProvider(playerTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.LockedText, new TextGeometryProvider(lockedTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.WinnerText, new TextGeometryProvider(winnerTextString, charactersTexture).getGeometry)
+    val charactersTexture2 = new CharactersTexture(512, typeFace, allChars(words2))
+    addTexture(TextureId.Font2, charactersTexture2.getTexture)
 
+    addGeometry(GeometryId.Player1TurnText, new TextGeometryProvider(player1TurnTextString, charactersTexture).getGeometry)
+    addGeometry(GeometryId.Player2TurnText, new TextGeometryProvider(player2TurnTextString, charactersTexture).getGeometry)
+    addGeometry(GeometryId.WinnerText, new TextGeometryProvider(winnerTextString, charactersTexture).getGeometry)
+    addGeometry(GeometryId.ReplayText, new TextGeometryProvider(replayTextString, charactersTexture2).getGeometry)
     //create shaders
     maskShader = Some(new MaskShader())
   }

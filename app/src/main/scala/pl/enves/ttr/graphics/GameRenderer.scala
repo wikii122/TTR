@@ -3,7 +3,6 @@ package pl.enves.ttr.graphics
 import javax.microedition.khronos.egl.EGLConfig
 import javax.microedition.khronos.opengles.GL10
 
-import android.app.AlertDialog
 import android.content.Context
 import android.opengl.GLSurfaceView.Renderer
 import android.opengl.{GLES20, Matrix}
@@ -15,21 +14,20 @@ import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.themes._
 
-import scala.util.{Failure, Success, Try}
-
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
+class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) extends Renderer with Logging {
   log("Creating")
 
-  private[this] val resources = new Resources(context)
-  private[this] val board = new GameBoard(game, resources)
+  private[this] val resources = new Resources(context, context.game)
+  private[this] val board = new GameBoard(context, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
   private var themeNeedsUpdate = false
+  private var replaying = false
 
   val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
@@ -44,6 +42,10 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
   def setTheme(theme: Theme): Unit = {
     resources.setTheme(theme)
     themeNeedsUpdate = true
+  }
+
+  def startReplaying(): Unit = {
+    replaying = true
   }
 
   override def onDrawFrame(gl: GL10) {
@@ -66,40 +68,46 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
       if (now / 1000 > lastFrame / 1000) {
         log("FPS: " + framesLastSecond)
+        if (replaying) {
+          if (!context.game.replayNextMove()) {
+            replaying = false
+            onEnd(context.game.winner)
+          }
+        }
         framesLastSecond = 0
       }
     }
     lastFrame = now
   }
 
+  /**
+   * Called after the surface is created
+   */
   override def onSurfaceChanged(gl: GL10, width: Int, height: Int) {
     GLES20.glViewport(0, 0, width, height)
     viewportWidth = width
     viewportHeight = height
 
     Matrix.setIdentityM(pMatrix.get(), 0)
+    var ratio = 1.0f
     if (height > width) {
-      val ratio = height.toFloat / width.toFloat
+      ratio = height.toFloat / width.toFloat
       Matrix.orthoM(pMatrix.get(), 0, -1.0f, 1.0f, -ratio, ratio, -1.0f, 1.0f)
     } else {
-      val ratio = width.toFloat / height.toFloat
+      ratio = width.toFloat / height.toFloat
       Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
     }
+    board.updateResources(ratio)
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
     GLES20.glClearColor(0.0f, 0.0f, 0.0f, 1.0f)
-    GLES20.glClearDepthf(1.0f)
-    GLES20.glEnable(GLES20.GL_DEPTH_TEST)
-    GLES20.glDepthFunc(GLES20.GL_LEQUAL)
-    GLES20.glDepthMask(true)
     GLES20.glEnable(GLES20.GL_CULL_FACE)
     GLES20.glCullFace(GLES20.GL_BACK)
     GLES20.glEnable(GLES20.GL_BLEND)
     GLES20.glBlendFunc(GLES20.GL_SRC_ALPHA, GLES20.GL_ONE_MINUS_SRC_ALPHA)
 
     resources.createOpenGLResources()
-    board.updateResources()
     themeNeedsUpdate = true
   }
 
@@ -111,6 +119,11 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 
   def onTouchEvent(e: MotionEvent): Boolean = {
     if (e.getAction == MotionEvent.ACTION_DOWN) {
+      if (context.game.finished) {
+        onEnd(context.game.winner)
+        return true
+      }
+
       val clickX = e.getX
       val clickY = viewportHeight - e.getY
       val viewport = Array(0, 0, viewportWidth, viewportHeight)
@@ -133,7 +146,5 @@ class GameRenderer(context: Context, game: Game) extends Renderer with Logging {
 }
 
 object GameRenderer {
-  def apply(context: Context with GameManager) = new GameRenderer(context, context.game)
-
-  def apply(context: Context, game: Game) = new GameRenderer(context, game)
+  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, onEnd)
 }

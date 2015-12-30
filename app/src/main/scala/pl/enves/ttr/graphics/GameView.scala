@@ -12,26 +12,26 @@ import pl.enves.ttr.utils.themes.Theme
  *
  * Takes responsibility for handling input from system and managing graphics rendering.
  */
-class GameView(val context: Context with GameManager) extends GLSurfaceView(context) with Logging {
-  private[this] val renderer = GameRenderer(context)
+class GameView(val context: Context with GameManager, onEnd: Option[Player.Value] => Unit) extends GLSurfaceView(context) with Logging {
+  private[this] val renderer = GameRenderer(context, onEnd)
 
   log("Creating")
-  setEGLConfigChooser(true) //true, cause we need depth buffer
+  setEGLConfigChooser(8, 8, 8, 8, 0, 0)
   setEGLContextClientVersion(2)
 
   setRenderer(renderer)
 
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
 
-  //setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY)
-
   def startGame() = context.game.start(Player.X)
 
   def setTheme(theme: Theme) = renderer.setTheme(theme)
+
+  def startReplaying() = renderer.startReplaying()
 
   override def onTouchEvent(e: MotionEvent): Boolean = renderer.onTouchEvent(e)
 }
 
 object GameView {
-  def apply(context: Context with GameManager) = new GameView(context)
+  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameView(context, onEnd)
 }

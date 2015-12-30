@@ -10,7 +10,7 @@ import spray.json._
  * Manages fields states.
  */
 private[logic] class Board private () extends Logging with JsonMappable {
-  private[this] var _winner: Option[Player.Value] = None
+  private var _winner: Option[Player.Value] = None
   private[this] var _combination: List[(Int, Int)] = Nil
 
   private val quadrants = createQuadrants.toMap
@@ -116,11 +116,14 @@ private[logic] class Board private () extends Logging with JsonMappable {
   override def toMap: Map[String, Any] = Map(
     "freeFields" -> freeFields,
     "version" -> _version,
+    "winner" -> _winner,
     "quadrants" -> quadrants.toJson
   )
 
   def getFreeFields = freeFields
   def getQuadrant(quadrant: Quadrant.Value) = quadrants(quadrant)
+
+  def setWinner(winner: Option[Player.Value]) = _winner = winner
 }
 
 object Board {
@@ -130,6 +133,7 @@ object Board {
     val board = new Board()
     board.freeFields = fields("freeFields").convertTo[Int]
     board._version = fields("version").convertTo[Int]
+    board._winner = fields("winner").convertTo[Option[Player.Value]]
 
     val quadrants = fields("quadrants").asInstanceOf[JsArray].elements map (_.asJsObject.fields) map {
       field =>

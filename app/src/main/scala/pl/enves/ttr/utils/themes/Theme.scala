@@ -7,8 +7,8 @@ import pl.enves.androidx.color.ColorTypes.ColorAndroid
 
 case class Theme(
                   background: ColorAndroid,
-                  outer1: ColorAndroid,
-                  outer2: ColorAndroid,
+                  color1: ColorAndroid,
+                  color2: ColorAndroid,
                   winner: ColorAndroid
                   ) extends Logging {
 
@@ -16,8 +16,8 @@ case class Theme(
     val jSONObject: JSONObject = new JSONObject()
     try {
       jSONObject.put("background", background)
-      jSONObject.put("outer1", outer1)
-      jSONObject.put("outer2", outer2)
+      jSONObject.put("outer1", color1)
+      jSONObject.put("outer2", color2)
       jSONObject.put("winner", winner)
     } catch {
       case (e: JSONException) => error(e.toString)

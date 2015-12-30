@@ -1,26 +1,34 @@
 <resources>
-    <string name="app_name">TicTacRotate</string>
+    <string name="app_name">TicTacTurn</string>
 
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_settings">settings</string>
-    <string name="title_activity_game">TicTacRotate</string>
+    <string name="title_activity_game">TicTacTurn</string>
     <string name="title_activity_tutorial">tutorial</string>
     <string name="title_activity_themes">themes</string>
-    <string name="title_activity_credits">credits</string>
+    <string name="title_activity_licenses">licenses</string>
     <string name="pick_theme">theme</string>
     <string name="new_game">new game</string>
-    <string name="new_ai_game">new ai game</string>
     <string name="settings">settings</string>
     <string name="continue_game">continue</string>
+    <string name="game_type">game type:</string>
+    <string name="new_standard_game">pvp offline</string>
+    <string name="new_ai_game">pvc</string>
+    <string name="new_network_game">pvp online</string>
+    <string name="back_to_main">main menu</string>
     <string name="tic_tac">tictac</string>
     <string name="turn">turn</string>
     <string name="tt">tt</string>
     <string name="t">t</string>
-    <string name="nav_prompt">></string>
-    <string name="nav_up">←</string>
-    <string name="board_player">player:</string>
+    <string name="nav_prompt">&gt;</string>
+    <string name="nav_up">&lt;</string>
+    <string name="board_player1">player 1: </string>
+    <string name="board_player2">player 2: </string>
+    <string name="board_your_turn">your turn: </string>
+    <string name="board_opponents_turn">opponent\'s turn: </string>
+    <string name="board_bots_turn">bot\'s turn: </string>
     <string name="board_winner">winner:</string>
-    <string name="board_locked">locked</string>
+    <string name="board_replay">replay</string>
     <string name="tutorial_figures">You can play either noughts or crosses. Cross player moves first.</string>
     <string name="tutorial_rotations">When quadrant\'s arrows are active, you can rotate it instead of marking a field</string>
     <string name="tutorial_goals">Try to put 5 of your marks straight in line to win the game</string>
@@ -31,7 +39,13 @@
     <string name="tutorial_next">next</string>
     <string name="tutorial_done">done</string>
     <string name="button_symbol_description">pick noughts or crosses</string>
-    <string name="credits_enves">enves</string>
     <string name="credits_spray">spray</string>
     <string name="credits_font">comfortaa</string>
+    <string name="bots_symbol">bot\'s symbol:</string>
+    <string name="play_again">play again</string>
+    <string name="game_course">game course</string>
+    <string name="contemplate">contemplate</string>
+    <string name="choose_symbol">choose your symbol</string>
+    <string name="button_symbol_X_description">choose X</string>
+    <string name="button_symbol_O_description">choose O</string>
 </resources>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingTop="24dp">
+
+    <ImageButton
+        android:id="@+id/button_back_to_main"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="left|top"
+        android:background="@null"
+        android:contentDescription="@string/abc_action_bar_up_description"
+        android:scaleType="center"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/button_play_again_prompt"
+                style="@style/ButtonStyle"
+                android:text="@string/nav_prompt" />
+
+            <Button
+                android:id="@+id/button_play_again"
+                style="@style/ButtonStyle"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/button_play_again_prompt"
+                android:layout_toRightOf="@+id/button_play_again_prompt"
+                android:text="@string/play_again" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/button_game_course_prompt"
+                style="@style/ButtonStyle"
+                android:text="@string/nav_up" />
+
+            <Button
+                android:id="@+id/button_game_course"
+                style="@style/ButtonStyle"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/button_game_course_prompt"
+                android:layout_toRightOf="@+id/button_game_course_prompt"
+                android:text="@string/game_course" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/button_contemplate_prompt"
+                style="@style/ButtonStyle"
+                android:text="@string/nav_up" />
+
+            <Button
+                android:id="@+id/button_contemplate"
+                style="@style/ButtonStyle"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/button_contemplate_prompt"
+                android:layout_toRightOf="@+id/button_contemplate_prompt"
+                android:text="@string/contemplate" />
+        </RelativeLayout>
+
+    </LinearLayout>
+</FrameLayout>

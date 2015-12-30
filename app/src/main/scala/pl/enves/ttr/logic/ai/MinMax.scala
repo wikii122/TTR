@@ -3,10 +3,10 @@ package pl.enves.ttr.logic.ai
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.{Player, QRotation, Quadrant}
+import pl.enves.ttr.utils.ExecutorContext
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
-import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 
 class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, success: LightMove => Unit) extends Logging {
@@ -187,6 +187,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int, su
     return bestMove
   }
 
+  implicit val ec = ExecutorContext.context
   private val f: Future[LightMove] = Future {
     val startTime = System.currentTimeMillis()
     val b = LightBoard(board)

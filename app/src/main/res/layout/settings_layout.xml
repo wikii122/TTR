@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:layout_width="match_parent"
-              android:layout_height="match_parent"
-              android:fitsSystemWindows="true"
-              android:orientation="vertical"
-              android:weightSum="1">
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true"
+    android:orientation="vertical"
+    android:weightSum="1">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/settings_toolbar"
@@ -12,28 +12,23 @@
         android:layout_height="?attr/actionBarSize"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"/>
+        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <RelativeLayout
+    <TextView
+        android:id="@+id/text_pick_theme"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp">
+        android:layout_marginTop="5dp"
+        android:text="@string/pick_theme"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
-        <Button
-            android:id="@+id/button_themes_prompt"
-            style="@style/ButtonStyle"
-            android:text="@string/nav_prompt"/>
-
-        <Button
-            android:id="@+id/button_themes"
-            style="@style/ButtonStyle"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_themes_prompt"
-            android:layout_toRightOf="@+id/button_themes_prompt"
-            android:text="@string/title_activity_themes"/>
-    </RelativeLayout>
+    <pl.enves.ttr.utils.themes.ThemePicker
+        android:id="@+id/view_theme_picker"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="5dp" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
@@ -45,7 +40,7 @@
         <Button
             android:id="@+id/button_tutorial_prompt"
             style="@style/ButtonStyle"
-            android:text="@string/nav_prompt"/>
+            android:text="@string/nav_prompt" />
 
         <Button
             android:id="@+id/button_tutorial"
@@ -53,7 +48,7 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/button_tutorial_prompt"
             android:layout_toRightOf="@+id/button_tutorial_prompt"
-            android:text="@string/title_activity_tutorial"/>
+            android:text="@string/title_activity_tutorial" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -64,17 +59,17 @@
         android:layout_marginTop="5dp">
 
         <Button
-            android:id="@+id/button_credits_prompt"
+            android:id="@+id/button_licenses_prompt"
             style="@style/ButtonStyle"
-            android:text="@string/nav_prompt"/>
+            android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_credits"
+            android:id="@+id/button_licenses"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_credits_prompt"
-            android:layout_toRightOf="@+id/button_credits_prompt"
-            android:text="@string/title_activity_credits"/>
+            android:layout_toEndOf="@+id/button_licenses_prompt"
+            android:layout_toRightOf="@+id/button_licenses_prompt"
+            android:text="@string/title_activity_licenses" />
     </RelativeLayout>
 
 </LinearLayout>

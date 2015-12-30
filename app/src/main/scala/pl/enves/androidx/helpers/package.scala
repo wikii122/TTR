@@ -4,4 +4,6 @@ package object helpers
   extends ButtonHelper
   with TextButtonHelper
   with ImageButtonHelper
+  with DoubleButtonHelper
   with IntentHelper
+  with ToolbarHelper

@@ -17,7 +17,7 @@ trait SceneObject {
 
   protected var visible = true
 
-  protected def onUpdateResources(): Unit
+  protected def onUpdateResources(screenRatio: Float): Unit
 
   protected def onUpdateTheme(): Unit
 
@@ -37,11 +37,13 @@ trait SceneObject {
     Matrix.scaleM(mvMatrix.get(), 0, objectScale(0), objectScale(1), objectScale(2))
   }
 
-  def updateResources(): Unit = {
-    onUpdateResources()
+  def updateResources(screenRatio: Float): Unit = {
+    reset()
+    //Allow children to setup first
     for (child <- children) {
-      child.updateResources()
+      child.updateResources(screenRatio)
     }
+    onUpdateResources(screenRatio)
   }
 
   def updateTheme(): Unit = {
@@ -100,6 +102,12 @@ trait SceneObject {
 
   def rotate(a: Float): Unit = {
     objectRotationAngle += a
+    if(objectRotationAngle >= 360.0f) {
+      objectRotationAngle -= 360.0f
+    }
+    if(objectRotationAngle <= -360.0f) {
+      objectRotationAngle += 360.0f
+    }
   }
 
   def rotation(a: Float, x: Float, y: Float, z: Float): Unit = {
@@ -108,4 +116,15 @@ trait SceneObject {
     objectRotation(1) = y
     objectRotation(2) = z
   }
+
+  def reset(): Unit = {
+    objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
+    objectRotationAngle = 0.0f
+    objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
+    objectScale = Array[Float](1.0f, 1.0f, 1.0f)
+  }
+
+  def setRotationAngle(a: Float) = objectRotationAngle = a
+
+  def setVisible(v: Boolean) = visible = v
 }
