@@ -8,12 +8,13 @@ import android.view.animation.AnimationUtils
 import android.widget.{ImageButton, ViewSwitcher, Button, TextView}
 import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState, Player}
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
 
 class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
-  private[this] var gameActive = false
   private[this] var viewSwitcher: Option[ViewSwitcher] = None
 
   private[this] var newGameButton: Option[(Button, Button)] = None
@@ -77,7 +78,12 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     enableButtons()
 
-    launchTutorialIfFirstrun()
+    if (Configuration.isFirstRun) {
+      Configuration.isFirstRun = false
+      launchTutorial()
+    } else if (Configuration.isPaid) {
+      PlayServices.connect()
+    }
   }
 
   override def onPause() {
@@ -133,17 +139,12 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     itnt start()
   }
 
-  private[this] def launchTutorialIfFirstrun() = {
-    if (prefs.get.getBoolean("FIRSTRUN", true)) {
-      val ed: SharedPreferences.Editor = prefs.get.edit()
-      ed.putBoolean("FIRSTRUN", false)
-      ed.commit()
-      log("Intending to launch tutorial")
-      val itnt = intent[TutorialActivity]
-      itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-      itnt putExtra("FIRSTRUN", true)
-      itnt start()
-    }
+  private[this] def launchTutorial() = {
+    log("Intending to launch tutorial")
+    val itnt = intent[TutorialActivity]
+    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+    itnt putExtra("FIRSTRUN", true)
+    itnt start()
   }
 
   private[this] def flip(v: View) = {
