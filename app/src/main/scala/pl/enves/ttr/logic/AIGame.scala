@@ -20,7 +20,13 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   private var maxDepth: Int = 3
 
+  private var adaptiveDepth = true
+
   private var positionsChoosing = PositionsChoosing.Reasonable
+
+  private var bestMoveHeuristics = BestMoveHeuristics.PreviousIteration
+
+  private var displayStatus: Option[String => Unit] = None
 
   //TODO: remove in production
   private var enabled = true
@@ -34,7 +40,11 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
       onMove(move)
     }
 
-    ai = Some(new MinMax(board, player, maxTime, maxDepth, positionsChoosing, makeAIMove))
+    //TODO: make it more intelligent
+    val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
+    else maxDepth
+
+    ai = Some(new MinMax(board, player, maxTime, depth, positionsChoosing, bestMoveHeuristics, displayStatus, makeAIMove))
   }
 
   /**
@@ -130,7 +140,13 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   def setMaxDepth(max: Int): Unit = maxDepth = max
 
+  def setAdaptiveDepth(a: Boolean): Unit = adaptiveDepth = a
+
   def setPositionsChoosing(pc: PositionsChoosing.Value): Unit = positionsChoosing = pc
+
+  def setBestMoveHeuristics(bmh: BestMoveHeuristics.Value): Unit = bestMoveHeuristics = bmh
+
+  def setDisplayStatus(f: String => Unit): Unit = displayStatus = Some(f)
 
   def setEnabled(e: Boolean): Unit = this.synchronized {
     enabled = e

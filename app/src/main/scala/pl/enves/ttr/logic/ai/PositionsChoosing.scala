@@ -1,14 +1,7 @@
 package pl.enves.ttr.logic.ai
 
-import android.content.Context
-import android.widget.ArrayAdapter
+import pl.enves.androidx.ArrayAdapterEnumeration
 
-object PositionsChoosing extends Enumeration {
+object PositionsChoosing extends ArrayAdapterEnumeration {
   val Reasonable, GEMedian, GEAverage, Max8, Max12, Max16 = Value
-
-  def getAdapter(context: Context): ArrayAdapter[String] = {
-    val strings = PositionsChoosing.values.toArray.map(v => v.toString)
-    val aa = new ArrayAdapter[String](context, android.R.layout.simple_list_item_1, strings)
-    return aa
-  }
 }

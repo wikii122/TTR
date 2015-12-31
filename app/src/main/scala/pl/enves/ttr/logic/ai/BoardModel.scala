@@ -5,7 +5,6 @@ import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Random
 
 class OutOfMovesException extends Exception
 
@@ -56,37 +55,9 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     new Rotation(Quadrant.fourth, QRotation.r270)
   )
 
-  private val zobristTableFields = Array.fill(6, 6, 3) {
-    0
-  }
-  private val zobristTableCooldowns = Array.fill(4, BoardQuadrantModel.rotationIndicator + 1) {
-    0
-  }
-  private var zobristSignature: Int = 0
-
-  initZobrist()
-
   //printCountersNum()
   //printCountersCoordinates()
 
-  private def initZobrist(): Unit = {
-    val generator = new Random(4) //TODO: seed
-    for (x <- six) {
-      for (y <- six) {
-        for (i <- 0 until 3)
-          zobristTableFields(x)(y)(i) = generator.nextInt()
-      }
-    }
-    for (q <- 0 until 4) {
-      for (i <- 0 until BoardQuadrantModel.rotationIndicator + 1) {
-        zobristTableCooldowns(q)(i) = generator.nextInt()
-      }
-    }
-  }
-
-  /**
-   * for tests
-   */
   private def calculateZobristSignature(): Int = {
     var h: Int = 0
     var x = 0
@@ -110,19 +81,19 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   private def zobristSignaturePosition(x: Int, y: Int, hash: Int): Int = {
     return state(x)(y) match {
       case LightField.None =>
-        hash ^ zobristTableFields(x)(y)(0)
+        hash ^ ZobristTable.fields(x)(y)(0)
       case LightField.X =>
-        hash ^ zobristTableFields(x)(y)(1)
+        hash ^ ZobristTable.fields(x)(y)(1)
       case LightField.O =>
-        hash ^ zobristTableFields(x)(y)(2)
+        hash ^ ZobristTable.fields(x)(y)(2)
     }
   }
 
   private def zobristSignatureCooldown(q: Int, hash: Int): Int = {
-    return hash ^ zobristTableCooldowns(q)(quadrants(q).getCooldown)
+    return hash ^ ZobristTable.cooldowns(q)(quadrants(q).getCooldown)
   }
 
-  def getZobristSignature = zobristSignature
+  def getZobristSignature = calculateZobristSignature()
 
   private def prepareCounters(): Array[Counter] = {
     val buf = ArrayBuffer[Counter]()
@@ -211,24 +182,18 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     //  error(s"heuristic: $heuristic != counters: $ret")
     //}
 
-    //if(zobristSignature != getZobristHash) {
-    //  error(s"hash error")
-    //}
-
     return ret
   }
 
-  def checkMove(m: Move, player: Int): Int = {
-    return m match {
-      case Position(x, y) => checkPosition(x, y, player)
-      case Rotation(q, r) => checkRotate(q, r, player)
-    }
+  def checkMove(m: Move, player: Int): Int = m match {
+    case Position(x, y) => checkPosition(x, y, player)
+    case Rotation(q, r) => checkRotate(q, r, player)
   }
 
   def checkPosition(x: Int, y: Int, player: Int): Int = {
-    position(x, y, player)
+    countField(x, y, player)
     val value = check()
-    unPosition(x, y, player)
+    unCountField(x, y, player)
     return value
   }
 
@@ -239,54 +204,46 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     return value
   }
 
+  def isLegal(m: Move): Boolean = m match {
+    case Position(x, y) => state(x)(y) == LightField.None
+    case Rotation(q, r) => canRotate(q.id)
+  }
+
   def position(x: Int, y: Int, player: Int): Unit = {
-    zobristTick()
     state(x)(y) = player
-    countField(x, y)
+    countField(x, y, player)
     tick()
     freeFields -= 1
-    zobristTick()
   }
 
   def unPosition(x: Int, y: Int, player: Int): Unit = {
-    zobristTick()
     freeFields += 1
     unTick()
-    unCountField(x, y)
+    unCountField(x, y, player)
     state(x)(y) = LightField.None
-    zobristTick()
   }
 
   def rotate(q: Quadrant.Value, rotation: QRotation.Value, player: Int): Unit = {
     val quadrant = q.id
-    zobristTick()
-    unCountQuadrantForRotation(quadrant)
     rotation match {
       case QRotation.r90 => rotateQuadrantLeft(quadrant)
       case QRotation.r270 => rotateQuadrantRight(quadrant)
     }
-    countQuadrantForRotation(quadrant)
     quadrants(quadrant).rotate(rotation)
     tick()
-    zobristTick()
   }
 
   def unRotate(q: Quadrant.Value, rotation: QRotation.Value, player: Int): Unit = {
     val quadrant = q.id
-    zobristTick()
     unTick()
     quadrants(quadrant).unRotate(rotation)
-    unCountQuadrantForRotation(quadrant)
     rotation match {
       case QRotation.r90 => rotateQuadrantRight(quadrant)
       case QRotation.r270 => rotateQuadrantLeft(quadrant)
     }
-    countQuadrantForRotation(quadrant)
-    zobristTick()
   }
 
-  private def countField(x: Int, y: Int): Unit = {
-    val f = state(x)(y)
+  private def countField(x: Int, y: Int, f: Int): Unit = {
     if (f != LightField.None) {
       val counters = countersMap(x)(y)
       val countersLength = counters.length
@@ -297,11 +254,9 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
         i += 1
       }
     }
-    zobristSignature = zobristSignaturePosition(x, y, zobristSignature)
   }
 
-  private def unCountField(x: Int, y: Int): Unit = {
-    val f = state(x)(y)
+  private def unCountField(x: Int, y: Int, f: Int): Unit = {
     if (f != LightField.None) {
       val counters = countersMap(x)(y)
       val countersLength = counters.length
@@ -312,7 +267,6 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
         i += 1
       }
     }
-    zobristSignature = zobristSignaturePosition(x, y, zobristSignature)
   }
 
   def offsetX(quadrant: Int) = quadrant match {
@@ -329,45 +283,27 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     case 3 => Quadrant.size
   }
 
-  private def countQuadrantForRotation(quadrant: Int): Unit = {
-    val x = offsetX(quadrant)
-    val y = offsetY(quadrant)
-    //only quadrant centers don't change
-    countField(x + 0, y + 0)
-    countField(x + 0, y + 1)
-    countField(x + 0, y + 2)
-    countField(x + 1, y + 0)
-    countField(x + 1, y + 2)
-    countField(x + 2, y + 0)
-    countField(x + 2, y + 1)
-    countField(x + 2, y + 2)
-  }
-
-  private def unCountQuadrantForRotation(quadrant: Int): Unit = {
-    val x = offsetX(quadrant)
-    val y = offsetY(quadrant)
-    unCountField(x + 0, y + 0)
-    unCountField(x + 0, y + 1)
-    unCountField(x + 0, y + 2)
-    unCountField(x + 1, y + 0)
-    unCountField(x + 1, y + 2)
-    unCountField(x + 2, y + 0)
-    unCountField(x + 2, y + 1)
-    unCountField(x + 2, y + 2)
-  }
-
   private def countBoard(): Unit = {
     var x = 0
     var y = 0
     while (x < 6) {
       y = 0
       while (y < 6) {
-        countField(x, y)
+        countField(x, y, state(x)(y))
         y += 1
       }
       x += 1
     }
-    zobristTick()
+  }
+
+  private def substitute(x1: Int, y1: Int, f2: Int): Unit = {
+    val f1 = state(x1)(y1)
+
+    if (f1 != f2) {
+      unCountField(x1, y1, f1)
+      state(x1)(y1) = f2
+      countField(x1, y1, f2)
+    }
   }
 
   private def rotateQuadrantLeft(quadrant: Int): Unit = {
@@ -377,14 +313,14 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     val t0 = state(x + 0)(y + 0)
     val t1 = state(x + 0)(y + 1)
 
-    state(x + 0)(y + 0) = state(x + 0)(y + 2)
-    state(x + 0)(y + 1) = state(x + 1)(y + 2)
-    state(x + 0)(y + 2) = state(x + 2)(y + 2)
-    state(x + 1)(y + 2) = state(x + 2)(y + 1)
-    state(x + 2)(y + 2) = state(x + 2)(y + 0)
-    state(x + 2)(y + 1) = state(x + 1)(y + 0)
-    state(x + 2)(y + 0) = t0
-    state(x + 1)(y + 0) = t1
+    substitute(x + 0, y + 0, state(x + 0)(y + 2))
+    substitute(x + 0, y + 1, state(x + 1)(y + 2))
+    substitute(x + 0, y + 2, state(x + 2)(y + 2))
+    substitute(x + 1, y + 2, state(x + 2)(y + 1))
+    substitute(x + 2, y + 2, state(x + 2)(y + 0))
+    substitute(x + 2, y + 1, state(x + 1)(y + 0))
+    substitute(x + 2, y + 0, t0)
+    substitute(x + 1, y + 0, t1)
   }
 
   private def rotateQuadrantRight(quadrant: Int): Unit = {
@@ -394,14 +330,14 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     val t0 = state(x + 0)(y + 0)
     val t1 = state(x + 1)(y + 0)
 
-    state(x + 0)(y + 0) = state(x + 2)(y + 0)
-    state(x + 1)(y + 0) = state(x + 2)(y + 1)
-    state(x + 2)(y + 0) = state(x + 2)(y + 2)
-    state(x + 2)(y + 1) = state(x + 1)(y + 2)
-    state(x + 2)(y + 2) = state(x + 0)(y + 2)
-    state(x + 1)(y + 2) = state(x + 0)(y + 1)
-    state(x + 0)(y + 2) = t0
-    state(x + 0)(y + 1) = t1
+    substitute(x + 0, y + 0, state(x + 2)(y + 0))
+    substitute(x + 1, y + 0, state(x + 2)(y + 1))
+    substitute(x + 2, y + 0, state(x + 2)(y + 2))
+    substitute(x + 2, y + 1, state(x + 1)(y + 2))
+    substitute(x + 2, y + 2, state(x + 0)(y + 2))
+    substitute(x + 1, y + 2, state(x + 0)(y + 1))
+    substitute(x + 0, y + 2, t0)
+    substitute(x + 0, y + 1, t1)
   }
 
   def tick(): Unit = {
@@ -420,34 +356,47 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     }
   }
 
-  private def zobristTick(): Unit = {
-    var i = 0
-    while (i < 4) {
-      zobristSignature = zobristSignatureCooldown(i, zobristSignature)
-      i += 1
-    }
-  }
-
   private def availableMoves(maximizing: Boolean): ArrayBuffer[ValuedMove] = {
     val moves = ArrayBuffer[ValuedMove]()
     val player = if (maximizing) LightField.X else LightField.O
-    if (freeFields == 36) {
-      //TODO: Pick one at random
-      val x = 1
-      val y = 1
-      val value = checkPosition(x, y, player)
-      moves.append(new ValuedMove(value, _cached_moves_positions(x)(y)))
-      return moves
-    }
 
-    //TODO: calculate value faster
+    //since we are here, game is still on
+    //taking a position can't cause draw, so adding is ok
+    val valueBefore = check()
     var x = 0
     var y = 0
     while (x < 6) {
       y = 0
       while (y < 6) {
         if (state(x)(y) == 0) {
-          val value = checkPosition(x, y, player)
+          val counters = countersMap(x)(y)
+          val countersLength = counters.length
+          var won = false
+          var value = valueBefore
+          var i = 0
+          while (i < countersLength) {
+            val counter = counters(i)
+            counter.add(player)
+            val v = counter.getValue
+            value += v
+            if (v == Heuristics.winnerValue || v == -Heuristics.winnerValue) {
+              won = true
+            }
+            i += 1
+          }
+          i = 0
+          while (i < countersLength) {
+            val counter = counters(i)
+            counter.sub(player)
+            i += 1
+          }
+          if (won) {
+            value = if (maximizing) {
+              Heuristics.winnerValue
+            } else {
+              -Heuristics.winnerValue
+            }
+          }
           moves.append(new ValuedMove(value, _cached_moves_positions(x)(y)))
         }
         y += 1
@@ -455,6 +404,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
       x += 1
     }
 
+    //TODO: calculate value faster
     var quadrant = 0
     while (quadrant < 4) {
       if (canRotate(quadrant) && !isRotationImmune(quadrant)) {
@@ -581,14 +531,23 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   }
 
   def findBestMove(maximizing: Boolean): ValuedMove = {
-    val moves = availableMovesSorted(maximizing)
+    val moves = availableMoves(maximizing)
     var best = 0
     var i = 1
-    while (i < moves.length) {
-      if (moves(i).value > moves(best).value) {
-        best = i
+    if (maximizing) {
+      while (i < moves.length) {
+        if (moves(i).value > moves(best).value) {
+          best = i
+        }
+        i += 1
       }
-      i += 1
+    } else {
+      while (i < moves.length) {
+        if (moves(i).value < moves(best).value) {
+          best = i
+        }
+        i += 1
+      }
     }
     return moves(best)
   }

@@ -3,7 +3,6 @@ package pl.enves.ttr.logic.ai
 class Counter() {
   private var nx: Int = 0
   private var no: Int = 0
-  private var value = 0
 
   def add(player: Int): Unit = {
     if (player == LightField.X) {
@@ -12,7 +11,6 @@ class Counter() {
     if (player == LightField.O) {
       no += 1
     }
-    value = calculateValue()
   }
 
   def sub(player: Int): Unit = {
@@ -22,12 +20,11 @@ class Counter() {
     if (player == LightField.O) {
       no -= 1
     }
-    value = calculateValue()
   }
 
   def getTaken: Int = nx + no
 
-  def getValue = value
+  def getValue = calculateValue()
 
   private def calculateValue(): Int = {
     val x = nx
