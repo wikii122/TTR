@@ -122,85 +122,55 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
 
     var al = alpha
     var be = beta
-    var bestValue = 0
+    var bestValue = if (maximizing) -infinity else infinity
     var bestMove = availableMoves.head.move
 
-    if (maximizing) {
-      //Max
-      bestValue = -infinity
+    val symbol = if (maximizing) LightField.X else LightField.O
 
-      var i = 0
-      while (i < availableMoves.size) {
-        val move = availableMoves(i).move
-        val predictedValue = availableMoves(i).value
-        val calculatedValue = if (Math.abs(predictedValue) == Heuristics.winnerValue) {
-          adjustWinnerValue(predictedValue)
-        } else {
+    var i = 0
+    while (i < availableMoves.size) {
+      val move = availableMoves(i).move
+      val predictedValue = availableMoves(i).value
+      val calculatedValue = if (Math.abs(predictedValue) == Heuristics.winnerValue) {
+        adjustWinnerValue(predictedValue)
+      } else {
 
-          move match {
-            case Position(x, y) => boardModel.position(x, y, LightField.X)
-            case Rotation(q, r) => boardModel.rotate(q, r, LightField.X)
-          }
-
-          val v = minMax(depth - 1, al, be, false)
-
-          move match {
-            case Position(x, y) => boardModel.unPosition(x, y, LightField.X)
-            case Rotation(q, r) => boardModel.unRotate(q, r, LightField.X)
-          }
-
-          v
+        move match {
+          case Position(x, y) => boardModel.position(x, y, symbol)
+          case Rotation(q, r) => boardModel.rotate(q, r, symbol)
         }
 
+        val v = minMax(depth - 1, al, be, !maximizing)
+
+        move match {
+          case Position(x, y) => boardModel.unPosition(x, y, symbol)
+          case Rotation(q, r) => boardModel.unRotate(q, r, symbol)
+        }
+
+        v
+      }
+
+      if (maximizing) {
         if (calculatedValue > bestValue) {
           bestValue = calculatedValue
           bestMove = move
         }
-
         al = math.max(al, bestValue)
-        if (al >= be) {
-          save(signature, bestMove, bestValue)
-          return bestValue
-        }
-        i += 1
-      }
-    } else {
-      //Min
-      bestValue = infinity
-
-      var i = 0
-      while (i < availableMoves.size) {
-        val move = availableMoves(i).move
-        val predictedValue = availableMoves(i).value
-        val calculatedValue = if (Math.abs(predictedValue) == Heuristics.winnerValue) {
-          adjustWinnerValue(predictedValue)
-        } else {
-          move match {
-            case Position(x, y) => boardModel.position(x, y, LightField.O)
-            case Rotation(q, r) => boardModel.rotate(q, r, LightField.O)
-          }
-
-          val v = minMax(depth - 1, al, be, true)
-
-          move match {
-            case Position(x, y) => boardModel.unPosition(x, y, LightField.O)
-            case Rotation(q, r) => boardModel.unRotate(q, r, LightField.O)
-          }
-
-          v
-        }
+      } else {
         if (calculatedValue < bestValue) {
           bestValue = calculatedValue
           bestMove = move
         }
         be = math.min(be, bestValue)
-        if (al >= be) {
-          save(signature, bestMove, bestValue)
-          return bestValue
-        }
-        i += 1
       }
+
+      if (al >= be) {
+        save(signature, bestMove, bestValue)
+        return bestValue
+      }
+      i += 1
     }
+
     save(signature, bestMove, bestValue)
     return bestValue
   }
