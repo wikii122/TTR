@@ -47,7 +47,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
    * https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning#Pseudocode
    * Instead of copying board when creating next child state, last move is reversed
    */
-  def minMax(depth: Int, alpha: Int, beta: Int, predictedValue: Int, maximizing: Boolean): Int = {
+  def minMax(depth: Int, alpha: Int, beta: Int, maximizing: Boolean): Int = {
     minMaxCalls += 1
 
     if (System.currentTimeMillis() > startTime + maxTime) {
@@ -61,17 +61,27 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
     }
 
     val signature = boardModel.getZobristSignature
-    if (thisValues.contains(signature)) {
-      var value = thisValues(signature)
-      if (value >= Heuristics.winnerValue || predictedValue <= -Heuristics.winnerValue) {
-        value = Heuristics.winnerValue * depth
+
+    def adjustWinnerValue(value: Int): Int = {
+      if (value > 0) {
+        Heuristics.winnerValue * depth
+      } else {
+        -Heuristics.winnerValue * depth
       }
-      return value
     }
 
-    // Saving return value on leaves is memory expensive, so no saving here
-    if (predictedValue == Heuristics.winnerValue || predictedValue == -Heuristics.winnerValue) {
-      return predictedValue * depth
+    def adjustValue(value: Int): Int = {
+      if (Math.abs(value) >= Heuristics.winnerValue) {
+        adjustWinnerValue(value)
+      } else {
+        value
+      }
+    }
+
+    if (thisValues.contains(signature)) {
+      // we visited this state before
+      val value = thisValues(signature)
+      return adjustValue(value)
     }
 
     def save(signature: Int, move: Move, value: Int): Unit = {
@@ -80,13 +90,14 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
       if (thisValues.size >= maxCachedEntries) {
         throw new CacheTooBigException
       }
-      if(bestMoveHeuristics == BestMoveHeuristics.Killer) {
+      if (bestMoveHeuristics == BestMoveHeuristics.Killer) {
         killers(depth) = Some(move)
       }
     }
 
     // There is no point to search for leaves values as they are calculated in BoardModel
     if (depth == 1) {
+      // no need to adjust value if the state is winning, as it would be multiplication by 1
       val best = boardModel.findBestMove(maximizing)
       save(signature, best.move, best.value)
       return best.value
@@ -100,7 +111,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
           boardModel.availableMovesSorted(maximizing)
         }
       case BestMoveHeuristics.Killer =>
-        if(killers(depth).isDefined && boardModel.isLegal(killers(depth).get)) {
+        if (killers(depth).isDefined && boardModel.isLegal(killers(depth).get)) {
           boardModel.availableMovesSorted(killers(depth).get, maximizing)
         } else {
           boardModel.availableMovesSorted(maximizing)
@@ -121,21 +132,29 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
       var i = 0
       while (i < availableMoves.size) {
         val move = availableMoves(i).move
+        val predictedValue = availableMoves(i).value
+        val calculatedValue = if (Math.abs(predictedValue) == Heuristics.winnerValue) {
+          adjustWinnerValue(predictedValue)
+        } else {
 
-        move match {
-          case Position(x, y) => boardModel.position(x, y, LightField.X)
-          case Rotation(q, r) => boardModel.rotate(q, r, LightField.X)
+          move match {
+            case Position(x, y) => boardModel.position(x, y, LightField.X)
+            case Rotation(q, r) => boardModel.rotate(q, r, LightField.X)
+          }
+
+          val v = minMax(depth - 1, al, be, false)
+
+          move match {
+            case Position(x, y) => boardModel.unPosition(x, y, LightField.X)
+            case Rotation(q, r) => boardModel.unRotate(q, r, LightField.X)
+          }
+
+          v
         }
 
-        val v = minMax(depth - 1, al, be, availableMoves(i).value, false)
-        if (v > bestValue) {
-          bestValue = v
+        if (calculatedValue > bestValue) {
+          bestValue = calculatedValue
           bestMove = move
-        }
-
-        move match {
-          case Position(x, y) => boardModel.unPosition(x, y, LightField.X)
-          case Rotation(q, r) => boardModel.unRotate(q, r, LightField.X)
         }
 
         al = math.max(al, bestValue)
@@ -152,23 +171,28 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
       var i = 0
       while (i < availableMoves.size) {
         val move = availableMoves(i).move
+        val predictedValue = availableMoves(i).value
+        val calculatedValue = if (Math.abs(predictedValue) == Heuristics.winnerValue) {
+          adjustWinnerValue(predictedValue)
+        } else {
+          move match {
+            case Position(x, y) => boardModel.position(x, y, LightField.O)
+            case Rotation(q, r) => boardModel.rotate(q, r, LightField.O)
+          }
 
-        move match {
-          case Position(x, y) => boardModel.position(x, y, LightField.O)
-          case Rotation(q, r) => boardModel.rotate(q, r, LightField.O)
+          val v = minMax(depth - 1, al, be, true)
+
+          move match {
+            case Position(x, y) => boardModel.unPosition(x, y, LightField.O)
+            case Rotation(q, r) => boardModel.unRotate(q, r, LightField.O)
+          }
+
+          v
         }
-
-        val v = minMax(depth - 1, al, be, availableMoves(i).value, true)
-        if (v < bestValue) {
-          bestValue = v
+        if (calculatedValue < bestValue) {
+          bestValue = calculatedValue
           bestMove = move
         }
-
-        move match {
-          case Position(x, y) => boardModel.unPosition(x, y, LightField.O)
-          case Rotation(q, r) => boardModel.unRotate(q, r, LightField.O)
-        }
-
         be = math.min(be, bestValue)
         if (al >= be) {
           save(signature, bestMove, bestValue)
@@ -223,20 +247,20 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
 
       //clear killers
       var i = 0
-      while(i <= maxDepth) {
+      while (i <= maxDepth) {
         killers(i) = None
         i += 1
       }
 
       try {
         val signature = boardModel.getZobristSignature
-        minMax(depth, -infinity, infinity, 0, maximizing)
+        minMax(depth, -infinity, infinity, maximizing)
         bestMove = thisBestMoves(signature)
         bestValue = thisValues(signature)
         val states = thisValues.size
         val time = System.currentTimeMillis() - startTime
         log(s"depth: $depth, calls: $minMaxCalls, saved states: $states, bestMove: $bestMove, bestValue: $bestValue, signature: $signature, time: $time")
-        if(displayStatus.isDefined) {
+        if (displayStatus.isDefined) {
           displayStatus.get(s"depth: $depth, bestMove: $bestMove, bestValue: $bestValue, time: $time")
         }
         boardModel.printState()
@@ -245,19 +269,19 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
         case e: TimedOutException =>
           run = false
           error(s"timed out during depth: $depth")
-          if(displayStatus.isDefined) {
+          if (displayStatus.isDefined) {
             displayStatus.get(s"timed out during depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
           }
         case e: CacheTooBigException =>
           run = false
           error(s"out of memory during depth: $depth")
-          if(displayStatus.isDefined) {
+          if (displayStatus.isDefined) {
             displayStatus.get(s"out of memory during depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
           }
         case e: OutOfMovesException =>
           run = false
           error(s"out of moves during depth: $depth")
-          if(displayStatus.isDefined) {
+          if (displayStatus.isDefined) {
             displayStatus.get(s"out of moves during depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
           }
       }
@@ -277,7 +301,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
     case e: Exception =>
       e.printStackTrace()
       log("switching to random")
-      if(displayStatus.isDefined) {
+      if (displayStatus.isDefined) {
         displayStatus.get(s"switching to random")
       }
       val nb = new NoBrainer(board, success)
