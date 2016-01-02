@@ -42,6 +42,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var positionsChoosingText: Option[TextView] = None
   private[this] var bestMoveHeuristicsSpinner: Option[Spinner] = None
   private[this] var bestMoveHeuristicsText: Option[TextView] = None
+  private[this] var randomizeDecisionsSwitch: Option[Switch] = None
 
   private[this] var botTestingLayer: Option[View] = None
   private[this] var botEnableSwitch: Option[Switch] = None
@@ -137,6 +138,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     bestMoveHeuristicsSpinner = Some(find[Spinner](R.id.spinner_best_move_heuristics))
     bestMoveHeuristicsText = Some(find[TextView](R.id.text_best_move_heuristics))
 
+    randomizeDecisionsSwitch = Some(find[Switch](R.id.randomize_decisions_switch))
+
     maxTimeSpinner.get.setSelection(5)
     maxDepthSpinner.get.setSelection(3)
     positionsChoosingSpinner.get.setAdapter(PositionsChoosing.getAdapter(this))
@@ -177,6 +180,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     maxTimeText.get.setTypeface(typeface)
     positionsChoosingText.get.setTypeface(typeface)
     bestMoveHeuristicsText.get.setTypeface(typeface)
+    randomizeDecisionsSwitch.get.setTypeface(typeface)
 
     botEnableSwitch.get.setTypeface(typeface)
     botStatusText.get.setTypeface(typeface)
@@ -203,6 +207,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     adaptiveDepthSwitch.get.setTextColor(theme.color2)
     positionsChoosingText.get.setTextColor(theme.color2)
     bestMoveHeuristicsText.get.setTextColor(theme.color2)
+    randomizeDecisionsSwitch.get.setTextColor(theme.color2)
 
     botEnableSwitch.get.setTextColor(theme.color2)
     botStatusText.get.setTextColor(theme.color2)
@@ -278,6 +283,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     positionsChoosingSpinner.get.setVisibility(View.VISIBLE)
     bestMoveHeuristicsText.get.setVisibility(View.VISIBLE)
     bestMoveHeuristicsSpinner.get.setVisibility(View.VISIBLE)
+    randomizeDecisionsSwitch.get.setVisibility(View.VISIBLE)
   }
 
   def closeChooser(): Unit = {
@@ -298,6 +304,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     positionsChoosingSpinner.get.setVisibility(View.GONE)
     bestMoveHeuristicsText.get.setVisibility(View.GONE)
     bestMoveHeuristicsSpinner.get.setVisibility(View.GONE)
+    randomizeDecisionsSwitch.get.setVisibility(View.GONE)
   }
 
   def showBotTesting(): Unit = {
@@ -360,6 +367,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     g.setAdaptiveDepth(adaptiveDepthSwitch.get.isChecked)
     g.setPositionsChoosing(PositionsChoosing.withName(positionsChoosingSpinner.get.getSelectedItem.toString))
     g.setBestMoveHeuristics(BestMoveHeuristics.withName(bestMoveHeuristicsSpinner.get.getSelectedItem.toString))
+    g.setRandomizeDecisions(randomizeDecisionsSwitch.get.isChecked)
 
     def displayStatus(s: String): Unit = {
       runOnUiThread(new Runnable() {

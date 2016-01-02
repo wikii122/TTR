@@ -28,6 +28,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   private var displayStatus: Option[String => Unit] = None
 
+  private var randomizeDecisions = false
+
   //TODO: remove in production
   private var enabled = true
 
@@ -44,7 +46,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
     else maxDepth
 
-    ai = Some(new MinMax(board, player, maxTime, depth, positionsChoosing, bestMoveHeuristics, displayStatus, makeAIMove))
+    ai = Some(new MinMax(board, player, maxTime, depth, positionsChoosing, bestMoveHeuristics, displayStatus, randomizeDecisions, makeAIMove))
   }
 
   /**
@@ -147,6 +149,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   def setBestMoveHeuristics(bmh: BestMoveHeuristics.Value): Unit = bestMoveHeuristics = bmh
 
   def setDisplayStatus(f: String => Unit): Unit = displayStatus = Some(f)
+
+  def setRandomizeDecisions(rd: Boolean): Unit = randomizeDecisions = rd
 
   def setEnabled(e: Boolean): Unit = this.synchronized {
     enabled = e

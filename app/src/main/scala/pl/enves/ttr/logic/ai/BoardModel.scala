@@ -5,6 +5,7 @@ import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Random
 
 class OutOfMovesException extends Exception
 
@@ -54,6 +55,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     new Rotation(Quadrant.third, QRotation.r270),
     new Rotation(Quadrant.fourth, QRotation.r270)
   )
+
+  private val generator = new Random()
 
   //printCountersNum()
   //printCountersCoordinates()
@@ -530,24 +533,25 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     return moves2
   }
 
-  def findBestMove(maximizing: Boolean): ValuedMove = {
+  def findBestMove(maximizing: Boolean, randomize: Boolean): ValuedMove = {
     val moves = availableMoves(maximizing)
     var best = 0
+    var bestNumber = 1
     var i = 1
-    if (maximizing) {
-      while (i < moves.length) {
-        if (moves(i).value > moves(best).value) {
+    while (i < moves.length) {
+      if (maximizing && moves(i).value > moves(best).value) {
+        best = i
+        bestNumber = 1
+      } else if (!maximizing && moves(i).value < moves(best).value) {
+        best = i
+        bestNumber = 1
+      } else if (moves(i).value == moves(best).value && randomize) {
+        bestNumber += 1
+        if (generator.nextInt(bestNumber) == 0) {
           best = i
         }
-        i += 1
       }
-    } else {
-      while (i < moves.length) {
-        if (moves(i).value < moves(best).value) {
-          best = i
-        }
-        i += 1
-      }
+      i += 1
     }
     return moves(best)
   }

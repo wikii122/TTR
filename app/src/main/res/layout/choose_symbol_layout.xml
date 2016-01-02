@@ -92,7 +92,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:checked="true"
-        android:text="Adaptive depth" />
+        android:text="Adaptive depth"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -105,7 +106,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="left|center_vertical"
-            android:text="Positions Choosing:"
+            android:text="Positions choosing:"
             android:textAppearance="?android:attr/textAppearanceMedium" />
 
         <Spinner
@@ -135,4 +136,12 @@
             android:layout_height="wrap_content"
             android:spinnerMode="dropdown" />
     </LinearLayout>
+
+    <Switch
+        android:id="@+id/randomize_decisions_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:checked="false"
+        android:text="Randomize decisions"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 </LinearLayout>

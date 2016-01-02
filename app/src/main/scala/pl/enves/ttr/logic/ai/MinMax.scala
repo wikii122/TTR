@@ -7,11 +7,13 @@ import pl.enves.ttr.utils.ExecutorContext
 
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.util.Random
 
 class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
              positionsChoosing: PositionsChoosing.Value,
              bestMoveHeuristics: BestMoveHeuristics.Value,
              displayStatus: Option[String => Unit],
+             randomize: Boolean,
              success: Move => Unit) extends Logging {
 
   private class TimedOutException extends Exception
@@ -36,6 +38,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
   private val startTime = System.currentTimeMillis()
 
   private val boardModel = BoardModel(board, positionsChoosing)
+
+  private val generator = new Random()
 
   def stop(): Unit = {
     this.synchronized {
@@ -98,7 +102,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
     // There is no point to search for leaves values as they are calculated in BoardModel
     if (depth == 1) {
       // no need to adjust value if the state is winning, as it would be multiplication by 1
-      val best = boardModel.findBestMove(maximizing)
+      val best = boardModel.findBestMove(maximizing, randomize)
       save(signature, best.move, best.value)
       return best.value
     }
@@ -124,6 +128,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
     var be = beta
     var bestValue = if (maximizing) -infinity else infinity
     var bestMove = availableMoves.head.move
+    var bestNumber = 1
 
     val symbol = if (maximizing) LightField.X else LightField.O
 
@@ -150,17 +155,24 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
         v
       }
 
-      if (maximizing) {
-        if (calculatedValue > bestValue) {
-          bestValue = calculatedValue
+      if (maximizing && calculatedValue > bestValue) {
+        bestValue = calculatedValue
+        bestMove = move
+        bestNumber = 1
+      } else if (!maximizing && calculatedValue < bestValue) {
+        bestValue = calculatedValue
+        bestMove = move
+        bestNumber = 1
+      } else if (calculatedValue == bestValue && randomize) {
+        bestNumber += 1
+        if (generator.nextInt(bestNumber) == 0) {
           bestMove = move
         }
+      }
+
+      if (maximizing) {
         al = math.max(al, bestValue)
       } else {
-        if (calculatedValue < bestValue) {
-          bestValue = calculatedValue
-          bestMove = move
-        }
         be = math.min(be, bestValue)
       }
 
