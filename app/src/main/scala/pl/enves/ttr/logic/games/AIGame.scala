@@ -1,8 +1,7 @@
-package pl.enves.ttr.logic
-
-import java.security.InvalidParameterException
+package pl.enves.ttr.logic.games
 
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.ai._
 import pl.enves.ttr.logic.inner._
 import pl.enves.ttr.utils.JsonProtocol._

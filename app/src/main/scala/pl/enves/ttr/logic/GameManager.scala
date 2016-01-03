@@ -1,6 +1,7 @@
 package pl.enves.ttr.logic
 
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic.games.{AIGame, ReplayStandardGame, ReplayAIGame, StandardGame}
 
 trait GameManager extends Logging {
   protected[this] var _game: Option[Game] = None

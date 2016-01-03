@@ -9,6 +9,7 @@ import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
+import pl.enves.ttr.logic.games.AIGame
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
 

@@ -1,6 +1,7 @@
 package pl.enves.ttr.logic
 
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic.games.{AIGame, ReplayStandardGame, ReplayAIGame, StandardGame}
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonMappable
 import spray.json._

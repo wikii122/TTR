@@ -9,6 +9,7 @@ import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic._
+import pl.enves.ttr.logic.games.AIGame
 
 /**
  * Display current player in 1x0.25 rectangle

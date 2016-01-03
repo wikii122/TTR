@@ -1,17 +1,16 @@
-package pl.enves.ttr.logic
+package pl.enves.ttr.logic.games
 
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
-class ReplayAIGame(_human: Player.Value, board: Board = Board()) extends AIGame(board) with Logging {
+class ReplayStandardGame(board: Board = Board()) extends StandardGame(board) with Logging {
 
   private var replayMove = 0
 
   override def isReplaying = replayMove < movesLog.size
-
-  setHumanSymbol(_human)
 
   override protected def onMove(move: Move): Boolean = {
     throw new GameWon(s"Game is finished. $winner has won.")
@@ -35,27 +34,23 @@ class ReplayAIGame(_human: Player.Value, board: Board = Board()) extends AIGame(
 
   override def locked: Boolean = true
 
-  override protected def onStart(player: Player.Value): Unit = {
-    _player = player
+  override protected def onStart(startingPlayer: Player.Value) = {
+    _player = startingPlayer
   }
 
-  override def toMap = {
-    Map(
-      "player" -> _player,
-      "human" -> human,
-      "replayMove" -> replayMove,
-      "board" -> board.toJson,
-      "log" -> (movesLog.toList map { entry => entry.toJson }),
-      "type" -> Game.REPLAY_AI
-    )
-  }
+  override def toMap = Map(
+    "player" -> _player,
+    "replayMove" -> replayMove,
+    "board" -> board.toJson,
+    "log" -> (movesLog.toList map { entry => entry.toJson }),
+    "type" -> Game.REPLAY_STANDARD
+  )
 }
 
-object ReplayAIGame {
-  def apply(game: AIGame): ReplayAIGame = {
-    val human = game.getHuman
+object ReplayStandardGame {
+  def apply(game: StandardGame): Game = {
     val winner = game.winner
-    val replayGame = new ReplayAIGame(human.get)
+    val replayGame = new ReplayStandardGame()
     replayGame.movesLog.appendAll(game.getMovesLog)
     replayGame.board.setWinner(winner)
     return replayGame
@@ -64,8 +59,7 @@ object ReplayAIGame {
   def apply(jsValue: JsValue): Game = {
     val fields = jsValue.asJsObject.fields
     val board = Board(fields("board"))
-    val human = fields("human").convertTo[Option[Player.Value]]
-    val replayGame = new ReplayAIGame(human.get, board)
+    val replayGame = new ReplayStandardGame(board)
     replayGame._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject, replayGame)))
     replayGame.replayMove = fields("replayMove").convertTo[Int]

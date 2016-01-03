@@ -1,6 +1,7 @@
-package pl.enves.ttr.logic
+package pl.enves.ttr.logic.games
 
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.logic.{Game, Move, Player}
 
 class PlayServicesGame(board: Board = Board()) extends Game(board) {
   override val gameType: Game.Value = Game.GPS_MULTIPLAYER
