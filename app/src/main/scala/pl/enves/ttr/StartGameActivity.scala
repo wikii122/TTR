@@ -19,6 +19,7 @@ import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
 
 class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
   private[this] final val SELECT_PLAYERS = 9003
+  private[this] var viewSwitcherSwitched = false
 
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
@@ -34,7 +35,13 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     log("Starting")
     super.onStart()
 
+    val viewSwitcher = Some(find[ViewSwitcher](R.id.menuViewSwitcher))
+
     enableButtons()
+
+    if (viewSwitcherSwitched) {
+      unflip(viewSwitcher.get)
+    }
 
     if (Configuration.isFirstRun) {
       Configuration.isFirstRun = false
@@ -174,6 +181,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     viewSwitcher.get.showNext()
     backToMainButton.get.setVisibility(View.VISIBLE)
+    viewSwitcherSwitched = true
   }
 
   private[this] def unflip(v: View) = {
@@ -184,6 +192,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     viewSwitcher.get.showPrevious()
     backToMainButton.get.setVisibility(View.GONE)
+    viewSwitcherSwitched = false
   }
 
   private[this] def enableButtons(): Unit = UiThread(() => {

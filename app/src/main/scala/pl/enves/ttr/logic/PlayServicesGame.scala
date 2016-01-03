@@ -11,5 +11,5 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
   override protected def onStart(player: Player.Value): Unit = ???
 
-  override protected def onMove(move: Game#Move): Boolean = ???
+  override protected def onMove(move: Move): Boolean = ???
 }

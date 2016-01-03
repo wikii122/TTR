@@ -16,7 +16,7 @@ class GameView(val context: Context with GameManager, onEnd: Option[Player.Value
   private[this] val renderer = GameRenderer(context, onEnd)
 
   log("Creating")
-  setEGLConfigChooser(true) //true, cause we need depth buffer
+  setEGLConfigChooser(8, 8, 8, 8, 0, 0)
   setEGLContextClientVersion(2)
 
   setRenderer(renderer)

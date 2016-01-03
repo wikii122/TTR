@@ -1,18 +1,20 @@
 package pl.enves.ttr
 
+import android.content.res.TypedArray
 import android.content.{Intent, SharedPreferences}
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
-import android.widget.{Button, ImageButton, TextView}
+import android.widget.{Button, TextView}
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.logic.Player
-import pl.enves.ttr.utils.SymbolButton
 import pl.enves.ttr.utils.styled.ToolbarActivity
-import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
+
+import scala.collection.mutable.ArrayBuffer
 
 class SettingsActivity extends ToolbarActivity {
-  private[this] var themesButton: Option[(Button, Button)] = None
+  private[this] var pickThemeText: Option[TextView] = None
+  private[this] var themePicker: Option[ThemePicker] = None
   private[this] var tutorialButton: Option[(Button, Button)] = None
   private[this] var licensesButton: Option[(Button, Button)] = None
 
@@ -22,25 +24,47 @@ class SettingsActivity extends ToolbarActivity {
 
     setupToolbar(R.id.settings_toolbar)
 
-    themesButton = Some((find[Button](R.id.button_themes), find[Button](R.id.button_themes_prompt)))
+    pickThemeText = Some(find[TextView](R.id.text_pick_theme))
+    themePicker = Some(find[ThemePicker](R.id.view_theme_picker))
     tutorialButton = Some((find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt)))
     licensesButton = Some((find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt)))
 
-    themesButton.get onClick startThemes
+    themePicker.get.setChangeListener(this)
+    val themes = readDefaultThemes
+    themePicker.get.setThemes(themes)
+    var i = themes.indexOf(getSavedTheme(getResources, prefs.get))
+    if (i == -1) {
+      i = 0
+    }
+    themePicker.get.setCurrent(i)
+
     tutorialButton.get onClick startTutorial
     licensesButton.get onClick startLicenses
+  }
+
+  override def onPause(): Unit = {
+    super.onPause()
+    if (themePicker.get.isChanged) {
+      val ed: SharedPreferences.Editor = prefs.get.edit()
+      ed.putString("THEME", themePicker.get.getTheme.toJsonObject.toString)
+      ed.commit()
+    }
+  }
+
+  private def readDefaultThemes: Array[Theme] = {
+    val themes = new ArrayBuffer[Theme]()
+    val resources = getResources
+    val themeArrays: TypedArray = resources.obtainTypedArray(R.array.themes)
+    for (i <- 0 until themeArrays.length) {
+      themes.append(Theme(resources, themeArrays.getResourceId(i, -1)))
+    }
+    themeArrays.recycle()
+    return themes.toArray
   }
 
   private[this] def startTutorial(v: View) = {
     log("Intending to start tutorial")
     val itnt = intent[TutorialActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt start()
-  }
-
-  private[this] def startThemes(v: View) = {
-    log("Intending to start themes")
-    val itnt = intent[ThemesActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
     itnt start()
   }
@@ -55,7 +79,7 @@ class SettingsActivity extends ToolbarActivity {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    themesButton.get.setTypeface(typeface)
+    pickThemeText.get.setTypeface(typeface)
     tutorialButton.get.setTypeface(typeface)
     licensesButton.get.setTypeface(typeface)
   }
@@ -63,7 +87,7 @@ class SettingsActivity extends ToolbarActivity {
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
 
-    themesButton.get.setTextColor(theme.color1, theme.color2)
+    pickThemeText.get.setTextColor(theme.color1)
     tutorialButton.get.setTextColor(theme.color1, theme.color2)
     licensesButton.get.setTextColor(theme.color1, theme.color2)
   }

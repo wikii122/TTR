@@ -170,7 +170,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     if (arrow.nonEmpty) {
       val a = arrow.get
       try {
-        val move = new game.Rotation(a._1, a._2)
+        val move = new Rotation(a._1, a._2)
         quadrants(a._1).synchronized {
           game.make(move)
         }

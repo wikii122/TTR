@@ -29,18 +29,17 @@
 
         <activity
             android:name=".SettingsActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_settings" >
         </activity>
         <activity
             android:name=".TutorialActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_tutorial" >
         </activity>
         <activity
-            android:name=".ThemesActivity"
-            android:label="@string/title_activity_themes" >
-        </activity>
-        <activity
             android:name=".LicensesActivity"
+            android:screenOrientation="portrait"
             android:label="@string/title_activity_licenses" >
         </activity>
 

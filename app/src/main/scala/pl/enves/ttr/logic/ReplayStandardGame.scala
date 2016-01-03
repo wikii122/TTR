@@ -11,7 +11,7 @@ class ReplayStandardGame(board: Board = Board()) extends StandardGame(board) wit
 
   override def isReplaying = replayMove < movesLog.size
 
-  override protected def onMove(move: Game#Move): Boolean = {
+  override protected def onMove(move: Move): Boolean = {
     throw new GameWon(s"Game is finished. $winner has won.")
   }
 
