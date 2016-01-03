@@ -16,7 +16,7 @@ import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.exceptions.ServiceUnavailableException
 
 object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener with Logging {
-  private final val RC_SIGN_IN = 9001 // Because reasons
+  final val SIGN_IN = 9001 // Because reasons
   private[this] val client = if (Configuration.isMultiplayerAvailable) Option(clientInit())
     else None
   private[this] var counter = 0
@@ -35,7 +35,7 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     }
   }
 
-  def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 7, true)
+  def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
 
   def isAvailable = Configuration.isMultiplayerAvailable && client.isDefined
   def nonAvailable = !isAvailable
@@ -72,14 +72,14 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     val activity = ContextRegistry.context.asInstanceOf[Activity]
     if (result.hasResolution) {
       try {
-        result.startResolutionForResult(activity, RC_SIGN_IN)
+        result.startResolutionForResult(activity, SIGN_IN)
       } catch {
         case e:IntentSender.SendIntentException => client.get.connect()
       }
     } else {
       // not resolvable... so show an error message
       val errorCode = result.getErrorCode
-      val dialog = Option(GoogleApiAvailability.getInstance.getErrorDialog(activity, errorCode, RC_SIGN_IN))
+      val dialog = Option(GoogleApiAvailability.getInstance.getErrorDialog(activity, errorCode, SIGN_IN))
       if (dialog.isDefined) {
         dialog.get.show()
       } else {
