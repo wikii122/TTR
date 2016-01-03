@@ -58,14 +58,18 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
     case SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
       else return
-    case PlayServices.SIGN_IN => log("Signed in to Google Play Services")
+    case PlayServices.SIGN_IN => if (response == Activity.RESULT_OK) {
+      log(s"Signed in to Google Play Services")
       log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
       enableButtons()
-    case a => warn(s"onActivityResult did not match request with id: $a")
+    } else {
+      warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
   }
 
   def showDialog(reason: dialogs.Reason) = reason match {
-    case dialogs.PaidOnly => val dialog = PaidOnlyDialog().show()
+    case dialogs.PaidOnly => val dialog = PaidOnlyDialog.show()
   }
 
   /**

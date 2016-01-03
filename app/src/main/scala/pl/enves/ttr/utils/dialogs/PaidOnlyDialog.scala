@@ -19,4 +19,6 @@ object PaidOnlyDialog {
     })
     return builder.create()
   }
+
+  def show() = apply().show()
 }

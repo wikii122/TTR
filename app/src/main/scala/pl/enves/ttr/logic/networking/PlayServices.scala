@@ -43,7 +43,10 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   def isConnected = isAvailable && client.get.isConnected
   def notConnected = !isConnected
 
-  override def onConnectionSuspended(i: Int): Unit = ???
+  override def onConnectionSuspended(i: Int): Unit = {
+    log("Connection suspended, retrying")
+    client.get.connect()
+  }
 
   override def onConnected(bundle: Bundle): Unit = {
     log("Logged in")
