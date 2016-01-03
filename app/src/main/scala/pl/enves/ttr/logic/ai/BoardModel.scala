@@ -20,22 +20,31 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   private val six = for (x <- 0 until 6) yield x
   private val two = for (x <- 0 until 2) yield x
 
-  private val quadrants = Array(
-    BoardQuadrantModel(),
-    BoardQuadrantModel(),
-    BoardQuadrantModel(),
+  private val quadrants = Array.fill(4) {
     BoardQuadrantModel()
-  )
+  }
 
   private var freeFields = 36
 
   val state = Array.fill[Int] (6, 6) { LightField.None }
 
-  private val countersMap = Array.fill(6, 6) {
+  private val baseCountersMap = Array.fill(6, 6) {
     ArrayBuffer[Counter]()
   }
 
-  private val counters = prepareCounters()
+  private val baseCounters = prepareBaseCounters(baseCountersMap)
+
+  private val rotatedCountersMap = Array.fill(6, 6) {
+    ArrayBuffer[Counter]()
+  }
+
+  private val rotatedLeftCounters = Array.tabulate(4) { quadrant =>
+    prepareRotateCounters(Quadrant(quadrant), QRotation.r90, baseCounters, rotatedCountersMap)
+  }
+
+  private val rotatedRightCounters = Array.tabulate(4) { quadrant =>
+    prepareRotateCounters(Quadrant(quadrant), QRotation.r270, baseCounters, rotatedCountersMap)
+  }
 
   //Their purpose is reducing GC pressure by reducing fresh allocations
   private val _cached_moves_positions = Array.tabulate(6, 6) {
@@ -58,8 +67,15 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   private val generator = new Random()
 
-  //printCountersNum()
+  printCountersNum(baseCountersMap)
+  printCountersNum(rotatedCountersMap)
   //printCountersCoordinates()
+  for (quadrant <- Quadrant.values) {
+    val ll = rotatedLeftCounters(quadrant.id).length
+    val rl = rotatedRightCounters(quadrant.id).length
+    log(s"rotatedLeftCounters($quadrant).length = $ll")
+    log(s"rotatedRightCounters($quadrant).length = $rl")
+  }
 
   private def calculateZobristSignature(): Int = {
     var h: Int = 0
@@ -98,66 +114,123 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   def getZobristSignature = calculateZobristSignature()
 
-  private def prepareCounters(): Array[Counter] = {
+  private def prepareBaseCounters(map: Array[Array[ArrayBuffer[Counter]]]): Array[Counter] = {
     val buf = ArrayBuffer[Counter]()
-    prepareHorizontalCounters(buf)
-    prepareVerticalCounters(buf)
-    prepareDiagonalCounters(buf)
+    prepareCounterSequences((seq: Seq[(Int, Int)], num: Int) => {
+      val counter = new Counter()
+      buf.append(counter)
+      for (i <- seq) {
+        map(i._1)(i._2).append(counter)
+      }
+    })
     return buf.toArray
   }
 
-  private def prepareHorizontalCounters(buf: ArrayBuffer[Counter]): Unit = {
-    for (x <- two; y <- six) {
-      prepareRowCounter(x, y, buf)
+  private def isIn(x: Int, y: Int, quadrant: Quadrant.Value): Boolean = quadrant match {
+    case Quadrant.first => x < 3 && y < 3
+    case Quadrant.second => x >= 3 && y < 3
+    case Quadrant.third => x < 3 && y >= 3
+    case Quadrant.fourth => x >= 3 && y >= 3
+  }
+
+  private def isThrough(seq: Seq[(Int, Int)], quadrant: Quadrant.Value): Boolean = {
+    var through = false
+    for (i <- seq) {
+      through |= isIn(i._1, i._2, quadrant)
+    }
+    return through
+  }
+
+  private def substituteIfInQuadrant(quadrant: Quadrant.Value, xOld: Int, yOld: Int, rot: QRotation.Value): (Int, Int) = {
+    val (xBase, yBase) = rot match {
+      case QRotation.r90 => (2 - yOld % 3, xOld % 3)
+      case QRotation.r270 => (yOld % 3, 2 - xOld % 3)
+    }
+    return quadrant match {
+      case Quadrant.first => if (xOld < 3 && yOld < 3) (xBase, yBase) else (xOld, yOld)
+      case Quadrant.second => if (xOld >= 3 && yOld < 3) (xBase + 3, yBase) else (xOld, yOld)
+      case Quadrant.third => if (xOld < 3 && yOld >= 3) (xBase, yBase + 3) else (xOld, yOld)
+      case Quadrant.fourth => if (xOld >= 3 && yOld >= 3) (xBase + 3, yBase + 3) else (xOld, yOld)
     }
   }
 
-  private def prepareVerticalCounters(buf: ArrayBuffer[Counter]): Unit = {
-    for (x <- six; y <- two) {
-      prepareColumnCounter(x, y, buf)
+  private def prepareRotateCounters(quadrant: Quadrant.Value,
+                                    rot: QRotation.Value,
+                                    base: Array[Counter],
+                                    map: Array[Array[ArrayBuffer[Counter]]]): Array[Counter] = {
+    val buf = ArrayBuffer[Counter]()
+    prepareCounterSequences((seq: Seq[(Int, Int)], num: Int) => {
+      //check if sequence passes through quadrant
+      if (isThrough(seq, quadrant)) {
+        //sequence is affected, need new counter
+        val counter = new Counter()
+        buf.append(counter)
+        for (i <- seq) {
+          val (nx, ny) = substituteIfInQuadrant(quadrant, i._1, i._2, rot)
+          rotatedCountersMap(nx)(ny).append(counter)
+        }
+      } else {
+        buf.append(base(num))
+      }
+    })
+    return buf.toArray
+  }
+
+  private def prepareCounterSequences(f: (Seq[(Int, Int)], Int) => Unit): Unit = {
+    var num = 0
+
+    def prepareHorizontal(): Unit = {
+      for (x <- two; y <- six) {
+        prepareRow(x, y)
+      }
     }
-  }
 
-  private def prepareDiagonalCounters(buf: ArrayBuffer[Counter]): Unit = {
-    for (x <- two; y <- two) {
-      prepareNormalDiagonalCounter(x, y, buf)
-      prepareReverseDiagonalCounter(5 - x, y, buf)
+    def prepareVertical(): Unit = {
+      for (x <- six; y <- two) {
+        prepareColumn(x, y)
+      }
     }
+
+    def prepareDiagonal(): Unit = {
+      for (x <- two; y <- two) {
+        prepareNormalDiagonal(x, y)
+        prepareReverseDiagonal(5 - x, y)
+      }
+    }
+
+    def prepareRow(x: Int, y: Int): Unit = {
+      val seq = five map (i => (x + i, y))
+      f(seq, num)
+      num += 1
+    }
+
+    def prepareColumn(x: Int, y: Int): Unit = {
+      val seq = five map (i => (x, y + i))
+      f(seq, num)
+      num += 1
+    }
+
+    def prepareNormalDiagonal(x: Int, y: Int): Unit = {
+      val seq = five map (i => (x + i, y + i))
+      f(seq, num)
+      num += 1
+    }
+
+    def prepareReverseDiagonal(x: Int, y: Int): Unit = {
+      val seq = five map (i => (x - i, y + i))
+      f(seq, num)
+      num += 1
+    }
+
+    prepareHorizontal()
+    prepareVertical()
+    prepareDiagonal()
   }
 
-  private def prepareRowCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
-    buf.append(counter)
-    five foreach (i => {
-      countersMap(x + i)(y).append(counter)
-    })
-  }
 
-  private def prepareColumnCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
-    buf.append(counter)
-    five foreach (i => {
-      countersMap(x)(y + i).append(counter)
-    })
-  }
+  def check(): Int = check(baseCounters)
 
-  private def prepareNormalDiagonalCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
-    buf.append(counter)
-    five foreach (i => {
-      countersMap(x + i)(y + i).append(counter)
-    })
-  }
-
-  private def prepareReverseDiagonalCounter(x: Int, y: Int, buf: ArrayBuffer[Counter]): Unit = {
-    val counter = new Counter()
-    buf.append(counter)
-    five foreach (i => {
-      countersMap(x - i)(y + i).append(counter)
-    })
-  }
-
-  def check(): Int = {
+  private def check(counters: Array[Counter]): Int = {
     var sum = 0
     var winX = 0
     var winO = 0
@@ -194,17 +267,26 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   }
 
   def checkPosition(x: Int, y: Int, player: Int): Int = {
-    countField(x, y, player)
+    countField(baseCountersMap(x)(y), player)
     val value = check()
-    unCountField(x, y, player)
+    unCountField(baseCountersMap(x)(y), player)
     return value
   }
 
   def checkRotate(q: Quadrant.Value, r: QRotation.Value, player: Int): Int = {
-    rotate(q, r, player)
-    val value = check()
-    unRotate(q, r, player)
-    return value
+    val fastValue = r match {
+      case QRotation.r90 => check(rotatedRightCounters(q.id))
+      case QRotation.r270 => check(rotatedLeftCounters(q.id))
+    }
+
+    //    rotate(q, r, player)
+    //    val value = check(baseCounters)
+    //    unRotate(q, r, player)
+    //
+    //    if (value != fastValue) {
+    //      error(s"rotation old value != fast value ($value != $fastValue)")
+    //    }
+    return fastValue
   }
 
   def isLegal(m: Move): Boolean = m match {
@@ -214,7 +296,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   def position(x: Int, y: Int, player: Int): Unit = {
     state(x)(y) = player
-    countField(x, y, player)
+    countField(baseCountersMap(x)(y), player)
+    countField(rotatedCountersMap(x)(y), player)
     tick()
     freeFields -= 1
   }
@@ -222,7 +305,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
   def unPosition(x: Int, y: Int, player: Int): Unit = {
     freeFields += 1
     unTick()
-    unCountField(x, y, player)
+    unCountField(baseCountersMap(x)(y), player)
+    unCountField(rotatedCountersMap(x)(y), player)
     state(x)(y) = LightField.None
   }
 
@@ -246,9 +330,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     }
   }
 
-  private def countField(x: Int, y: Int, f: Int): Unit = {
+  private def countField(counters: ArrayBuffer[Counter], f: Int): Unit = {
     if (f != LightField.None) {
-      val counters = countersMap(x)(y)
       val countersLength = counters.length
       var i = 0
       while (i < countersLength) {
@@ -259,9 +342,8 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     }
   }
 
-  private def unCountField(x: Int, y: Int, f: Int): Unit = {
+  private def unCountField(counters: ArrayBuffer[Counter], f: Int): Unit = {
     if (f != LightField.None) {
-      val counters = countersMap(x)(y)
       val countersLength = counters.length
       var i = 0
       while (i < countersLength) {
@@ -292,7 +374,9 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     while (x < 6) {
       y = 0
       while (y < 6) {
-        countField(x, y, state(x)(y))
+        val field = state(x)(y)
+        countField(baseCountersMap(x)(y), field)
+        countField(rotatedCountersMap(x)(y), field)
         y += 1
       }
       x += 1
@@ -303,9 +387,11 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     val f1 = state(x1)(y1)
 
     if (f1 != f2) {
-      unCountField(x1, y1, f1)
+      unCountField(baseCountersMap(x1)(y1), f1)
+      unCountField(rotatedCountersMap(x1)(y1), f1)
       state(x1)(y1) = f2
-      countField(x1, y1, f2)
+      countField(baseCountersMap(x1)(y1), f2)
+      countField(rotatedCountersMap(x1)(y1), f2)
     }
   }
 
@@ -365,14 +451,14 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
     //since we are here, game is still on
     //taking a position can't cause draw, so adding is ok
-    val valueBefore = check()
+    val valueBefore = check(baseCounters)
     var x = 0
     var y = 0
     while (x < 6) {
       y = 0
       while (y < 6) {
         if (state(x)(y) == 0) {
-          val counters = countersMap(x)(y)
+          val counters = baseCountersMap(x)(y)
           val countersLength = counters.length
           var won = false
           var value = valueBefore
@@ -577,7 +663,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   def getQuadrant(quadrant: Int) = quadrants(quadrant)
 
-  def printCountersNum(): Unit = {
+  def printCountersNum(countersMap: Array[Array[ArrayBuffer[Counter]]]): Unit = {
     for (y <- six) {
       val n0 = countersMap(0)(5 - y).length
       val n1 = countersMap(1)(5 - y).length
