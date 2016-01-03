@@ -13,7 +13,7 @@ import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
 import scala.collection.mutable.ArrayBuffer
 
 class SettingsActivity extends ToolbarActivity {
-  private[this] var pickThemeText: Option[TextView] = None
+  private[this] var pickThemeText: Option[(TextView, TextView)] = None
   private[this] var themePicker: Option[ThemePicker] = None
   private[this] var tutorialButton: Option[(Button, Button)] = None
   private[this] var licensesButton: Option[(Button, Button)] = None
@@ -24,7 +24,7 @@ class SettingsActivity extends ToolbarActivity {
 
     setupToolbar(R.id.settings_toolbar)
 
-    pickThemeText = Some(find[TextView](R.id.text_pick_theme))
+    pickThemeText = Some((find[TextView](R.id.text_pick_theme), find[TextView](R.id.text_pick_theme_prompt)))
     themePicker = Some(find[ThemePicker](R.id.view_theme_picker))
     tutorialButton = Some((find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt)))
     licensesButton = Some((find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt)))
@@ -79,7 +79,8 @@ class SettingsActivity extends ToolbarActivity {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    pickThemeText.get.setTypeface(typeface)
+    pickThemeText.get._1.setTypeface(typeface)
+    pickThemeText.get._2.setTypeface(typeface)
     tutorialButton.get.setTypeface(typeface)
     licensesButton.get.setTypeface(typeface)
   }
@@ -87,7 +88,8 @@ class SettingsActivity extends ToolbarActivity {
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
 
-    pickThemeText.get.setTextColor(theme.color1)
+    pickThemeText.get._1.setTextColor(theme.color1)
+    pickThemeText.get._2.setTextColor(theme.color2)
     tutorialButton.get.setTextColor(theme.color1, theme.color2)
     licensesButton.get.setTextColor(theme.color1, theme.color2)
   }

@@ -10,25 +10,38 @@
         android:id="@+id/settings_toolbar"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
+        android:layout_marginBottom="20dp"
         android:background="?attr/colorPrimary"
         android:elevation="4dp"
         android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar" />
 
-    <TextView
-        android:id="@+id/text_pick_theme"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="5dp"
-        android:text="@string/pick_theme"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <TextView
+            android:id="@+id/text_pick_theme_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <TextView
+            android:id="@+id/text_pick_theme"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/text_pick_theme_prompt"
+            android:layout_toRightOf="@+id/text_pick_theme_prompt"
+            android:text="@string/pick_theme" />
+    </RelativeLayout>
 
     <pl.enves.ttr.utils.themes.ThemePicker
         android:id="@+id/view_theme_picker"
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="5dp" />
+        android:layout_marginBottom="20dp" />
 
     <RelativeLayout
         android:layout_width="wrap_content"
