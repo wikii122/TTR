@@ -9,7 +9,6 @@ import scala.reflect.{ClassTag, classTag}
 
 abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry with Logging {
   type ID = Int
-
   protected var prefs: Option[SharedPreferences] = None
 
   private lazy val handler = new Handler(Looper.getMainLooper)
@@ -25,16 +24,18 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
     prefs = Some(getSharedPreferences("preferences", Context.MODE_PRIVATE))
   }
 
-  protected def UiThread(f: () => Unit) = {
+  protected def UiThread(f: => Unit) = {
     lazy val runnable = new Runnable() {
-      def run() = f()
+      def run() = f
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
       runOnUiThread(runnable)
     }
     else {
-      if (uiThread == Thread.currentThread) f()
+      if (uiThread == Thread.currentThread) f
       else handler.post(runnable)
     }
   }
+
+  protected implicit def UnitToUnit(f: => Unit): () => Unit = () => f
 }

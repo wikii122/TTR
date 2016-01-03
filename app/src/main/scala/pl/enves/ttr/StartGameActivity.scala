@@ -195,7 +195,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     viewSwitcherSwitched = false
   }
 
-  private[this] def enableButtons(): Unit = UiThread(() => {
+  private[this] def enableButtons(): Unit = UiThread {
     val continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
 
     if (activeGame) {
@@ -203,7 +203,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     } else {
       continueGameButton.get.disable()
     }
-  })
+  }
 
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
