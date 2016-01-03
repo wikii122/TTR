@@ -7,6 +7,7 @@ import pl.enves.ttr.R
 object Configuration {
   private[this] val prefs = ContextRegistry.context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
   private[this] val prefed: SharedPreferences.Editor = prefs.edit()
+
   def isPaid = ContextRegistry.context.getString(R.string.VERSION) == "PAID"
 
   def isFirstRun = prefs.getBoolean("FIRSTRUN", true)
@@ -15,4 +16,6 @@ object Configuration {
     prefed.putBoolean("FIRSTRUN", b)
     prefed.commit()
   }
+
+  def isMultiplayerAvailable = isPaid
 }
