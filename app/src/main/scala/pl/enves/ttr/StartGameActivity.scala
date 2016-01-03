@@ -57,10 +57,10 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
     case SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
-      else return;
+      else return
     case PlayServices.SIGN_IN => log("Signed in to Google Play Services")
       log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
-      drawUI()
+      enableButtons()
     case a => warn(s"onActivityResult did not match request with id: $a")
   }
 
@@ -197,12 +197,13 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
   private[this] def enableButtons(): Unit = UiThread {
     val continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
+    val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
 
-    if (activeGame) {
-      continueGameButton.get.enable()
-    } else {
-      continueGameButton.get.disable()
-    }
+    if (activeGame) continueGameButton.get.enable()
+    else continueGameButton.get.disable()
+
+    if (PlayServices.isConnected) newNetworkButton.get.enable()
+    else newNetworkButton.get.disable() // TODO this should be only greyed out
   }
 
   override def setTypeface(typeface: Typeface): Unit = {
