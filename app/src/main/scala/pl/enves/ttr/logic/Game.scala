@@ -103,7 +103,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 }
 
 object Game extends Enumeration {
-  val STANDARD, CONTINUE, AI, REPLAY_STANDARD, REPLAY_AI = Value
+  val STANDARD, CONTINUE, AI, REPLAY_STANDARD, REPLAY_AI, GPS_MULTIPLAYER = Value
 
   def create(typo: Game.Value): Game = typo match {
     case STANDARD => StandardGame()

@@ -10,7 +10,7 @@ import spray.json._
 /**
  * Wrapper for game logic.
  */
-class StandardGame(board: Board = Board()) extends Game(board) with Logging {
+class StandardGame(board: Board = Board()) extends Game(board) {
   override val gameType = Game.STANDARD
 
   /**
