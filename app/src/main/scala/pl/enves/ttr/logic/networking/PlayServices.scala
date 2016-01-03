@@ -6,44 +6,47 @@ import android.app.Activity
 import android.content.IntentSender
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import com.google.android.gms.common.{GooglePlayServicesUtil, ConnectionResult}
+import com.google.android.gms.common.{GoogleApiAvailability, GooglePlayServicesUtil, ConnectionResult}
 import com.google.android.gms.common.api.GoogleApiClient
 import com.google.android.gms.common.api.GoogleApiClient.{Builder, OnConnectionFailedListener, ConnectionCallbacks}
 import com.google.android.gms.games.Games
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.exceptions.ServiceUnavailableException
 
 object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener with Logging {
   private final val RC_SIGN_IN = 9001 // Because reasons
-  private[this] val client = clientInit()
+  private[this] val client = if (Configuration.isMultiplayerAvailable) Option(clientInit())
+    else None
   private[this] var counter = 0
   private[this] var signingIn = false
 
-
   def connect() = {
-    if (nonAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services installed on the device.")
-    client connect ()
+    if (nonAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
+    client.get connect ()
     counter += 1
   }
 
   def disconnect() = {
     if (isConnected) {
       counter -= 1
-      if (counter == 0) client disconnect()
+      if (counter == 0) client.get disconnect()
     }
   }
 
-  def isAvailable = client != null
+  def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 7, true)
+
+  def isAvailable = Configuration.isMultiplayerAvailable && client.isDefined
   def nonAvailable = !isAvailable
 
-  def isConnected = isAvailable && client.isConnected
+  def isConnected = isAvailable && client.get.isConnected
   def notConnected = !isConnected
 
   override def onConnectionSuspended(i: Int): Unit = ???
 
   override def onConnected(bundle: Bundle): Unit = {
-    log("Connected")
+    log("Logged in")
   }
 
   override def onConnectionFailed(connectionResult: ConnectionResult): Unit = if (!signingIn) {
@@ -71,14 +74,14 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       try {
         result.startResolutionForResult(activity, RC_SIGN_IN)
       } catch {
-        case e:IntentSender.SendIntentException => client.connect()
+        case e:IntentSender.SendIntentException => client.get.connect()
       }
     } else {
       // not resolvable... so show an error message
       val errorCode = result.getErrorCode
-      val dialog = GooglePlayServicesUtil.getErrorDialog(errorCode, activity, RC_SIGN_IN)
-      if (dialog != null) {
-        dialog.show()
+      val dialog = Option(GoogleApiAvailability.getInstance.getErrorDialog(activity, errorCode, RC_SIGN_IN))
+      if (dialog.isDefined) {
+        dialog.get.show()
       } else {
         new AlertDialog.Builder(activity).setMessage(fallbackMessage).setNeutralButton(android.R.string.ok, null).create().show()
       }
