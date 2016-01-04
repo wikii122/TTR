@@ -17,22 +17,22 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
 
   visible = false
 
-  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.75f, 0.20f)
+  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f)
   addChild(winnerText)
 
-  val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.20f)
+  val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f)
   addChild(drawText)
 
   val field = new BoardField(Quadrant.second, resources)
   addChild(field)
 
   override protected def onUpdateResources(screenRatio: Float): Unit = {
-    winnerText.translate(-0.125f, 0.0f, 0.0f)
+    winnerText.translate(-0.5f + winnerText.getWidth / 2, 0.0f, 0.0f)
 
     drawText.translate(0.0f, 0.0f, 0.0f)
 
-    field.translate(0.375f, 0.0f, 0.0f)
-    field.scale(0.2f, 0.2f, 1.0f)
+    field.translate(0.425f, 0.0f, 0.0f)
+    field.scale(0.15f, 0.15f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {

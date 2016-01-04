@@ -16,8 +16,8 @@ import pl.enves.ttr.logic._
 class CurrentPlayerIndicator(context: Context with GameManager, resources: Resources) extends SceneObject with ColorManip {
   val omega = 360.0f //degrees per second
 
-  val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.20f)
-  val player2TurnText = new StaticText(resources, GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.20f)
+  val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f)
+  val player2TurnText = new StaticText(resources, GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.15f)
   addChild(player1TurnText)
   addChild(player2TurnText)
 
@@ -29,8 +29,8 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
     player1TurnText.translate(-0.5f + player1TurnText.getWidth / 2, 0.0f, 0.0f)
     player2TurnText.translate(-0.5f + player2TurnText.getWidth / 2, 0.0f, 0.0f)
 
-    field.translate(0.4f, 0.0f, 0.0f)
-    field.scale(0.2f, 0.2f, 1.0f)
+    field.translate(0.425f, 0.0f, 0.0f)
+    field.scale(0.15f, 0.15f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {
