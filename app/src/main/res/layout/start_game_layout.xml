@@ -5,7 +5,7 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <FrameLayout
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_weight="1">
@@ -14,16 +14,24 @@
             android:id="@+id/button_back_to_main"
             android:layout_width="56dp"
             android:layout_height="56dp"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentTop="true"
             android:layout_gravity="left|top"
+            android:layout_marginLeft="0dp"
+            android:layout_marginTop="0dp"
             android:background="@null"
             android:contentDescription="@string/abc_action_bar_up_description"
             android:scaleType="center"
             android:visibility="gone" />
 
         <RelativeLayout
+            android:id="@+id/ttt"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center">
+            android:layout_centerHorizontal="true"
+            android:layout_centerVertical="true"
+            android:layout_gravity="center"
+            android:layout_marginBottom="10dp">
 
             <TextView
                 android:id="@+id/text_tt"
@@ -47,7 +55,8 @@
         <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal|bottom">
+            android:layout_below="@+id/ttt"
+            android:layout_centerHorizontal="true">
 
             <TextView
                 android:id="@+id/text_tic_tac"
@@ -67,13 +76,14 @@
                 android:text="@string/turn"
                 android:textSize="33sp" />
         </RelativeLayout>
-    </FrameLayout>
+    </RelativeLayout>
 
     <ViewSwitcher
         android:id="@+id/menuViewSwitcher"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_weight="1">
+        android:layout_weight="1"
+        android:paddingTop="20dp">
 
         <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="wrap_content"
@@ -147,10 +157,10 @@
 
             <TextView
                 android:id="@+id/text_game_type"
+                style="@style/ButtonStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                style="@style/ButtonStyle"
                 android:text="@string/game_type" />
 
             <RelativeLayout
