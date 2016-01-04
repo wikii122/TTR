@@ -1,8 +1,9 @@
 package pl.enves.ttr.logic
 
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.games.{AIGame, ReplayStandardGame, ReplayAIGame, StandardGame}
+import pl.enves.ttr.logic.games._
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.JsonMappable
 import spray.json._
 import pl.enves.ttr.utils.JsonProtocol._
@@ -106,10 +107,11 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 object Game extends Enumeration {
   val STANDARD, CONTINUE, AI, REPLAY_STANDARD, REPLAY_AI, GPS_MULTIPLAYER = Value
 
-  def create(typo: Game.Value): Game = typo match {
-    case STANDARD => StandardGame()
-    case AI => AIGame()
-  }
+  def plain() = StandardGame()
+
+  def ai() = AIGame()
+
+  def network() = PlayServicesGame()
 
   def load(jsValue: JsValue): Game = {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {

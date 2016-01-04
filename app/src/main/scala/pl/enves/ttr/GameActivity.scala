@@ -40,12 +40,15 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val b: Bundle = Option(getIntent.getExtras) getOrElse (throw new UninitializedError())
     Game withName (b getString "TYPE") match {
       case Game.STANDARD =>
-        game = Game.create(Game.STANDARD)
+        game = Game.plain()
         view.startGame()
       case Game.AI =>
-        game = Game.create(Game.AI)
+        game = Game.ai()
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
+      case Game.GPS_MULTIPLAYER =>
+        game = Game.network()
+
       case s =>
         throw new IllegalArgumentException(s"Invalid game type: $s")
     }

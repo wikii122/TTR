@@ -14,3 +14,7 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
   override protected def onMove(move: Move): Boolean = ???
 }
+
+object PlayServicesGame {
+  def apply() = new PlayServicesGame()
+}
