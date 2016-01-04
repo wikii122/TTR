@@ -2,6 +2,7 @@ package pl.enves.ttr.graphics.board
 
 import android.content.Context
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
+import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
@@ -12,12 +13,15 @@ import pl.enves.ttr.logic.{GameManager, Quadrant}
 /**
  * Display winner in 1x0.25 rectangle
  */
-class WinnerIndicator(context: Context with GameManager, resources: Resources) extends SceneObject {
+class WinnerIndicator(context: Context with GameManager, resources: Resources) extends SceneObject with ColorManip {
 
   visible = false
 
   val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.75f, 0.20f)
   addChild(winnerText)
+
+  val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.20f)
+  addChild(drawText)
 
   val field = new BoardField(Quadrant.second, resources)
   addChild(field)
@@ -25,25 +29,38 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
   override protected def onUpdateResources(screenRatio: Float): Unit = {
     winnerText.translate(-0.125f, 0.0f, 0.0f)
 
+    drawText.translate(0.0f, 0.0f, 0.0f)
+
     field.translate(0.375f, 0.0f, 0.0f)
     field.scale(0.2f, 0.2f, 1.0f)
   }
 
   override protected def onUpdateTheme(): Unit = {
     winnerText.setTextColor(resources.getTheme.color1)
-    val noColor: ColorArray = resources.getTheme.background
-    noColor(3) = 0.0f //To nicely fade-out on edges
+    drawText.setTextColor(resources.getTheme.color1)
+
+    val noColor: ColorArray = colorTransparent(resources.getTheme.background, 0.0f)
+
     winnerText.setTextBackground(noColor)
+    drawText.setTextBackground(noColor)
   }
 
   override protected def onAnimate(dt: Float): Unit = {
     val game = context.game
     if (game.finished || game.isReplaying) {
       visible = true
-      field.value = game.winner
+      if(game.winner.isDefined) {
+        field.value = game.winner
+        field.setVisible(true)
+        winnerText.setVisible(true)
+        drawText.setVisible(false)
+      } else {
+        field.setVisible(false)
+        winnerText.setVisible(false)
+        drawText.setVisible(true)
+      }
     } else {
       visible = false
-      field.value = None
     }
   }
 

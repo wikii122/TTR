@@ -57,12 +57,15 @@ class Resources(context: Context, game: Game) extends Logging {
       case Game.AI => context.getString(R.string.board_bots_turn)
       case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_opponents_turn)
     }
+
+    val drawTextString = context.getString(R.string.board_draw)
     val winnerTextString = context.getString(R.string.board_winner)
     val replayTextString = context.getString(R.string.board_replay)
 
     val words = Array(
       player1TurnTextString,
       player2TurnTextString,
+      drawTextString,
       winnerTextString)
 
     val words2 = Array(
@@ -77,8 +80,10 @@ class Resources(context: Context, game: Game) extends Logging {
 
     addGeometry(GeometryId.Player1TurnText, new TextGeometryProvider(player1TurnTextString, charactersTexture).getGeometry)
     addGeometry(GeometryId.Player2TurnText, new TextGeometryProvider(player2TurnTextString, charactersTexture).getGeometry)
+    addGeometry(GeometryId.DrawText, new TextGeometryProvider(drawTextString, charactersTexture).getGeometry)
     addGeometry(GeometryId.WinnerText, new TextGeometryProvider(winnerTextString, charactersTexture).getGeometry)
     addGeometry(GeometryId.ReplayText, new TextGeometryProvider(replayTextString, charactersTexture2).getGeometry)
+
     //create shaders
     maskShader = Some(new MaskShader())
   }
