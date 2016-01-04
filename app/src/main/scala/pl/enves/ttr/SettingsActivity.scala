@@ -1,12 +1,13 @@
 package pl.enves.ttr
 
+import android.content.Intent
 import android.content.res.TypedArray
-import android.content.{Intent, SharedPreferences}
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.{Button, TextView}
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.ToolbarActivity
 import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
 
@@ -32,7 +33,7 @@ class SettingsActivity extends ToolbarActivity {
     themePicker.get.setChangeListener(this)
     val themes = readDefaultThemes
     themePicker.get.setThemes(themes)
-    var i = themes.indexOf(getSavedTheme(getResources, prefs.get))
+    var i = themes.indexOf(Configuration.pickedTheme)
     if (i == -1) {
       i = 0
     }
@@ -45,9 +46,7 @@ class SettingsActivity extends ToolbarActivity {
   override def onPause(): Unit = {
     super.onPause()
     if (themePicker.get.isChanged) {
-      val ed: SharedPreferences.Editor = prefs.get.edit()
-      ed.putString("THEME", themePicker.get.getTheme.toJsonObject.toString)
-      ed.commit()
+      Configuration.pickedTheme = themePicker.get.getTheme
     }
   }
 

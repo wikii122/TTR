@@ -2,6 +2,7 @@ package pl.enves.ttr.utils.styled
 
 import android.graphics.Typeface
 import pl.enves.androidx.ExtendedFragment
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.themes.Theme
 
 abstract class StyledFragment extends ExtendedFragment with Styled {
@@ -13,7 +14,7 @@ abstract class StyledFragment extends ExtendedFragment with Styled {
     val typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
     setTypeface(typeface)
 
-    val theme = getSavedTheme(getResources, prefs.get)
+    val theme = Configuration.pickedTheme
     setColorTheme(theme)
   }
 
