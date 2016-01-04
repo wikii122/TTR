@@ -88,11 +88,8 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
   private[this] def startAIGame(v: View) = {
     log("Intending to start new AIGame")
-    val botSymbol = Player.withName(prefs.get.getString("BOT_SYMBOL", Player.X.toString))
-    val humanSymbol = if (botSymbol == Player.X) Player.O else Player.X
     val itnt = prepareGameIntent(intent[GameActivity])
     itnt putExtra("TYPE", Game.AI.toString)
-    itnt putExtra("AI_HUMAN_SYMBOL", humanSymbol.toString)
     itnt start ()
   }
 

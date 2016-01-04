@@ -221,7 +221,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         itnt putExtra("TYPE", Game.STANDARD.toString)
       case Game.AI =>
         itnt putExtra("TYPE", Game.AI.toString)
-        itnt putExtra("AI_HUMAN_SYMBOL", game.asInstanceOf[AIGame].getHuman.toString)
 //      case Game.NETWORK =>
 //        itnt = intent[StartNetworkGameActivity]
 //        itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
