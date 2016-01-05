@@ -1,5 +1,7 @@
 package pl.enves.ttr.logic
 
+import java.util
+
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.games._
 import pl.enves.ttr.logic.inner.Board
@@ -111,7 +113,7 @@ object Game extends Enumeration {
 
   def ai() = AIGame()
 
-  def network() = PlayServicesGame()
+  def network(players: util.ArrayList[String]) = PlayServicesGame(Option(players))
 
   def load(jsValue: JsValue): Game = {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {

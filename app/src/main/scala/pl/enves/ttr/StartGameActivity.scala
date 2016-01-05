@@ -82,6 +82,13 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     itnt start ()
   }
 
+  private[this] def startNetworkGame(v: View) = if (Configuration.isMultiplayerAvailable) {
+    val intn = PlayServices.getPlayerSelectIntent
+    startActivityForResult(intn, SELECT_PLAYERS)
+  } else {
+    showDialog(dialogs.PaidOnly)
+  }
+
   private[this] def startNetworkGame(i: Intent) = {
     log("Intending to start new StandardGame")
     val itnt = prepareGameIntent(intent[GameActivity])
@@ -105,13 +112,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     i addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
 
     return i
-  }
-
-  private[this] def startNetworkGame(v: View) = if (Configuration.isMultiplayerAvailable) {
-    val intn = PlayServices.getPlayerSelectIntent
-    startActivityForResult(intn, SELECT_PLAYERS)
-  } else {
-    showDialog(dialogs.PaidOnly)
   }
 
   /**

@@ -2,14 +2,17 @@ package pl.enves.ttr
 package logic
 package networking
 
+import java.util
+
 import android.app.Activity
 import android.content.IntentSender
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
 import com.google.android.gms.common.{GoogleApiAvailability, GooglePlayServicesUtil, ConnectionResult}
-import com.google.android.gms.common.api.GoogleApiClient
+import com.google.android.gms.common.api.{ResultCallback, GoogleApiClient}
 import com.google.android.gms.common.api.GoogleApiClient.{Builder, OnConnectionFailedListener, ConnectionCallbacks}
 import com.google.android.gms.games.Games
+import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatchConfig, TurnBasedMatch}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.utils.Configuration
@@ -36,6 +39,22 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   }
 
   def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
+
+  def createMatch(callee: ResultCallback[TurnBasedMultiplayer.InitiateMatchResult],
+                  players: util.ArrayList[String]) = {
+    val config = TurnBasedMatchConfig.builder()
+      .addInvitedPlayers(players)
+      .build()
+
+    // TODO thresher
+    Games.TurnBasedMultiplayer
+      .createMatch(client.get, config)
+      .setResultCallback(callee)
+  }
+
+  def takeTurn(matchInstance: TurnBasedMatch, turnData: String) = ???
+
+  def finishMatch(matchInstance: TurnBasedMatch) = ???
 
   def isAvailable = Configuration.isMultiplayerAvailable && client.isDefined
   def nonAvailable = !isAvailable

@@ -47,8 +47,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
       case Game.GPS_MULTIPLAYER =>
-        game = Game.network()
-
+        val ng = Game.network(b.getStringArrayList("PLAYERS"))
+        game = ng
       case s =>
         throw new IllegalArgumentException(s"Invalid game type: $s")
     }
