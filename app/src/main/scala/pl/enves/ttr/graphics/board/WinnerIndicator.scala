@@ -8,7 +8,7 @@ import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
-import pl.enves.ttr.logic.{GameManager, Quadrant}
+import pl.enves.ttr.logic.{Game, GameManager, Quadrant}
 
 /**
  * Display winner in 1x0.25 rectangle
@@ -47,9 +47,9 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
 
   override protected def onAnimate(dt: Float): Unit = {
     val game = context.game
-    if (game.finished || game.isReplaying) {
+    if (game.finished || game.gameType == Game.REPLAY) {
       visible = true
-      if(game.winner.isDefined) {
+      if (game.winner.isDefined) {
         field.value = game.winner
         field.setVisible(true)
         winnerText.setVisible(true)

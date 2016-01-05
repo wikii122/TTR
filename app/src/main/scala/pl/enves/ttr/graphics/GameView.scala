@@ -27,8 +27,6 @@ class GameView(val context: Context with GameManager, onEnd: Option[Player.Value
 
   def setTheme(theme: Theme) = renderer.setTheme(theme)
 
-  def startReplaying() = renderer.startReplaying()
-
   override def onTouchEvent(e: MotionEvent): Boolean = renderer.onTouchEvent(e)
 }
 

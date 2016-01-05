@@ -46,7 +46,8 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
     val game = context.game
     field.value = Some(game.player)
 
-    if (game.gameType == Game.STANDARD) {
+    def setTextsStandard(): Unit = {
+      field.setVisible(true)
       if (game.player == Player.O) {
         player1TurnText.setVisible(false)
         player2TurnText.setVisible(true)
@@ -56,11 +57,10 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
       }
     }
 
-    if (game.gameType == Game.AI) {
-      val human = game.asInstanceOf[AIGame].getHuman
-      if(human.isDefined) {
+    def setTextsBot(showAnything: Boolean): Unit = {
+      if (showAnything) {
         field.setVisible(true)
-        if (game.player != human.get) {
+        if (game.locked) {
           player1TurnText.setVisible(false)
           player2TurnText.setVisible(true)
         } else {
@@ -74,7 +74,29 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
       }
     }
 
-    if (game.locked && (!game.finished || game.isReplaying)) {
+    def setTextsMulti(): Unit = {
+      field.setVisible(true)
+      if (game.locked) {
+        player1TurnText.setVisible(false)
+        player2TurnText.setVisible(true)
+      } else {
+        player2TurnText.setVisible(false)
+        player1TurnText.setVisible(true)
+      }
+    }
+
+    game.gameType match {
+      case Game.STANDARD => setTextsStandard()
+      case Game.AI => setTextsBot(game.asInstanceOf[AIGame].getHuman.isDefined)
+      case Game.GPS_MULTIPLAYER => setTextsMulti()
+      case Game.REPLAY => game.asInstanceOf[ReplayGame].getReplayedGameType match {
+        case Game.STANDARD => setTextsStandard()
+        case Game.AI => setTextsBot(true)
+        case Game.GPS_MULTIPLAYER => setTextsMulti()
+      }
+    }
+
+    if ((game.locked || game.gameType == Game.REPLAY) && !game.finished) {
       field.rotate(omega * dt)
     } else {
       field.setRotationAngle(0.0f)

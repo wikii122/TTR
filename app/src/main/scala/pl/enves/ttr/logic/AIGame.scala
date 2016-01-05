@@ -1,7 +1,5 @@
 package pl.enves.ttr.logic
 
-import java.security.InvalidParameterException
-
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.ai._
 import pl.enves.ttr.logic.inner._
@@ -39,13 +37,13 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     log(s"Starting player: ${_player}")
     _player = startingPlayer
 
-    if(_player != human.get) {
+    if (_player != human.get) {
       startThinking()
     }
   }
 
   def setHumanSymbol(symbol: Player.Value): Unit = {
-    if(human.isEmpty) {
+    if (human.isEmpty) {
       human = Some(symbol)
 
     } else {
@@ -92,7 +90,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     }
   }
 
-  def locked: Boolean = if(human.isDefined) {
+  def locked: Boolean = if (human.isDefined) {
     player != human.get
   } else {
     true

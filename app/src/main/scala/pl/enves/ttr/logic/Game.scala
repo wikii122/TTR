@@ -31,14 +31,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
     return movesLog
   }
 
-  def replayNextMove(): Boolean = {
-    error("replaying non Replay game")
-    return false
-  }
-
   def canBeSaved = true
-
-  def isReplaying = false
 
   def player = _player
 
@@ -103,7 +96,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 }
 
 object Game extends Enumeration {
-  val STANDARD, CONTINUE, AI, REPLAY_STANDARD, REPLAY_AI, GPS_MULTIPLAYER = Value
+  val STANDARD, AI, GPS_MULTIPLAYER, CONTINUE, REPLAY = Value
 
   def create(typo: Game.Value): Game = typo match {
     case STANDARD => StandardGame()
@@ -114,10 +107,7 @@ object Game extends Enumeration {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
       case STANDARD => StandardGame(jsValue)
       case AI => AIGame(jsValue)
-      case REPLAY_STANDARD => ReplayStandardGame(jsValue)
-      case REPLAY_AI => ReplayAIGame(jsValue)
+      case REPLAY => ReplayGame(jsValue)
     }
   }
-
-
 }

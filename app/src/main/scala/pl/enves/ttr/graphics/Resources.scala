@@ -16,7 +16,7 @@ import pl.enves.ttr.graphics.geometry.{GeometryId, TextGeometryProvider}
 import pl.enves.ttr.graphics.models.Square
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
-import pl.enves.ttr.logic.Game
+import pl.enves.ttr.logic.{ReplayGame, Game}
 import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
@@ -46,16 +46,28 @@ class Resources(context: Context, game: Game) extends Logging {
     addTexture(TextureId.MaskArrowLeft, new DrawableTexture(context, R.drawable.pat_arrow_left_mod_mask).getTexture)
     addTexture(TextureId.MaskArrowRight, new DrawableTexture(context, R.drawable.pat_arrow_right_mod_mask).getTexture)
 
-    val player1TurnTextString = game.gameType match {
+    def choosePlayer1String(gameType: Game.Value) = gameType match {
       case Game.STANDARD => context.getString(R.string.board_player1)
       case Game.AI => context.getString(R.string.board_your_turn)
-      case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_your_turn)
+      case Game.GPS_MULTIPLAYER => context.getString(R.string.board_your_turn)
     }
 
-    val player2TurnTextString = game.gameType match {
+    val player1TurnTextString = if(game.gameType == Game.REPLAY) {
+      choosePlayer1String(game.asInstanceOf[ReplayGame].getReplayedGameType)
+    } else {
+      choosePlayer1String(game.gameType)
+    }
+
+    def choosePlayer2String(gameType: Game.Value) = gameType match {
       case Game.STANDARD => context.getString(R.string.board_player2)
       case Game.AI => context.getString(R.string.board_bots_turn)
-      case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_opponents_turn)
+      case Game.GPS_MULTIPLAYER => context.getString(R.string.board_opponents_turn)
+    }
+
+    val player2TurnTextString = if(game.gameType == Game.REPLAY) {
+      choosePlayer2String(game.asInstanceOf[ReplayGame].getReplayedGameType)
+    } else {
+      choosePlayer2String(game.gameType)
     }
 
     val drawTextString = context.getString(R.string.board_draw)

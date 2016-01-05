@@ -4,13 +4,13 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view._
-import android.widget.{ImageButton, TextView, Button, FrameLayout}
+import android.widget.{Button, FrameLayout, ImageButton, TextView}
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.styled.StyledActivity
-import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
+import pl.enves.ttr.utils.themes.{Theme, ThemedOneImageButton}
 
 /**
  * Core game activity.
@@ -47,10 +47,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         game = Game.load(GameState.load())
       case s =>
         throw new IllegalArgumentException(s"Invalid game type: $s")
-    }
-
-    if (game.isReplaying) {
-      view.startReplaying()
     }
 
     val frameLayout = new FrameLayout(this)
@@ -97,8 +93,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseXButton.get onClick onPlayWithBotAsX
     chooseOButton.get onClick onPlayWithBotAsO
 
-    if(game.gameType == Game.AI) {
-      if(game.asInstanceOf[AIGame].getHuman.isEmpty) {
+    if (game.gameType == Game.AI) {
+      if (game.asInstanceOf[AIGame].getHuman.isEmpty) {
         showChooser()
       }
     }
@@ -141,6 +137,10 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     super.onPause()
     view.onPause()
+
+    if (game.gameType == Game.REPLAY) {
+      game.asInstanceOf[ReplayGame].stopReplaying()
+    }
 
     if (game.canBeSaved) GameState store game
     else GameState clear()
@@ -213,30 +213,34 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
    */
   private[this] def onPlayAgain(v: View): Unit = {
     log("Intending to play again")
-    var itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-    itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-    game.gameType match {
-      case Game.STANDARD =>
-        itnt putExtra("TYPE", Game.STANDARD.toString)
-      case Game.AI =>
-        itnt putExtra("TYPE", Game.AI.toString)
-//      case Game.NETWORK =>
-//        itnt = intent[StartNetworkGameActivity]
-//        itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-//        itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-      case _ =>
-        error("bad game type")
-        return
+    def restartGame(gameType: Game.Value): Unit = {
+      val itnt = intent[GameActivity]
+      itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
+      itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
+      game.gameType match {
+        case Game.STANDARD =>
+          itnt putExtra("TYPE", Game.STANDARD.toString)
+        case Game.AI =>
+          itnt putExtra("TYPE", Game.AI.toString)
+        case Game.GPS_MULTIPLAYER => //TODO
+        case _ =>
+          error("bad game type")
+          return
+      }
+      finish()
+      itnt start()
     }
-    finish()
-    itnt start()
+
+    if (game.gameType == Game.REPLAY) {
+      restartGame(game.asInstanceOf[ReplayGame].getReplayedGameType)
+    } else {
+      restartGame(game.gameType)
+    }
   }
 
   private[this] def onReplay(v: View): Unit = {
     onCloseMenu(v)
     replayGame()
-    view.startReplaying()
   }
 
   private[this] def onBackToMainMenu(v: View) = {

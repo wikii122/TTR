@@ -122,8 +122,6 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   def getFreeFields = freeFields
   def getQuadrant(quadrant: Quadrant.Value) = quadrants(quadrant)
-
-  def setWinner(winner: Option[Player.Value]) = _winner = winner
 }
 
 object Board {
@@ -151,6 +149,8 @@ object Board {
           j <- 0 until triple(i).length
         ) quadrant.fields(i)(j) = triple(i)(j).convertTo[Option[Player.Value]]
     }
+
+    board.checkVictory()
 
     return board
   }

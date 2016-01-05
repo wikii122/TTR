@@ -7,7 +7,7 @@ import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
-import pl.enves.ttr.logic.GameManager
+import pl.enves.ttr.logic.{Game, GameManager}
 
 /**
  * Display replay text
@@ -30,7 +30,7 @@ class ReplayIndicator(context: Context with GameManager, resources: Resources) e
 
   override protected def onAnimate(dt: Float): Unit = {
     val game = context.game
-    if (game.isReplaying) {
+    if (game.gameType == Game.REPLAY) {
       visible = true
     } else {
       visible = false

@@ -27,7 +27,6 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
   private[this] var lastFrame: Long = 0
   private var framesLastSecond = 0
   private var themeNeedsUpdate = false
-  private var replaying = false
 
   val mvMatrix = new MatrixStack(8)
   val pMatrix = new MatrixStack()
@@ -42,10 +41,6 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
   def setTheme(theme: Theme): Unit = {
     resources.setTheme(theme)
     themeNeedsUpdate = true
-  }
-
-  def startReplaying(): Unit = {
-    replaying = true
   }
 
   override def onDrawFrame(gl: GL10) {
@@ -67,13 +62,7 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
       framesLastSecond += 1
 
       if (now / 1000 > lastFrame / 1000) {
-        log("FPS: " + framesLastSecond)
-        if (replaying) {
-          if (!context.game.replayNextMove()) {
-            replaying = false
-            onEnd(context.game.winner)
-          }
-        }
+        //log("FPS: " + framesLastSecond)
         framesLastSecond = 0
       }
     }
@@ -119,7 +108,7 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
 
   def onTouchEvent(e: MotionEvent): Boolean = {
     if (e.getAction == MotionEvent.ACTION_DOWN) {
-      if (context.game.finished) {
+      if (context.game.finished || context.game.gameType == Game.REPLAY) {
         onEnd(context.game.winner)
         return true
       }
