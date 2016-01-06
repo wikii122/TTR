@@ -24,9 +24,7 @@ class Counter() {
 
   def getTaken: Int = nx + no
 
-  def getValue = calculateValue()
-
-  private def calculateValue(): Int = {
+  def getValue: Int = {
     val x = nx
     val o = no
     return if (x == 5) Heuristics.winnerValue

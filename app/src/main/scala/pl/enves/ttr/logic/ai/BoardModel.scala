@@ -15,7 +15,7 @@ class OutOfMovesException extends Exception
  * With ability to reverse moves
  * TODO: Optimize more
  */
-class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
+class BoardModel() extends Logging {
   private val five = for (x <- 0 until 5) yield x
   private val six = for (x <- 0 until 6) yield x
   private val two = for (x <- 0 until 2) yield x
@@ -268,7 +268,7 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 
   def checkPosition(x: Int, y: Int, player: Int): Int = {
     countField(baseCountersMap(x)(y), player)
-    val value = check()
+    val value = check(baseCounters)
     unCountField(baseCountersMap(x)(y), player)
     return value
   }
@@ -445,9 +445,28 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
     }
   }
 
-  private def availableMoves(maximizing: Boolean): ArrayBuffer[ValuedMove] = {
-    val moves = ArrayBuffer[ValuedMove]()
+  def availableMovesNumber(): Int = {
+    var num = freeFields
+    var i = 0
+    while (i < 4) {
+      if (quadrants(i).canRotate && !isRotationImmune(i)) {
+        num += 2
+      }
+      i += 1
+    }
+    return num
+  }
+
+  def availableMovesSorted(maximizing: Boolean): Array[ValuedMove] = {
     val player = if (maximizing) LightField.X else LightField.O
+
+    val movesNumber = availableMovesNumber()
+    val moves = new Array[ValuedMove](movesNumber)
+    if (movesNumber == 0) {
+      throw new OutOfMovesException
+    }
+
+    var moveNumber = 0
 
     //since we are here, game is still on
     //taking a position can't cause draw, so adding is ok
@@ -465,10 +484,11 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
           var i = 0
           while (i < countersLength) {
             val counter = counters(i)
+            val before = counter.getValue
             counter.add(player)
-            val v = counter.getValue
-            value += v
-            if (v == Heuristics.winnerValue || v == -Heuristics.winnerValue) {
+            val after = counter.getValue
+            value += (after - before)
+            if (Math.abs(after) == Heuristics.winnerValue) {
               won = true
             }
             i += 1
@@ -486,160 +506,165 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
               -Heuristics.winnerValue
             }
           }
-          moves.append(new ValuedMove(value, _cached_moves_positions(x)(y)))
+          moves(moveNumber) = new ValuedMove(value, _cached_moves_positions(x)(y))
+          moveNumber += 1
         }
         y += 1
       }
       x += 1
     }
 
-    //TODO: calculate value faster
     var quadrant = 0
     while (quadrant < 4) {
       if (canRotate(quadrant) && !isRotationImmune(quadrant)) {
 
         val value = checkRotate(Quadrant(quadrant), QRotation.r90, player)
-        moves.append(new ValuedMove(value, _cached_moves_rotations_left(quadrant)))
+        moves(moveNumber) = new ValuedMove(value, _cached_moves_rotations_left(quadrant))
+        moveNumber += 1
 
         val value2 = checkRotate(Quadrant(quadrant), QRotation.r270, player)
-        moves.append(new ValuedMove(value2, _cached_moves_rotations_right(quadrant)))
+        moves(moveNumber) = new ValuedMove(value2, _cached_moves_rotations_right(quadrant))
+        moveNumber += 1
       }
       quadrant += 1
     }
 
-    if (moves.isEmpty) {
+    scala.util.Sorting.quickSort(moves)
+    return if (maximizing) moves else moves.reverse
+  }
+
+  def availableMovesSorted(previousBest: Move, maximizing: Boolean): Array[ValuedMove] = {
+    return if (isLegal(previousBest)) {
+      val player = if (maximizing) LightField.X else LightField.O
+      val moves = availableMovesSorted(maximizing)
+      val length = moves.length
+
+      //TODO: in-place
+      val moves2 = new Array[ValuedMove](length)
+      moves2(0) = new ValuedMove(checkMove(previousBest, player), previousBest)
+
+      var i = 0
+      var j = 1
+      while (i < length) {
+        val move = moves(i)
+        if (move.move != previousBest) {
+          moves2(j) = move
+          j += 1
+        }
+        i += 1
+      }
+      moves2
+    } else {
+      availableMovesSorted(maximizing)
+    }
+  }
+
+  def findBestMove(alpha: Int, beta: Int, maximizing: Boolean, randomize: Boolean): ValuedMove = {
+    val player = if (maximizing) LightField.X else LightField.O
+    var bestValue = if (maximizing) -1000000 else 1000000
+    var bestMove: Option[Move] = None
+    var bestNumber = 1
+
+    var al = alpha
+    var be = beta
+
+    def changeBestIfNotWorse(move: Move, value: Int): Unit = {
+      if (maximizing && value > bestValue) {
+        bestMove = Some(move)
+        bestValue = value
+        bestNumber = 1
+
+        al = math.max(al, bestValue)
+
+      } else if (!maximizing && value < bestValue) {
+        bestMove = Some(move)
+        bestValue = value
+        bestNumber = 1
+
+        be = math.min(be, bestValue)
+
+      } else if (value == bestValue && randomize) {
+        bestNumber += 1
+        if (generator.nextInt(bestNumber) == 0) {
+          bestMove = Some(move)
+        }
+      }
+    }
+
+    //since we are here, game is still on
+    //taking a position can't cause draw, so adding is ok
+    val valueBefore = check(baseCounters)
+    var x = 0
+    var y = 0
+    while (x < 6) {
+      y = 0
+      while (y < 6) {
+        if (state(x)(y) == 0) {
+          val counters = baseCountersMap(x)(y)
+          val countersLength = counters.length
+          var won = false
+          var value = valueBefore
+          var i = 0
+          while (i < countersLength) {
+            val counter = counters(i)
+            val before = counter.getValue
+            counter.add(player)
+            val after = counter.getValue
+            value += (after - before)
+            if (Math.abs(after) == Heuristics.winnerValue) {
+              won = true
+            }
+            i += 1
+          }
+          i = 0
+          while (i < countersLength) {
+            val counter = counters(i)
+            counter.sub(player)
+            i += 1
+          }
+          if (won) {
+            value = if (maximizing) {
+              Heuristics.winnerValue
+            } else {
+              -Heuristics.winnerValue
+            }
+          }
+
+          changeBestIfNotWorse(_cached_moves_positions(x)(y), value)
+          if (al >= be) {
+            return new ValuedMove(bestValue, bestMove.get)
+          }
+        }
+        y += 1
+      }
+      x += 1
+    }
+
+
+    var quadrant = 0
+    while (quadrant < 4) {
+      if (canRotate(quadrant) && !isRotationImmune(quadrant)) {
+
+        val valueLeft = checkRotate(Quadrant(quadrant), QRotation.r90, player)
+        changeBestIfNotWorse(_cached_moves_rotations_left(quadrant), valueLeft)
+        if (al >= be) {
+          return new ValuedMove(bestValue, bestMove.get)
+        }
+
+        val valueRight = checkRotate(Quadrant(quadrant), QRotation.r270, player)
+        changeBestIfNotWorse(_cached_moves_rotations_right(quadrant), valueRight)
+        if (al >= be) {
+          return new ValuedMove(bestValue, bestMove.get)
+        }
+      }
+      quadrant += 1
+    }
+
+    if (bestMove.isEmpty) {
       throw new OutOfMovesException
     }
 
-    return moves
-  }
-
-  def availableMovesSorted(maximizing: Boolean): ArrayBuffer[ValuedMove] = {
-    val moves = availableMoves(maximizing)
-
-    //Checking more important fields first increases possibility of alpha-beta cutoff
-    var sortedValuedMoves = moves.toArray
-    scala.util.Sorting.quickSort(sortedValuedMoves)
-    sortedValuedMoves = if (maximizing) sortedValuedMoves else sortedValuedMoves.reverse
-
-    val movesLength = sortedValuedMoves.length
-
-    val moves2 = ArrayBuffer[ValuedMove]()
-
-    //warning - omitting moves with small value may cause idiocy
-    positionsChoosing match {
-      case PositionsChoosing.Reasonable =>
-        var i = 0
-        while (i < movesLength) {
-          moves2.append(sortedValuedMoves(i))
-          i += 1
-        }
-      case PositionsChoosing.GEMedian =>
-        val median = if (movesLength > 0) {
-          if (movesLength % 2 == 0) {
-            (sortedValuedMoves(movesLength / 2).value + sortedValuedMoves((movesLength / 2) - 1).value) / 2
-          } else {
-            sortedValuedMoves(movesLength / 2).value
-          }
-        } else {
-          0
-        }
-
-        if (maximizing) {
-          var i = 0
-          while (i < movesLength && sortedValuedMoves(i).value >= median) {
-            moves2.append(sortedValuedMoves(i))
-            i += 1
-          }
-        } else {
-          var i = 0
-          while (i < movesLength && sortedValuedMoves(i).value <= median) {
-            moves2.append(sortedValuedMoves(i))
-            i += 1
-          }
-        }
-      case PositionsChoosing.GEAverage =>
-        var sum = 0
-        var j = 0
-        while (j < movesLength) {
-          sum += sortedValuedMoves(j).value
-          j += 1
-        }
-        val average = sum / movesLength
-        if (maximizing) {
-          var i = 0
-          while (i < movesLength && sortedValuedMoves(i).value >= average) {
-            moves2.append(sortedValuedMoves(i))
-            i += 1
-          }
-        } else {
-          var i = 0
-          while (i < movesLength && sortedValuedMoves(i).value <= average) {
-            moves2.append(sortedValuedMoves(i))
-            i += 1
-          }
-        }
-      case PositionsChoosing.Max8 =>
-        var i = 0
-        while (i < movesLength && i < 8) {
-          moves2.append(sortedValuedMoves(i))
-          i += 1
-        }
-      case PositionsChoosing.Max12 =>
-        var i = 0
-        while (i < movesLength && i < 12) {
-          moves2.append(sortedValuedMoves(i))
-          i += 1
-        }
-      case PositionsChoosing.Max16 =>
-        var i = 0
-        while (i < movesLength && i < 16) {
-          moves2.append(sortedValuedMoves(i))
-          i += 1
-        }
-    }
-
-    return moves2
-  }
-
-  def availableMovesSorted(previousBest: Move, maximizing: Boolean): ArrayBuffer[ValuedMove] = {
-    val moves = availableMovesSorted(maximizing)
-    val player = if (maximizing) LightField.X else LightField.O
-    val size = moves.size
-    val moves2 = new ArrayBuffer[ValuedMove](size)
-    moves2.append(new ValuedMove(checkMove(previousBest, player), previousBest))
-    var i = 0
-    while (i < size) {
-      val move = moves(i)
-      if (move.move != previousBest) {
-        moves2.append(move)
-      }
-      i += 1
-    }
-    return moves2
-  }
-
-  def findBestMove(maximizing: Boolean, randomize: Boolean): ValuedMove = {
-    val moves = availableMoves(maximizing)
-    var best = 0
-    var bestNumber = 1
-    var i = 1
-    while (i < moves.length) {
-      if (maximizing && moves(i).value > moves(best).value) {
-        best = i
-        bestNumber = 1
-      } else if (!maximizing && moves(i).value < moves(best).value) {
-        best = i
-        bestNumber = 1
-      } else if (moves(i).value == moves(best).value && randomize) {
-        bestNumber += 1
-        if (generator.nextInt(bestNumber) == 0) {
-          best = i
-        }
-      }
-      i += 1
-    }
-    return moves(best)
+    return new ValuedMove(bestValue, bestMove.get)
   }
 
   def canRotate(quadrant: Int) = quadrants(quadrant).canRotate
@@ -694,10 +719,10 @@ class BoardModel(positionsChoosing: PositionsChoosing.Value) extends Logging {
 }
 
 object BoardModel {
-  def apply(positionsChoosing: PositionsChoosing.Value) = new BoardModel(positionsChoosing)
+  def apply() = new BoardModel()
 
-  def apply(old: Board, positionsChoosing: PositionsChoosing.Value): BoardModel = {
-    val board = new BoardModel(positionsChoosing)
+  def apply(old: Board): BoardModel = {
+    val board = new BoardModel()
     board.freeFields = old.getFreeFields
 
     for (q <- Quadrant.values) {
