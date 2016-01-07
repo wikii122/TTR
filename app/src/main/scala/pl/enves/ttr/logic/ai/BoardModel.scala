@@ -7,8 +7,6 @@ import pl.enves.ttr.logic.inner.Board
 import scala.collection.mutable.ArrayBuffer
 import scala.util.Random
 
-class OutOfMovesException extends Exception
-
 /**
  * Manages fields states.
  * Version without saving, safety checks, prints, and nice but time-costly things
@@ -69,13 +67,6 @@ class BoardModel() extends Logging {
 
   printCountersNum(baseCountersMap)
   printCountersNum(rotatedCountersMap)
-  //printCountersCoordinates()
-  for (quadrant <- Quadrant.values) {
-    val ll = rotatedLeftCounters(quadrant.id).length
-    val rl = rotatedRightCounters(quadrant.id).length
-    log(s"rotatedLeftCounters($quadrant).length = $ll")
-    log(s"rotatedRightCounters($quadrant).length = $rl")
-  }
 
   private def calculateZobristSignature(): Int = {
     var h: Int = 0
@@ -238,9 +229,9 @@ class BoardModel() extends Logging {
     val countersLength = counters.length
     while (i < countersLength) {
       val v = counters(i).getValue
-      if (v == Heuristics.winnerValue) {
+      if (v == BoardModel.winnerValue) {
         winX += 1
-      } else if (v == -Heuristics.winnerValue) {
+      } else if (v == -BoardModel.winnerValue) {
         winO += 1
       } else {
         sum += v
@@ -248,17 +239,10 @@ class BoardModel() extends Logging {
       i += 1
     }
 
-    val ret = if (winX == 0 && winO == 0) sum
-    else if (winX > 0 && winO == 0) Heuristics.winnerValue
-    else if (winO > 0 && winX == 0) -Heuristics.winnerValue
+    return if (winX == 0 && winO == 0) sum
+    else if (winX > 0 && winO == 0) BoardModel.winnerValue
+    else if (winO > 0 && winX == 0) -BoardModel.winnerValue
     else 0 //draw
-
-    //val heuristic = Heuristics.check(state)
-    //if(heuristic != ret) {
-    //  error(s"heuristic: $heuristic != counters: $ret")
-    //}
-
-    return ret
   }
 
   def checkMove(m: Move, player: Int): Int = m match {
@@ -273,20 +257,9 @@ class BoardModel() extends Logging {
     return value
   }
 
-  def checkRotate(q: Quadrant.Value, r: QRotation.Value, player: Int): Int = {
-    val fastValue = r match {
-      case QRotation.r90 => check(rotatedRightCounters(q.id))
-      case QRotation.r270 => check(rotatedLeftCounters(q.id))
-    }
-
-    //    rotate(q, r, player)
-    //    val value = check(baseCounters)
-    //    unRotate(q, r, player)
-    //
-    //    if (value != fastValue) {
-    //      error(s"rotation old value != fast value ($value != $fastValue)")
-    //    }
-    return fastValue
+  def checkRotate(q: Quadrant.Value, r: QRotation.Value, player: Int): Int = r match {
+    case QRotation.r90 => check(rotatedRightCounters(q.id))
+    case QRotation.r270 => check(rotatedLeftCounters(q.id))
   }
 
   def isLegal(m: Move): Boolean = m match {
@@ -488,7 +461,7 @@ class BoardModel() extends Logging {
             counter.add(player)
             val after = counter.getValue
             value += (after - before)
-            if (Math.abs(after) == Heuristics.winnerValue) {
+            if (Math.abs(after) == BoardModel.winnerValue) {
               won = true
             }
             i += 1
@@ -501,9 +474,9 @@ class BoardModel() extends Logging {
           }
           if (won) {
             value = if (maximizing) {
-              Heuristics.winnerValue
+              BoardModel.winnerValue
             } else {
-              -Heuristics.winnerValue
+              -BoardModel.winnerValue
             }
           }
           moves(moveNumber) = new ValuedMove(value, _cached_moves_positions(x)(y))
@@ -545,7 +518,7 @@ class BoardModel() extends Logging {
 
       var i = 0
       var j = 1
-      while (i < length) {
+      while (i < length && j < length) {
         val move = moves(i)
         if (move.move != previousBest) {
           moves2(j) = move
@@ -561,7 +534,7 @@ class BoardModel() extends Logging {
 
   def findBestMove(alpha: Int, beta: Int, maximizing: Boolean, randomize: Boolean): ValuedMove = {
     val player = if (maximizing) LightField.X else LightField.O
-    var bestValue = if (maximizing) -1000000 else 1000000
+    var bestValue = if (maximizing) -BoardModel.infinity else BoardModel.infinity
     var bestMove: Option[Move] = None
     var bestNumber = 1
 
@@ -611,7 +584,7 @@ class BoardModel() extends Logging {
             counter.add(player)
             val after = counter.getValue
             value += (after - before)
-            if (Math.abs(after) == Heuristics.winnerValue) {
+            if (Math.abs(after) == BoardModel.winnerValue) {
               won = true
             }
             i += 1
@@ -624,9 +597,9 @@ class BoardModel() extends Logging {
           }
           if (won) {
             value = if (maximizing) {
-              Heuristics.winnerValue
+              BoardModel.winnerValue
             } else {
-              -Heuristics.winnerValue
+              -BoardModel.winnerValue
             }
           }
 
@@ -719,6 +692,10 @@ class BoardModel() extends Logging {
 }
 
 object BoardModel {
+  val winnerValue = 10000
+
+  val infinity = 1000000
+
   def apply() = new BoardModel()
 
   def apply(old: Board): BoardModel = {

@@ -7,12 +7,8 @@ import pl.enves.ttr.utils.ExecutorContext
 
 import scala.collection.mutable
 import scala.concurrent.Future
-import scala.util.Random
 
 class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
-             positionsChoosing: PositionsChoosing.Value,
-             bestMoveHeuristics: BestMoveHeuristics.Value,
-             displayStatus: Option[String => Unit],
              randomize: Boolean,
              success: Move => Unit) extends Logging {
 
@@ -24,8 +20,6 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
 
   private var stopped = false
 
-  private val infinity = 1000000
-
   private val maxCachedEntries = 40000
 
   private case class ValueDepth(value: Int, depth: Int)
@@ -35,13 +29,9 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
   private var thisBestMoves = mutable.HashMap[Int, Move]()
   private var previousBestMoves = mutable.HashMap[Int, Move]()
 
-  private val killers = Array.fill[Option[Move]](maxDepth+1) { None }
-
   private val startTime = System.currentTimeMillis()
 
   private val boardModel = BoardModel(board)
-
-  private val generator = new Random()
 
   def stop(): Unit = {
     this.synchronized {
@@ -55,27 +45,13 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
     if (thisValues.size >= maxCachedEntries) {
       throw new CacheTooBigException
     }
-    if (bestMoveHeuristics == BestMoveHeuristics.Killer) {
-      killers(depth) = Some(move)
-    }
   }
 
   private def availableMoves(signature: Int, maximizing: Boolean, depth: Int): Array[ValuedMove] = {
-    return bestMoveHeuristics match {
-      case BestMoveHeuristics.PreviousIteration =>
-        if (previousBestMoves.contains(signature)) {
-          boardModel.availableMovesSorted(previousBestMoves(signature), maximizing)
-        } else {
-          boardModel.availableMovesSorted(maximizing)
-        }
-      case BestMoveHeuristics.Killer =>
-        if (killers(depth).isDefined) {
-          boardModel.availableMovesSorted(killers(depth).get, maximizing)
-        } else {
-          boardModel.availableMovesSorted(maximizing)
-        }
-      case BestMoveHeuristics.None =>
-        boardModel.availableMovesSorted(maximizing)
+    return if (previousBestMoves.contains(signature)) {
+      boardModel.availableMovesSorted(previousBestMoves(signature), maximizing)
+    } else {
+      boardModel.availableMovesSorted(maximizing)
     }
   }
 
@@ -118,7 +94,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
 
     var al = alpha
     var be = beta
-    var bestValue = if (maximizing) -infinity else infinity
+    var bestValue = if (maximizing) -BoardModel.infinity else BoardModel.infinity
     var bestMove = moves.head.move
     var bestDepth = depth
 
@@ -133,7 +109,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
         case Rotation(q, r) => boardModel.getFreeFields
       }
 
-      val calculated = if (Math.abs(predictedValue) == Heuristics.winnerValue || freeFieldsAfter == 0) {
+      val calculated = if (Math.abs(predictedValue) == BoardModel.winnerValue || freeFieldsAfter == 0) {
         new ValueDepth(predictedValue, depth)
       } else {
 
@@ -200,7 +176,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
 
     var al = alpha
     var be = beta
-    var bestValue = if (maximizing) -infinity else infinity
+    var bestValue = if (maximizing) -BoardModel.infinity else BoardModel.infinity
     var bestMove: Move = new Move
     var bestDepth = depth
 
@@ -215,7 +191,7 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
         case Rotation(q, r) => boardModel.getFreeFields
       }
 
-      val calculated = if (Math.abs(predictedValue) == Heuristics.winnerValue || freeFieldsAfter == 0) {
+      val calculated = if (Math.abs(predictedValue) == BoardModel.winnerValue || freeFieldsAfter == 0) {
         new ValueDepth(predictedValue, depth)
       } else {
 
@@ -302,25 +278,18 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
       previousBestMoves = thisBestMoves
       thisBestMoves = mutable.HashMap[Int, Move]()
 
-      //clear killers
-      var i = 0
-      while (i <= maxDepth) {
-        killers(i) = None
-        i += 1
-      }
-
       try {
         val signature = boardModel.getZobristSignature
-        val vm = minMaxStart(depth, -infinity, infinity, maximizing)
+        val vm = minMaxStart(depth, -BoardModel.infinity, BoardModel.infinity, maximizing)
         bestValue = vm.value
 
-        if (Math.abs(vm.value) != Heuristics.winnerValue) {
+        if (Math.abs(vm.value) != BoardModel.winnerValue) {
           bestMove = vm.move
         } else {
           // there is no point to analyze more
           run = false
-          if ((maximizing && bestValue == Heuristics.winnerValue) ||
-            (!maximizing && bestValue == -Heuristics.winnerValue) ||
+          if ((maximizing && bestValue == BoardModel.winnerValue) ||
+            (!maximizing && bestValue == -BoardModel.winnerValue) ||
             (depth == 1)) {
             //either we know how to win or we have to take fatal move
             bestMove = vm.move
@@ -330,30 +299,18 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
         val states = thisValues.size
         val time = System.currentTimeMillis() - startTime
         log(s"depth: $depth, calls: $minMaxCalls, saved states: $states, bestMove: $bestMove, bestValue: $bestValue, signature: $signature, time: $time")
-        if (displayStatus.isDefined) {
-          displayStatus.get(s"depth: $depth, bestMove: $bestMove, bestValue: $bestValue, time: $time")
-        }
         boardModel.printState()
         printPredicted(maximizing)
       } catch {
         case e: TimedOutException =>
           run = false
           error(s"timed out during depth: $depth")
-          if (displayStatus.isDefined) {
-            displayStatus.get(s"timed out during depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
-          }
         case e: CacheTooBigException =>
           run = false
           error(s"out of memory during depth: $depth")
-          if (displayStatus.isDefined) {
-            displayStatus.get(s"out of memory during depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
-          }
         case e: OutOfMovesException =>
           run = false
           error(s"out of moves during depth: $depth")
-          if (displayStatus.isDefined) {
-            displayStatus.get(s"out of moves during depth: $depth, bestMove: $bestMove, bestValue: $bestValue")
-          }
       }
       depth += 1
     }
@@ -372,9 +329,6 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
     case e: Exception =>
       e.printStackTrace()
       log("switching to random")
-      if (displayStatus.isDefined) {
-        displayStatus.get(s"switching to random")
-      }
       val nb = new NoBrainer(board, success)
   }
 }

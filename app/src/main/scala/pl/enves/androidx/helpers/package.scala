@@ -8,3 +8,4 @@ package object helpers
   with SwitchHelper
   with IntentHelper
   with ToolbarHelper
+  with SeekBarHelper
