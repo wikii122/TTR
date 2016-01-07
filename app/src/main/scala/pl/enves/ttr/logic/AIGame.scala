@@ -16,17 +16,28 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   protected var human: Option[Player.Value] = None
 
+  private var maxTime: Int = 3000
+
+  private val maxDepth: Int = 5
+
+  private val adaptiveDepth = true
+
+  private val randomizeDecisions = true
+
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
 
-    def makeAIMove(lm: LightMove): Unit = {
-      log(s"AI Move: $lm for $player")
-      val move = LightMove.toNormalMove(lm, this)
+    def makeAIMove(move: Move): Unit = {
+      log(s"AI Move: $move for $player")
       onMove(move)
     }
 
-    ai = Some(new MinMax(board, player, 2000, 4, makeAIMove))
+    //TODO: make it more intelligent
+    val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
+    else maxDepth
+
+    ai = Some(new MinMax(board, player, maxTime, depth, randomizeDecisions, makeAIMove))
   }
 
   /**
@@ -106,6 +117,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     Map(
       "player" -> _player,
       "human" -> human,
+      "maxTime" -> maxTime,
       "board" -> board.toJson,
       "log" -> (movesLog.toList map { entry => entry.toJson }),
       "type" -> gameType
@@ -113,6 +125,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   }
 
   def getHuman: Option[Player.Value] = human
+
+  def setMaxTime(max: Int): Unit = maxTime = max
 }
 
 object AIGame {
@@ -127,6 +141,9 @@ object AIGame {
     val game = new AIGame(board)
     game._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject, game)))
+
+    val maxTime = fields("maxTime").convertTo[Int]
+    game.setMaxTime(maxTime)
 
     if (human.isDefined) {
       game.setHumanSymbol(human.get)

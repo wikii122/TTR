@@ -4,7 +4,7 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view._
-import android.widget.{Button, FrameLayout, ImageButton, TextView}
+import android.widget._
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
@@ -30,6 +30,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var chooseSymbolText: Option[TextView] = None
   private[this] var chooseXButton: Option[ThemedOneImageButton] = None
   private[this] var chooseOButton: Option[ThemedOneImageButton] = None
+
+  private[this] var difficultyText: Option[TextView] = None
+  private[this] var difficultySeekBar: Option[SeekBar] = None
 
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
@@ -93,6 +96,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseXButton.get onClick onPlayWithBotAsX
     chooseOButton.get onClick onPlayWithBotAsO
 
+    difficultySeekBar = Some(find[SeekBar](R.id.seekBar_difficulty))
+    difficultyText = Some(find[TextView](R.id.text_difficulty))
+
     if (game.gameType == Game.AI) {
       if (game.asInstanceOf[AIGame].getHuman.isEmpty) {
         showChooser()
@@ -113,6 +119,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     contemplateButton.get.setTypeface(typeface)
 
     chooseSymbolText.get.setTypeface(typeface)
+
+    difficultyText.get.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -130,6 +138,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseSymbolText.get.setTextColor(theme.color2)
     chooseXButton.get.setColorTheme(theme)
     chooseOButton.get.setColorTheme(theme)
+
+    difficultyText.get.setTextColor(theme.color2)
+    difficultySeekBar.get.setColors(theme.color1, theme.color2)
   }
 
   override def onPause(): Unit = {
@@ -196,6 +207,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseSymbolText.get.setVisibility(View.VISIBLE)
     chooseXButton.get.setVisibility(View.VISIBLE)
     chooseOButton.get.setVisibility(View.VISIBLE)
+
+    difficultyText.get.setVisibility(View.VISIBLE)
+    difficultySeekBar.get.setVisibility(View.VISIBLE)
   }
 
   def closeChooser(): Unit = {
@@ -206,6 +220,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseSymbolText.get.setVisibility(View.GONE)
     chooseXButton.get.setVisibility(View.GONE)
     chooseOButton.get.setVisibility(View.GONE)
+
+    difficultyText.get.setVisibility(View.GONE)
+    difficultySeekBar.get.setVisibility(View.GONE)
   }
 
   /**
@@ -247,14 +264,21 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     finish()
   }
 
+  private[this] def setupBot(): Unit = {
+    val g = game.asInstanceOf[AIGame]
+    g.setMaxTime((difficultySeekBar.get.getProgress + 1) * 1000)
+  }
+
   private[this] def onPlayWithBotAsX(v: View) = {
     game.asInstanceOf[AIGame].setHumanSymbol(Player.X)
+    setupBot()
     view.startGame()
     closeChooser()
   }
 
   private[this] def onPlayWithBotAsO(v: View) = {
     game.asInstanceOf[AIGame].setHumanSymbol(Player.O)
+    setupBot()
     view.startGame()
     closeChooser()
   }

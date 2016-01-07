@@ -11,7 +11,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="5dp"
-        android:layout_marginTop="5dp"
+        android:layout_marginTop="15dp"
         android:text="@string/choose_symbol"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
@@ -42,4 +42,22 @@
             android:scaleType="centerInside" />
 
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/text_difficulty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/difficulty"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="5dp" />
+
+
+    <SeekBar
+        android:id="@+id/seekBar_difficulty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:max="9" />
 </LinearLayout>

@@ -49,4 +49,5 @@
     <string name="button_symbol_O_description">choose O</string>
     <string name="sign_in_error">Could not sign in due to connection error</string>
     <string name="paid_only">This feature is not available in this version of the game.</string>
+    <string name="difficulty">difficulty:</string>
 </resources>
