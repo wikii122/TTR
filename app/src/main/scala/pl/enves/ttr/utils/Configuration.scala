@@ -31,4 +31,11 @@ object Configuration {
     prefed.putString("THEME", t.toJsonObject.toString)
     prefed.commit()
   }
+
+  def botDifficulty: Int = prefs.getInt("BOT_DIFFICULTY", 2)
+
+  def botDifficulty_=(d: Int) = {
+    prefed.putInt("BOT_DIFFICULTY", d)
+    prefed.commit()
+  }
 }

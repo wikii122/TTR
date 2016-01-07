@@ -9,6 +9,7 @@ import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.{Theme, ThemedOneImageButton}
 
@@ -210,6 +211,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     difficultyText.get.setVisibility(View.VISIBLE)
     difficultySeekBar.get.setVisibility(View.VISIBLE)
+
+    difficultySeekBar.get.setProgress(Configuration.botDifficulty)
   }
 
   def closeChooser(): Unit = {
@@ -266,7 +269,13 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
   private[this] def setupBot(): Unit = {
     val g = game.asInstanceOf[AIGame]
-    g.setMaxTime((difficultySeekBar.get.getProgress + 1) * 1000)
+
+    val difficulty = difficultySeekBar.get.getProgress
+    g.setMaxTime((difficulty + 1) * 1000)
+
+    if(difficulty != Configuration.botDifficulty) {
+      Configuration.botDifficulty = difficulty
+    }
   }
 
   private[this] def onPlayWithBotAsX(v: View) = {
