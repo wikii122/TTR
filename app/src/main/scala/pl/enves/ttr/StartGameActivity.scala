@@ -8,16 +8,16 @@ import android.view.View
 import android.view.animation.AnimationUtils
 import android.widget.{ImageButton, ViewSwitcher, Button, TextView}
 import com.google.android.gms.games.Games
-import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
+import pl.enves.androidx.color.ColorUiTweaks
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState, Player}
 import pl.enves.ttr.utils.{dialogs, Configuration}
 import pl.enves.ttr.utils.dialogs.{PaidOnlyDialog, Reason}
 import pl.enves.ttr.utils.styled.StyledActivity
-import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
+import pl.enves.ttr.utils.themes.Theme
 
-class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
+class StartGameActivity extends StyledActivity with ColorUiTweaks {
   private[this] final val SELECT_PLAYERS = 9003
   private[this] var viewSwitcherSwitched = false
 
@@ -147,7 +147,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     val newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
     val newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
     val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    val backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
+    val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
     val gameTypeText = Some(find[TextView](R.id.text_game_type))
 
     val ticTacText = Some(find[TextView](R.id.text_tic_tac))
@@ -174,7 +174,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     log("Showing new game menu")
 
     val viewSwitcher = Some(find[ViewSwitcher](R.id.menuViewSwitcher))
-    val backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
+    val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
 
     viewSwitcher.get.showNext()
     backToMainButton.get.setVisibility(View.VISIBLE)
@@ -185,7 +185,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     log("Showing main menu")
 
     val viewSwitcher = Some(find[ViewSwitcher](R.id.menuViewSwitcher))
-    val backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
+    val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
 
     viewSwitcher.get.showPrevious()
     backToMainButton.get.setVisibility(View.GONE)
@@ -212,7 +212,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     val newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
     val newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
     val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    val backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
     val gameTypeText = Some(find[TextView](R.id.text_game_type))
 
     val ticTacText = Some(find[TextView](R.id.text_tic_tac))
@@ -258,7 +257,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     val newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
     val newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
     val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    val backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
+    val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
     val gameTypeText = Some(find[TextView](R.id.text_game_type))
 
     val ticTacText = Some(find[TextView](R.id.text_tic_tac))
@@ -273,7 +272,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
     newStandardButton.get.setTextColor(theme.color1, theme.color2)
     newAIGameButton.get.setTextColor(theme.color1, theme.color2)
     newNetworkButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColorTheme(theme)
+    backToMainButton.get.setColorMask(theme.background, theme.background, theme.color1)
     gameTypeText.get.setTextColor(theme.color2)
 
     ticTacText.get.setTextColor(theme.color1)

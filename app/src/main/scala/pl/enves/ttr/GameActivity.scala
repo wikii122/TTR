@@ -11,7 +11,7 @@ import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.StyledActivity
-import pl.enves.ttr.utils.themes.{Theme, ThemedOneImageButton}
+import pl.enves.ttr.utils.themes.Theme
 
 /**
  * Core game activity.
@@ -25,12 +25,12 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var playAgainButton: Option[(Button, Button)] = None
   private[this] var gameCourseButton: Option[(Button, Button)] = None
   private[this] var contemplateButton: Option[(Button, Button)] = None
-  private[this] var backToMainButton: Option[ThemedOneImageButton] = None
+  private[this] var backToMainButton: Option[ImageButton] = None
 
   private[this] var chooseSymbolLayer: Option[View] = None
   private[this] var chooseSymbolText: Option[TextView] = None
-  private[this] var chooseXButton: Option[ThemedOneImageButton] = None
-  private[this] var chooseOButton: Option[ThemedOneImageButton] = None
+  private[this] var chooseXButton: Option[ImageButton] = None
+  private[this] var chooseOButton: Option[ImageButton] = None
 
   private[this] var difficultyText: Option[TextView] = None
   private[this] var difficultySeekBar: Option[SeekBar] = None
@@ -83,7 +83,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
     gameCourseButton = Some((find[Button](R.id.button_game_course), find[Button](R.id.button_game_course_prompt)))
     contemplateButton = Some((find[Button](R.id.button_contemplate), find[Button](R.id.button_contemplate_prompt)))
-    backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
+    backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
 
     playAgainButton.get onClick onPlayAgain
     gameCourseButton.get onClick onReplay
@@ -91,8 +91,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     backToMainButton.get onClick onBackToMainMenu
 
     chooseSymbolText = Some(find[TextView](R.id.text_choose_symbol))
-    chooseXButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_symbol_X), R.drawable.pat_cross_mod_mask))
-    chooseOButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_symbol_O), R.drawable.pat_ring_mod_mask))
+    chooseXButton = Some(find[ImageButton](R.id.button_symbol_X))
+    chooseOButton = Some(find[ImageButton](R.id.button_symbol_O))
 
     chooseXButton.get onClick onPlayWithBotAsX
     chooseOButton.get onClick onPlayWithBotAsO
@@ -132,13 +132,13 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     playAgainButton.get.setTextColor(theme.color1, theme.color2)
     gameCourseButton.get.setTextColor(theme.color1, theme.color2)
     contemplateButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColorTheme(theme)
+    backToMainButton.get.setColorMask(theme.background, theme.background, theme.color1)
 
     chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
     chooseSymbolText.get.setTextColor(theme.color2)
-    chooseXButton.get.setColorTheme(theme)
-    chooseOButton.get.setColorTheme(theme)
+    chooseXButton.get.setColorMask(theme.background, theme.background, theme.color1)
+    chooseOButton.get.setColorMask(theme.background, theme.background, theme.color1)
 
     difficultyText.get.setTextColor(theme.color2)
     difficultySeekBar.get.setColors(theme.color1, theme.color2)
@@ -273,7 +273,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val difficulty = difficultySeekBar.get.getProgress
     g.setMaxTime((difficulty + 1) * 1000)
 
-    if(difficulty != Configuration.botDifficulty) {
+    if (difficulty != Configuration.botDifficulty) {
       Configuration.botDifficulty = difficulty
     }
   }

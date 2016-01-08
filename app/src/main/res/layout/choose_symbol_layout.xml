@@ -27,7 +27,8 @@
             android:layout_height="36dp"
             android:background="@null"
             android:contentDescription="@string/button_symbol_X_description"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:src="@drawable/pat_cross_mod_mask" />
 
         <Space
             android:layout_width="36dp"
@@ -39,7 +40,8 @@
             android:layout_height="36dp"
             android:background="@null"
             android:contentDescription="@string/button_symbol_O_description"
-            android:scaleType="centerInside" />
+            android:scaleType="centerInside"
+            android:src="@drawable/pat_ring_mod_mask" />
 
     </LinearLayout>
 
@@ -48,11 +50,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:text="@string/difficulty"
-        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:layout_marginBottom="5dp"
         android:layout_marginTop="15dp"
-        android:layout_marginBottom="5dp" />
-
+        android:text="@string/difficulty"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <SeekBar
         android:id="@+id/seekBar_difficulty"
