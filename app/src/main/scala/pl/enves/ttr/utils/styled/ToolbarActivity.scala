@@ -39,6 +39,7 @@ abstract class ToolbarActivity extends StyledActivity {
     super.setColorTheme(theme)
 
     toolbar.get.setTitleTextColor(theme.color1)
+    toolbar.get.setImageButtonsColor(theme.color2)
   }
 
   override def onOptionsItemSelected(item: MenuItem): Boolean = {
