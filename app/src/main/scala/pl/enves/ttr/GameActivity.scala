@@ -132,7 +132,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     playAgainButton.get.setTextColor(theme.color1, theme.color2)
     gameCourseButton.get.setTextColor(theme.color1, theme.color2)
     contemplateButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColorMask(theme.background, theme.background, theme.color1)
+    backToMainButton.get.setColor(theme.color1)
 
     chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 

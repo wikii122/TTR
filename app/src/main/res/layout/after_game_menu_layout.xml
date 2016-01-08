@@ -12,7 +12,7 @@
         android:background="@null"
         android:contentDescription="@string/abc_action_bar_up_description"
         android:scaleType="center"
-        android:src="@drawable/ic_action_back_mask"
+        android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"
         android:visibility="gone" />
 
     <LinearLayout

@@ -272,7 +272,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks {
     newStandardButton.get.setTextColor(theme.color1, theme.color2)
     newAIGameButton.get.setTextColor(theme.color1, theme.color2)
     newNetworkButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColorMask(theme.background, theme.background, theme.color1)
+    backToMainButton.get.setColor(theme.color1)
     gameTypeText.get.setTextColor(theme.color2)
 
     ticTacText.get.setTextColor(theme.color1)
