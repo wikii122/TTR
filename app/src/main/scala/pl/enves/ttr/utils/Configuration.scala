@@ -17,5 +17,5 @@ object Configuration {
     prefed.commit()
   }
 
-  def isMultiplayerAvailable = isPaid
+  def isMultiplayerAvailable = true
 }
