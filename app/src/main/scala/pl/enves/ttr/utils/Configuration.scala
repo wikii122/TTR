@@ -9,7 +9,7 @@ object Configuration {
   private[this] val prefs = ContextRegistry.context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
   private[this] val prefed: SharedPreferences.Editor = prefs.edit()
 
-  private[this] val defaultColorThemeId: Int = R.array.theme_five
+  val defaultColorThemeId: Int = R.array.theme_five
 
   def isPaid = ContextRegistry.context.getString(R.string.VERSION) == "PAID"
 

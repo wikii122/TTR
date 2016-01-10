@@ -12,12 +12,12 @@ import pl.enves.androidx.color.ColorUiTweaks
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState, Player}
-import pl.enves.ttr.utils.{dialogs, Configuration}
+import pl.enves.ttr.utils.{LogoUtils, dialogs, Configuration}
 import pl.enves.ttr.utils.dialogs.{PaidOnlyDialog, Reason}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
 
-class StartGameActivity extends StyledActivity with ColorUiTweaks {
+class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks {
   private[this] final val SELECT_PLAYERS = 9003
   private[this] var viewSwitcherSwitched = false
 
@@ -150,10 +150,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks {
     val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
     val gameTypeText = Some(find[TextView](R.id.text_game_type))
 
-    val ticTacText = Some(find[TextView](R.id.text_tic_tac))
-    val turnText = Some(find[TextView](R.id.text_turn))
-    val ttText = Some(find[TextView](R.id.text_tt))
-    val tText = Some(find[TextView](R.id.text_t))
+    alignLogo()
 
     newGameButton.get onClick flip
     continueGameButton.get onClick continueGame
@@ -214,11 +211,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks {
     val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
     val gameTypeText = Some(find[TextView](R.id.text_game_type))
 
-    val ticTacText = Some(find[TextView](R.id.text_tic_tac))
-    val turnText = Some(find[TextView](R.id.text_turn))
-    val ttText = Some(find[TextView](R.id.text_tt))
-    val tText = Some(find[TextView](R.id.text_t))
-
     newGameButton.get.setTypeface(typeface)
     continueGameButton.get.setTypeface(typeface)
     settingsButton.get.setTypeface(typeface)
@@ -228,18 +220,7 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks {
     newNetworkButton.get.setTypeface(typeface)
     gameTypeText.get.setTypeface(typeface)
 
-    ticTacText.get.setTypeface(typeface)
-    turnText.get.setTypeface(typeface)
-    ttText.get.setTypeface(typeface)
-    tText.get.setTypeface(typeface)
-
-    alignUpsideDownText(turnText.get)
-  }
-
-  private[this] def alignUpsideDownText(text: TextView): Unit = {
-    val fm = text.getPaint.getFontMetrics
-    val descent = Math.round(fm.descent)
-    text.setPadding(0, 0, 0, descent)
+    setLogoTypeface(typeface)
   }
 
   /**
@@ -260,11 +241,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks {
     val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
     val gameTypeText = Some(find[TextView](R.id.text_game_type))
 
-    val ticTacText = Some(find[TextView](R.id.text_tic_tac))
-    val turnText = Some(find[TextView](R.id.text_turn))
-    val ttText = Some(find[TextView](R.id.text_tt))
-    val tText = Some(find[TextView](R.id.text_t))
-
     newGameButton.get.setTextColor(theme.color1, theme.color2)
     continueGameButton.get.setTextColor(colorStateList(theme.color1, 0.25f), colorStateList(theme.color2, 0.25f))
     settingsButton.get.setTextColor(theme.color1, theme.color2)
@@ -275,9 +251,6 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks {
     backToMainButton.get.setColor(theme.color1)
     gameTypeText.get.setTextColor(theme.color2)
 
-    ticTacText.get.setTextColor(theme.color1)
-    turnText.get.setTextColor(theme.color2)
-    ttText.get.setTextColor(theme.color1)
-    tText.get.setTextColor(theme.color2)
+    setLogoColorTheme(theme)
   }
 }
