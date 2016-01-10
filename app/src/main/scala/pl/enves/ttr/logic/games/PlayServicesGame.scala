@@ -10,6 +10,7 @@ import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
+import scala.collection.JavaConversions._
 
 class PlayServicesGame(inputPlayers: Option[util.ArrayList[String]], board: Board = Board())
   extends Game(board)
@@ -20,8 +21,12 @@ class PlayServicesGame(inputPlayers: Option[util.ArrayList[String]], board: Boar
   private[this] val players = inputPlayers getOrElse ???
   private[this] var game: Option[TurnBasedMatch] = None
 
-  PlayServices createMatch (this, players)
+  private[this] lazy val otherPlayer: String = if (inputPlayers.isDefined)
+      game.get getParticipantId inputPlayers.get.last
+    else
+      "" // TODO join existing game
 
+  PlayServices createMatch (this, players)
   override def locked: Boolean = player != playerSide && step > 0
 
   override protected def boardVersion: Int = ???
@@ -33,7 +38,7 @@ class PlayServicesGame(inputPlayers: Option[util.ArrayList[String]], board: Boar
         "currentPlayer" -> Player.X.toString // X always starts
       ).toJson.toString()
 
-    PlayServices.takeTurn(game.get, data)
+    PlayServices.takeTurn(game.get, data, otherPlayer)
   }
 
   def update(data: String) = {

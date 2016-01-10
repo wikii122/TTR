@@ -12,6 +12,7 @@ import com.google.android.gms.common.{GoogleApiAvailability, GooglePlayServicesU
 import com.google.android.gms.common.api.{ResultCallback, GoogleApiClient}
 import com.google.android.gms.common.api.GoogleApiClient.{Builder, OnConnectionFailedListener, ConnectionCallbacks}
 import com.google.android.gms.games.Games
+import com.google.android.gms.games.multiplayer.ParticipantResult
 import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatchConfig, TurnBasedMatch}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
@@ -22,21 +23,14 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   final val SIGN_IN = 9001 // Because reasons
   private[this] val client = if (Configuration.isMultiplayerAvailable) Option(clientInit())
     else None
-  private[this] var counter = 0
   private[this] var signingIn = false
 
   def connect() = {
     if (nonAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
     client.get connect ()
-    counter += 1
   }
 
-  def disconnect() = {
-    if (isConnected) {
-      counter -= 1
-      if (counter == 0) client.get disconnect()
-    }
-  }
+  def disconnect() = if (isConnected) client.get disconnect()
 
   def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
 
@@ -52,7 +46,9 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       .setResultCallback(callee)
   }
 
-  def takeTurn(matchInstance: TurnBasedMatch, turnData: String) = ???
+  def takeTurn(matchInstance: TurnBasedMatch, turnData: String, participant: String) = {
+    Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant)
+  }
 
   def finishMatch(matchInstance: TurnBasedMatch) = ???
 
