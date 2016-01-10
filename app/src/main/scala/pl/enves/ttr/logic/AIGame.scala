@@ -16,6 +16,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   protected var human: Option[Player.Value] = None
 
+  private val minTime: Int = 1000
+
   private var maxTime: Int = 3000
 
   private val maxDepth: Int = 5
@@ -37,7 +39,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
     else maxDepth
 
-    ai = Some(new MinMax(board, player, maxTime, depth, randomizeDecisions, makeAIMove))
+    ai = Some(new MinMax(board, player, minTime, maxTime, depth, randomizeDecisions, makeAIMove))
   }
 
   /**

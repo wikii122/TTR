@@ -8,7 +8,7 @@ import pl.enves.ttr.utils.ExecutorContext
 import scala.collection.mutable
 import scala.concurrent.Future
 
-class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
+class MinMax(board: Board, player: Player.Value, minTime: Int, maxTime: Int, maxDepth: Int,
              randomize: Boolean,
              success: Move => Unit) extends Logging {
 
@@ -314,6 +314,12 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
       }
       depth += 1
     }
+
+    val elapsed = System.currentTimeMillis() - startTime
+    if (elapsed < minTime) {
+      Thread.sleep(minTime - elapsed)
+    }
+
     log(s"finished, bestMove: $bestMove")
 
     bestMove
@@ -326,6 +332,8 @@ class MinMax(board: Board, player: Player.Value, maxTime: Int, maxDepth: Int,
   f onFailure {
     case e: StoppedException =>
       log("stopped")
+    case e: InterruptedException =>
+      log("interrupted")
     case e: Exception =>
       e.printStackTrace()
       log("switching to random")
