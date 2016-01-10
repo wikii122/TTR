@@ -7,6 +7,7 @@
     <string name="title_activity_tutorial">tutorial</string>
     <string name="title_activity_themes">themes</string>
     <string name="title_activity_licenses">open source licenses</string>
+    <string name="title_activity_about">about</string>
     <string name="pick_theme">theme</string>
     <string name="new_game">new game</string>
     <string name="settings">settings</string>
@@ -50,4 +51,8 @@
     <string name="sign_in_error">Could not sign in due to connection error</string>
     <string name="paid_only">This feature is not available in this version of the game.</string>
     <string name="difficulty">difficulty:</string>
+    <string name="enves">enves</string>
+    <string name="created_by">created by</string>
+    <string name="game_description">TicTacTurn is a hell of a game!</string>
+    <string name="game_license">DO NOT EVEN THINK ABOUT IT</string>
 </resources>

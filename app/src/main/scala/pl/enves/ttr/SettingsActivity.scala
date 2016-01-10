@@ -17,6 +17,7 @@ class SettingsActivity extends ToolbarActivity {
   private[this] var pickThemeText: Option[(TextView, TextView)] = None
   private[this] var themePicker: Option[ThemePicker] = None
   private[this] var tutorialButton: Option[(Button, Button)] = None
+  private[this] var aboutButton: Option[(Button, Button)] = None
   private[this] var licensesButton: Option[(Button, Button)] = None
 
   override def onCreate(savedInstanceState: Bundle) {
@@ -28,6 +29,7 @@ class SettingsActivity extends ToolbarActivity {
     pickThemeText = Some((find[TextView](R.id.text_pick_theme), find[TextView](R.id.text_pick_theme_prompt)))
     themePicker = Some(find[ThemePicker](R.id.view_theme_picker))
     tutorialButton = Some((find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt)))
+    aboutButton = Some((find[Button](R.id.button_about), find[Button](R.id.button_about_prompt)))
     licensesButton = Some((find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt)))
 
     themePicker.get.setChangeListener(this)
@@ -40,6 +42,7 @@ class SettingsActivity extends ToolbarActivity {
     themePicker.get.setCurrent(i)
 
     tutorialButton.get onClick startTutorial
+    aboutButton.get onClick startAbout
     licensesButton.get onClick startLicenses
   }
 
@@ -68,6 +71,13 @@ class SettingsActivity extends ToolbarActivity {
     itnt start()
   }
 
+  private[this] def startAbout(v: View) = {
+    log("Intending to start about")
+    val itnt = intent[AboutActivity]
+    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
+    itnt start()
+  }
+
   private[this] def startLicenses(v: View) = {
     log("Intending to start licenses")
     val itnt = intent[LicensesActivity]
@@ -81,6 +91,7 @@ class SettingsActivity extends ToolbarActivity {
     pickThemeText.get._1.setTypeface(typeface)
     pickThemeText.get._2.setTypeface(typeface)
     tutorialButton.get.setTypeface(typeface)
+    aboutButton.get.setTypeface(typeface)
     licensesButton.get.setTypeface(typeface)
   }
 
@@ -90,6 +101,7 @@ class SettingsActivity extends ToolbarActivity {
     pickThemeText.get._1.setTextColor(theme.color1)
     pickThemeText.get._2.setTextColor(theme.color2)
     tutorialButton.get.setTextColor(theme.color1, theme.color2)
+    aboutButton.get.setTextColor(theme.color1, theme.color2)
     licensesButton.get.setTextColor(theme.color1, theme.color2)
   }
 }
