@@ -33,6 +33,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] var chooseOButton: Option[ImageButton] = None
 
   private[this] var difficultyText: Option[TextView] = None
+  private[this] var difficultyNumber: Option[TextView] = None
   private[this] var difficultySeekBar: Option[SeekBar] = None
 
   override def onCreate(state: Bundle): Unit = {
@@ -99,6 +100,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     difficultySeekBar = Some(find[SeekBar](R.id.seekBar_difficulty))
     difficultyText = Some(find[TextView](R.id.text_difficulty))
+    difficultyNumber = Some(find[TextView](R.id.text_difficulty_number))
+
+    difficultySeekBar.get onChange onDifficultyChanged
 
     if (game.gameType == Game.AI) {
       if (game.asInstanceOf[AIGame].getHuman.isEmpty) {
@@ -122,6 +126,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseSymbolText.get.setTypeface(typeface)
 
     difficultyText.get.setTypeface(typeface)
+    difficultyNumber.get.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -141,6 +146,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseOButton.get.setColorMask(theme.background, theme.background, theme.color1)
 
     difficultyText.get.setTextColor(theme.color2)
+    difficultyNumber.get.setTextColor(theme.color1)
     difficultySeekBar.get.setColors(theme.color1, theme.color2)
   }
 
@@ -211,6 +217,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     difficultyText.get.setVisibility(View.VISIBLE)
     difficultySeekBar.get.setVisibility(View.VISIBLE)
+    difficultyNumber.get.setVisibility(View.VISIBLE)
 
     difficultySeekBar.get.setProgress(Configuration.botDifficulty)
   }
@@ -226,6 +233,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     difficultyText.get.setVisibility(View.GONE)
     difficultySeekBar.get.setVisibility(View.GONE)
+    difficultyNumber.get.setVisibility(View.GONE)
   }
 
   /**
@@ -290,5 +298,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     setupBot()
     view.startGame()
     closeChooser()
+  }
+
+  private[this] def onDifficultyChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
+    difficultyNumber.get.setText((progress + 1).toString)
   }
 }

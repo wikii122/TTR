@@ -45,15 +45,33 @@
 
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/text_difficulty"
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
         android:layout_marginBottom="5dp"
         android:layout_marginTop="15dp"
-        android:text="@string/difficulty"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/text_difficulty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="5dp"
+            android:layout_marginRight="5dp"
+            android:text="@string/difficulty"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+
+        <TextView
+            android:id="@+id/text_difficulty_number"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/text_difficulty"
+            android:layout_toRightOf="@+id/text_difficulty"
+            android:minWidth="15dp"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
+    </RelativeLayout>
 
     <SeekBar
         android:id="@+id/seekBar_difficulty"
