@@ -6,7 +6,7 @@ import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
-import pl.enves.ttr.graphics.text.StaticText
+import pl.enves.ttr.graphics.text.{TextAlignment, StaticText}
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic.{Game, GameManager, Quadrant}
 
@@ -17,22 +17,20 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
 
   visible = false
 
-  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f)
+  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
   addChild(winnerText)
 
-  val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f)
+  val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f, TextAlignment.Center)
   addChild(drawText)
 
-  val field = new BoardField(Quadrant.second, resources)
+  val field = new Field(Quadrant.second, resources)
   addChild(field)
 
   override protected def onUpdateResources(screenRatio: Float): Unit = {
-    winnerText.translate(-0.5f + winnerText.getWidth / 2, 0.0f, 0.0f)
+    winnerText.addTranslation(-0.5f, 0.0f, 0.0f, true)
 
-    drawText.translate(0.0f, 0.0f, 0.0f)
-
-    field.translate(0.425f, 0.0f, 0.0f)
-    field.scale(0.15f, 0.15f, 1.0f)
+    field.addTranslation(0.425f, 0.0f, 0.0f, true)
+    field.addScale(0.15f, 0.15f, 1.0f, true)
   }
 
   override protected def onUpdateTheme(): Unit = {
@@ -50,7 +48,7 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
     if (game.finished || game.gameType == Game.REPLAY) {
       visible = true
       if (game.winner.isDefined) {
-        field.value = game.winner
+        field.setValue(game.winner)
         field.setVisible(true)
         winnerText.setVisible(true)
         drawText.setVisible(false)

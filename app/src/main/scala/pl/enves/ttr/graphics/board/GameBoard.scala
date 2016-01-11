@@ -36,7 +36,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     (Quadrant.fourth, QRotation.r270)
   )
 
-  val arrows = allArrows map { key => key -> new ArrowField(key._1, key._2, resources) } toMap
+  val arrows = allArrows map { key => key -> new Arrow(key._1, key._2, resources) } toMap
 
   for ((name, arrow) <- arrows) {
     addChild(arrow)
@@ -50,7 +50,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
   addChild(replayIndicator)
 
   override def onUpdateResources(screenRatio: Float): Unit = {
-    scale(0.25f, 0.25f, 1.0f)
+    addScale(0.25f, 0.25f, 1.0f, true)
 
     //screenRatio should be >= 1, as is ensured in GameRenderer
     val halfScreenHeight = 4.0f * screenRatio
@@ -59,33 +59,31 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     //fit indicator between arrows when there is little space left
     var indicatorPositionY = 3.5f + heightLeft / 2
     //but do not allow it to be too distant
-    if(indicatorPositionY > 4.5f) {
+    if (indicatorPositionY > 4.5f) {
       indicatorPositionY = 4.5f
     }
 
-    currentPlayerIndicator.translate(0.0f, indicatorPositionY, 0.0f)
-    currentPlayerIndicator.scale(4.0f, 4.0f, 1.0f)
+    currentPlayerIndicator.addTranslation(0.0f, indicatorPositionY, 0.0f, true)
+    currentPlayerIndicator.addScale(4.0f, 4.0f, 1.0f, true)
 
-    winnerIndicator.translate(0.0f, -indicatorPositionY, 0.0f)
-    winnerIndicator.scale(4.0f, 4.0f, 1.0f)
+    winnerIndicator.addTranslation(0.0f, -indicatorPositionY, 0.0f, true)
+    winnerIndicator.addScale(4.0f, 4.0f, 1.0f, true)
 
-    replayIndicator.translate(0.0f, 0.0f, 0.5f)
-    replayIndicator.rotate(45.0f)
-    replayIndicator.scale(12.0f, 12.0f, 1.0f)
+    replayIndicator.addTranslation(0.0f, 0.0f, 0.5f, true)
+    replayIndicator.addRotation(45.0f, 0.0f, 0.0f, 1.0f, true)
+    replayIndicator.addScale(12.0f, 12.0f, 1.0f, true)
 
     for ((name, arrow) <- arrows) {
       val pos = name._2 match {
         case QRotation.r90 => arrowLeftPosition(name._1)
         case QRotation.r270 => arrowRightPosition(name._1)
       }
-      val rot = arrowsRotation(name._1)
-      arrow.translate(pos._1, pos._2, 0.0f)
-      arrow.rotate(rot)
+      arrow.addTranslation(pos._1, pos._2, 0.0f, true)
     }
 
     for (quadrant <- Quadrant.values) {
       val centre = quadrantCentre(quadrant)
-      quadrants(quadrant).translate(centre._1, centre._2, 0.0f)
+      quadrants(quadrant).addTranslation(centre._1, centre._2, 0.0f, true)
     }
   }
 
@@ -113,15 +111,6 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     case Quadrant.fourth => (3.5f, 2.5f)
   }
 
-  def arrowsRotation(quadrant: Quadrant.Value): Float = quadrant match {
-    case Quadrant.first => 0.0f
-    case Quadrant.second => 90.0f
-    case Quadrant.third => 270.0f
-    case Quadrant.fourth => 180.0f
-  }
-
-  type Arrow = (Quadrant.Value, QRotation.Value)
-
   override def onAnimate(dt: Float): Unit = {
     val availableRotations = context.game.availableRotations
     for ((name, arrow) <- arrows) {
@@ -148,7 +137,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     }
   }
 
-  private def matchArrow(x: Float, y: Float): Option[Arrow] = {
+  private def matchArrow(x: Float, y: Float): Option[(Quadrant.Value, QRotation.Value)] = {
     for (quadrant <- Quadrant.values) {
       val al = arrowLeftPosition(quadrant)
       val ar = arrowRightPosition(quadrant)

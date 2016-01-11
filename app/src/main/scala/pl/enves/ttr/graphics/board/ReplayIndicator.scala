@@ -5,7 +5,7 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
-import pl.enves.ttr.graphics.text.StaticText
+import pl.enves.ttr.graphics.text.{StaticText, TextAlignment}
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic.{Game, GameManager}
 
@@ -16,7 +16,7 @@ class ReplayIndicator(context: Context with GameManager, resources: Resources) e
 
   visible = false
 
-  val replayText = new StaticText(resources, GeometryId.ReplayText, TextureId.Font2, 1.0f, 0.25f)
+  val replayText = new StaticText(resources, GeometryId.ReplayText, TextureId.Font2, 1.0f, 0.25f, TextAlignment.Center)
   addChild(replayText)
 
   override protected def onUpdateResources(screenRatio: Float): Unit = {

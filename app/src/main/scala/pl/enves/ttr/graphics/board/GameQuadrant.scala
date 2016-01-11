@@ -3,6 +3,7 @@ package pl.enves.ttr.graphics.board
 import android.content.Context
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
+import pl.enves.ttr.graphics.animations.QuadrantRotation
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -12,17 +13,11 @@ import pl.enves.ttr.utils.Algebra
  */
 class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  val rotationTime = 1.0f //seconds
+  private var rotationOld = context.game.quadrantRotation(quadrant)
 
-  var rotationAnimated = false
+  private var rotationAnimation: Option[QuadrantRotation] = None
 
-  var rotationCCW = false
-
-  var rotationLinear = 0.0f
-
-  var rotationOld = context.game.quadrantRotation(quadrant)
-
-  val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
+  private val fields = Array.fill[Field](Quadrant.size, Quadrant.size)(new Field(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
     for (y <- 0 until Quadrant.size) {
       addChild(fields(x)(y))
@@ -36,9 +31,14 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
         // TODO: calculate from Quadrant.size
         val nx = x - 1.0f
         val ny = y - 1.0f
-        fields(x)(y).translate(nx, ny, 0.0f)
+        fields(x)(y).addTranslation(nx / 0.9f, ny / 0.9f, 0.0f, true)
       }
     }
+
+    val scale = addScale(0.9f, 0.9f, 1.0f, true)
+    val rotation = addRotation(0.0f, 0.0f, 0.0f, 1.0f, false)
+
+    rotationAnimation = Some(new QuadrantRotation(1.0f, rotation, scale))
   }
 
   override protected def onUpdateTheme(): Unit = {}
@@ -54,7 +54,7 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
     this.synchronized {
       for (x <- 0 until Quadrant.size) {
         for (y <- 0 until Quadrant.size) {
-          fields(x)(y).value = context.game.quadrantField(quadrant, x, y)
+          fields(x)(y).setValue(context.game.quadrantField(quadrant, x, y))
         }
       }
 
@@ -62,12 +62,11 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
       val rotationDiff = rotationNew sub rotationOld
 
       if (rotationDiff != QRotation.r0) {
-        rotationAnimated = true
-
-        rotationLinear = 0.0f
-
         //TODO: Consider 180 degrees rotations
-        rotationCCW = if (rotationDiff == QRotation.r90) true else false
+        val ccw = if (rotationDiff == QRotation.r90) true else false
+        rotationAnimation.get.setCCW(ccw)
+
+        rotationAnimation.get.start()
 
         for (x <- 0 until Quadrant.size) {
           for (y <- 0 until Quadrant.size) {
@@ -81,27 +80,11 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
     //This doesn't have to be synchronized
     for (x <- 0 until Quadrant.size) {
       for (y <- 0 until Quadrant.size) {
-        fields(x)(y).winning = checkWinning(x, y)
+        fields(x)(y).setWinning(checkWinning(x, y))
       }
     }
 
-    if (rotationAnimated) {
-      rotationLinear += dt / rotationTime
-
-      if (rotationLinear >= 1.0f) {
-        rotationLinear = 1.0f
-        rotationAnimated = false
-      }
-
-      objectRotationAngle = ((Math.sin(Math.PI / 2 + rotationLinear * Math.PI) + 1.0) * 45.0).toFloat
-
-      if (rotationCCW) {
-        objectRotationAngle = -objectRotationAngle
-      }
-
-      val a = Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(objectRotationAngle))))
-      objectScale = Array(a.toFloat, a.toFloat, 1.0f)
-    }
+    rotationAnimation.get.animate(dt)
   }
 
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
@@ -124,15 +107,22 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
     }
   }
 
-  def processClick(fx: Float, fy: Float): Boolean = {
-    log("Click " + quadrant.toString + " " + fx + " " + fy)
-
+  def processClick(ffx: Float, ffy: Float): Boolean = {
+    val fx = ffx * 0.9f
+    val fy = ffy * 0.9f
     //Board is just a square
     if (fx > -1.5f && fx < 1.5f && fy > -1.5f && fy < 1.5f) {
       // Calculate field
       // Although quadrants are now independent, fields inside them are still not
-      val x = Math.floor(fx + 1.5f).toInt
-      val y = Math.floor(fy + 1.5f).toInt
+      var x = Math.floor(fx + 1.5f).toInt
+      var y = Math.floor(fy + 1.5f).toInt
+
+      //shit happens
+      if (x >= Quadrant.size) x = Quadrant.size - 1
+      if (y >= Quadrant.size) y = Quadrant.size - 1
+      if (x < 0) x = 0
+      if (y < 0) y = 0
+
       val nx = x + Quadrant.offset(quadrant)._1
       val ny = y + Quadrant.offset(quadrant)._2
       try {

@@ -12,11 +12,7 @@ class TextGeometryProvider(text: String, characters: CharactersTexture) extends 
   override def getGeometry: AbstractGeometry = {
     var positions = Array[Float]()
     var texCoords = Array[Float]()
-    var width = 0.0f
-    for (c <- text) {
-      width = width + characters.getNormalizedWidth(c)
-    }
-    var pos = -width / 2
+    var pos = 0.0f
     val height = characters.getNormalizedFontHeight
     for (c <- text) {
       val (x, y) = characters.getNormalizedCoordinates(c)
@@ -31,7 +27,7 @@ class TextGeometryProvider(text: String, characters: CharactersTexture) extends 
     return createTextGeometry(
       GLES20.GL_TRIANGLES,
       buffers,
-      width,
+      pos,
       height
     )
   }

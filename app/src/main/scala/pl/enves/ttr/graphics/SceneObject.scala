@@ -1,19 +1,13 @@
 package pl.enves.ttr.graphics
 
-import android.opengl.Matrix
+import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, Translation}
 
 import scala.collection.mutable
 
-/**
- *
- */
 trait SceneObject {
-  protected val children: mutable.ListBuffer[SceneObject] = mutable.ListBuffer()
+  protected val children = mutable.ListBuffer[SceneObject]()
 
-  protected var objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
-  protected var objectRotationAngle = 0.0f
-  protected var objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
-  protected var objectScale = Array[Float](1.0f, 1.0f, 1.0f)
+  protected val transformations = mutable.ListBuffer[Transformation]()
 
   protected var visible = true
 
@@ -31,19 +25,53 @@ trait SceneObject {
     children.append(child)
   }
 
+  def addTransformation(transformation: Transformation): Unit = {
+    transformations.append(transformation)
+  }
+
+  def removeTransformation(transformation: Transformation): Unit = {
+    val i = transformations.indexOf(transformation)
+    if (i != -1) {
+      transformations.remove(i)
+    }
+  }
+
+  def addScale(x: Float, y: Float, z: Float, enabled: Boolean): Scale = {
+    val scale = new Scale(x, y, z, enabled)
+    transformations.append(scale)
+    return scale
+  }
+
+  def addTranslation(x: Float, y: Float, z: Float, enabled: Boolean): Translation = {
+    val translation = new Translation(x, y, z, enabled)
+    transformations.append(translation)
+    return translation
+  }
+
+  def addRotation(a: Float, x: Float, y: Float, z: Float, enabled: Boolean): Rotation = {
+    val rotation = new Rotation(a, x, y, z, enabled)
+    transformations.append(rotation)
+    return rotation
+  }
+
+  def reset(): Unit = {
+    transformations.clear()
+    for (child <- children) {
+      child.reset()
+    }
+  }
+
   protected def transformToPosition(mvMatrix: MatrixStack): Unit = {
-    Matrix.translateM(mvMatrix.get(), 0, objectPosition(0), objectPosition(1), objectPosition(2))
-    Matrix.rotateM(mvMatrix.get(), 0, objectRotationAngle, objectRotation(0), objectRotation(1), objectRotation(2))
-    Matrix.scaleM(mvMatrix.get(), 0, objectScale(0), objectScale(1), objectScale(2))
+    for (transformation <- transformations) {
+      transformation.transform(mvMatrix.get())
+    }
   }
 
   def updateResources(screenRatio: Float): Unit = {
-    reset()
-    //Allow children to setup first
+    onUpdateResources(screenRatio)
     for (child <- children) {
       child.updateResources(screenRatio)
     }
-    onUpdateResources(screenRatio)
   }
 
   def updateTheme(): Unit = {
@@ -87,44 +115,6 @@ trait SceneObject {
     mvMatrix.pop()
     return result
   }
-
-  def scale(x: Float, y: Float, z: Float): Unit = {
-    objectScale(0) *= x
-    objectScale(1) *= y
-    objectScale(2) *= z
-  }
-
-  def translate(x: Float, y: Float, z: Float): Unit = {
-    objectPosition(0) += x
-    objectPosition(1) += y
-    objectPosition(2) += z
-  }
-
-  def rotate(a: Float): Unit = {
-    objectRotationAngle += a
-    if(objectRotationAngle >= 360.0f) {
-      objectRotationAngle -= 360.0f
-    }
-    if(objectRotationAngle <= -360.0f) {
-      objectRotationAngle += 360.0f
-    }
-  }
-
-  def rotation(a: Float, x: Float, y: Float, z: Float): Unit = {
-    objectRotationAngle = a
-    objectRotation(0) = x
-    objectRotation(1) = y
-    objectRotation(2) = z
-  }
-
-  def reset(): Unit = {
-    objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
-    objectRotationAngle = 0.0f
-    objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
-    objectScale = Array[Float](1.0f, 1.0f, 1.0f)
-  }
-
-  def setRotationAngle(a: Float) = objectRotationAngle = a
 
   def setVisible(v: Boolean) = visible = v
 }

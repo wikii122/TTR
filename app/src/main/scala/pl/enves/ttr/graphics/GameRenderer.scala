@@ -86,6 +86,7 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
       ratio = width.toFloat / height.toFloat
       Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
     }
+    board.reset()
     board.updateResources(ratio)
   }
 
