@@ -7,7 +7,7 @@ import android.support.design.widget.TabLayout
 import android.support.v4.app.{Fragment, FragmentManager, FragmentPagerAdapter}
 import android.support.v4.view.ViewPager
 import android.text.{SpannableStringBuilder, Spanned}
-import android.view.View
+import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.TextView
 import pl.enves.androidx._
 import pl.enves.ttr.utils.styled.{StyledFragment, ToolbarActivity}
@@ -42,12 +42,12 @@ class LicensesActivity extends ToolbarActivity {
 }
 
 class LicenseFragment extends StyledFragment with Logging {
-  override protected def getLayoutId: Int = R.layout.fragment_license
-
   private var textView: Option[TextView] = None
 
-  override def onOnCreateView(view: View): Unit = {
+  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
+    val view: View = inflater.inflate(R.layout.fragment_license, container, false)
     textView = Some(find[TextView](view, R.id.license_text))
+    return view
   }
 
   override def onStart(): Unit = {
@@ -69,11 +69,10 @@ class LicenseFragment extends StyledFragment with Logging {
 }
 
 object LicenseFragment {
-  def apply(path: String, number: Int): LicenseFragment = {
+  def apply(path: String): LicenseFragment = {
     val licenseFragment = new LicenseFragment
     val args: Bundle = new Bundle()
     args.putString("TEXT_PATH", path)
-    args.putInt("NUMBER", number)
     licenseFragment.setArguments(args)
     return licenseFragment
   }
@@ -81,8 +80,8 @@ object LicenseFragment {
 
 class LicenseFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   val items = Array(
-    (context.getString(R.string.credits_spray), LicenseFragment("licenses/APL2.txt", 0)),
-    (context.getString(R.string.credits_font), LicenseFragment("licenses/OFL.txt", 1))
+    (context.getString(R.string.credits_spray), LicenseFragment("licenses/APL2.txt")),
+    (context.getString(R.string.credits_font), LicenseFragment("licenses/OFL.txt"))
   )
 
   override def getPageTitle(position: Int): CharSequence = {

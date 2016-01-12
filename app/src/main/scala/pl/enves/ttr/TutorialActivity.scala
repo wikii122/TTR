@@ -18,15 +18,21 @@ import pl.enves.androidx.helpers._
 import pl.enves.ttr.utils.styled.{BottomBarActivity, StyledFragment}
 import pl.enves.ttr.utils.themes.Theme
 
-class DoubleTextFragment extends StyledFragment with Logging {
+trait Selectable {
+  def onSelected(): Unit = {}
+
+  def onDeSelected(): Unit = {}
+}
+
+class DoubleTextFragment extends StyledFragment with Selectable with Logging {
   private var textView1: Option[TextView] = None
   private var textView2: Option[TextView] = None
 
-  override protected def getLayoutId: Int = R.layout.fragment_tutorial_double_text
-
-  override def onOnCreateView(view: View): Unit = {
+  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
+    val view: View = inflater.inflate(R.layout.fragment_tutorial_double_text, container, false)
     textView1 = Some(find[TextView](view, R.id.tutorial_text_1))
     textView2 = Some(find[TextView](view, R.id.tutorial_text_2))
+    return view
   }
 
   override def onStart(): Unit = {
@@ -46,18 +52,17 @@ class DoubleTextFragment extends StyledFragment with Logging {
 }
 
 object DoubleTextFragment {
-  def apply(text1Res: Int, text2Res: Int, number: Int): DoubleTextFragment = {
+  def apply(text1Res: Int, text2Res: Int): DoubleTextFragment = {
     val doubleTextFragment = new DoubleTextFragment
     val args: Bundle = new Bundle()
     args.putInt("TEXT_1_RES", text1Res)
     args.putInt("TEXT_2_RES", text2Res)
-    args.putInt("NUMBER", number)
     doubleTextFragment.setArguments(args)
     return doubleTextFragment
   }
 }
 
-class AnimationFragment extends StyledFragment with Logging {
+class AnimationFragment extends StyledFragment with Selectable with Logging {
   private var textView: Option[TextView] = None
   private var imageView: Option[ImageView] = None
 
@@ -78,25 +83,23 @@ class AnimationFragment extends StyledFragment with Logging {
 
   private var wasAutoPlayed = false
 
-  override protected def getLayoutId: Int = R.layout.fragment_tutorial_image_text
-
   override def onCreate(savedInstanceState: Bundle): Unit = {
     super.onCreate(savedInstanceState)
-    log("onCreate" + number)
     if (savedInstanceState != null) {
       autoPlay = savedInstanceState.getBoolean("AUTO_PLAY", false)
       wasAutoPlayed = false
     }
   }
 
-  override def onOnCreateView(view: View): Unit = {
+  override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
+    val view: View = inflater.inflate(R.layout.fragment_tutorial_image_text, container, false)
     textView = Some(find[TextView](view, R.id.tutorial_text))
     imageView = Some(find[ImageView](view, R.id.tutorial_image))
+    return view
   }
 
   override def onStart(): Unit = {
     super.onStart()
-    log("onStart" + number)
 
     val textRes = getArguments.getInt("TEXT_RES", 0)
     val animationRes = getArguments.getInt("ANIMATION_RES", 0)
@@ -117,24 +120,20 @@ class AnimationFragment extends StyledFragment with Logging {
   }
 
   override def onSelected(): Unit = {
-    log("onSelected" + number)
     startAnimation(imageView.get, getContext)
   }
 
   override def onDeSelected(): Unit = {
-    log("onDeSelected" + number)
     stopAnimation()
   }
 
   override def onSaveInstanceState(outState: Bundle): Unit = {
     super.onSaveInstanceState(outState)
-    log("onSaveInstanceState" + number)
     outState.putBoolean("AUTO_PLAY", animate)
   }
 
   override def onStop(): Unit = {
     super.onStop()
-    log("onStop" + number)
     autoPlay = animate
     stopAnimation()
     if (lastFrameData.isDefined) {
@@ -149,7 +148,6 @@ class AnimationFragment extends StyledFragment with Logging {
 
   override def onDestroy(): Unit = {
     super.onDestroy()
-    log("onDestroy" + number)
     frameSpecs.clear()
   }
 
@@ -303,13 +301,12 @@ class AnimationFragment extends StyledFragment with Logging {
 }
 
 object AnimationFragment {
-  def apply(textRes: Int, animationRes: Int, autoPlay: Boolean, number: Int): AnimationFragment = {
+  def apply(textRes: Int, animationRes: Int, autoPlay: Boolean): AnimationFragment = {
     val animationFragment = new AnimationFragment
     val args: Bundle = new Bundle()
     args.putInt("TEXT_RES", textRes)
     args.putInt("ANIMATION_RES", animationRes)
     args.putBoolean("AUTO_PLAY", autoPlay)
-    args.putInt("NUMBER", number)
     animationFragment.setArguments(args)
     return animationFragment
   }
@@ -317,10 +314,10 @@ object AnimationFragment {
 
 class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   val items = Array(
-    AnimationFragment(R.string.tutorial_figures, R.xml.tutorial_figures_animation, autoPlay = true, 1),
-    AnimationFragment(R.string.tutorial_rotations, R.xml.tutorial_rotations_animation, autoPlay = false, 2),
-    AnimationFragment(R.string.tutorial_goals, R.xml.tutorial_goals_animation, autoPlay = false, 3),
-    DoubleTextFragment(R.string.tutorial_standard, R.string.tutorial_network, 4)
+    AnimationFragment(R.string.tutorial_figures, R.xml.tutorial_figures_animation, autoPlay = true),
+    AnimationFragment(R.string.tutorial_rotations, R.xml.tutorial_rotations_animation, autoPlay = false),
+    AnimationFragment(R.string.tutorial_goals, R.xml.tutorial_goals_animation, autoPlay = false),
+    DoubleTextFragment(R.string.tutorial_standard, R.string.tutorial_network)
   )
 
   override def getCount: Int = items.length
@@ -368,9 +365,9 @@ class TutorialActivity extends BottomBarActivity {
           doneButton.get.setVisibility(View.GONE)
           nextButton.get.setVisibility(View.VISIBLE)
         }
-        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[ExtendedFragment].onDeSelected()
+        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[Selectable].onDeSelected()
         currentFragment = position
-        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[ExtendedFragment].onSelected()
+        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[Selectable].onSelected()
       }
 
       override def onPageScrollStateChanged(state: Int): Unit = {}

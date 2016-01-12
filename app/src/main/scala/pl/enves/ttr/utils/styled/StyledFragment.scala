@@ -9,8 +9,6 @@ abstract class StyledFragment extends ExtendedFragment with Styled {
   override def onStart() {
     super.onStart()
 
-    number = getArguments.getInt("NUMBER", 0)
-
     val typeface = Typeface.createFromAsset(getContext.getAssets, fontPath)
     setTypeface(typeface)
 
