@@ -142,7 +142,7 @@ object AIGame {
     val human = fields("human").convertTo[Option[Player.Value]]
     val game = new AIGame(board)
     game._player = fields("player").convertTo[Player.Value]
-    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject, game)))
+    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject)))
 
     val maxTime = fields("maxTime").convertTo[Int]
     game.setMaxTime(maxTime)

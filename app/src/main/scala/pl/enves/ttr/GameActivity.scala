@@ -22,11 +22,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
   private[this] var afterGameMenuLayer: Option[View] = None
 
-  private[this] var playAgainButton: Option[(Button, Button)] = None
-  private[this] var gameCourseButton: Option[(Button, Button)] = None
-  private[this] var contemplateButton: Option[(Button, Button)] = None
-  private[this] var backToMainButton: Option[ImageButton] = None
-
   private[this] var chooseSymbolLayer: Option[View] = None
   private[this] var chooseSymbolText: Option[TextView] = None
   private[this] var chooseXButton: Option[ImageButton] = None
@@ -81,16 +76,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     setContentView(frameLayout)
 
-    playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
-    gameCourseButton = Some((find[Button](R.id.button_game_course), find[Button](R.id.button_game_course_prompt)))
-    contemplateButton = Some((find[Button](R.id.button_contemplate), find[Button](R.id.button_contemplate_prompt)))
-    backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
-
-    playAgainButton.get onClick onPlayAgain
-    gameCourseButton.get onClick onReplay
-    contemplateButton.get onClick onCloseMenu
-    backToMainButton.get onClick onBackToMainMenu
-
     chooseSymbolText = Some(find[TextView](R.id.text_choose_symbol))
     chooseXButton = Some(find[ImageButton](R.id.button_symbol_X))
     chooseOButton = Some(find[ImageButton](R.id.button_symbol_O))
@@ -119,10 +104,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    playAgainButton.get.setTypeface(typeface)
-    gameCourseButton.get.setTypeface(typeface)
-    contemplateButton.get.setTypeface(typeface)
-
     chooseSymbolText.get.setTypeface(typeface)
 
     difficultyText.get.setTypeface(typeface)
@@ -130,14 +111,10 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   }
 
   override def setColorTheme(theme: Theme): Unit = {
+    super.setColorTheme(theme)
     view.setTheme(theme)
 
     afterGameMenuLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
-
-    playAgainButton.get.setTextColor(theme.color1, theme.color2)
-    gameCourseButton.get.setTextColor(theme.color1, theme.color2)
-    contemplateButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColor(theme.color1)
 
     chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
@@ -155,13 +132,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     super.onPause()
     view.onPause()
-
-    if (game.gameType == Game.REPLAY) {
-      game.asInstanceOf[ReplayGame].stopReplaying()
-    }
-
-    if (game.canBeSaved) GameState store game
-    else GameState clear()
   }
 
   override def onResume(): Unit = {
@@ -175,35 +145,23 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onStop()
 
     // There is no point to keep game that cannot be saved.
-    if (!game.canBeSaved) {
-      GameState.clear()
-      this.finish()
+    if (game.canBeSaved) {
+      GameState store game
+    } else {
+      GameState clear()
     }
+
+    //if game was saved, user can select to continue it in main menu
+    finish()
   }
 
-  def showMenu(winner: Option[Player.Value]): Unit = {
-    log("showing game menu")
-    runOnUiThread(new Runnable() {
-      override def run(): Unit = {
-        afterGameMenuLayer.get.setVisibility(View.VISIBLE)
-
-        //make sure that all buttons are visible, android gets crazy sometimes
-        playAgainButton.get.setVisibility(View.VISIBLE)
-        gameCourseButton.get.setVisibility(View.VISIBLE)
-        contemplateButton.get.setVisibility(View.VISIBLE)
-        backToMainButton.get.setVisibility(View.VISIBLE)
-      }
-    })
-  }
-
-  private[this] def onCloseMenu(v: View): Unit = {
-    afterGameMenuLayer.get.setVisibility(View.GONE)
-
-    //make sure that all buttons are gone, android gets crazy sometimes
-    playAgainButton.get.setVisibility(View.GONE)
-    gameCourseButton.get.setVisibility(View.GONE)
-    contemplateButton.get.setVisibility(View.GONE)
-    backToMainButton.get.setVisibility(View.GONE)
+  def showMenu(): Unit = {
+    val itnt = intent[GameEndedActivity]
+    itnt.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    itnt.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    itnt.putExtra("GAME_DATA", game.toJson.compactPrint)
+    finish()
+    itnt.start()
   }
 
   def showChooser(): Unit = {
@@ -219,7 +177,12 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     difficultySeekBar.get.setVisibility(View.VISIBLE)
     difficultyNumber.get.setVisibility(View.VISIBLE)
 
-    difficultySeekBar.get.setProgress(Configuration.botDifficulty)
+    val difficulty = Configuration.botDifficulty
+    difficultySeekBar.get.setProgress(difficulty)
+    if(difficulty == 0) {
+      //seekBar' default progress is 0, so there is no change informed to ProgressChangeListener
+      onDifficultyChanged(difficultySeekBar.get, difficulty, false)
+    }
   }
 
   def closeChooser(): Unit = {
@@ -234,45 +197,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     difficultyText.get.setVisibility(View.GONE)
     difficultySeekBar.get.setVisibility(View.GONE)
     difficultyNumber.get.setVisibility(View.GONE)
-  }
-
-  /**
-   * Starts new game with the same options
-   */
-  private[this] def onPlayAgain(v: View): Unit = {
-    log("Intending to play again")
-    def restartGame(gameType: Game.Value): Unit = {
-      val itnt = intent[GameActivity]
-      itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-      itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-      game.gameType match {
-        case Game.STANDARD =>
-          itnt putExtra("TYPE", Game.STANDARD.toString)
-        case Game.AI =>
-          itnt putExtra("TYPE", Game.AI.toString)
-        case Game.GPS_MULTIPLAYER => //TODO
-        case _ =>
-          error("bad game type")
-          return
-      }
-      finish()
-      itnt start()
-    }
-
-    if (game.gameType == Game.REPLAY) {
-      restartGame(game.asInstanceOf[ReplayGame].getReplayedGameType)
-    } else {
-      restartGame(game.gameType)
-    }
-  }
-
-  private[this] def onReplay(v: View): Unit = {
-    onCloseMenu(v)
-    replayGame()
-  }
-
-  private[this] def onBackToMainMenu(v: View) = {
-    finish()
   }
 
   private[this] def setupBot(): Unit = {

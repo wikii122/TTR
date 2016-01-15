@@ -11,11 +11,15 @@ class ReplayGame(replayedGameType: Game.Value,
                  board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.REPLAY
 
+  override def canBeSaved = false
+
   override protected def boardVersion = 0
 
   private var replayMove = 0
 
-  private val thread = new Thread(new Runnable {
+  private var thread: Option[Thread] = None
+
+  private def makeThread = new Thread(new Runnable {
     override def run(): Unit = {
       var done = false
       while (!done) {
@@ -37,16 +41,27 @@ class ReplayGame(replayedGameType: Game.Value,
   def getDevicePlayer = devicePlayer
 
   def startReplaying() = {
-    if (thread.isAlive) {
-      stopReplaying()
-    }
+    stopReplaying()
 
-    thread.start()
+    thread = Some(makeThread)
+    thread.get.start()
   }
 
   def stopReplaying() = {
-    thread.interrupt()
-    thread.join()
+    if (thread.isDefined) {
+      if (thread.get.isAlive) {
+        thread.get.interrupt()
+        thread.get.join()
+      }
+      thread = None
+    }
+  }
+
+  def rewind(): Unit = {
+    var done = false
+    while (!done) {
+      done = !replayNextMove()
+    }
   }
 
   override protected def onMove(move: Move): Boolean = {
@@ -77,55 +92,33 @@ class ReplayGame(replayedGameType: Game.Value,
     _player = player
   }
 
-  override def toMap = {
-    Map(
-      "player" -> _player,
-      "devicePlayer" -> devicePlayer,
-      "winner" -> win,
-      "replayMove" -> replayMove,
-      "board" -> board.toJson,
-      "log" -> (movesLog.toList map { entry => entry.toJson }),
-      "type" -> Game.REPLAY,
-      "replayedGameType" -> replayedGameType
-    )
-  }
+  override def toMap = throw new Exception("Replay game shouldn't be saved")
 }
 
 object ReplayGame {
-  def apply(game: StandardGame): ReplayGame = {
-    val replayGame = new ReplayGame(Game.STANDARD, None, game.winner)
-    replayGame.movesLog.appendAll(game.getMovesLog)
-    replayGame.startReplaying()
-    return replayGame
-  }
 
-  def apply(game: AIGame): ReplayGame = {
-    val replayGame = new ReplayGame(Game.AI, game.getHuman, game.winner)
-    replayGame.movesLog.appendAll(game.getMovesLog)
-    replayGame.startReplaying()
-    return replayGame
-  }
-
-  //TODO: GPS_MULTIPLAYER
-
-  def apply(game: ReplayGame): ReplayGame = {
-    val replayGame = new ReplayGame(game.getReplayedGameType, game.getDevicePlayer, game.winner)
-    replayGame.movesLog.appendAll(game.getMovesLog)
-    replayGame.startReplaying()
-    return replayGame
-  }
-
-  def apply(jsValue: JsValue): Game = {
+  def apply(jsValue: JsValue, showEnd: Boolean): Game = {
     val fields = jsValue.asJsObject.fields
-    val board = Board(fields("board"))
-    val devicePlayer = fields("devicePlayer").convertTo[Option[Player.Value]]
-    val winner = fields("winner").convertTo[Option[Player.Value]]
-    val replayedGameType = fields("replayedGameType").convertTo[Game.Value]
-    val replayGame = new ReplayGame(replayedGameType, devicePlayer, winner, board)
-    replayGame._player = fields("player").convertTo[Player.Value]
-    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject, replayGame)))
-    replayGame.replayMove = fields("replayMove").convertTo[Int]
-    replayGame.startReplaying()
-    return replayGame
+    fields("type").convertTo[Game.Value] match {
+      case Game.STANDARD =>
+        val board = Board(fields("board"))
+        val replayGame = new ReplayGame(Game.STANDARD, None, board.winner)
+        fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject)))
+        if (showEnd) replayGame.rewind()
+        return replayGame
+
+      case Game.AI =>
+        val board = Board(fields("board"))
+        val human = fields("human").convertTo[Option[Player.Value]]
+        val replayGame = new ReplayGame(Game.AI, human, board.winner)
+        fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject)))
+        if (showEnd) replayGame.rewind()
+        return replayGame
+
+      //case Game.GPS_MULTIPLAYER => //TODO
+
+      case _ => throw new Exception("bad game type")
+    }
+
   }
 }

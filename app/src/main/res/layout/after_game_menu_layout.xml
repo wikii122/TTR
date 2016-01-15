@@ -1,23 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:paddingTop="24dp">
+    android:fitsSystemWindows="true">
 
     <ImageButton
         android:id="@+id/button_back_to_main"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_gravity="left|top"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
         android:background="@null"
         android:contentDescription="@string/abc_action_bar_up_description"
         android:scaleType="center"
-        android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"
-        android:visibility="gone" />
+        android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha" />
+
+    <TextView
+        android:id="@+id/text_game_ended"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_back_to_main"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/game_ended"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
         android:layout_gravity="center"
         android:orientation="vertical">
 
@@ -46,17 +60,17 @@
             android:layout_gravity="center_horizontal">
 
             <Button
-                android:id="@+id/button_game_course_prompt"
+                android:id="@+id/button_replay_moves_prompt"
                 style="@style/ButtonStyle"
-                android:text="@string/nav_up" />
+                android:text="@string/nav_prompt" />
 
             <Button
-                android:id="@+id/button_game_course"
+                android:id="@+id/button_replay_moves"
                 style="@style/ButtonStyle"
                 android:layout_alignParentTop="true"
-                android:layout_toEndOf="@+id/button_game_course_prompt"
-                android:layout_toRightOf="@+id/button_game_course_prompt"
-                android:text="@string/game_course" />
+                android:layout_toEndOf="@+id/button_replay_moves_prompt"
+                android:layout_toRightOf="@+id/button_replay_moves_prompt"
+                android:text="@string/replay_moves" />
         </RelativeLayout>
 
         <RelativeLayout
@@ -65,18 +79,18 @@
             android:layout_gravity="center_horizontal">
 
             <Button
-                android:id="@+id/button_contemplate_prompt"
+                android:id="@+id/button_show_game_end_prompt"
                 style="@style/ButtonStyle"
-                android:text="@string/nav_up" />
+                android:text="@string/nav_prompt" />
 
             <Button
-                android:id="@+id/button_contemplate"
+                android:id="@+id/button_show_game_end"
                 style="@style/ButtonStyle"
                 android:layout_alignParentTop="true"
-                android:layout_toEndOf="@+id/button_contemplate_prompt"
-                android:layout_toRightOf="@+id/button_contemplate_prompt"
-                android:text="@string/contemplate" />
+                android:layout_toEndOf="@+id/button_show_game_end_prompt"
+                android:layout_toRightOf="@+id/button_show_game_end_prompt"
+                android:text="@string/show_game_end" />
         </RelativeLayout>
 
     </LinearLayout>
-</FrameLayout>
+</RelativeLayout>

@@ -63,7 +63,7 @@ object StandardGame {
     val board = Board(fields("board"))
     val game = new StandardGame(board)
     game._player = fields("player").convertTo[Player.Value]
-    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject, game)))
+    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject)))
 
     return game
   }

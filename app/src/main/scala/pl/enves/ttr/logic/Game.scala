@@ -107,7 +107,6 @@ object Game extends Enumeration {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
       case STANDARD => StandardGame(jsValue)
       case AI => AIGame(jsValue)
-      case REPLAY => ReplayGame(jsValue)
     }
   }
 }

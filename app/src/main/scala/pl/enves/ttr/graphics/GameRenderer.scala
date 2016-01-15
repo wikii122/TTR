@@ -17,7 +17,7 @@ import pl.enves.ttr.utils.themes._
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) extends Renderer with Logging {
+class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends Renderer with Logging {
   log("Creating")
 
   private[this] val resources = new Resources(context, context.game)
@@ -109,7 +109,7 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
   def onTouchEvent(e: MotionEvent): Boolean = {
     if (e.getAction == MotionEvent.ACTION_DOWN) {
       if (context.game.finished || context.game.gameType == Game.REPLAY) {
-        onEnd(context.game.winner)
+        onEnd()
         return true
       }
 
@@ -135,5 +135,5 @@ class GameRenderer(context: Context with GameManager, onEnd: Option[Player.Value
 }
 
 object GameRenderer {
-  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameRenderer(context, onEnd)
+  def apply(context: Context with GameManager, onEnd: () => Unit) = new GameRenderer(context, onEnd)
 }
