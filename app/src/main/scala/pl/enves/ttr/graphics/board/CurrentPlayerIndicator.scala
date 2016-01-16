@@ -50,7 +50,7 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
 
   override protected def onAnimate(dt: Float): Unit = {
     val game = context.game
-    field.setValue(Some(game.player))
+    field.setValue(Some(game.player), false)
 
     def setTextsStandard(): Unit = {
       field.setVisible(true)

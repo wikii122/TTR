@@ -33,8 +33,8 @@ class Field(quadrant: Quadrant.Value, resources: Resources)
   private var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
   private var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  def setValue(v: Option[Player.Value]): Unit = {
-    if(v != value) {
+  def setValue(v: Option[Player.Value], animateChange: Boolean): Unit = {
+    if(animateChange && v != value) {
       shakeAnimation.get.stop()
       rotationAnimation.get.start()
     }

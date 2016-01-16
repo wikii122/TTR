@@ -48,7 +48,7 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
     if (game.finished || game.gameType == Game.REPLAY) {
       visible = true
       if (game.winner.isDefined) {
-        field.setValue(game.winner)
+        field.setValue(game.winner, false)
         field.setVisible(true)
         winnerText.setVisible(true)
         drawText.setVisible(false)

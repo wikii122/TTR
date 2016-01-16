@@ -52,14 +52,15 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
 
   override def onAnimate(dt: Float): Unit = {
     this.synchronized {
-      for (x <- 0 until Quadrant.size) {
-        for (y <- 0 until Quadrant.size) {
-          fields(x)(y).setValue(context.game.quadrantField(quadrant, x, y))
-        }
-      }
-
       val rotationNew = context.game.quadrantRotation(quadrant)
       val rotationDiff = rotationNew sub rotationOld
+
+      val animateChange = rotationNew == rotationOld
+      for (x <- 0 until Quadrant.size) {
+        for (y <- 0 until Quadrant.size) {
+          fields(x)(y).setValue(context.game.quadrantField(quadrant, x, y), animateChange)
+        }
+      }
 
       if (rotationDiff != QRotation.r0) {
         //TODO: Consider 180 degrees rotations

@@ -6,8 +6,7 @@ class FieldRotation(animationTime: Float, rotation: Rotation, scale: Scale)
   extends Animation(animationTime) {
 
   override protected def onAnimate(dt: Float, elapsed: Float): Unit = {
-    //TODO: ease-in-ease-out
-    val angle = elapsed * 360.0f
+    val angle = ((Math.cos(Math.PI + elapsed * Math.PI).toFloat / 2.0f) + 0.5f) * 360.0f
     rotation.setA(rotation.getDefaultA + angle)
 
     val s = rotatedSquareScale(angle)
@@ -29,6 +28,10 @@ class FieldRotation(animationTime: Float, rotation: Rotation, scale: Scale)
 
 
   def rotatedSquareScale(angle: Float): Float = {
-    return (Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(angle % 90.0f))))).toFloat
+    return if (angle < 45.0f || angle > 315.0f) {
+      (Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(angle % 90.0f))))).toFloat
+    } else {
+      0.7071f
+    }
   }
 }
