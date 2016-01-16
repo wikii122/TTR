@@ -20,9 +20,9 @@ import pl.enves.ttr.utils.themes.Theme
  */
 class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
-  private[this] var afterGameMenuLayer: Option[View] = None
 
   private[this] var chooseSymbolLayer: Option[View] = None
+
   private[this] var chooseSymbolText: Option[TextView] = None
   private[this] var chooseXButton: Option[ImageButton] = None
   private[this] var chooseOButton: Option[ImageButton] = None
@@ -56,14 +56,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     frameLayout.addView(view, gameLayoutParams)
 
     val inflater = getLayoutInflater
-    afterGameMenuLayer = Some(inflater.inflate(R.layout.after_game_menu_layout, null))
-    afterGameMenuLayer.get.setVisibility(View.GONE)
-
-    val afterGameMenuLayoutParams = new FrameLayout.LayoutParams(
-      ViewGroup.LayoutParams.MATCH_PARENT,
-      ViewGroup.LayoutParams.MATCH_PARENT,
-      Gravity.CENTER)
-    frameLayout.addView(afterGameMenuLayer.get, afterGameMenuLayoutParams)
 
     chooseSymbolLayer = Some(inflater.inflate(R.layout.choose_symbol_layout, null))
     chooseSymbolLayer.get.setVisibility(View.GONE)
@@ -113,8 +105,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
     view.setTheme(theme)
-
-    afterGameMenuLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
     chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
@@ -179,7 +169,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     val difficulty = Configuration.botDifficulty
     difficultySeekBar.get.setProgress(difficulty)
-    if(difficulty == 0) {
+    if (difficulty == 0) {
       //seekBar' default progress is 0, so there is no change informed to ProgressChangeListener
       onDifficultyChanged(difficultySeekBar.get, difficulty, false)
     }
