@@ -7,13 +7,13 @@ import android.os.Bundle
 import android.view.View
 import android.widget.{Button, TextView}
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.ToolbarActivity
 import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
+import pl.enves.ttr.utils.{AdUtils, Configuration}
 
 import scala.collection.mutable.ArrayBuffer
 
-class SettingsActivity extends ToolbarActivity {
+class SettingsActivity extends ToolbarActivity with AdUtils {
   private[this] var pickThemeText: Option[(TextView, TextView)] = None
   private[this] var themePicker: Option[ThemePicker] = None
   private[this] var tutorialButton: Option[(Button, Button)] = None
@@ -44,6 +44,10 @@ class SettingsActivity extends ToolbarActivity {
     tutorialButton.get onClick startTutorial
     aboutButton.get onClick startAbout
     licensesButton.get onClick startLicenses
+
+    if (!Configuration.isPaid) {
+      loadAdToStub(R.id.stub_settings_ad)
+    }
   }
 
   override def onPause(): Unit = {

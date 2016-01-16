@@ -28,13 +28,13 @@
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <LinearLayout
+        android:id="@+id/game_ended_menu_items_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:layout_gravity="center"
-        android:orientation="vertical"
-        android:id="@+id/game_ended_menu_items_layout">
+        android:orientation="vertical">
 
         <RelativeLayout
             android:layout_width="wrap_content"
@@ -95,10 +95,18 @@
 
     </LinearLayout>
 
-    <include android:id="@+id/news_title"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="fill_parent"
+        android:layout_height="match_parent"
         android:layout_below="@+id/game_ended_menu_items_layout"
-        android:layout_marginTop="20dp"
-        layout="@layout/game_ended_ad_layout"/>
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp">
+
+        <ViewStub
+            android:id="@+id/stub_game_ended_ad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout="@layout/game_ended_ad" />
+    </FrameLayout>
 </RelativeLayout>

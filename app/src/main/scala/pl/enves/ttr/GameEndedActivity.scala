@@ -10,9 +10,10 @@ import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.JsonProtocol._
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.{AdUtils, Configuration}
 import spray.json._
 
-class GameEndedActivity extends StyledActivity {
+class GameEndedActivity extends StyledActivity with AdUtils {
 
   private[this] var gameEndedText: Option[TextView] = None
   private[this] var playAgainButton: Option[(Button, Button)] = None
@@ -23,7 +24,7 @@ class GameEndedActivity extends StyledActivity {
   override def onCreate(state: Bundle): Unit = {
     super.onCreate(state)
 
-    setContentView(R.layout.after_game_menu_layout)
+    setContentView(R.layout.game_ended_layout)
 
     gameEndedText = Some(find[TextView](R.id.text_game_ended))
     playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
@@ -35,6 +36,10 @@ class GameEndedActivity extends StyledActivity {
     gameCourseButton.get onClick onReplay
     showGameEndButton.get onClick onShowGameEnd
     backButton.get onClick onBack
+
+    if (!Configuration.isPaid) {
+      loadAdToStub(R.id.stub_game_ended_ad)
+    }
   }
 
   override def onStop(): Unit = {
