@@ -34,7 +34,7 @@ class Field(quadrant: Quadrant.Value, resources: Resources)
   private[this] var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   def setValue(v: Option[Player.Value], animateChange: Boolean): Unit = {
-    if(animateChange && v != value) {
+    if (animateChange && v != value) {
       shakeAnimation.get.stop()
       rotationAnimation.get.start()
     }
@@ -98,6 +98,11 @@ class Field(quadrant: Quadrant.Value, resources: Resources)
     case Quadrant.second => outerColor2
     case Quadrant.third => outerColor2
     case Quadrant.fourth => outerColor1
+  }
+
+  def stopAnimations(): Unit = {
+    rotationAnimation.get.stop()
+    shakeAnimation.get.stop()
   }
 
   override def discardIllegal(): Unit = {

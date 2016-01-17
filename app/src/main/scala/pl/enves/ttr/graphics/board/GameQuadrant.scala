@@ -55,7 +55,7 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
       val rotationNew = context.game.quadrantRotation(quadrant)
       val rotationDiff = rotationNew sub rotationOld
 
-      val animateChange = rotationNew == rotationOld
+      val animateChange = rotationDiff == QRotation.r0
       for (x <- 0 until Quadrant.size) {
         for (y <- 0 until Quadrant.size) {
           fields(x)(y).setValue(context.game.quadrantField(quadrant, x, y), animateChange)
@@ -71,7 +71,7 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
 
         for (x <- 0 until Quadrant.size) {
           for (y <- 0 until Quadrant.size) {
-            fields(x)(y).discardIllegal()
+            fields(x)(y).stopAnimations()
           }
         }
       }
