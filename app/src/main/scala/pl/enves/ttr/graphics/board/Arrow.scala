@@ -13,28 +13,32 @@ import pl.enves.ttr.logic.{QRotation, Quadrant}
 class Arrow(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
   extends SceneObject with ColorManip with Illegal {
 
-  var square: Option[AbstractGeometry] = None
+  private[this] var square: Option[AbstractGeometry] = None
 
-  var maskShader: Option[MaskShader] = None
+  private[this] var maskShader: Option[MaskShader] = None
 
-  private var shakeAnimation: Option[Shake] = None
+  private[this] var shakeAnimation: Option[Shake] = None
 
-  var arrow: Option[Int] = None
+  private[this] var arrow: Option[Int] = None
 
-  var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var colorActive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  var colorInactive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var colorActive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var colorInactive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  var active = false
+  private[this] var active = false
 
-  def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
+  def setActive(a: Boolean): Unit = {
+    active = a
+  }
+
+  private def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => resources.getTheme.color1
     case Quadrant.second => resources.getTheme.color2
     case Quadrant.third => resources.getTheme.color2
     case Quadrant.fourth => resources.getTheme.color1
   }
 
-  def arrowRotation(quadrant: Quadrant.Value): Float = quadrant match {
+  private def arrowRotation(quadrant: Quadrant.Value): Float = quadrant match {
     case Quadrant.first => 0.0f
     case Quadrant.second => 90.0f
     case Quadrant.third => 270.0f

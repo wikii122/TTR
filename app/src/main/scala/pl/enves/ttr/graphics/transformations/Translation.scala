@@ -4,9 +4,9 @@ import android.opengl.Matrix
 
 class Translation(x: Float, y: Float, z: Float, enabled: Boolean) extends Transformation(enabled) {
 
-  private var tx = x
-  private var ty = y
-  private var tz = z
+  private[this] var tx = x
+  private[this] var ty = y
+  private[this] var tz = z
 
   def setX(x: Float): Unit = tx = x
 

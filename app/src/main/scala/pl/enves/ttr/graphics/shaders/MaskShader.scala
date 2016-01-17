@@ -11,15 +11,15 @@ import pl.enves.ttr.graphics.{AbstractGeometry, MatrixStack}
 class MaskShader extends Shader {
 
   // Get handlers to attributes
-  val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
-  val texCoordHandle = GLES20.glGetAttribLocation(program, "a_MaskTexCoord")
+  private[this] val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
+  private[this] val texCoordHandle = GLES20.glGetAttribLocation(program, "a_MaskTexCoord")
 
   // Get handlers to uniforms
-  val MVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
-  val samplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
-  val color1Handle = GLES20.glGetUniformLocation(program, "u_Color1")
-  val color2Handle = GLES20.glGetUniformLocation(program, "u_Color2")
-  val color3Handle = GLES20.glGetUniformLocation(program, "u_Color3")
+  private[this] val MVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
+  private[this] val samplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
+  private[this] val color1Handle = GLES20.glGetUniformLocation(program, "u_Color1")
+  private[this] val color2Handle = GLES20.glGetUniformLocation(program, "u_Color2")
+  private[this] val color3Handle = GLES20.glGetUniformLocation(program, "u_Color3")
 
   override def getVertexShaderCode: String =
     """

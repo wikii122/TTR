@@ -25,11 +25,11 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
-  private var framesLastSecond = 0
-  private var themeNeedsUpdate = false
+  private[this] var framesLastSecond = 0
+  private[this] var themeNeedsUpdate = false
 
-  val mvMatrix = new MatrixStack(8)
-  val pMatrix = new MatrixStack()
+  private[this] val mvMatrix = new MatrixStack(8)
+  private[this] val pMatrix = new MatrixStack()
 
   def setCamera(mvMatrix: MatrixStack): Unit = {
     //In case of inconsistent use of push and pop

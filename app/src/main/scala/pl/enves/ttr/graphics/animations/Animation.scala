@@ -1,8 +1,8 @@
 package pl.enves.ttr.graphics.animations
 
 abstract class Animation(animationTime: Float) {
-  private var running = false
-  private var elapsed = 0.0f
+  private[this] var running = false
+  private[this] var elapsed = 0.0f
 
   def isRunning = running
 

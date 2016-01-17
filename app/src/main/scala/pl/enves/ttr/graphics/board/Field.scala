@@ -13,25 +13,25 @@ import pl.enves.ttr.logic._
 class Field(quadrant: Quadrant.Value, resources: Resources)
   extends SceneObject with ColorManip with Illegal {
 
-  private var value: Option[Player.Value] = None
-  private var winning = false
+  private[this] var value: Option[Player.Value] = None
+  private[this] var winning = false
 
-  var square: Option[AbstractGeometry] = None
+  private[this] var square: Option[AbstractGeometry] = None
 
-  var maskShader: Option[MaskShader] = None
+  private[this] var maskShader: Option[MaskShader] = None
 
-  var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  private var shakeAnimation: Option[Shake] = None
-  private var rotationAnimation: Option[FieldRotation] = None
+  private[this] var shakeAnimation: Option[Shake] = None
+  private[this] var rotationAnimation: Option[FieldRotation] = None
 
-  private var ring: Option[Int] = None
-  private var cross: Option[Int] = None
-  private var empty: Option[Int] = None
+  private[this] var ring: Option[Int] = None
+  private[this] var cross: Option[Int] = None
+  private[this] var empty: Option[Int] = None
 
-  private var outerColor1: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  private var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  private var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var outerColor1: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var outerColor2: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   def setValue(v: Option[Player.Value], animateChange: Boolean): Unit = {
     if(animateChange && v != value) {
@@ -93,7 +93,7 @@ class Field(quadrant: Quadrant.Value, resources: Resources)
     }
   }
 
-  def defaultOuterColor(quadrant: Quadrant.Value) = quadrant match {
+  private def defaultOuterColor(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => outerColor1
     case Quadrant.second => outerColor2
     case Quadrant.third => outerColor2

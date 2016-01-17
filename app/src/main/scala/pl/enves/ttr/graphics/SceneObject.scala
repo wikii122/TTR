@@ -5,11 +5,11 @@ import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, T
 import scala.collection.mutable
 
 trait SceneObject {
-  protected val children = mutable.ListBuffer[SceneObject]()
+  private[this] val children = mutable.ListBuffer[SceneObject]()
 
-  protected val transformations = mutable.ListBuffer[Transformation]()
+  private[this] val transformations = mutable.ListBuffer[Transformation]()
 
-  protected var visible = true
+  private[this] var visible = true
 
   protected def onUpdateResources(screenRatio: Float): Unit
 

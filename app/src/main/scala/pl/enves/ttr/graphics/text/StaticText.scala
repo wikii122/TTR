@@ -12,12 +12,12 @@ class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: 
                  maxW: Float, maxH: Float, alignment: TextAlignment)
   extends Logging with SceneObject {
 
-  private var textColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  private var backgroundColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var textColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var backgroundColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  private var texture: Option[Int] = None
-  private var geometry: Option[AbstractGeometry] = None
-  private var maskShader: Option[MaskShader] = None
+  private[this] var texture: Option[Int] = None
+  private[this] var geometry: Option[AbstractGeometry] = None
+  private[this] var maskShader: Option[MaskShader] = None
 
   override def onUpdateResources(screenRatio: Float): Unit = {
     texture = Some(resources.getTexture(textureId))

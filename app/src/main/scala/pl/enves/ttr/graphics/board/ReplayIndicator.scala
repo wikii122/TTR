@@ -14,9 +14,9 @@ import pl.enves.ttr.logic.{Game, GameManager}
  */
 class ReplayIndicator(context: Context with GameManager, resources: Resources) extends SceneObject with ColorManip {
 
-  visible = false
+  setVisible(false)
 
-  val replayText = new StaticText(resources, GeometryId.ReplayText, TextureId.Font2, 1.0f, 0.25f, TextAlignment.Center)
+  private[this] val replayText = new StaticText(resources, GeometryId.ReplayText, TextureId.Font2, 1.0f, 0.25f, TextAlignment.Center)
   addChild(replayText)
 
   override protected def onUpdateResources(screenRatio: Float): Unit = {
@@ -31,9 +31,9 @@ class ReplayIndicator(context: Context with GameManager, resources: Resources) e
   override protected def onAnimate(dt: Float): Unit = {
     val game = context.game
     if (game.gameType == Game.REPLAY) {
-      visible = true
+      setVisible(true)
     } else {
-      visible = false
+      setVisible(false)
     }
   }
 

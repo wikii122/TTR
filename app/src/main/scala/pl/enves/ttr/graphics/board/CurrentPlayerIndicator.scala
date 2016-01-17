@@ -17,15 +17,15 @@ import pl.enves.ttr.logic._
 class CurrentPlayerIndicator(context: Context with GameManager, resources: Resources)
   extends SceneObject with ColorManip {
 
-  val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
-  val player2TurnText = new StaticText(resources, GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val player2TurnText = new StaticText(resources, GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
   addChild(player1TurnText)
   addChild(player2TurnText)
 
-  val field = new Field(Quadrant.first, resources)
+  private[this] val field = new Field(Quadrant.first, resources)
   addChild(field)
 
-  var animation: Option[InfiniteRotation] = None
+  private[this] var animation: Option[InfiniteRotation] = None
 
   override protected def onUpdateResources(screenRatio: Float): Unit = {
     player1TurnText.addTranslation(-0.5f, 0.0f, 0.0f, true)

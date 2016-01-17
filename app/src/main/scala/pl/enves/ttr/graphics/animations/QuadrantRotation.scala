@@ -5,7 +5,7 @@ import pl.enves.ttr.graphics.transformations.{Rotation, Scale}
 class QuadrantRotation(animationTime: Float, rotation: Rotation, scale: Scale)
   extends Animation(animationTime) {
 
-  var ccw = false
+  private[this] var ccw = false
 
   def setCCW(c: Boolean) = ccw = c
 

@@ -13,10 +13,10 @@ import pl.enves.ttr.graphics.{AbstractGeometry, MatrixStack}
 
 abstract class Shader {
   // prepare shaders and OpenGL program
-  var vertexShader: Int = loadShader(GLES20.GL_VERTEX_SHADER, getVertexShaderCode)
-  var fragmentShader: Int = loadShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShaderCode)
+  private[this] val vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, getVertexShaderCode)
+  private[this] val fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, getFragmentShaderCode)
 
-  var program = GLES20.glCreateProgram() // create empty OpenGL Program
+  protected val program = GLES20.glCreateProgram() // create empty OpenGL Program
   checkGlError("glCreateProgram")
 
   GLES20.glAttachShader(program, vertexShader)
@@ -27,8 +27,9 @@ abstract class Shader {
 
   GLES20.glLinkProgram(program)
   checkGlError("glLinkProgram")
+
   // Get the link status.
-  final var linkStatus = new Array[Int](1)
+  private[this] val linkStatus = new Array[Int](1)
   GLES20.glGetProgramiv(program, GLES20.GL_LINK_STATUS, linkStatus, 0)
 
   // If the link failed, delete the program.
@@ -42,7 +43,7 @@ abstract class Shader {
     Log.e("Shader", "NoProgram")
   }
 
-  val mvpMatrix = new Array[Float](16)
+  protected val mvpMatrix = new Array[Float](16)
 
   protected def getVertexShaderCode: String
 
@@ -52,7 +53,7 @@ abstract class Shader {
 
   def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: AbstractGeometry, data: dataType)
 
-  def checkGlError(glOperation: String) {
+  private def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()
     while (error != GLES20.GL_NO_ERROR) {
       Log.e("Shader", glOperation + ": glError " + error)
@@ -60,7 +61,7 @@ abstract class Shader {
     }
   }
 
-  def loadShader(shaderType: Int, shaderCode: String): Int = {
+  private def loadShader(shaderType: Int, shaderCode: String): Int = {
     // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
     // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
     val shader = GLES20.glCreateShader(shaderType)
@@ -79,7 +80,7 @@ abstract class Shader {
     return shader
   }
 
-  def makeMVPMatrix(mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
+  protected def makeMVPMatrix(mvMatrix: MatrixStack, pMatrix: MatrixStack) = {
     Matrix.multiplyMM(mvpMatrix, 0, pMatrix.get(), 0, mvMatrix.get(), 0)
   }
 }

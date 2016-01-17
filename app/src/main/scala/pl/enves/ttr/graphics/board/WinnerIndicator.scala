@@ -15,15 +15,15 @@ import pl.enves.ttr.logic.{Game, GameManager, Quadrant}
  */
 class WinnerIndicator(context: Context with GameManager, resources: Resources) extends SceneObject with ColorManip {
 
-  visible = false
+  setVisible(false)
 
-  val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
   addChild(winnerText)
 
-  val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f, TextAlignment.Center)
+  private[this] val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f, TextAlignment.Center)
   addChild(drawText)
 
-  val field = new Field(Quadrant.second, resources)
+  private[this] val field = new Field(Quadrant.second, resources)
   addChild(field)
 
   override protected def onUpdateResources(screenRatio: Float): Unit = {
@@ -46,7 +46,7 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
   override protected def onAnimate(dt: Float): Unit = {
     val game = context.game
     if (game.finished || game.gameType == Game.REPLAY) {
-      visible = true
+      setVisible(true)
       if (game.winner.isDefined) {
         field.setValue(game.winner, false)
         field.setVisible(true)
@@ -58,7 +58,7 @@ class WinnerIndicator(context: Context with GameManager, resources: Resources) e
         drawText.setVisible(true)
       }
     } else {
-      visible = false
+      setVisible(false)
     }
   }
 

@@ -13,11 +13,11 @@ import pl.enves.ttr.utils.Algebra
  */
 class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  private var rotationOld = context.game.quadrantRotation(quadrant)
+  private[this] var rotationOld = context.game.quadrantRotation(quadrant)
 
-  private var rotationAnimation: Option[QuadrantRotation] = None
+  private[this] var rotationAnimation: Option[QuadrantRotation] = None
 
-  private val fields = Array.fill[Field](Quadrant.size, Quadrant.size)(new Field(quadrant, resources))
+  private[this] val fields = Array.fill[Field](Quadrant.size, Quadrant.size)(new Field(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
     for (y <- 0 until Quadrant.size) {
       addChild(fields(x)(y))
@@ -43,7 +43,7 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
 
   override protected def onUpdateTheme(): Unit = {}
 
-  def checkWinning(x: Int, y: Int): Boolean = {
+  private def checkWinning(x: Int, y: Int): Boolean = {
     val game = context.game
     val nx = x + Quadrant.offset(quadrant)._1
     val ny = y + Quadrant.offset(quadrant)._2
@@ -108,7 +108,7 @@ class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, 
     }
   }
 
-  def processClick(ffx: Float, ffy: Float): Boolean = {
+  private def processClick(ffx: Float, ffy: Float): Boolean = {
     val fx = ffx * 0.9f
     val fy = ffy * 0.9f
     //Board is just a square

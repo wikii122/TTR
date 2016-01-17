@@ -5,8 +5,8 @@ import android.opengl.Matrix
 import pl.enves.androidx.Logging
 
 class MatrixStack(size:Int = 1) extends Logging {
-  private var stack = new Array[Array[Float]](size)
-  private var pointer: Int = 0
+  private[this] val stack = new Array[Array[Float]](size)
+  private[this] var pointer: Int = 0
 
   for(i <- 0 to size-1) {
     stack(i) = new Array[Float](16)

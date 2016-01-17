@@ -4,7 +4,7 @@ package pl.enves.ttr.graphics.transformations
  * @param enabled set to false if transformation is used in temporary animation
  */
 abstract class Transformation(enabled: Boolean) {
-  private var _enabled = enabled
+  private[this] var _enabled = enabled
 
   def isEnabled = _enabled
 

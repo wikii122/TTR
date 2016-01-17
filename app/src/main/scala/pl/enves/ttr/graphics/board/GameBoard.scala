@@ -12,20 +12,20 @@ import pl.enves.ttr.utils.Algebra
  */
 class GameBoard(context: Context with GameManager, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  val currentPlayerIndicator = new CurrentPlayerIndicator(context, resources)
+  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator(context, resources)
   addChild(currentPlayerIndicator)
 
-  val winnerIndicator = new WinnerIndicator(context, resources)
+  private[this] val winnerIndicator = new WinnerIndicator(context, resources)
   addChild(winnerIndicator)
 
-  val quadrants = Map(
+  private[this] val quadrants = Map(
     (Quadrant.first, new GameQuadrant(context, Quadrant.first, resources)),
     (Quadrant.second, new GameQuadrant(context, Quadrant.second, resources)),
     (Quadrant.third, new GameQuadrant(context, Quadrant.third, resources)),
     (Quadrant.fourth, new GameQuadrant(context, Quadrant.fourth, resources))
   )
 
-  val allArrows = Array(
+  private[this] val allArrows = Array(
     (Quadrant.first, QRotation.r90),
     (Quadrant.first, QRotation.r270),
     (Quadrant.second, QRotation.r90),
@@ -36,7 +36,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     (Quadrant.fourth, QRotation.r270)
   )
 
-  val arrows = allArrows map { key => key -> new Arrow(key._1, key._2, resources) } toMap
+  private[this] val arrows = allArrows map { key => key -> new Arrow(key._1, key._2, resources) } toMap
 
   for ((name, arrow) <- arrows) {
     addChild(arrow)
@@ -46,7 +46,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     addChild(quadrants(quadrant))
   }
 
-  val replayIndicator = new ReplayIndicator(context, resources)
+  private[this] val replayIndicator = new ReplayIndicator(context, resources)
   addChild(replayIndicator)
 
   override def onUpdateResources(screenRatio: Float): Unit = {
@@ -90,21 +90,21 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
   override protected def onUpdateTheme(): Unit = {
   }
 
-  def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
+  private def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-1.5f, -1.5f)
     case Quadrant.second => (1.5f, -1.5f)
     case Quadrant.third => (-1.5f, 1.5f)
     case Quadrant.fourth => (1.5f, 1.5f)
   }
 
-  def arrowRightPosition(quadrant: Quadrant.Value) = quadrant match {
+  private def arrowRightPosition(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-2.5f, -3.5f)
     case Quadrant.second => (3.5f, -2.5f)
     case Quadrant.third => (-3.5f, 2.5f)
     case Quadrant.fourth => (2.5f, 3.5f)
   }
 
-  def arrowLeftPosition(quadrant: Quadrant.Value) = quadrant match {
+  private def arrowLeftPosition(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-3.5f, -2.5f)
     case Quadrant.second => (2.5f, -3.5f)
     case Quadrant.third => (-2.5f, 3.5f)
@@ -114,7 +114,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
   override def onAnimate(dt: Float): Unit = {
     val availableRotations = context.game.availableRotations
     for ((name, arrow) <- arrows) {
-      arrow.active = availableRotations.contains(name._1)
+      arrow.setActive(availableRotations.contains(name._1))
     }
   }
 
@@ -153,7 +153,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     return None
   }
 
-  def processClick(fx: Float, fy: Float): Boolean = {
+  private def processClick(fx: Float, fy: Float): Boolean = {
     val game = context.game
     val arrow = matchArrow(fx, fy)
     if (arrow.nonEmpty) {

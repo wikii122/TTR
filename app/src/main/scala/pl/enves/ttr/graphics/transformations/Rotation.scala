@@ -4,10 +4,10 @@ import android.opengl.Matrix
 
 class Rotation(a: Float, x: Float, y: Float, z: Float, enabled: Boolean) extends Transformation(enabled) {
 
-  private var ra = a
-  private var rx = x
-  private var ry = y
-  private var rz = z
+  private[this] var ra = a
+  private[this] var rx = x
+  private[this] var ry = y
+  private[this] var rz = z
 
   def setA(a: Float): Unit = ra = a
 

@@ -23,17 +23,17 @@ import scala.collection.mutable
 
 class Resources(context: Context, game: Game) extends Logging {
 
-  private val assetManager: AssetManager = context.getResources.getAssets
+  private[this] val assetManager: AssetManager = context.getResources.getAssets
 
-  private val models: mutable.HashMap[GeometryId.Value, AbstractGeometry] = mutable.HashMap()
+  private[this] val models: mutable.HashMap[GeometryId.Value, AbstractGeometry] = mutable.HashMap()
 
-  private val textures: mutable.HashMap[TextureId.Value, Int] = mutable.HashMap()
+  private[this] val textures: mutable.HashMap[TextureId.Value, Int] = mutable.HashMap()
 
-  private var maskShader: Option[MaskShader] = None
+  private[this] var maskShader: Option[MaskShader] = None
 
-  private var _theme: Option[Theme] = None
+  private[this] var _theme: Option[Theme] = None
 
-  private val typeFace = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
+  private[this] val typeFace = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")

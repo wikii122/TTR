@@ -4,9 +4,9 @@ import android.opengl.Matrix
 
 class Scale(x: Float, y: Float, z: Float, enabled: Boolean) extends Transformation(enabled) {
 
-  private var sx = x
-  private var sy = y
-  private var sz = z
+  private[this] var sx = x
+  private[this] var sy = y
+  private[this] var sz = z
 
   def setX(x: Float): Unit = sx = x
 
