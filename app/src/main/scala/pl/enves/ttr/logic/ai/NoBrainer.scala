@@ -6,7 +6,7 @@ import pl.enves.ttr.logic.inner.Board
 import scala.collection.mutable
 
 class NoBrainer(board: Board, success: Move => Unit) {
-  val moves: mutable.ArrayBuffer[Move] = mutable.ArrayBuffer[Move]()
+  private[this] val moves: mutable.ArrayBuffer[Move] = mutable.ArrayBuffer[Move]()
 
   for (x <- 0 until Quadrant.size) {
     for (y <- 0 until Quadrant.size) {

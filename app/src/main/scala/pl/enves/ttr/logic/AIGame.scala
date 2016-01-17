@@ -12,19 +12,19 @@ import spray.json._
 class AIGame(board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.AI
 
-  private var ai: Option[MinMax] = None
+  private[this] var ai: Option[MinMax] = None
 
-  protected var human: Option[Player.Value] = None
+  private[this] var human: Option[Player.Value] = None
 
-  private val minTime: Int = 1000
+  private[this] val minTime: Int = 1000
 
-  private var maxTime: Int = 3000
+  private[this] var maxTime: Int = 3000
 
-  private val maxDepth: Int = 5
+  private[this] val maxDepth: Int = 5
 
-  private val adaptiveDepth = true
+  private[this] val adaptiveDepth = true
 
-  private val randomizeDecisions = true
+  private[this] val randomizeDecisions = true
 
   //TODO: Make interface for different AI classes
   def startThinking(): Unit = {

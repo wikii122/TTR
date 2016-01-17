@@ -1,8 +1,8 @@
 package pl.enves.ttr.logic.ai
 
 class Counter() {
-  private var nx: Int = 0
-  private var no: Int = 0
+  private[this] var nx: Int = 0
+  private[this] var no: Int = 0
 
   def add(player: Int): Unit = {
     if (player == LightField.X) {

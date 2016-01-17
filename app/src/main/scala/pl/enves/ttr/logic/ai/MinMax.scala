@@ -18,20 +18,20 @@ class MinMax(board: Board, player: Player.Value, minTime: Int, maxTime: Int, max
 
   private class CacheTooBigException extends Exception
 
-  private var stopped = false
+  private[this] var stopped = false
 
-  private val maxCachedEntries = 40000
+  private[this] val maxCachedEntries = 40000
 
   private case class ValueDepth(value: Int, depth: Int)
 
-  private var minMaxCalls = 0
-  private val thisValues = mutable.HashMap[Int, ValueDepth]()
-  private var thisBestMoves = mutable.HashMap[Int, Move]()
-  private var previousBestMoves = mutable.HashMap[Int, Move]()
+  private[this] var minMaxCalls = 0
+  private[this] val thisValues = mutable.HashMap[Int, ValueDepth]()
+  private[this] var thisBestMoves = mutable.HashMap[Int, Move]()
+  private[this] var previousBestMoves = mutable.HashMap[Int, Move]()
 
-  private val startTime = System.currentTimeMillis()
+  private[this] val startTime = System.currentTimeMillis()
 
-  private val boardModel = BoardModel(board)
+  private[this] val boardModel = BoardModel(board)
 
   def stop(): Unit = {
     this.synchronized {

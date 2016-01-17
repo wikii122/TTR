@@ -14,56 +14,56 @@ import scala.util.Random
  * TODO: Optimize more
  */
 class BoardModel() extends Logging {
-  private val five = for (x <- 0 until 5) yield x
-  private val six = for (x <- 0 until 6) yield x
-  private val two = for (x <- 0 until 2) yield x
+  private[this] val five = for (x <- 0 until 5) yield x
+  private[this] val six = for (x <- 0 until 6) yield x
+  private[this] val two = for (x <- 0 until 2) yield x
 
-  private val quadrants = Array.fill(4) {
+  private[this] val quadrants = Array.fill(4) {
     BoardQuadrantModel()
   }
 
-  private var freeFields = 36
+  private[this] var freeFields = 36
 
-  val state = Array.fill[Int] (6, 6) { LightField.None }
+  private[this] val state = Array.fill[Int] (6, 6) { LightField.None }
 
-  private val baseCountersMap = Array.fill(6, 6) {
+  private[this] val baseCountersMap = Array.fill(6, 6) {
     ArrayBuffer[Counter]()
   }
 
-  private val baseCounters = prepareBaseCounters(baseCountersMap)
+  private[this] val baseCounters = prepareBaseCounters(baseCountersMap)
 
   private val rotatedCountersMap = Array.fill(6, 6) {
     ArrayBuffer[Counter]()
   }
 
-  private val rotatedLeftCounters = Array.tabulate(4) { quadrant =>
+  private[this] val rotatedLeftCounters = Array.tabulate(4) { quadrant =>
     prepareRotateCounters(Quadrant(quadrant), QRotation.r90, baseCounters, rotatedCountersMap)
   }
 
-  private val rotatedRightCounters = Array.tabulate(4) { quadrant =>
+  private[this] val rotatedRightCounters = Array.tabulate(4) { quadrant =>
     prepareRotateCounters(Quadrant(quadrant), QRotation.r270, baseCounters, rotatedCountersMap)
   }
 
   //Their purpose is reducing GC pressure by reducing fresh allocations
-  private val _cached_moves_positions = Array.tabulate(6, 6) {
+  private[this] val _cached_moves_positions = Array.tabulate(6, 6) {
     (x: Int, y: Int) => new Position(x, y)
   }
 
-  private val _cached_moves_rotations_left = Array(
+  private[this] val _cached_moves_rotations_left = Array(
     new Rotation(Quadrant.first, QRotation.r90),
     new Rotation(Quadrant.second, QRotation.r90),
     new Rotation(Quadrant.third, QRotation.r90),
     new Rotation(Quadrant.fourth, QRotation.r90)
   )
 
-  private val _cached_moves_rotations_right = Array(
+  private[this] val _cached_moves_rotations_right = Array(
     new Rotation(Quadrant.first, QRotation.r270),
     new Rotation(Quadrant.second, QRotation.r270),
     new Rotation(Quadrant.third, QRotation.r270),
     new Rotation(Quadrant.fourth, QRotation.r270)
   )
 
-  private val generator = new Random()
+  private[this] val generator = new Random()
 
   printCountersNum(baseCountersMap)
   printCountersNum(rotatedCountersMap)
@@ -689,6 +689,10 @@ class BoardModel() extends Logging {
       log(s"state: $s0 $s1 $s2 $s3 $s4 $s5")
     }
   }
+
+  def setFreeFields(ff: Int): Unit = freeFields = ff
+
+  def setState(x: Int, y: Int, f: Int): Unit = state(x)(y) = f
 }
 
 object BoardModel {
@@ -700,17 +704,17 @@ object BoardModel {
 
   def apply(old: Board): BoardModel = {
     val board = new BoardModel()
-    board.freeFields = old.getFreeFields
+    board.setFreeFields(old.getFreeFields)
 
     for (q <- Quadrant.values) {
       val oldq = old.getQuadrant(q)
-      val newq = board.quadrants(q.id)
+      val newq = board.getQuadrant(q.id)
       newq.setCooldown(oldq.getCooldown)
     }
     val state = old.lines
     for (i <- 0 until 2 * Quadrant.size;
          j <- 0 until 2 * Quadrant.size
-    ) board.state(i)(j) = LightField.fromOption(state(j)(i))
+    ) board.setState(i, j, LightField.fromOption(state(j)(i)))
 
     board.countBoard()
 
