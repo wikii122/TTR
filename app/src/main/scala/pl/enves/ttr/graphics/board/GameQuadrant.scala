@@ -58,10 +58,15 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     val rotationDiff = rotationNew sub rotationOld
 
     val animateChange = rotationDiff == QRotation.r0
-    for (x <- 0 until Quadrant.size) {
-      for (y <- 0 until Quadrant.size) {
+    var x = 0
+    var y = 0
+    while (x < Quadrant.size) {
+      y = 0
+      while (y < Quadrant.size) {
         fields(x)(y).setValue(game.quadrantField(quadrant, x, y), animateChange)
+        y += 1
       }
+      x += 1
     }
 
     if (rotationDiff != QRotation.r0) {
@@ -71,18 +76,26 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
 
       rotationAnimation.get.start()
 
-      for (x <- 0 until Quadrant.size) {
-        for (y <- 0 until Quadrant.size) {
+      x = 0
+      while (x < Quadrant.size) {
+        y = 0
+        while (y < Quadrant.size) {
           fields(x)(y).stopAnimations()
+          y += 1
         }
+        x += 1
       }
     }
     rotationOld = rotationNew
 
-    for (x <- 0 until Quadrant.size) {
-      for (y <- 0 until Quadrant.size) {
+    x = 0
+    while (x < Quadrant.size) {
+      y = 0
+      while (y < Quadrant.size) {
         fields(x)(y).setWinning(checkWinning(x, y))
+        y += 1
       }
+      x += 1
     }
 
     rotationAnimation.get.animate(dt)

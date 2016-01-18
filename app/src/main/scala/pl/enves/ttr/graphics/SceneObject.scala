@@ -7,9 +7,9 @@ import pl.enves.ttr.utils.{Algebra, Ray, Triangle}
 import scala.collection.mutable
 
 trait SceneObject extends Algebra {
-  private[this] val children = mutable.ListBuffer[SceneObject]()
+  private[this] val children = mutable.ArrayBuffer[SceneObject]()
 
-  private[this] val transformations = mutable.ListBuffer[Transformation]()
+  private[this] val transformations = mutable.ArrayBuffer[Transformation]()
 
   private[this] var visible = true
 
@@ -60,35 +60,50 @@ trait SceneObject extends Algebra {
 
   def reset(): Unit = {
     transformations.clear()
-    for (child <- children) {
-      child.reset()
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).reset()
+      i += 1
     }
   }
 
   protected def transformToPosition(mvMatrix: MatrixStack): Unit = {
-    for (transformation <- transformations) {
-      transformation.transform(mvMatrix.get())
+    val size = transformations.size
+    var i = 0
+    while (i < size) {
+      transformations(i).transform(mvMatrix.get())
+      i += 1
     }
   }
 
   def updateResources(screenRatio: Float): Unit = {
     onUpdateResources(screenRatio)
-    for (child <- children) {
-      child.updateResources(screenRatio)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).updateResources(screenRatio)
+      i += 1
     }
   }
 
   def updateTheme(): Unit = {
     onUpdateTheme()
-    for (child <- children) {
-      child.updateTheme()
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).updateTheme()
+      i += 1
     }
   }
 
   def animate(dt: Float): Unit = {
     onAnimate(dt)
-    for (child <- children) {
-      child.animate(dt)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).animate(dt)
+      i += 1
     }
   }
 
@@ -97,8 +112,11 @@ trait SceneObject extends Algebra {
       mvMatrix.push()
       transformToPosition(mvMatrix)
       onDraw(mvMatrix, pMatrix)
-      for (child <- children) {
-        child.draw(mvMatrix, pMatrix)
+      val size = children.size
+      var i = 0
+      while (i < size) {
+        children(i).draw(mvMatrix, pMatrix)
+        i += 1
       }
       mvMatrix.pop()
     }
@@ -135,8 +153,11 @@ trait SceneObject extends Algebra {
       false
     }
 
-    for (child <- children) {
-      result |= child.click(eyeSpaceRay, mvMatrix)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      result |= children(i).click(eyeSpaceRay, mvMatrix)
+      i += 1
     }
 
     mvMatrix.pop()
