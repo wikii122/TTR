@@ -9,8 +9,9 @@ import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.Triangle
 
-class Field(quadrant: Quadrant.Value, resources: Resources)
+class Field(game: Game, quadrant: Quadrant.Value, resources: Resources)
   extends SceneObject with ColorManip with Illegal {
 
   private[this] var value: Option[Player.Value] = None
@@ -74,8 +75,6 @@ class Field(quadrant: Quadrant.Value, resources: Resources)
     rotationAnimation.get.animate(dt)
   }
 
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
-
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     val outer = if (winning) {
       winnerOuterColor
@@ -92,6 +91,8 @@ class Field(quadrant: Quadrant.Value, resources: Resources)
       maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, empty.get))
     }
   }
+
+  override def getBoundingFigure: Array[Triangle] = square.get.getBoundingFigure
 
   private def defaultOuterColor(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => outerColor1

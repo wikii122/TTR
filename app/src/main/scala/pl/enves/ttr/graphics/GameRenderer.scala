@@ -12,16 +12,17 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
 import pl.enves.androidx.color.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.Algebra
 import pl.enves.ttr.utils.themes._
 
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends Renderer with Logging {
+class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends Renderer with Logging with Algebra {
   log("Creating")
 
   private[this] val resources = new Resources(context, context.game)
-  private[this] val board = new GameBoard(context, resources)
+  private[this] val board = new GameBoard(context.game, resources)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
@@ -51,13 +52,13 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
     val now = System.currentTimeMillis()
 
     if (lastFrame != 0) {
-      setCamera(mvMatrix)
-      board.animate((now - lastFrame) / 1000.0f)
-
       this.synchronized {
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
-        board.draw(mvMatrix, pMatrix)
+        setCamera(mvMatrix)
+        board.animate((now - lastFrame) / 1000.0f)
       }
+
+      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
+      board.draw(mvMatrix, pMatrix)
 
       framesLastSecond += 1
 
@@ -122,12 +123,21 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
       pMatrix.get().copyToArray(tempPMatrix.get())
       setCamera(tempMVMatrix)
       try {
-        board.click(clickX, clickY, viewport, tempMVMatrix, tempPMatrix)
+        val ray = unProjectMatrices(tempMVMatrix.get(), tempPMatrix.get(), clickX, clickY, viewport)
+        try {
+          this.synchronized {
+            board.click(ray, tempMVMatrix)
+          }
+        } catch {
+          //TODO: remind user that game has ended
+          case e: GameFinished =>
+          case e: GameWon =>
+          case e: GameDrawn =>
+        }
       } catch {
-        //TODO: remind user that game has ended
-        case e: GameFinished =>
-        case e: GameWon =>
-        case e: GameDrawn =>
+        case e: UnProjectException =>
+          error(e.getMessage)
+          return false
       }
     }
 

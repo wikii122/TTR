@@ -8,13 +8,11 @@ trait Algebra extends Vector3 {
 
   class UnProjectException(msg: String) extends RuntimeException(msg)
 
-  class IntersectException(msg: String) extends RuntimeException(msg)
-
   def unProjectMatrices(mvMatrix: Array[Float],
                         pMatrix: Array[Float],
                         clickX: Float,
                         clickY: Float,
-                        viewport: Array[Int]): (Array[Float], Array[Float]) = {
+                        viewport: Array[Int]): Ray = {
     val temp1 = new Array[Float](4)
     val temp2 = new Array[Float](4)
     val near = new Array[Float](3)
@@ -35,43 +33,59 @@ trait Algebra extends Vector3 {
     far(1) = temp2(1) / temp2(3)
     far(2) = temp2(2) / temp2(3)
 
-    return (near, far)
+    return Ray(near, far)
   }
 
-  def intersectRayAndXYPlane(P0: Array[Float], P1: Array[Float]): Array[Float] = {
-    val I = new Array[Float](3)
-    val planePoint = Array(0.0f, 0.0f, 0.0f)
-    val planeNormal = Array(0.0f, 0.0f, 1.0f)
+  /**
+   * https://en.wikipedia.org/wiki/M%C3%B6ller%E2%80%93Trumbore_intersection_algorithm
+   */
+  def isRayIntersectingTriangle(triangle: Triangle, ray: Ray): Boolean = {
+    val EPSILON = 0.0001f
 
-    var r, a, b: Float = 0.0f
+    //ray direction
+    val D = sub(ray.P1, ray.P0)
 
-    val SMALL_NUM = 0.0001f
+    //Find vectors for two edges sharing V1
+    val e1 = sub(triangle.V2, triangle.V1) //Edge1
+    val e2 = sub(triangle.V3, triangle.V1) //Edge2
 
-    val rayDirection = sub(P1, P0)
-    val w0 = sub(P0, planePoint)
-    a = -dotProduct(planeNormal, w0)
-    b = dotProduct(planeNormal, rayDirection)
-    if (Math.abs(b) < SMALL_NUM) {
-      //if (a == 0) {
-      // throw new IntersectException("Ray lies in plane")
-      //}
-      throw new IntersectException("Ray is parallel to plane")
+    //Begin calculating determinant - also used to calculate u parameter
+    val P = crossProduct(D, e2)
+
+    //if determinant is near zero, ray lies in plane of triangle
+    val det = dotProduct(e1, P)
+
+    //NOT CULLING
+    if (det > -EPSILON && det < EPSILON) return false
+
+    val inv_det = 1.0f / det
+
+    //calculate distance from V1 to ray origin
+    val T = sub(ray.P0, triangle.V1)
+
+    //Calculate u parameter and test bound
+    val u = dotProduct(T, P) * inv_det
+
+    //The intersection lies outside of the triangle
+    if (u < 0.0f || u > 1.0f) return false
+
+    //Prepare to test v parameter
+    val Q = crossProduct(T, e1)
+
+    //Calculate V parameter and test bound
+    val v = dotProduct(D, Q) * inv_det
+
+    //The intersection lies outside of the triangle
+    if (v < 0.0f || u + v > 1.0f) return false
+
+    val t = dotProduct(e2, Q) * inv_det
+
+    if (t > EPSILON) {
+      //ray intersection
+      return true
     }
 
-    // Check if specified segment intersects with plane
-    r = a / b
-    if (r < 0.0f || r > 1.0f) {
-      throw new IntersectException("Ray segment doesn't intersect with plane")
-    }
-
-    // Get intersection point
-    val temp = scale(r, rayDirection)
-    val tI = add(P0, temp)
-
-    tI.indices foreach {
-      i => I(i) = tI(i)
-    }
-
-    return I
+    // No hit, no win
+    return false
   }
 }

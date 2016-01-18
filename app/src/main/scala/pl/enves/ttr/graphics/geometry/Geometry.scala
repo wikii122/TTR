@@ -3,6 +3,7 @@ package pl.enves.ttr.graphics.geometry
 import java.nio.{ByteBuffer, ByteOrder, IntBuffer}
 
 import android.opengl.GLES20
+import pl.enves.ttr.utils.Triangle
 
 trait Geometry {
   def getNumVertices: Int
@@ -11,6 +12,8 @@ trait Geometry {
   def getDrawMode: Int
 
   def getBuffers: Buffers[Int]
+
+  def getBoundingFigure: Array[Triangle]
 
   final val PositionSize = 3
   final val TexCoordSize = 2

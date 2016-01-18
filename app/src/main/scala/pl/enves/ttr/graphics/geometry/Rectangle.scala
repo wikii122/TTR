@@ -1,4 +1,4 @@
-package pl.enves.ttr.graphics.models
+package pl.enves.ttr.graphics.geometry
 
 /**
  * Rectangle of GL_TRIANGLES

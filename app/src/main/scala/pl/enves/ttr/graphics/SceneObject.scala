@@ -1,25 +1,29 @@
 package pl.enves.ttr.graphics
 
+import android.opengl.Matrix
 import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, Translation}
+import pl.enves.ttr.utils.{Algebra, Ray, Triangle}
 
 import scala.collection.mutable
 
-trait SceneObject {
+trait SceneObject extends Algebra {
   private[this] val children = mutable.ListBuffer[SceneObject]()
 
   private[this] val transformations = mutable.ListBuffer[Transformation]()
 
   private[this] var visible = true
 
-  protected def onUpdateResources(screenRatio: Float): Unit
+  protected def onUpdateResources(screenRatio: Float): Unit = {}
 
-  protected def onUpdateTheme(): Unit
+  protected def onUpdateTheme(): Unit = {}
 
-  protected def onAnimate(dt: Float): Unit
+  protected def onAnimate(dt: Float): Unit = {}
 
-  protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit
+  protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {}
 
-  protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean
+  protected def onClick(): Unit = {}
+
+  protected def getBoundingFigure: Array[Triangle] = Array[Triangle]()
 
   def addChild(child: SceneObject): Unit = {
     children.append(child)
@@ -100,18 +104,41 @@ trait SceneObject {
     }
   }
 
-  def click(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
+  def click(eyeSpaceRay: Ray, mvMatrix: MatrixStack): Boolean = {
     mvMatrix.push()
     transformToPosition(mvMatrix)
-    var result = false
-    for (child <- children) {
-      if (!result) {
-        result = child.click(clickX, clickY, viewport, mvMatrix, pMatrix)
+    val boundingFigure = getBoundingFigure
+
+    var result = if (boundingFigure.length != 0) {
+
+      val p1 = Array(0.0f, 0.0f, 0.0f, 1.0f)
+      val p2 = Array(0.0f, 0.0f, 0.0f, 1.0f)
+      val p3 = Array(0.0f, 0.0f, 0.0f, 1.0f)
+
+      var intersect = false
+      var triangle = 0
+      while (triangle < boundingFigure.length && !intersect) {
+        Matrix.multiplyMV(p1, 0, mvMatrix.get(), 0, boundingFigure(triangle).V1, 0)
+        Matrix.multiplyMV(p2, 0, mvMatrix.get(), 0, boundingFigure(triangle).V2, 0)
+        Matrix.multiplyMV(p3, 0, mvMatrix.get(), 0, boundingFigure(triangle).V3, 0)
+        val eyeSpaceTriangle = Triangle(p1, p2, p3)
+
+        intersect |= isRayIntersectingTriangle(eyeSpaceTriangle, eyeSpaceRay)
+        triangle += 1
       }
+      if (intersect) {
+        onClick()
+      }
+
+      intersect
+    } else {
+      false
     }
-    if (!result) {
-      result = onClick(clickX, clickY, viewport, mvMatrix, pMatrix)
+
+    for (child <- children) {
+      result |= child.click(eyeSpaceRay, mvMatrix)
     }
+
     mvMatrix.pop()
     return result
   }

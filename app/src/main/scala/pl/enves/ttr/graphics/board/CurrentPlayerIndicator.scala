@@ -1,6 +1,5 @@
 package pl.enves.ttr.graphics.board
 
-import android.content.Context
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
@@ -14,7 +13,7 @@ import pl.enves.ttr.logic._
 /**
  * Display current player in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator(context: Context with GameManager, resources: Resources)
+class CurrentPlayerIndicator(game: Game, resources: Resources)
   extends SceneObject with ColorManip {
 
   private[this] val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
@@ -22,7 +21,7 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
   addChild(player1TurnText)
   addChild(player2TurnText)
 
-  private[this] val field = new Field(Quadrant.first, resources)
+  private[this] val field = new Field(game, Quadrant.first, resources)
   addChild(field)
 
   private[this] var animation: Option[InfiniteRotation] = None
@@ -49,7 +48,6 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    val game = context.game
     field.setValue(Some(game.player), false)
 
     def setTextsStandard(): Unit = {
@@ -110,8 +108,4 @@ class CurrentPlayerIndicator(context: Context with GameManager, resources: Resou
 
     animation.get.animate(dt)
   }
-
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
-
-  override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {}
 }

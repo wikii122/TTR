@@ -1,6 +1,5 @@
 package pl.enves.ttr.graphics.board
 
-import android.content.Context
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.logic._
@@ -10,19 +9,19 @@ import pl.enves.ttr.utils.Algebra
  * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)
  * (0.0, 0.0) is in the middle
  */
-class GameBoard(context: Context with GameManager, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
 
-  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator(context, resources)
+  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator(game, resources)
   addChild(currentPlayerIndicator)
 
-  private[this] val winnerIndicator = new WinnerIndicator(context, resources)
+  private[this] val winnerIndicator = new WinnerIndicator(game, resources)
   addChild(winnerIndicator)
 
   private[this] val quadrants = Map(
-    (Quadrant.first, new GameQuadrant(context, Quadrant.first, resources)),
-    (Quadrant.second, new GameQuadrant(context, Quadrant.second, resources)),
-    (Quadrant.third, new GameQuadrant(context, Quadrant.third, resources)),
-    (Quadrant.fourth, new GameQuadrant(context, Quadrant.fourth, resources))
+    (Quadrant.first, new GameQuadrant(game, Quadrant.first, resources)),
+    (Quadrant.second, new GameQuadrant(game, Quadrant.second, resources)),
+    (Quadrant.third, new GameQuadrant(game, Quadrant.third, resources)),
+    (Quadrant.fourth, new GameQuadrant(game, Quadrant.fourth, resources))
   )
 
   private[this] val allArrows = Array(
@@ -36,7 +35,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     (Quadrant.fourth, QRotation.r270)
   )
 
-  private[this] val arrows = allArrows map { key => key -> new Arrow(key._1, key._2, resources) } toMap
+  private[this] val arrows = allArrows map { key => key -> new Arrow(game, key._1, key._2, resources) } toMap
 
   for ((name, arrow) <- arrows) {
     addChild(arrow)
@@ -46,7 +45,7 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     addChild(quadrants(quadrant))
   }
 
-  private[this] val replayIndicator = new ReplayIndicator(context, resources)
+  private[this] val replayIndicator = new ReplayIndicator(game, resources)
   addChild(replayIndicator)
 
   override def onUpdateResources(screenRatio: Float): Unit = {
@@ -87,9 +86,6 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
     }
   }
 
-  override protected def onUpdateTheme(): Unit = {
-  }
-
   private def quadrantCentre(quadrant: Quadrant.Value) = quadrant match {
     case Quadrant.first => (-1.5f, -1.5f)
     case Quadrant.second => (1.5f, -1.5f)
@@ -112,66 +108,9 @@ class GameBoard(context: Context with GameManager, resources: Resources) extends
   }
 
   override def onAnimate(dt: Float): Unit = {
-    val availableRotations = context.game.availableRotations
+    val availableRotations = game.availableRotations
     for ((name, arrow) <- arrows) {
       arrow.setActive(availableRotations.contains(name._1))
     }
-  }
-
-  override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-  }
-
-  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
-    try {
-      val (near, far) = unProjectMatrices(mvMatrix.get(), pMatrix.get(), clickX, clickY, viewport)
-      val I = intersectRayAndXYPlane(near, far)
-      return processClick(I(0), I(1))
-    } catch {
-      case e: UnProjectException =>
-        error(e.getMessage)
-        return false
-      case e: IntersectException =>
-        // In current scene configuration this shouldn't happen
-        error(e.getMessage)
-        return false
-    }
-  }
-
-  private def matchArrow(x: Float, y: Float): Option[(Quadrant.Value, QRotation.Value)] = {
-    for (quadrant <- Quadrant.values) {
-      val al = arrowLeftPosition(quadrant)
-      val ar = arrowRightPosition(quadrant)
-
-      //Arrow fields are just squares
-      if (x > al._1 - 0.5f && x < al._1 + 0.5f && y > al._2 - 0.5f && y < al._2 + 0.5f) {
-        return Some((quadrant, QRotation.r90))
-      }
-      if (x > ar._1 - 0.5f && x < ar._1 + 0.5f && y > ar._2 - 0.5f && y < ar._2 + 0.5f) {
-        return Some((quadrant, QRotation.r270))
-      }
-    }
-    return None
-  }
-
-  private def processClick(fx: Float, fy: Float): Boolean = {
-    val game = context.game
-    val arrow = matchArrow(fx, fy)
-    if (arrow.nonEmpty) {
-      val a = arrow.get
-      try {
-        val move = new Rotation(a._1, a._2)
-        quadrants(a._1).synchronized {
-          game.make(move)
-        }
-        arrows(a).discardIllegal()
-      } catch {
-        case e: RotationLocked =>
-          arrows(a).setIllegal()
-        case e: BoardLocked =>
-          arrows(a).setIllegal()
-      }
-      return true
-    }
-    return false
   }
 }

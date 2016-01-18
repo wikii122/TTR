@@ -45,8 +45,6 @@ class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: 
     }
   }
 
-  override protected def onUpdateTheme(): Unit = {}
-
   def setTextColor(color: ColorArray): Unit = {
     textColor = color
   }
@@ -54,10 +52,6 @@ class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: 
   def setTextBackground(color: ColorArray): Unit = {
     backgroundColor = color
   }
-
-  override def onAnimate(dt: Float): Unit = {}
-
-  override def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
 
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     maskShader.get.draw(mvMatrix, pMatrix, geometry.get, (backgroundColor, backgroundColor, textColor, texture.get))

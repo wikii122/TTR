@@ -1,8 +1,8 @@
 package pl.enves.ttr.graphics.geometry
 
 import android.opengl.GLES20
-import pl.enves.ttr.graphics.models.Rectangle
 import pl.enves.ttr.graphics.texture.CharactersTexture
+import pl.enves.ttr.utils.Triangle
 
 class TextGeometry(text: String, characters: CharactersTexture) extends Geometry {
 
@@ -26,12 +26,13 @@ class TextGeometry(text: String, characters: CharactersTexture) extends Geometry
 
   private[this] val numVertices = positions.length / 3
 
-
   override def getNumVertices: Int = numVertices
 
   override def getDrawMode: Int = GLES20.GL_TRIANGLES
 
   override def getBuffers: Buffers[Int] = buffersGpu
+
+  override def getBoundingFigure: Array[Triangle] = Array[Triangle]() //TODO
 
   def getWidth: Float = pos
 

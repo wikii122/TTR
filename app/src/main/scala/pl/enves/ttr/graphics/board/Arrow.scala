@@ -8,9 +8,10 @@ import pl.enves.ttr.graphics.geometry.{Geometry, GeometryId}
 import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
-import pl.enves.ttr.logic.{QRotation, Quadrant}
+import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.Triangle
 
-class Arrow(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
+class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
   extends SceneObject with ColorManip with Illegal {
 
   private[this] var square: Option[Geometry] = None
@@ -70,8 +71,6 @@ class Arrow(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Reso
     shakeAnimation.get.animate(dt)
   }
 
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
-
   override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
     val inner = if (active) {
       colorActive
@@ -81,6 +80,21 @@ class Arrow(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Reso
 
     maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, noColor, arrow.get))
   }
+
+  override def onClick(): Unit = {
+    try {
+      val move = new Rotation(quadrant, rotation)
+      game.make(move)
+      discardIllegal()
+    } catch {
+      case e: RotationLocked =>
+        setIllegal()
+      case e: BoardLocked =>
+        setIllegal()
+    }
+  }
+
+  override def getBoundingFigure: Array[Triangle] = square.get.getBoundingFigure
 
   override def discardIllegal(): Unit = {
     shakeAnimation.get.stop()
