@@ -78,7 +78,7 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, res
       colorInactive
     }
 
-    maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, inner, noColor, arrow.get))
+    maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, inner, noColor, arrow.get)
   }
 
   override def onClick(): Unit = {

@@ -84,11 +84,11 @@ class Field(game: Game, quadrant: Quadrant.Value, resources: Resources)
 
     if (value.isDefined) {
       value.get match {
-        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, ring.get))
-        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, cross.get))
+        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, ring.get)
+        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, cross.get)
       }
     } else {
-      maskShader.get.draw(mvMatrix, pMatrix, square.get, (noColor, noColor, outer, empty.get))
+      maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, empty.get)
     }
   }
 

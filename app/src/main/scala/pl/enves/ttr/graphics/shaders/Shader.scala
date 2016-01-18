@@ -50,10 +50,6 @@ abstract class Shader {
 
   protected def getFragmentShaderCode: String
 
-  type dataType
-
-  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType)
-
   private def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()
     while (error != GLES20.GL_NO_ERROR) {

@@ -1,7 +1,7 @@
 package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
-import pl.enves.androidx.color.ColorTypes.ColorArray
+import pl.enves.androidx.color.ColorTypes._
 import pl.enves.ttr.graphics.MatrixStack
 import pl.enves.ttr.graphics.geometry.Geometry
 
@@ -63,12 +63,8 @@ class MaskShader extends Shader {
     }
     """
 
-  /**
-   * (color1rgba, color2rgba, color3rgba, mask)
-   */
-  override type dataType = (ColorArray, ColorArray, ColorArray, Int)
-
-  override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType) {
+  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry,
+                    red: ColorArray, green: ColorArray, blue: ColorArray, mask: Int) {
     makeMVPMatrix(mvMatrix, pMatrix)
 
     val positionsBuffer = model.getBuffers.positions
@@ -96,17 +92,17 @@ class MaskShader extends Shader {
     GLES20.glUniformMatrix4fv(MVPMatrixHandle, 1, false, mvpMatrix, 0)
 
     //Apply Colors
-    GLES20.glUniform4fv(color1Handle, 1, data._1, 0)
+    GLES20.glUniform4fv(color1Handle, 1, red, 0)
 
-    GLES20.glUniform4fv(color2Handle, 1, data._2, 0)
+    GLES20.glUniform4fv(color2Handle, 1, green, 0)
 
-    GLES20.glUniform4fv(color3Handle, 1, data._3, 0)
+    GLES20.glUniform4fv(color3Handle, 1, blue, 0)
 
     // Set the active texture unit to texture unit 0.
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
 
     // Bind the texture to this unit.
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, data._4)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mask)
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     GLES20.glUniform1i(samplerHandle, 0)

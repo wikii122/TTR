@@ -54,6 +54,6 @@ class StaticText(resources: Resources, geometryId: GeometryId.Value, textureId: 
   }
 
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    maskShader.get.draw(mvMatrix, pMatrix, geometry.get, (backgroundColor, backgroundColor, textColor, texture.get))
+    maskShader.get.draw(mvMatrix, pMatrix, geometry.get, backgroundColor, backgroundColor, textColor, texture.get)
   }
 }
