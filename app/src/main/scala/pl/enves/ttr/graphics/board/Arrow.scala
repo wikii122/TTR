@@ -4,16 +4,16 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics.animations.Shake
-import pl.enves.ttr.graphics.geometry.GeometryId
+import pl.enves.ttr.graphics.geometry.{Geometry, GeometryId}
 import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.texture.TextureId
-import pl.enves.ttr.graphics.{AbstractGeometry, MatrixStack, Resources, SceneObject}
+import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
 import pl.enves.ttr.logic.{QRotation, Quadrant}
 
 class Arrow(quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
   extends SceneObject with ColorManip with Illegal {
 
-  private[this] var square: Option[AbstractGeometry] = None
+  private[this] var square: Option[Geometry] = None
 
   private[this] var maskShader: Option[MaskShader] = None
 

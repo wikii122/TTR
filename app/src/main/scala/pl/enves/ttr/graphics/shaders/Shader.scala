@@ -9,7 +9,8 @@ package pl.enves.ttr.graphics.shaders
 
 import android.opengl.{GLES20, Matrix}
 import android.util.Log
-import pl.enves.ttr.graphics.{AbstractGeometry, MatrixStack}
+import pl.enves.ttr.graphics.MatrixStack
+import pl.enves.ttr.graphics.geometry.Geometry
 
 abstract class Shader {
   // prepare shaders and OpenGL program
@@ -51,7 +52,7 @@ abstract class Shader {
 
   type dataType
 
-  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: AbstractGeometry, data: dataType)
+  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, data: dataType)
 
   private def checkGlError(glOperation: String) {
     var error: Int = GLES20.glGetError()

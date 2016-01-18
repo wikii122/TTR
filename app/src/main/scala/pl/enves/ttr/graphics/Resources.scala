@@ -12,11 +12,10 @@ import android.content.res.AssetManager
 import android.graphics.Typeface
 import pl.enves.androidx.Logging
 import pl.enves.ttr.R
-import pl.enves.ttr.graphics.geometry.{GeometryId, TextGeometryProvider}
-import pl.enves.ttr.graphics.models.Square
+import pl.enves.ttr.graphics.geometry._
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
-import pl.enves.ttr.logic.{ReplayGame, Game}
+import pl.enves.ttr.logic.{Game, ReplayGame}
 import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
@@ -25,7 +24,7 @@ class Resources(context: Context, game: Game) extends Logging {
 
   private[this] val assetManager: AssetManager = context.getResources.getAssets
 
-  private[this] val models: mutable.HashMap[GeometryId.Value, AbstractGeometry] = mutable.HashMap()
+  private[this] val models: mutable.HashMap[GeometryId.Value, Geometry] = mutable.HashMap()
 
   private[this] val textures: mutable.HashMap[TextureId.Value, Int] = mutable.HashMap()
 
@@ -38,7 +37,7 @@ class Resources(context: Context, game: Game) extends Logging {
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")
 
-    addGeometry(GeometryId.Square, Square.getGeometry)
+    addGeometry(GeometryId.Square, new SquareGeometry)
 
     addTexture(TextureId.MaskCross, new DrawableTexture(context, R.drawable.pat_cross_mod_mask).getTexture)
     addTexture(TextureId.MaskRing, new DrawableTexture(context, R.drawable.pat_ring_mod_mask).getTexture)
@@ -52,7 +51,7 @@ class Resources(context: Context, game: Game) extends Logging {
       case Game.GPS_MULTIPLAYER => context.getString(R.string.board_your_turn)
     }
 
-    val player1TurnTextString = if(game.gameType == Game.REPLAY) {
+    val player1TurnTextString = if (game.gameType == Game.REPLAY) {
       choosePlayer1String(game.asInstanceOf[ReplayGame].getReplayedGameType)
     } else {
       choosePlayer1String(game.gameType)
@@ -64,7 +63,7 @@ class Resources(context: Context, game: Game) extends Logging {
       case Game.GPS_MULTIPLAYER => context.getString(R.string.board_opponents_turn)
     }
 
-    val player2TurnTextString = if(game.gameType == Game.REPLAY) {
+    val player2TurnTextString = if (game.gameType == Game.REPLAY) {
       choosePlayer2String(game.asInstanceOf[ReplayGame].getReplayedGameType)
     } else {
       choosePlayer2String(game.gameType)
@@ -90,11 +89,11 @@ class Resources(context: Context, game: Game) extends Logging {
     val charactersTexture2 = new CharactersTexture(512, typeFace, allChars(words2))
     addTexture(TextureId.Font2, charactersTexture2.getTexture)
 
-    addGeometry(GeometryId.Player1TurnText, new TextGeometryProvider(player1TurnTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.Player2TurnText, new TextGeometryProvider(player2TurnTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.DrawText, new TextGeometryProvider(drawTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.WinnerText, new TextGeometryProvider(winnerTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.ReplayText, new TextGeometryProvider(replayTextString, charactersTexture2).getGeometry)
+    addGeometry(GeometryId.Player1TurnText, new TextGeometry(player1TurnTextString, charactersTexture))
+    addGeometry(GeometryId.Player2TurnText, new TextGeometry(player2TurnTextString, charactersTexture))
+    addGeometry(GeometryId.DrawText, new TextGeometry(drawTextString, charactersTexture))
+    addGeometry(GeometryId.WinnerText, new TextGeometry(winnerTextString, charactersTexture))
+    addGeometry(GeometryId.ReplayText, new TextGeometry(replayTextString, charactersTexture2))
 
     //create shaders
     maskShader = Some(new MaskShader())
@@ -112,7 +111,7 @@ class Resources(context: Context, game: Game) extends Logging {
     return set.toArray
   }
 
-  private def addGeometry(name: GeometryId.Value, geometry: AbstractGeometry): Unit = {
+  private def addGeometry(name: GeometryId.Value, geometry: Geometry): Unit = {
     models.update(name, geometry)
   }
 
@@ -122,7 +121,7 @@ class Resources(context: Context, game: Game) extends Logging {
 
   def getTexture(texture: TextureId.Value): Int = textures(texture)
 
-  def getGeometry(model: GeometryId.Value): AbstractGeometry = models(model)
+  def getGeometry(model: GeometryId.Value): Geometry = models(model)
 
   def getMaskShader: MaskShader = maskShader.get
 
