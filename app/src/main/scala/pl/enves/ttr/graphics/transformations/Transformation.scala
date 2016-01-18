@@ -20,6 +20,7 @@ abstract class Transformation(enabled: Boolean) {
 
   def reset(): Unit = {
     _enabled = enabled
+    onReset()
   }
   
   protected def onReset(): Unit
