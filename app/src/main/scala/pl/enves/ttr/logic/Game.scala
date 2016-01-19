@@ -77,6 +77,11 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
     else Nil
 
   /**
+   * Can quadrant be rotated
+   */
+  def canRotate(quadrant: Quadrant.Value) = board.canRotate(quadrant)
+
+  /**
    * Indicates whether this device can alter the board at the moment,
    */
   def locked: Boolean

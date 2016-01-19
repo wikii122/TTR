@@ -79,6 +79,8 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   def availableRotations = quadrants filter (_._2.canRotate) keys
 
+  def canRotate(quadrant: Quadrant.Value) = quadrants(quadrant).canRotate
+
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
 
   private def checkVictory(): Boolean = VictoryConditions.check(lines) exists {

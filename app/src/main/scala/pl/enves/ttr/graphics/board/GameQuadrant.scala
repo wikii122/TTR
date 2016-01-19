@@ -47,12 +47,6 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     rotationAnimation = Some(new QuadrantRotation(1.0f, rotation, scale))
   }
 
-  private def checkWinning(x: Int, y: Int): Boolean = {
-    val nx = x + Quadrant.offset(quadrant)._1
-    val ny = y + Quadrant.offset(quadrant)._2
-    game.finished && game.finishingMove != Nil && game.finishingMove.contains((ny, nx))
-  }
-
   override def onAnimate(dt: Float): Unit = {
     val rotationNew = game.quadrantRotation(quadrant)
     val rotationDiff = rotationNew sub rotationOld
@@ -88,16 +82,8 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     }
     rotationOld = rotationNew
 
-    x = 0
-    while (x < Quadrant.size) {
-      y = 0
-      while (y < Quadrant.size) {
-        fields(x)(y).setWinning(checkWinning(x, y))
-        y += 1
-      }
-      x += 1
-    }
-
     rotationAnimation.get.animate(dt)
   }
+
+  def setWinning(x: Int, y: Int) = fields(x)(y).setWinning(true)
 }

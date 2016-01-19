@@ -17,36 +17,37 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   private[this] val winnerIndicator = new WinnerIndicator(game, resources)
   addChild(winnerIndicator)
 
-  private[this] val quadrants = Map(
-    (Quadrant.first, new GameQuadrant(game, Quadrant.first, resources)),
-    (Quadrant.second, new GameQuadrant(game, Quadrant.second, resources)),
-    (Quadrant.third, new GameQuadrant(game, Quadrant.third, resources)),
-    (Quadrant.fourth, new GameQuadrant(game, Quadrant.fourth, resources))
+  private[this] val quadrants = Array(
+    new GameQuadrant(game, Quadrant.first, resources),
+    new GameQuadrant(game, Quadrant.second, resources),
+    new GameQuadrant(game, Quadrant.third, resources),
+    new GameQuadrant(game, Quadrant.fourth, resources)
   )
 
-  private[this] val allArrows = Array(
-    (Quadrant.first, QRotation.r90),
-    (Quadrant.first, QRotation.r270),
-    (Quadrant.second, QRotation.r90),
-    (Quadrant.second, QRotation.r270),
-    (Quadrant.third, QRotation.r90),
-    (Quadrant.third, QRotation.r270),
-    (Quadrant.fourth, QRotation.r90),
-    (Quadrant.fourth, QRotation.r270)
+  private[this] val arrows = Array(
+    createArrowPair(Quadrant.first),
+    createArrowPair(Quadrant.second),
+    createArrowPair(Quadrant.third),
+    createArrowPair(Quadrant.fourth)
   )
 
-  private[this] val arrows = allArrows map { key => key -> new Arrow(game, key._1, key._2, resources) } toMap
-
-  for ((name, arrow) <- arrows) {
-    addChild(arrow)
+  for (quadrant <- Quadrant.values) {
+    addChild(quadrants(quadrant.id))
   }
 
   for (quadrant <- Quadrant.values) {
-    addChild(quadrants(quadrant))
+    val pair = arrows(quadrant.id)
+    addChild(pair._1)
+    addChild(pair._2)
   }
 
   private[this] val replayIndicator = new ReplayIndicator(game, resources)
   addChild(replayIndicator)
+
+  private def createArrowPair(quadrant: Quadrant.Value) = (
+    new Arrow(game, quadrant, QRotation.r90, resources),
+    new Arrow(game, quadrant, QRotation.r270, resources)
+    )
 
   override def onUpdateResources(screenRatio: Float): Unit = {
     addScale(0.25f, 0.25f, 1.0f, true)
@@ -72,17 +73,19 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     replayIndicator.addRotation(45.0f, 0.0f, 0.0f, 1.0f, true)
     replayIndicator.addScale(12.0f, 12.0f, 1.0f, true)
 
-    for ((name, arrow) <- arrows) {
-      val pos = name._2 match {
-        case QRotation.r90 => arrowLeftPosition(name._1)
-        case QRotation.r270 => arrowRightPosition(name._1)
-      }
-      arrow.addTranslation(pos._1, pos._2, 0.0f, true)
+    for (quadrant <- Quadrant.values) {
+      val pair = arrows(quadrant.id)
+
+      val posLeft = arrowLeftPosition(quadrant)
+      pair._1.addTranslation(posLeft._1, posLeft._2, 0.0f, true)
+
+      val posRight = arrowRightPosition(quadrant)
+      pair._2.addTranslation(posRight._1, posRight._2, 0.0f, true)
     }
 
     for (quadrant <- Quadrant.values) {
       val centre = quadrantCentre(quadrant)
-      quadrants(quadrant).addTranslation(centre._1, centre._2, 0.0f, true)
+      quadrants(quadrant.id).addTranslation(centre._1, centre._2, 0.0f, true)
     }
   }
 
@@ -108,9 +111,29 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
   }
 
   override def onAnimate(dt: Float): Unit = {
-    val availableRotations = game.availableRotations
-    for ((name, arrow) <- arrows) {
-      arrow.setActive(availableRotations.contains(name._1))
+    var i = 0
+    while (i < 4) {
+      val quadrant = Quadrant(i)
+      val pair = arrows(quadrant.id)
+      val active = game.canRotate(quadrant)
+      pair._1.setActive(active)
+      pair._2.setActive(active)
+      i += 1
+    }
+
+
+    if (game.finished && game.finishingMove != Nil) {
+      for ((y, x) <- game.finishingMove) {
+        val quadrant = if (y < Quadrant.size) {
+          if (x < Quadrant.size) Quadrant.first
+          else Quadrant.second
+        } else {
+          if (x < Quadrant.size) Quadrant.third
+          else Quadrant.fourth
+        }
+
+        quadrants(quadrant.id).setWinning(x % Quadrant.size, y % Quadrant.size)
+      }
     }
   }
 }
