@@ -52,8 +52,8 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, res
     maskShader = Some(resources.getMaskShader)
 
     arrow = rotation match {
-      case QRotation.r90 => Some(resources.getTexture(TextureId.MaskArrowLeft))
-      case QRotation.r270 => Some(resources.getTexture(TextureId.MaskArrowRight))
+      case QRotation.r90 => Some(resources.getTexture(TextureId.MaskArrowRight))
+      case QRotation.r270 => Some(resources.getTexture(TextureId.MaskArrowLeft))
     }
 
     val rot = addRotation(arrowRotation(quadrant), 0.0f, 0.0f, 1.0f, true)

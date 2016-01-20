@@ -67,13 +67,13 @@ private[logic] class Board private () extends Logging with JsonMappable {
   def finishingMove = _combination
 
   def lines: Game#State = (0 to 5) map {
-    i => if (i < Quadrant.size)
-      quadrants(Quadrant.first).line(i) ++ quadrants(Quadrant.second).line(i)
+    x => if (x < Quadrant.size)
+      quadrants(Quadrant.first).line(x) ++ quadrants(Quadrant.third).line(x)
     else
-      quadrants(Quadrant.third).line(i % Quadrant.size) ++ quadrants(Quadrant.fourth).line(i % Quadrant.size)
+      quadrants(Quadrant.second).line(x % Quadrant.size) ++ quadrants(Quadrant.fourth).line(x % Quadrant.size)
   }
 
-  def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int) = quadrants(quadrant).get(x, y)
+  def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int) = quadrants(quadrant).get(x % Quadrant.size, y % Quadrant.size)
 
   def quadrantRotation(quadrant: Quadrant.Value) = quadrants(quadrant).getRotation
 
@@ -102,7 +102,7 @@ private[logic] class Board private () extends Logging with JsonMappable {
     }
 
     def move(quadrant: Quadrant.Value, x: Int, y: Int, player: Player.Value) = {
-      map(quadrant).move(x, y, player)
+      map(quadrant).move(x % Quadrant.size, y % Quadrant.size, player)
       tick()
     }
 

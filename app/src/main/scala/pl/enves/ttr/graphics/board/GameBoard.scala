@@ -76,11 +76,11 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     for (quadrant <- Quadrant.values) {
       val pair = arrows(quadrant.id)
 
-      val posLeft = arrowLeftPosition(quadrant)
-      pair._1.addTranslation(posLeft._1, posLeft._2, 0.0f, true)
-
       val posRight = arrowRightPosition(quadrant)
-      pair._2.addTranslation(posRight._1, posRight._2, 0.0f, true)
+      pair._1.addTranslation(posRight._1, posRight._2, 0.0f, true)
+
+      val posLeft = arrowLeftPosition(quadrant)
+      pair._2.addTranslation(posLeft._1, posLeft._2, 0.0f, true)
     }
 
     for (quadrant <- Quadrant.values) {
@@ -123,7 +123,7 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
 
 
     if (game.finished && game.finishingMove != Nil) {
-      for ((y, x) <- game.finishingMove) {
+      for ((x, y) <- game.finishingMove) {
         val quadrant = if (y < Quadrant.size) {
           if (x < Quadrant.size) Quadrant.first
           else Quadrant.second

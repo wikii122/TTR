@@ -17,7 +17,8 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
 
   def move(xv: Int, yv: Int, player: Player.Value) = {
     log(s"Move $player at ($xv, $yv)")
-    val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
+    val x = readCoordinateX(xv, yv)
+    val y = readCoordinateY(xv, yv)
     log(s"Coordinates translated to ($x, $y) inside Quadrant")
 
     if (_fields(x)(y).isEmpty) _fields(x)(y) = Some(player)
@@ -34,14 +35,15 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
   }
 
   def get(xv: Int, yv: Int): Option[Player.Value] = {
-    val (x, y) = readCoordinates(xv % Quadrant.size, yv % Quadrant.size)
+    val x = readCoordinateX(xv, yv)
+    val y = readCoordinateY(xv, yv)
 
     return _fields(x)(y)
   }
 
   def getRotation: QRotation.Value = rotation
 
-  def line(y: Int): Seq[Option[Player.Value]] = for (x <- 0 until Quadrant.size) yield get(x, y)
+  def line(x: Int): Seq[Option[Player.Value]] = for (y <- 0 until Quadrant.size) yield get(x, y)
 
   def canRotate = rotationCooldown == 0
 
@@ -52,12 +54,18 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
    */
   def tickCooldown() = if (rotationCooldown > 0) rotationCooldown = rotationCooldown - 1
 
-  // Lines are horizontal, and assumption is they are vertical, thus x and y must be swapped
-  private def readCoordinates(y: Int, x: Int): (Int, Int) = rotation match {
-    case QRotation.r0 => (x, y)
-    case QRotation.r90 => (Quadrant.size - y - 1, x)
-    case QRotation.r180 => (Quadrant.size - x - 1, Quadrant.size - y - 1)
-    case QRotation.r270 => (y, Quadrant.size - x - 1)
+  private def readCoordinateX(x: Int, y: Int): Int = rotation match {
+    case QRotation.r0 => x
+    case QRotation.r90 => Quadrant.size - y - 1
+    case QRotation.r180 => Quadrant.size - x - 1
+    case QRotation.r270 => y
+  }
+
+  private def readCoordinateY(x: Int, y: Int): Int = rotation match {
+    case QRotation.r0 => y
+    case QRotation.r90 => x
+    case QRotation.r180 => Quadrant.size - y - 1
+    case QRotation.r270 => Quadrant.size - x - 1
   }
 
   override def toMap: Map[String, Any] = Map(

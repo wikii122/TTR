@@ -65,7 +65,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
 
     if (rotationDiff != QRotation.r0) {
       //TODO: Consider 180 degrees rotations
-      val ccw = if (rotationDiff == QRotation.r90) true else false
+      val ccw = rotationDiff != QRotation.r90
       rotationAnimation.get.setCCW(ccw)
 
       rotationAnimation.get.start()
