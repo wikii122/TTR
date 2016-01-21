@@ -10,8 +10,9 @@ import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Triangle
+import pl.enves.ttr.utils.themes.Theme
 
-class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, resources: Resources)
+class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value)
   extends SceneObject with ColorManip with Illegal {
 
   private[this] var square: Option[Geometry] = None
@@ -32,11 +33,11 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, res
     active = a
   }
 
-  private def defaultArrowColor(quadrant: Quadrant.Value) = quadrant match {
-    case Quadrant.first => resources.getTheme.color1
-    case Quadrant.second => resources.getTheme.color2
-    case Quadrant.third => resources.getTheme.color2
-    case Quadrant.fourth => resources.getTheme.color1
+  private def defaultArrowColor(quadrant: Quadrant.Value, theme: Theme) = quadrant match {
+    case Quadrant.first => theme.color1
+    case Quadrant.second => theme.color2
+    case Quadrant.third => theme.color2
+    case Quadrant.fourth => theme.color1
   }
 
   private def arrowRotation(quadrant: Quadrant.Value): Float = quadrant match {
@@ -46,7 +47,7 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, res
     case Quadrant.fourth => 180.0f
   }
 
-  override protected def onUpdateResources(screenRatio: Float): Unit = {
+  override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     square = Some(resources.getGeometry(GeometryId.Square))
 
     maskShader = Some(resources.getMaskShader)
@@ -61,10 +62,10 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value, res
     shakeAnimation = Some(new Shake(1.0f, rot, 30.0f, 5.0f))
   }
 
-  override protected def onUpdateTheme(): Unit = {
-    noColor = colorTransparent(resources.getTheme.background, 0.0f)
-    colorActive = defaultArrowColor(quadrant)
-    colorInactive = colorTransparent(defaultArrowColor(quadrant), 0.3f)
+  override protected def onUpdateTheme(theme: Theme): Unit = {
+    noColor = colorTransparent(theme.background, 0.0f)
+    colorActive = defaultArrowColor(quadrant, theme)
+    colorInactive = colorTransparent(defaultArrowColor(quadrant, theme), 0.3f)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

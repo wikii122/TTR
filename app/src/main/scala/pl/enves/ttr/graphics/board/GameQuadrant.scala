@@ -10,7 +10,7 @@ import pl.enves.ttr.utils.Algebra
  * Basic size: 3.0x3.0
  * (0.0, 0.0) - in the middle
  */
-class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameQuadrant(game: Game, quadrant: Quadrant.Value) extends SceneObject with Logging with Algebra {
 
   private[this] var rotationOld = game.quadrantRotation(quadrant)
 
@@ -20,7 +20,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     (x, y) => {
       val nx = x + Quadrant.offset(quadrant)._1
       val ny = y + Quadrant.offset(quadrant)._2
-      new GameField(game, quadrant, nx, ny, resources)
+      new GameField(game, quadrant, nx, ny)
     }
   }
 
@@ -30,7 +30,7 @@ class GameQuadrant(game: Game, quadrant: Quadrant.Value, resources: Resources) e
     }
   }
 
-  override def onUpdateResources(screenRatio: Float): Unit = {
+  override def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     for (x <- 0 until Quadrant.size) {
       for (y <- 0 until Quadrant.size) {
         // Position from the quadrant center

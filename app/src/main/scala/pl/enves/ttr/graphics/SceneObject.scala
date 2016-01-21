@@ -2,6 +2,7 @@ package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
 import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, Translation}
+import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.utils.{Algebra, Ray, Triangle}
 
 import scala.collection.mutable
@@ -13,9 +14,9 @@ trait SceneObject extends Algebra {
 
   private[this] var visible = true
 
-  protected def onUpdateResources(screenRatio: Float): Unit = {}
+  protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {}
 
-  protected def onUpdateTheme(): Unit = {}
+  protected def onUpdateTheme(theme: Theme): Unit = {}
 
   protected def onAnimate(dt: Float): Unit = {}
 
@@ -77,22 +78,22 @@ trait SceneObject extends Algebra {
     }
   }
 
-  def updateResources(screenRatio: Float): Unit = {
-    onUpdateResources(screenRatio)
+  def updateResources(resources: Resources, screenRatio: Float): Unit = {
+    onUpdateResources(resources, screenRatio)
     val size = children.size
     var i = 0
     while (i < size) {
-      children(i).updateResources(screenRatio)
+      children(i).updateResources(resources, screenRatio)
       i += 1
     }
   }
 
-  def updateTheme(): Unit = {
-    onUpdateTheme()
+  def updateTheme(theme: Theme): Unit = {
+    onUpdateTheme(theme)
     val size = children.size
     var i = 0
     while (i < size) {
-      children(i).updateTheme()
+      children(i).updateTheme(theme)
       i += 1
     }
   }

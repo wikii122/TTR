@@ -22,12 +22,13 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
   log("Creating")
 
   private[this] val resources = new Resources(context, context.game)
-  private[this] val board = new GameBoard(context.game, resources)
+  private[this] val board = new GameBoard(context.game)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
   private[this] var framesLastSecond = 0
   private[this] var themeNeedsUpdate = false
+  private[this] var _theme = Theme(0, 0, 0, 0)
 
   private[this] val mvMatrix = new MatrixStack(8)
   private[this] val pMatrix = new MatrixStack()
@@ -39,14 +40,22 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
     //We don't use camera transformations
   }
 
+  // this method may be called anytime
   def setTheme(theme: Theme): Unit = {
-    resources.setTheme(theme)
+    _theme = theme
     themeNeedsUpdate = true
+  }
+
+  // this method may be called only when OpenGL context is valid
+  private def updateTheme(theme: Theme): Unit = {
+    val backgroundColor: Color3 = theme.background
+    GLES20.glClearColor(backgroundColor._1, backgroundColor._2, backgroundColor._3, 1.0f)
+    board.updateTheme(theme)
   }
 
   override def onDrawFrame(gl: GL10) {
     if (themeNeedsUpdate) {
-      updateTheme()
+      updateTheme(_theme)
       themeNeedsUpdate = false
     }
     val now = System.currentTimeMillis()
@@ -88,7 +97,7 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
       Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
     }
     board.reset()
-    board.updateResources(ratio)
+    board.updateResources(resources, ratio)
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
@@ -100,12 +109,6 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
 
     resources.createOpenGLResources()
     themeNeedsUpdate = true
-  }
-
-  private def updateTheme(): Unit = {
-    val backgroundColor: Color3 = resources.getTheme.background
-    GLES20.glClearColor(backgroundColor._1, backgroundColor._2, backgroundColor._3, 1.0f)
-    board.updateTheme()
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {

@@ -9,24 +9,25 @@ import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.{StaticText, TextAlignment}
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.themes.Theme
 
 /**
  * Display current player in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator(game: Game, resources: Resources)
+class CurrentPlayerIndicator(game: Game)
   extends SceneObject with ColorManip {
 
-  private[this] val player1TurnText = new StaticText(resources, GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
-  private[this] val player2TurnText = new StaticText(resources, GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val player1TurnText = new StaticText(GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val player2TurnText = new StaticText(GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
   addChild(player1TurnText)
   addChild(player2TurnText)
 
-  private[this] val field = new Field(game, Quadrant.first, resources)
+  private[this] val field = new Field(Quadrant.first)
   addChild(field)
 
   private[this] var animation: Option[InfiniteRotation] = None
 
-  override protected def onUpdateResources(screenRatio: Float): Unit = {
+  override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     player1TurnText.addTranslation(-0.5f, 0.0f, 0.0f, true)
     player2TurnText.addTranslation(-0.5f, 0.0f, 0.0f, true)
 
@@ -38,17 +39,17 @@ class CurrentPlayerIndicator(game: Game, resources: Resources)
     animation.get.start()
   }
 
-  override protected def onUpdateTheme(): Unit = {
-    player1TurnText.setTextColor(resources.getTheme.color2)
-    player2TurnText.setTextColor(resources.getTheme.color2)
+  override protected def onUpdateTheme(theme: Theme): Unit = {
+    player1TurnText.setTextColor(theme.color2)
+    player2TurnText.setTextColor(theme.color2)
 
-    val noColor: ColorArray = colorTransparent(resources.getTheme.background, 0.0f)
+    val noColor: ColorArray = colorTransparent(theme.background, 0.0f)
     player1TurnText.setTextBackground(noColor)
     player2TurnText.setTextBackground(noColor)
   }
 
   override protected def onAnimate(dt: Float): Unit = {
-    field.setValue(Some(game.player), false)
+    field.setValue(Some(game.player))
 
     def setTextsStandard(): Unit = {
       field.setVisible(true)

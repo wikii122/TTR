@@ -8,35 +8,36 @@ import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.{StaticText, TextAlignment}
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic.{Game, Quadrant}
+import pl.enves.ttr.utils.themes.Theme
 
 /**
  * Display winner in 1x0.25 rectangle
  */
-class WinnerIndicator(game: Game, resources: Resources) extends SceneObject with ColorManip {
+class WinnerIndicator(game: Game) extends SceneObject with ColorManip {
 
   setVisible(false)
 
-  private[this] val winnerText = new StaticText(resources, GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val winnerText = new StaticText(GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
   addChild(winnerText)
 
-  private[this] val drawText = new StaticText(resources, GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f, TextAlignment.Center)
+  private[this] val drawText = new StaticText(GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f, TextAlignment.Center)
   addChild(drawText)
 
-  private[this] val field = new Field(game, Quadrant.second, resources)
+  private[this] val field = new Field(Quadrant.second)
   addChild(field)
 
-  override protected def onUpdateResources(screenRatio: Float): Unit = {
+  override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     winnerText.addTranslation(-0.5f, 0.0f, 0.0f, true)
 
     field.addTranslation(0.425f, 0.0f, 0.0f, true)
     field.addScale(0.15f, 0.15f, 1.0f, true)
   }
 
-  override protected def onUpdateTheme(): Unit = {
-    winnerText.setTextColor(resources.getTheme.color1)
-    drawText.setTextColor(resources.getTheme.color1)
+  override protected def onUpdateTheme(theme: Theme): Unit = {
+    winnerText.setTextColor(theme.color1)
+    drawText.setTextColor(theme.color1)
 
-    val noColor: ColorArray = colorTransparent(resources.getTheme.background, 0.0f)
+    val noColor: ColorArray = colorTransparent(theme.background, 0.0f)
 
     winnerText.setTextBackground(noColor)
     drawText.setTextBackground(noColor)
@@ -46,7 +47,7 @@ class WinnerIndicator(game: Game, resources: Resources) extends SceneObject with
     if (game.finished || game.gameType == Game.REPLAY) {
       setVisible(true)
       if (game.winner.isDefined) {
-        field.setValue(game.winner, false)
+        field.setValue(game.winner)
         field.setVisible(true)
         winnerText.setVisible(true)
         drawText.setVisible(false)

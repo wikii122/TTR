@@ -16,7 +16,6 @@ import pl.enves.ttr.graphics.geometry._
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
 import pl.enves.ttr.logic.{Game, ReplayGame}
-import pl.enves.ttr.utils.themes.Theme
 
 import scala.collection.mutable
 
@@ -30,12 +29,15 @@ class Resources(context: Context, game: Game) extends Logging {
 
   private[this] var maskShader: Option[MaskShader] = None
 
-  private[this] var _theme: Option[Theme] = None
-
   private[this] val typeFace = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")
+
+    // clear old objects, just to be sure
+    models.clear()
+    textures.clear()
+    maskShader = None
 
     addGeometry(GeometryId.Square, new SquareGeometry)
 
@@ -124,10 +126,6 @@ class Resources(context: Context, game: Game) extends Logging {
   def getGeometry(model: GeometryId.Value): Geometry = models(model)
 
   def getMaskShader: MaskShader = maskShader.get
-
-  def getTheme: Theme = _theme.get
-
-  def setTheme(theme: Theme): Unit = _theme = Some(theme)
 
   def getTypeFace: Typeface = typeFace
 }

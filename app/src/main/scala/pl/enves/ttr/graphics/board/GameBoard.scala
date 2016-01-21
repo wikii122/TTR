@@ -9,19 +9,19 @@ import pl.enves.ttr.utils.Algebra
  * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)
  * (0.0, 0.0) is in the middle
  */
-class GameBoard(game: Game, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameBoard(game: Game) extends SceneObject with Logging with Algebra {
 
-  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator(game, resources)
+  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator(game)
   addChild(currentPlayerIndicator)
 
-  private[this] val winnerIndicator = new WinnerIndicator(game, resources)
+  private[this] val winnerIndicator = new WinnerIndicator(game)
   addChild(winnerIndicator)
 
   private[this] val quadrants = Array(
-    new GameQuadrant(game, Quadrant.first, resources),
-    new GameQuadrant(game, Quadrant.second, resources),
-    new GameQuadrant(game, Quadrant.third, resources),
-    new GameQuadrant(game, Quadrant.fourth, resources)
+    new GameQuadrant(game, Quadrant.first),
+    new GameQuadrant(game, Quadrant.second),
+    new GameQuadrant(game, Quadrant.third),
+    new GameQuadrant(game, Quadrant.fourth)
   )
 
   private[this] val arrows = Array(
@@ -41,15 +41,15 @@ class GameBoard(game: Game, resources: Resources) extends SceneObject with Loggi
     addChild(pair._2)
   }
 
-  private[this] val replayIndicator = new ReplayIndicator(game, resources)
+  private[this] val replayIndicator = new ReplayIndicator(game)
   addChild(replayIndicator)
 
   private def createArrowPair(quadrant: Quadrant.Value) = (
-    new Arrow(game, quadrant, QRotation.r90, resources),
-    new Arrow(game, quadrant, QRotation.r270, resources)
+    new Arrow(game, quadrant, QRotation.r90),
+    new Arrow(game, quadrant, QRotation.r270)
     )
 
-  override def onUpdateResources(screenRatio: Float): Unit = {
+  override def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     addScale(0.25f, 0.25f, 1.0f, true)
 
     //screenRatio should be >= 1, as is ensured in GameRenderer
