@@ -1,22 +1,25 @@
-package pl.enves.ttr.graphics
+package pl.enves.ttr.graphics.geometry
 
 import java.nio.{ByteBuffer, ByteOrder, IntBuffer}
 
 import android.opengl.GLES20
-import pl.enves.ttr.graphics.geometry.{BasicGeometry, Buffers}
+import pl.enves.ttr.utils.Triangle
 
-trait GeometryProvider {
-  def getGeometry: AbstractGeometry
+trait Geometry {
+  def getNumVertices: Int
 
-  protected def createBaseGeometry(numVertices: Int, drawMode: Int, buffers: Buffers[Array[Float]]): AbstractGeometry = {
-    val buffersGpu = new Buffers[Int](
-      createFloatBuffer(buffers.positions),
-      createFloatBuffer(unflipY(buffers.texCoords))
-    )
-    return new BasicGeometry(
-      numVertices,
-      drawMode,
-      buffersGpu)
+  // one of POINTS, LINE_STRIP, LINE_LOOP, LINES, TRIANGLE_STRIP, TRIANGLE_FAN, TRIANGLES
+  def getDrawMode: Int
+
+  def getBuffers: Buffers[Int]
+
+  def getBoundingFigure: Array[Triangle]
+
+  final val PositionSize = 3
+  final val TexCoordSize = 2
+
+  def draw(): Unit = {
+    GLES20.glDrawArrays(getDrawMode, 0, getNumVertices)
   }
 
   // Buffer in GPU memory

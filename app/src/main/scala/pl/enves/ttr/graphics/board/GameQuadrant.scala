@@ -1,8 +1,8 @@
 package pl.enves.ttr.graphics.board
 
-import android.content.Context
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
+import pl.enves.ttr.graphics.animations.QuadrantRotation
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Algebra
 
@@ -10,144 +10,80 @@ import pl.enves.ttr.utils.Algebra
  * Basic size: 3.0x3.0
  * (0.0, 0.0) - in the middle
  */
-class GameQuadrant(context: Context with GameManager, quadrant: Quadrant.Value, resources: Resources) extends SceneObject with Logging with Algebra {
+class GameQuadrant(game: Game, quadrant: Quadrant.Value) extends SceneObject with Logging with Algebra {
 
-  val rotationTime = 1.0f //seconds
+  private[this] var rotationOld = game.quadrantRotation(quadrant)
 
-  var rotationAnimated = false
+  private[this] var rotationAnimation: Option[QuadrantRotation] = None
 
-  var rotationCCW = false
+  private[this] val fields = Array.tabulate[GameField](Quadrant.size, Quadrant.size) {
+    (x, y) => {
+      val nx = x + Quadrant.offset(quadrant)._1
+      val ny = y + Quadrant.offset(quadrant)._2
+      new GameField(game, quadrant, nx, ny)
+    }
+  }
 
-  var rotationLinear = 0.0f
-
-  var rotationOld = context.game.quadrantRotation(quadrant)
-
-  val fields = Array.fill[BoardField](Quadrant.size, Quadrant.size)(new BoardField(quadrant, resources))
   for (x <- 0 until Quadrant.size) {
     for (y <- 0 until Quadrant.size) {
       addChild(fields(x)(y))
     }
   }
 
-  override def onUpdateResources(screenRatio: Float): Unit = {
+  override def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     for (x <- 0 until Quadrant.size) {
       for (y <- 0 until Quadrant.size) {
         // Position from the quadrant center
         // TODO: calculate from Quadrant.size
         val nx = x - 1.0f
         val ny = y - 1.0f
-        fields(x)(y).translate(nx, ny, 0.0f)
+        fields(x)(y).addTranslation(nx / 0.9f, ny / 0.9f, 0.0f, true)
       }
     }
-  }
 
-  override protected def onUpdateTheme(): Unit = {}
+    val scale = addScale(0.9f, 0.9f, 1.0f, true)
+    val rotation = addRotation(0.0f, 0.0f, 0.0f, 1.0f, false)
 
-  def checkWinning(x: Int, y: Int): Boolean = {
-    val game = context.game
-    val nx = x + Quadrant.offset(quadrant)._1
-    val ny = y + Quadrant.offset(quadrant)._2
-    game.finished && game.finishingMove != Nil && game.finishingMove.contains((ny, nx))
+    rotationAnimation = Some(new QuadrantRotation(1.0f, rotation, scale))
   }
 
   override def onAnimate(dt: Float): Unit = {
-    this.synchronized {
-      for (x <- 0 until Quadrant.size) {
-        for (y <- 0 until Quadrant.size) {
-          fields(x)(y).value = context.game.quadrantField(quadrant, x, y)
+    val rotationNew = game.quadrantRotation(quadrant)
+    val rotationDiff = rotationNew sub rotationOld
+
+    val animateChange = rotationDiff == QRotation.r0
+    var x = 0
+    var y = 0
+    while (x < Quadrant.size) {
+      y = 0
+      while (y < Quadrant.size) {
+        fields(x)(y).setValue(game.quadrantField(quadrant, x, y), animateChange)
+        y += 1
+      }
+      x += 1
+    }
+
+    if (rotationDiff != QRotation.r0) {
+      //TODO: Consider 180 degrees rotations
+      val ccw = rotationDiff != QRotation.r90
+      rotationAnimation.get.setCCW(ccw)
+
+      rotationAnimation.get.start()
+
+      x = 0
+      while (x < Quadrant.size) {
+        y = 0
+        while (y < Quadrant.size) {
+          fields(x)(y).stopAnimations()
+          y += 1
         }
-      }
-
-      val rotationNew = context.game.quadrantRotation(quadrant)
-      val rotationDiff = rotationNew sub rotationOld
-
-      if (rotationDiff != QRotation.r0) {
-        rotationAnimated = true
-
-        rotationLinear = 0.0f
-
-        //TODO: Consider 180 degrees rotations
-        rotationCCW = if (rotationDiff == QRotation.r90) true else false
-
-        for (x <- 0 until Quadrant.size) {
-          for (y <- 0 until Quadrant.size) {
-            fields(x)(y).discardIllegal()
-          }
-        }
-      }
-      rotationOld = rotationNew
-    }
-
-    //This doesn't have to be synchronized
-    for (x <- 0 until Quadrant.size) {
-      for (y <- 0 until Quadrant.size) {
-        fields(x)(y).winning = checkWinning(x, y)
+        x += 1
       }
     }
+    rotationOld = rotationNew
 
-    if (rotationAnimated) {
-      rotationLinear += dt / rotationTime
-
-      if (rotationLinear >= 1.0f) {
-        rotationLinear = 1.0f
-        rotationAnimated = false
-      }
-
-      objectRotationAngle = ((Math.sin(Math.PI / 2 + rotationLinear * Math.PI) + 1.0) * 45.0).toFloat
-
-      if (rotationCCW) {
-        objectRotationAngle = -objectRotationAngle
-      }
-
-      val a = Math.sqrt(2) / (2 * Math.cos(Math.toRadians(45.0f - Math.abs(objectRotationAngle))))
-      objectScale = Array(a.toFloat, a.toFloat, 1.0f)
-    }
+    rotationAnimation.get.animate(dt)
   }
 
-  override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-
-  }
-
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
-    try {
-      val (near, far) = unProjectMatrices(mvMatrix.get(), pMatrix.get(), clickX, clickY, viewport)
-      val I = intersectRayAndXYPlane(near, far)
-      return processClick(I(0), I(1))
-    } catch {
-      case e: UnProjectException =>
-        error(e.getMessage)
-        return false
-      case e: IntersectException =>
-        // In current scene configuration this shouldn't happen
-        error(e.getMessage)
-        return false
-    }
-  }
-
-  def processClick(fx: Float, fy: Float): Boolean = {
-    log("Click " + quadrant.toString + " " + fx + " " + fy)
-
-    //Board is just a square
-    if (fx > -1.5f && fx < 1.5f && fy > -1.5f && fy < 1.5f) {
-      // Calculate field
-      // Although quadrants are now independent, fields inside them are still not
-      val x = Math.floor(fx + 1.5f).toInt
-      val y = Math.floor(fy + 1.5f).toInt
-      val nx = x + Quadrant.offset(quadrant)._1
-      val ny = y + Quadrant.offset(quadrant)._2
-      try {
-        val game = context.game
-        val move = new Position(nx, ny)
-        game.make(move)
-        fields(x)(y).discardIllegal()
-      } catch {
-        case e: FieldTaken =>
-          fields(x)(y).setIllegal()
-        case e: BoardLocked =>
-          fields(x)(y).setIllegal()
-      }
-      return true
-    }
-    return false
-  }
+  def setWinning(x: Int, y: Int) = fields(x)(y).setWinning(true)
 }

@@ -12,24 +12,26 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
 import pl.enves.androidx.color.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.Algebra
 import pl.enves.ttr.utils.themes._
 
 /**
  * Manages the process of drawing the frame.
  */
-class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends Renderer with Logging {
+class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends Renderer with Logging with Algebra {
   log("Creating")
 
   private[this] val resources = new Resources(context, context.game)
-  private[this] val board = new GameBoard(context, resources)
+  private[this] val board = new GameBoard(context.game)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
-  private var framesLastSecond = 0
-  private var themeNeedsUpdate = false
+  private[this] var framesLastSecond = 0
+  private[this] var themeNeedsUpdate = false
+  private[this] var _theme = Theme(0, 0, 0, 0)
 
-  val mvMatrix = new MatrixStack(8)
-  val pMatrix = new MatrixStack()
+  private[this] val mvMatrix = new MatrixStack(8)
+  private[this] val pMatrix = new MatrixStack()
 
   def setCamera(mvMatrix: MatrixStack): Unit = {
     //In case of inconsistent use of push and pop
@@ -38,26 +40,34 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
     //We don't use camera transformations
   }
 
+  // this method may be called anytime
   def setTheme(theme: Theme): Unit = {
-    resources.setTheme(theme)
+    _theme = theme
     themeNeedsUpdate = true
+  }
+
+  // this method may be called only when OpenGL context is valid
+  private def updateTheme(theme: Theme): Unit = {
+    val backgroundColor: Color3 = theme.background
+    GLES20.glClearColor(backgroundColor._1, backgroundColor._2, backgroundColor._3, 1.0f)
+    board.updateTheme(theme)
   }
 
   override def onDrawFrame(gl: GL10) {
     if (themeNeedsUpdate) {
-      updateTheme()
+      updateTheme(_theme)
       themeNeedsUpdate = false
     }
     val now = System.currentTimeMillis()
 
     if (lastFrame != 0) {
-      setCamera(mvMatrix)
-      board.animate((now - lastFrame) / 1000.0f)
-
       this.synchronized {
-        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
-        board.draw(mvMatrix, pMatrix)
+        setCamera(mvMatrix)
+        board.animate((now - lastFrame) / 1000.0f)
       }
+
+      GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
+      board.draw(mvMatrix, pMatrix)
 
       framesLastSecond += 1
 
@@ -86,7 +96,8 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
       ratio = width.toFloat / height.toFloat
       Matrix.orthoM(pMatrix.get(), 0, -ratio, ratio, -1.0f, 1.0f, -1.0f, 1.0f)
     }
-    board.updateResources(ratio)
+    board.reset()
+    board.updateResources(resources, ratio)
   }
 
   override def onSurfaceCreated(gl: GL10, config: EGLConfig) {
@@ -98,12 +109,6 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
 
     resources.createOpenGLResources()
     themeNeedsUpdate = true
-  }
-
-  private def updateTheme(): Unit = {
-    val backgroundColor: Color3 = resources.getTheme.background
-    GLES20.glClearColor(backgroundColor._1, backgroundColor._2, backgroundColor._3, 1.0f)
-    board.updateTheme()
   }
 
   def onTouchEvent(e: MotionEvent): Boolean = {
@@ -121,12 +126,21 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
       pMatrix.get().copyToArray(tempPMatrix.get())
       setCamera(tempMVMatrix)
       try {
-        board.click(clickX, clickY, viewport, tempMVMatrix, tempPMatrix)
+        val ray = unProjectMatrices(tempMVMatrix.get(), tempPMatrix.get(), clickX, clickY, viewport)
+        try {
+          this.synchronized {
+            board.click(ray, tempMVMatrix)
+          }
+        } catch {
+          //TODO: remind user that game has ended
+          case e: GameFinished =>
+          case e: GameWon =>
+          case e: GameDrawn =>
+        }
       } catch {
-        //TODO: remind user that game has ended
-        case e: GameFinished =>
-        case e: GameWon =>
-        case e: GameDrawn =>
+        case e: UnProjectException =>
+          error(e.getMessage)
+          return false
       }
     }
 

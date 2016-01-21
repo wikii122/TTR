@@ -1,62 +1,110 @@
 package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
+import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, Translation}
+import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.{Algebra, Ray, Triangle}
 
 import scala.collection.mutable
 
-/**
- *
- */
-trait SceneObject {
-  protected val children: mutable.ListBuffer[SceneObject] = mutable.ListBuffer()
+trait SceneObject extends Algebra {
+  private[this] val children = mutable.ArrayBuffer[SceneObject]()
 
-  protected var objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
-  protected var objectRotationAngle = 0.0f
-  protected var objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
-  protected var objectScale = Array[Float](1.0f, 1.0f, 1.0f)
+  private[this] val transformations = mutable.ArrayBuffer[Transformation]()
 
-  protected var visible = true
+  private[this] var visible = true
 
-  protected def onUpdateResources(screenRatio: Float): Unit
+  protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {}
 
-  protected def onUpdateTheme(): Unit
+  protected def onUpdateTheme(theme: Theme): Unit = {}
 
-  protected def onAnimate(dt: Float): Unit
+  protected def onAnimate(dt: Float): Unit = {}
 
-  protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit
+  protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {}
 
-  protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean
+  protected def onClick(): Unit = {}
+
+  protected def getBoundingFigure: Array[Triangle] = Array[Triangle]()
 
   def addChild(child: SceneObject): Unit = {
     children.append(child)
   }
 
-  protected def transformToPosition(mvMatrix: MatrixStack): Unit = {
-    Matrix.translateM(mvMatrix.get(), 0, objectPosition(0), objectPosition(1), objectPosition(2))
-    Matrix.rotateM(mvMatrix.get(), 0, objectRotationAngle, objectRotation(0), objectRotation(1), objectRotation(2))
-    Matrix.scaleM(mvMatrix.get(), 0, objectScale(0), objectScale(1), objectScale(2))
+  def addTransformation(transformation: Transformation): Unit = {
+    transformations.append(transformation)
   }
 
-  def updateResources(screenRatio: Float): Unit = {
-    reset()
-    //Allow children to setup first
-    for (child <- children) {
-      child.updateResources(screenRatio)
+  def removeTransformation(transformation: Transformation): Unit = {
+    val i = transformations.indexOf(transformation)
+    if (i != -1) {
+      transformations.remove(i)
     }
-    onUpdateResources(screenRatio)
   }
 
-  def updateTheme(): Unit = {
-    onUpdateTheme()
-    for (child <- children) {
-      child.updateTheme()
+  def addScale(x: Float, y: Float, z: Float, enabled: Boolean): Scale = {
+    val scale = new Scale(x, y, z, enabled)
+    transformations.append(scale)
+    return scale
+  }
+
+  def addTranslation(x: Float, y: Float, z: Float, enabled: Boolean): Translation = {
+    val translation = new Translation(x, y, z, enabled)
+    transformations.append(translation)
+    return translation
+  }
+
+  def addRotation(a: Float, x: Float, y: Float, z: Float, enabled: Boolean): Rotation = {
+    val rotation = new Rotation(a, x, y, z, enabled)
+    transformations.append(rotation)
+    return rotation
+  }
+
+  def reset(): Unit = {
+    transformations.clear()
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).reset()
+      i += 1
+    }
+  }
+
+  protected def transformToPosition(mvMatrix: MatrixStack): Unit = {
+    val size = transformations.size
+    var i = 0
+    while (i < size) {
+      transformations(i).transform(mvMatrix.get())
+      i += 1
+    }
+  }
+
+  def updateResources(resources: Resources, screenRatio: Float): Unit = {
+    onUpdateResources(resources, screenRatio)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).updateResources(resources, screenRatio)
+      i += 1
+    }
+  }
+
+  def updateTheme(theme: Theme): Unit = {
+    onUpdateTheme(theme)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).updateTheme(theme)
+      i += 1
     }
   }
 
   def animate(dt: Float): Unit = {
     onAnimate(dt)
-    for (child <- children) {
-      child.animate(dt)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).animate(dt)
+      i += 1
     }
   }
 
@@ -65,66 +113,57 @@ trait SceneObject {
       mvMatrix.push()
       transformToPosition(mvMatrix)
       onDraw(mvMatrix, pMatrix)
-      for (child <- children) {
-        child.draw(mvMatrix, pMatrix)
+      val size = children.size
+      var i = 0
+      while (i < size) {
+        children(i).draw(mvMatrix, pMatrix)
+        i += 1
       }
       mvMatrix.pop()
     }
   }
 
-  def click(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = {
+  def click(eyeSpaceRay: Ray, mvMatrix: MatrixStack): Boolean = {
     mvMatrix.push()
     transformToPosition(mvMatrix)
-    var result = false
-    for (child <- children) {
-      if (!result) {
-        result = child.click(clickX, clickY, viewport, mvMatrix, pMatrix)
+    val boundingFigure = getBoundingFigure
+
+    var result = if (boundingFigure.length != 0) {
+
+      val p1 = Array(0.0f, 0.0f, 0.0f, 1.0f)
+      val p2 = Array(0.0f, 0.0f, 0.0f, 1.0f)
+      val p3 = Array(0.0f, 0.0f, 0.0f, 1.0f)
+
+      var intersect = false
+      var triangle = 0
+      while (triangle < boundingFigure.length && !intersect) {
+        Matrix.multiplyMV(p1, 0, mvMatrix.get(), 0, boundingFigure(triangle).V1, 0)
+        Matrix.multiplyMV(p2, 0, mvMatrix.get(), 0, boundingFigure(triangle).V2, 0)
+        Matrix.multiplyMV(p3, 0, mvMatrix.get(), 0, boundingFigure(triangle).V3, 0)
+        val eyeSpaceTriangle = Triangle(p1, p2, p3)
+
+        intersect |= isRayIntersectingTriangle(eyeSpaceTriangle, eyeSpaceRay)
+        triangle += 1
       }
+      if (intersect) {
+        onClick()
+      }
+
+      intersect
+    } else {
+      false
     }
-    if (!result) {
-      result = onClick(clickX, clickY, viewport, mvMatrix, pMatrix)
+
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      result |= children(i).click(eyeSpaceRay, mvMatrix)
+      i += 1
     }
+
     mvMatrix.pop()
     return result
   }
-
-  def scale(x: Float, y: Float, z: Float): Unit = {
-    objectScale(0) *= x
-    objectScale(1) *= y
-    objectScale(2) *= z
-  }
-
-  def translate(x: Float, y: Float, z: Float): Unit = {
-    objectPosition(0) += x
-    objectPosition(1) += y
-    objectPosition(2) += z
-  }
-
-  def rotate(a: Float): Unit = {
-    objectRotationAngle += a
-    if(objectRotationAngle >= 360.0f) {
-      objectRotationAngle -= 360.0f
-    }
-    if(objectRotationAngle <= -360.0f) {
-      objectRotationAngle += 360.0f
-    }
-  }
-
-  def rotation(a: Float, x: Float, y: Float, z: Float): Unit = {
-    objectRotationAngle = a
-    objectRotation(0) = x
-    objectRotation(1) = y
-    objectRotation(2) = z
-  }
-
-  def reset(): Unit = {
-    objectPosition = Array[Float](0.0f, 0.0f, 0.0f)
-    objectRotationAngle = 0.0f
-    objectRotation = Array[Float](0.0f, 0.0f, 1.0f)
-    objectScale = Array[Float](1.0f, 1.0f, 1.0f)
-  }
-
-  def setRotationAngle(a: Float) = objectRotationAngle = a
 
   def setVisible(v: Boolean) = visible = v
 }

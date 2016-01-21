@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.{Bitmap, BitmapFactory}
 
 class DrawableTexture(context: Context, drawable: Int) extends TextureProvider {
-  private val res = context.getResources
 
   private def calculateInSampleSize(options: BitmapFactory.Options, reqWidth: Int, reqHeight: Int): Int = {
     // Raw height and width of image
@@ -27,6 +26,7 @@ class DrawableTexture(context: Context, drawable: Int) extends TextureProvider {
   }
 
   def decode(drawable: Int, width: Int = 512, height: Int = 512, config: Bitmap.Config = Bitmap.Config.ARGB_8888): Int = {
+    val res = context.getResources
     val options: BitmapFactory.Options = new BitmapFactory.Options()
     options.inJustDecodeBounds = true
     BitmapFactory.decodeResource(res, drawable, options)

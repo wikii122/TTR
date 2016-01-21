@@ -36,11 +36,11 @@ class BoardModel() extends Logging {
     ArrayBuffer[Counter]()
   }
 
-  private[this] val rotatedLeftCounters = Array.tabulate(4) { quadrant =>
+  private[this] val rotatedRightCounters = Array.tabulate(4) { quadrant =>
     prepareRotateCounters(Quadrant(quadrant), QRotation.r90, baseCounters, rotatedCountersMap)
   }
 
-  private[this] val rotatedRightCounters = Array.tabulate(4) { quadrant =>
+  private[this] val rotatedLeftCounters = Array.tabulate(4) { quadrant =>
     prepareRotateCounters(Quadrant(quadrant), QRotation.r270, baseCounters, rotatedCountersMap)
   }
 
@@ -49,14 +49,14 @@ class BoardModel() extends Logging {
     (x: Int, y: Int) => new Position(x, y)
   }
 
-  private[this] val _cached_moves_rotations_left = Array(
+  private[this] val _cached_moves_rotations_right = Array(
     new Rotation(Quadrant.first, QRotation.r90),
     new Rotation(Quadrant.second, QRotation.r90),
     new Rotation(Quadrant.third, QRotation.r90),
     new Rotation(Quadrant.fourth, QRotation.r90)
   )
 
-  private[this] val _cached_moves_rotations_right = Array(
+  private[this] val _cached_moves_rotations_left = Array(
     new Rotation(Quadrant.first, QRotation.r270),
     new Rotation(Quadrant.second, QRotation.r270),
     new Rotation(Quadrant.third, QRotation.r270),
@@ -134,8 +134,8 @@ class BoardModel() extends Logging {
 
   private def substituteIfInQuadrant(quadrant: Quadrant.Value, xOld: Int, yOld: Int, rot: QRotation.Value): (Int, Int) = {
     val (xBase, yBase) = rot match {
-      case QRotation.r90 => (2 - yOld % 3, xOld % 3)
-      case QRotation.r270 => (yOld % 3, 2 - xOld % 3)
+      case QRotation.r90 => (yOld % 3, 2 - xOld % 3)
+      case QRotation.r270 => (2 - yOld % 3, xOld % 3)
     }
     return quadrant match {
       case Quadrant.first => if (xOld < 3 && yOld < 3) (xBase, yBase) else (xOld, yOld)
@@ -258,8 +258,8 @@ class BoardModel() extends Logging {
   }
 
   def checkRotate(q: Quadrant.Value, r: QRotation.Value, player: Int): Int = r match {
-    case QRotation.r90 => check(rotatedRightCounters(q.id))
-    case QRotation.r270 => check(rotatedLeftCounters(q.id))
+    case QRotation.r90 => check(rotatedLeftCounters(q.id))
+    case QRotation.r270 => check(rotatedRightCounters(q.id))
   }
 
   def isLegal(m: Move): Boolean = m match {
@@ -286,8 +286,8 @@ class BoardModel() extends Logging {
   def rotate(q: Quadrant.Value, rotation: QRotation.Value, player: Int): Unit = {
     val quadrant = q.id
     rotation match {
-      case QRotation.r90 => rotateQuadrantLeft(quadrant)
-      case QRotation.r270 => rotateQuadrantRight(quadrant)
+      case QRotation.r90 => rotateQuadrantRight(quadrant)
+      case QRotation.r270 => rotateQuadrantLeft(quadrant)
     }
     quadrants(quadrant).rotate(rotation)
     tick()
@@ -298,8 +298,8 @@ class BoardModel() extends Logging {
     unTick()
     quadrants(quadrant).unRotate(rotation)
     rotation match {
-      case QRotation.r90 => rotateQuadrantRight(quadrant)
-      case QRotation.r270 => rotateQuadrantLeft(quadrant)
+      case QRotation.r90 => rotateQuadrantLeft(quadrant)
+      case QRotation.r270 => rotateQuadrantRight(quadrant)
     }
   }
 
@@ -491,12 +491,12 @@ class BoardModel() extends Logging {
     while (quadrant < 4) {
       if (canRotate(quadrant) && !isRotationImmune(quadrant)) {
 
-        val value = checkRotate(Quadrant(quadrant), QRotation.r90, player)
-        moves(moveNumber) = new ValuedMove(value, _cached_moves_rotations_left(quadrant))
+        val valueRight = checkRotate(Quadrant(quadrant), QRotation.r90, player)
+        moves(moveNumber) = new ValuedMove(valueRight, _cached_moves_rotations_right(quadrant))
         moveNumber += 1
 
-        val value2 = checkRotate(Quadrant(quadrant), QRotation.r270, player)
-        moves(moveNumber) = new ValuedMove(value2, _cached_moves_rotations_right(quadrant))
+        val valueLeft = checkRotate(Quadrant(quadrant), QRotation.r270, player)
+        moves(moveNumber) = new ValuedMove(valueLeft, _cached_moves_rotations_left(quadrant))
         moveNumber += 1
       }
       quadrant += 1
@@ -618,14 +618,14 @@ class BoardModel() extends Logging {
     while (quadrant < 4) {
       if (canRotate(quadrant) && !isRotationImmune(quadrant)) {
 
-        val valueLeft = checkRotate(Quadrant(quadrant), QRotation.r90, player)
-        changeBestIfNotWorse(_cached_moves_rotations_left(quadrant), valueLeft)
+        val valueRight = checkRotate(Quadrant(quadrant), QRotation.r90, player)
+        changeBestIfNotWorse(_cached_moves_rotations_right(quadrant), valueRight)
         if (al >= be) {
           return new ValuedMove(bestValue, bestMove.get)
         }
 
-        val valueRight = checkRotate(Quadrant(quadrant), QRotation.r270, player)
-        changeBestIfNotWorse(_cached_moves_rotations_right(quadrant), valueRight)
+        val valueLeft = checkRotate(Quadrant(quadrant), QRotation.r270, player)
+        changeBestIfNotWorse(_cached_moves_rotations_left(quadrant), valueLeft)
         if (al >= be) {
           return new ValuedMove(bestValue, bestMove.get)
         }
@@ -714,7 +714,7 @@ object BoardModel {
     val state = old.lines
     for (i <- 0 until 2 * Quadrant.size;
          j <- 0 until 2 * Quadrant.size
-    ) board.setState(i, j, LightField.fromOption(state(j)(i)))
+    ) board.setState(i, j, LightField.fromOption(state(i)(j)))
 
     board.countBoard()
 

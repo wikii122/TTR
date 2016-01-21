@@ -1,73 +1,82 @@
 package pl.enves.ttr.graphics.board
 
-import pl.enves.androidx.Logging
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.color.ColorTypes.ColorArray
-import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.geometry.GeometryId
+import pl.enves.ttr.graphics.geometry.{Geometry, GeometryId}
 import pl.enves.ttr.graphics.shaders.MaskShader
+import pl.enves.ttr.graphics.texture.TextureId
+import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
+import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.Triangle
+import pl.enves.ttr.utils.themes.Theme
 
-class Field(resources: Resources) extends SceneObject with Logging with ColorManip {
-  var square: Option[AbstractGeometry] = None
+class Field(quadrant: Quadrant.Value)
+  extends SceneObject with ColorManip {
 
-  var maskShader: Option[MaskShader] = None
+  private[this] var value: Option[Player.Value] = None
+  private[this] var winning = false
 
-  var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var square: Option[Geometry] = None
 
-  //TODO: Load from settings
-  protected var shakeTime: Float = 1.0f //seconds
+  private[this] var maskShader: Option[MaskShader] = None
 
-  protected var shakeAmplitude = 15.0f
+  private[this] var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  protected var shakeFrequency = 5.0f //Hz
+  private[this] var ring: Option[Int] = None
+  private[this] var cross: Option[Int] = None
+  private[this] var empty: Option[Int] = None
 
-  private var shaken = false
+  private[this] var outerColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
+  private[this] var winnerOuterColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
-  private var shakeTimeElapsed: Float = 0.0f
+  def setValue(v: Option[Player.Value]): Unit = {
+    value = v
+  }
 
-  private var notStirred = 0.0f
+  protected def getValue = value
 
-  override protected def onUpdateResources(screenRatio: Float): Unit = {
+  def setWinning(w: Boolean): Unit = {
+    winning = w
+  }
+
+  override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     square = Some(resources.getGeometry(GeometryId.Square))
 
     maskShader = Some(resources.getMaskShader)
 
-    scale(0.9f, 0.9f, 1.0f)
+    ring = Some(resources.getTexture(TextureId.MaskRing))
+    cross = Some(resources.getTexture(TextureId.MaskCross))
+    empty = Some(resources.getTexture(TextureId.MaskEmpty))
   }
 
-  override protected def onUpdateTheme(): Unit = {
-    noColor = colorTransparent(resources.getTheme.background, 0.0f)
+  override protected def onUpdateTheme(theme: Theme): Unit = {
+    noColor = colorTransparent(theme.background, 0.0f)
+    outerColor = quadrant match {
+      case Quadrant.first => theme.color1
+      case Quadrant.second => theme.color2
+      case Quadrant.third => theme.color2
+      case Quadrant.fourth => theme.color1
+    }
+    winnerOuterColor = theme.winner
   }
 
-  override protected def onAnimate(dt: Float): Unit = {
-    if (shaken) {
-      val s = shakeAmplitude * Math.sin(shakeTimeElapsed * shakeFrequency * 2 * Math.PI).toFloat
-      objectRotationAngle = notStirred + s * Math.sin((shakeTimeElapsed / shakeTime) * Math.PI).toFloat //Apply Ease In And Ease Out
+  override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
+    val outer = if (winning) {
+      winnerOuterColor
+    } else {
+      outerColor
+    }
 
-      shakeTimeElapsed += dt
-      if (shakeTimeElapsed >= shakeTime) {
-        discardIllegal()
+    if (value.isDefined) {
+      value.get match {
+        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, ring.get)
+        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, cross.get)
       }
+    } else {
+      maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, empty.get)
     }
   }
 
-  override protected def onClick(clickX: Float, clickY: Float, viewport: Array[Int], mvMatrix: MatrixStack, pMatrix: MatrixStack): Boolean = false
-
-  override protected def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {}
-
-  def discardIllegal(): Unit = {
-    if (shaken) {
-      shaken = false
-      objectRotationAngle = notStirred
-    }
-  }
-
-  def setIllegal(): Unit = {
-    if (!shaken) {
-      shaken = true
-      notStirred = objectRotationAngle
-    }
-    shakeTimeElapsed = 0.0f
-  }
+  override def getBoundingFigure: Array[Triangle] = square.get.getBoundingFigure
 }
