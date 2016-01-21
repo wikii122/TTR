@@ -5,16 +5,12 @@ import pl.enves.ttr.graphics.transformations.Rotation
 class InfiniteRotation(rotation: Rotation, omega: Float)
   extends Animation(666.6f) {
 
+  private[this] val clockwise = Math.random() < 0.5
+
   override protected def onAnimate(dt: Float, elapsed: Float): Unit = {
-    var angle = rotation.getA + omega * dt
+    val a = if (clockwise) omega * elapsed else -omega * elapsed
 
-    if (angle >= 360.0f) {
-      angle = 360.0f - angle
-    }
-
-    if (angle <= -360.0f) {
-      angle = -360.0f + angle
-    }
+    val angle = a % 360.0f
 
     rotation.setA(rotation.getDefaultA + angle)
   }
