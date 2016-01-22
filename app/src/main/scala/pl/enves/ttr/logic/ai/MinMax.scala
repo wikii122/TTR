@@ -31,7 +31,9 @@ class MinMax(board: Board, player: Player.Value, minTime: Int, maxTime: Int, max
 
   private[this] val startTime = System.currentTimeMillis()
 
-  private[this] val boardModel = BoardModel(board)
+  // initialization may take 100-200 milliseconds and cause lag in display
+  // first used in worker thread, so it can be lazy
+  private[this] lazy val boardModel = BoardModel(board)
 
   def stop(): Unit = {
     this.synchronized {

@@ -65,8 +65,8 @@ class BoardModel() extends Logging {
 
   private[this] val generator = new Random()
 
-  printCountersNum(baseCountersMap)
-  printCountersNum(rotatedCountersMap)
+  //printCountersNum(baseCountersMap)
+  //printCountersNum(rotatedCountersMap)
 
   private def calculateZobristSignature(): Int = {
     var h: Int = 0
