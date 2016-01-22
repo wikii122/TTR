@@ -22,7 +22,6 @@ trait AdUtils extends ExtendedActivity {
   private def createAdRequest(): AdRequest = {
     return new AdRequest.Builder()
       .addTestDevice(AdRequest.DEVICE_ID_EMULATOR)
-      .addTestDevice("DBAED61F4D0B4FF717EA42BC382FF432")  //pjan
       .build()
   }
 }
