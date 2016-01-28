@@ -14,11 +14,6 @@ import pl.enves.ttr.utils.{AdUtils, Configuration}
 import scala.collection.mutable.ArrayBuffer
 
 class SettingsActivity extends ToolbarActivity with AdUtils {
-  private[this] var pickThemeText: Option[(TextView, TextView)] = None
-  private[this] var themePicker: Option[ThemePicker] = None
-  private[this] var tutorialButton: Option[(Button, Button)] = None
-  private[this] var aboutButton: Option[(Button, Button)] = None
-  private[this] var licensesButton: Option[(Button, Button)] = None
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -26,24 +21,23 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
 
     setupToolbar(R.id.settings_toolbar)
 
-    pickThemeText = Some((find[TextView](R.id.text_pick_theme), find[TextView](R.id.text_pick_theme_prompt)))
-    themePicker = Some(find[ThemePicker](R.id.view_theme_picker))
-    tutorialButton = Some((find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt)))
-    aboutButton = Some((find[Button](R.id.button_about), find[Button](R.id.button_about_prompt)))
-    licensesButton = Some((find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt)))
+    val themePicker = find[ThemePicker](R.id.view_theme_picker)
+    val tutorialButton = (find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt))
+    val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
+    val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
 
-    themePicker.get.setChangeListener(this)
+    themePicker.setChangeListener(this)
     val themes = readDefaultThemes
-    themePicker.get.setThemes(themes)
+    themePicker.setThemes(themes)
     var i = themes.indexOf(Configuration.pickedTheme)
     if (i == -1) {
       i = 0
     }
-    themePicker.get.setCurrent(i)
+    themePicker.setCurrent(i)
 
-    tutorialButton.get onClick startTutorial
-    aboutButton.get onClick startAbout
-    licensesButton.get onClick startLicenses
+    tutorialButton onClick startTutorial
+    aboutButton onClick startAbout
+    licensesButton onClick startLicenses
 
     if (!Configuration.isPaid) {
       loadAdToStub(R.id.stub_settings_ad)
@@ -52,8 +46,11 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
 
   override def onPause(): Unit = {
     super.onPause()
-    if (themePicker.get.isChanged) {
-      Configuration.pickedTheme = themePicker.get.getTheme
+
+    val themePicker = find[ThemePicker](R.id.view_theme_picker)
+
+    if (themePicker.isChanged) {
+      Configuration.pickedTheme = themePicker.getTheme
     }
   }
 
@@ -92,20 +89,30 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    pickThemeText.get._1.setTypeface(typeface)
-    pickThemeText.get._2.setTypeface(typeface)
-    tutorialButton.get.setTypeface(typeface)
-    aboutButton.get.setTypeface(typeface)
-    licensesButton.get.setTypeface(typeface)
+    val pickThemeText = (find[TextView](R.id.text_pick_theme), find[TextView](R.id.text_pick_theme_prompt))
+    val tutorialButton = (find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt))
+    val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
+    val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
+
+    pickThemeText._1.setTypeface(typeface)
+    pickThemeText._2.setTypeface(typeface)
+    tutorialButton.setTypeface(typeface)
+    aboutButton.setTypeface(typeface)
+    licensesButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
 
-    pickThemeText.get._1.setTextColor(theme.color1)
-    pickThemeText.get._2.setTextColor(theme.color2)
-    tutorialButton.get.setTextColor(theme.color1, theme.color2)
-    aboutButton.get.setTextColor(theme.color1, theme.color2)
-    licensesButton.get.setTextColor(theme.color1, theme.color2)
+    val pickThemeText = (find[TextView](R.id.text_pick_theme), find[TextView](R.id.text_pick_theme_prompt))
+    val tutorialButton = (find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt))
+    val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
+    val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
+
+    pickThemeText._1.setTextColor(theme.color1)
+    pickThemeText._2.setTextColor(theme.color2)
+    tutorialButton.setTextColor(theme.color1, theme.color2)
+    aboutButton.setTextColor(theme.color1, theme.color2)
+    licensesButton.setTextColor(theme.color1, theme.color2)
   }
 }

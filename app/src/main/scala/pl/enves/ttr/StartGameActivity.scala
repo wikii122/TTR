@@ -1,21 +1,21 @@
 package pl.enves.ttr
 
 import android.app.Activity
-import android.content.{Intent, SharedPreferences}
+import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.view.animation.AnimationUtils
-import android.widget.{ImageButton, ViewSwitcher, Button, TextView}
+import android.widget.{Button, ImageButton, TextView, ViewSwitcher}
 import com.google.android.gms.games.Games
 import pl.enves.androidx.color.ColorUiTweaks
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
-import pl.enves.ttr.logic.{Game, GameState, Player}
-import pl.enves.ttr.utils.{LogoUtils, dialogs, Configuration}
-import pl.enves.ttr.utils.dialogs.{PaidOnlyDialog, Reason}
+import pl.enves.ttr.logic.{Game, GameState}
+import pl.enves.ttr.utils.dialogs.PaidOnlyDialog
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.{Configuration, LogoUtils, dialogs}
 
 class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks {
   private[this] final val SELECT_PLAYERS = 9003
@@ -57,7 +57,7 @@ class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks
 
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
     case SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
-      else return;
+    else return;
     case PlayServices.SIGN_IN => log("Signed in to Google Play Services")
       log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
       drawUI()
@@ -75,22 +75,22 @@ class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks
     log("Intending to start new StandardGame")
     val itnt = prepareGameIntent(intent[GameActivity])
     itnt putExtra("TYPE", Game.STANDARD.toString)
-    itnt start ()
+    itnt start()
   }
 
   private[this] def startNetworkGame(i: Intent) = {
     log("Intending to start new StandardGame")
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra ("TYPE", Game.GPS_MULTIPLAYER.toString)
-    itnt putExtra ("PLAYERS", i getStringArrayListExtra Games.EXTRA_PLAYER_IDS)
-    itnt start ()
+    itnt putExtra("TYPE", Game.GPS_MULTIPLAYER.toString)
+    itnt putExtra("PLAYERS", i getStringArrayListExtra Games.EXTRA_PLAYER_IDS)
+    itnt start()
   }
 
   private[this] def startAIGame(v: View) = {
     log("Intending to start new AIGame")
     val itnt = prepareGameIntent(intent[GameActivity])
     itnt putExtra("TYPE", Game.AI.toString)
-    itnt start ()
+    itnt start()
   }
 
   private[this] def prepareGameIntent(i: Intent): Intent = {
@@ -138,35 +138,35 @@ class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks
   }
 
   private[this] def drawUI() = {
-    val viewSwitcher = Some(find[ViewSwitcher](R.id.menuViewSwitcher))
+    val viewSwitcher = find[ViewSwitcher](R.id.menuViewSwitcher)
 
-    val newGameButton = Some((find[Button](R.id.button_new), find[Button](R.id.button_new_prompt)))
-    val continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
-    val settingsButton = Some((find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt)))
+    val newGameButton = (find[Button](R.id.button_new), find[Button](R.id.button_new_prompt))
+    val continueGameButton = (find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt))
+    val settingsButton = (find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt))
 
-    val newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
-    val newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
-    val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
-    val gameTypeText = Some(find[TextView](R.id.text_game_type))
+    val newStandardButton = (find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt))
+    val newAIGameButton = (find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt))
+    val newNetworkButton = (find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt))
+    val backToMainButton = find[ImageButton](R.id.button_back_to_main)
 
     alignLogo()
 
-    newGameButton.get onClick flip
-    continueGameButton.get onClick continueGame
-    settingsButton.get onClick launchSettings
+    newGameButton onClick flip
+    continueGameButton onClick continueGame
+    settingsButton onClick launchSettings
 
-    newStandardButton.get onClick startStandardGame
-    newAIGameButton.get onClick startAIGame
-    newNetworkButton.get onClick startNetworkGame
-    backToMainButton.get onClick unflip
+    newStandardButton onClick startStandardGame
+    newAIGameButton onClick startAIGame
+    newNetworkButton onClick startNetworkGame
+    backToMainButton onClick unflip
 
-    val inAnimation = AnimationUtils.loadAnimation(this,  android.R.anim.fade_in)
+    val inAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_in)
     val outAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
 
-    viewSwitcher.get.setInAnimation(inAnimation)
-    viewSwitcher.get.setOutAnimation(outAnimation)
+    viewSwitcher.setInAnimation(inAnimation)
+    viewSwitcher.setOutAnimation(outAnimation)
   }
+
   private[this] def flip(v: View) = {
     log("Showing new game menu")
 
@@ -202,23 +202,23 @@ class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    val newGameButton = Some((find[Button](R.id.button_new), find[Button](R.id.button_new_prompt)))
-    val continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
-    val settingsButton = Some((find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt)))
+    val newGameButton = (find[Button](R.id.button_new), find[Button](R.id.button_new_prompt))
+    val continueGameButton = (find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt))
+    val settingsButton = (find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt))
 
-    val newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
-    val newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
-    val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    val gameTypeText = Some(find[TextView](R.id.text_game_type))
+    val newStandardButton = (find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt))
+    val newAIGameButton = (find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt))
+    val newNetworkButton = (find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt))
+    val gameTypeText = find[TextView](R.id.text_game_type)
 
-    newGameButton.get.setTypeface(typeface)
-    continueGameButton.get.setTypeface(typeface)
-    settingsButton.get.setTypeface(typeface)
+    newGameButton.setTypeface(typeface)
+    continueGameButton.setTypeface(typeface)
+    settingsButton.setTypeface(typeface)
 
-    newStandardButton.get.setTypeface(typeface)
-    newAIGameButton.get.setTypeface(typeface)
-    newNetworkButton.get.setTypeface(typeface)
-    gameTypeText.get.setTypeface(typeface)
+    newStandardButton.setTypeface(typeface)
+    newAIGameButton.setTypeface(typeface)
+    newNetworkButton.setTypeface(typeface)
+    gameTypeText.setTypeface(typeface)
 
     setLogoTypeface(typeface)
   }
@@ -231,25 +231,25 @@ class StartGameActivity extends StyledActivity with LogoUtils with ColorUiTweaks
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
 
-    val newGameButton = Some((find[Button](R.id.button_new), find[Button](R.id.button_new_prompt)))
-    val continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
-    val settingsButton = Some((find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt)))
+    val newGameButton = (find[Button](R.id.button_new), find[Button](R.id.button_new_prompt))
+    val continueGameButton = (find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt))
+    val settingsButton = (find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt))
 
-    val newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
-    val newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
-    val newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    val backToMainButton = Some(find[ImageButton](R.id.button_back_to_main))
-    val gameTypeText = Some(find[TextView](R.id.text_game_type))
+    val newStandardButton = (find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt))
+    val newAIGameButton = (find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt))
+    val newNetworkButton = (find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt))
+    val backToMainButton = find[ImageButton](R.id.button_back_to_main)
+    val gameTypeText = find[TextView](R.id.text_game_type)
 
-    newGameButton.get.setTextColor(theme.color1, theme.color2)
-    continueGameButton.get.setTextColor(colorStateList(theme.color1, 0.25f), colorStateList(theme.color2, 0.25f))
-    settingsButton.get.setTextColor(theme.color1, theme.color2)
+    newGameButton.setTextColor(theme.color1, theme.color2)
+    continueGameButton.setTextColor(colorStateList(theme.color1, 0.25f), colorStateList(theme.color2, 0.25f))
+    settingsButton.setTextColor(theme.color1, theme.color2)
 
-    newStandardButton.get.setTextColor(theme.color1, theme.color2)
-    newAIGameButton.get.setTextColor(theme.color1, theme.color2)
-    newNetworkButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColor(theme.color1)
-    gameTypeText.get.setTextColor(theme.color2)
+    newStandardButton.setTextColor(theme.color1, theme.color2)
+    newAIGameButton.setTextColor(theme.color1, theme.color2)
+    newNetworkButton.setTextColor(theme.color1, theme.color2)
+    backToMainButton.setColor(theme.color1)
+    gameTypeText.setTextColor(theme.color2)
 
     setLogoColorTheme(theme)
   }

@@ -326,12 +326,6 @@ class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extend
 }
 
 class TutorialActivity extends BottomBarActivity {
-  private[this] var adapter: Option[TutorialFragmentPagerAdapter] = None
-  private[this] var viewPager: Option[ViewPager] = None
-
-  private[this] var skipButton: Option[Button] = None
-  private[this] var nextButton: Option[Button] = None
-  private[this] var doneButton: Option[Button] = None
 
   private[this] var currentFragment = 0
 
@@ -339,35 +333,35 @@ class TutorialActivity extends BottomBarActivity {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.tutorial_layout)
 
-    viewPager = Some(find[ViewPager](R.id.tutorial_viewpager))
-    adapter = Some(new TutorialFragmentPagerAdapter(getSupportFragmentManager, TutorialActivity.this))
+    val viewPager = find[ViewPager](R.id.tutorial_viewpager)
+    val adapter = new TutorialFragmentPagerAdapter(getSupportFragmentManager, TutorialActivity.this)
 
-    skipButton = Some(find[Button](R.id.tutorial_skip_button))
-    nextButton = Some(find[Button](R.id.tutorial_next_button))
-    doneButton = Some(find[Button](R.id.tutorial_done_button))
+    val skipButton = find[Button](R.id.tutorial_skip_button)
+    val nextButton = find[Button](R.id.tutorial_next_button)
+    val doneButton = find[Button](R.id.tutorial_done_button)
 
-    skipButton.get onClick onSkipPressed
-    nextButton.get onClick onNextPressed
-    doneButton.get onClick onDonePressed
+    skipButton onClick onSkipPressed
+    nextButton onClick onNextPressed
+    doneButton onClick onDonePressed
 
-    viewPager.get.setAdapter(adapter.get)
+    viewPager.setAdapter(adapter)
 
-    viewPager.get.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+    viewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
       override def onPageScrolled(position: Int, positionOffset: Float, positionOffsetPixels: Int): Unit = {}
 
       override def onPageSelected(position: Int): Unit = {
-        if (position == adapter.get.getCount - 1) {
-          skipButton.get.setVisibility(View.INVISIBLE)
-          nextButton.get.setVisibility(View.GONE)
-          doneButton.get.setVisibility(View.VISIBLE)
+        if (position == adapter.getCount - 1) {
+          skipButton.setVisibility(View.INVISIBLE)
+          nextButton.setVisibility(View.GONE)
+          doneButton.setVisibility(View.VISIBLE)
         } else {
-          skipButton.get.setVisibility(View.VISIBLE)
-          doneButton.get.setVisibility(View.GONE)
-          nextButton.get.setVisibility(View.VISIBLE)
+          skipButton.setVisibility(View.VISIBLE)
+          doneButton.setVisibility(View.GONE)
+          nextButton.setVisibility(View.VISIBLE)
         }
-        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[Selectable].onDeSelected()
+        viewPager.getAdapter.instantiateItem(viewPager, currentFragment).asInstanceOf[Selectable].onDeSelected()
         currentFragment = position
-        viewPager.get.getAdapter.instantiateItem(viewPager.get, currentFragment).asInstanceOf[Selectable].onSelected()
+        viewPager.getAdapter.instantiateItem(viewPager, currentFragment).asInstanceOf[Selectable].onSelected()
       }
 
       override def onPageScrollStateChanged(state: Int): Unit = {}
@@ -377,9 +371,13 @@ class TutorialActivity extends BottomBarActivity {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    skipButton.get.setTypeface(typeface)
-    nextButton.get.setTypeface(typeface)
-    doneButton.get.setTypeface(typeface)
+    val skipButton = find[Button](R.id.tutorial_skip_button)
+    val nextButton = find[Button](R.id.tutorial_next_button)
+    val doneButton = find[Button](R.id.tutorial_done_button)
+
+    skipButton.setTypeface(typeface)
+    nextButton.setTypeface(typeface)
+    doneButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -391,7 +389,9 @@ class TutorialActivity extends BottomBarActivity {
   }
 
   private[this] def onNextPressed(v: View) = {
-    viewPager.get.setCurrentItem(viewPager.get.getCurrentItem + 1)
+    val viewPager = find[ViewPager](R.id.tutorial_viewpager)
+
+    viewPager.setCurrentItem(viewPager.getCurrentItem + 1)
   }
 
   private[this] def onDonePressed(v: View) = {

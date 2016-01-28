@@ -14,8 +14,6 @@ import pl.enves.ttr.utils.styled.{StyledFragment, ToolbarActivity}
 import pl.enves.ttr.utils.themes.Theme
 
 class LicensesActivity extends ToolbarActivity {
-  private[this] var viewPager: Option[ViewPager] = None
-  private[this] var tabLayout: Option[TabLayout] = None
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
@@ -23,21 +21,23 @@ class LicensesActivity extends ToolbarActivity {
 
     setupToolbar(R.id.licenses_toolbar)
 
-    viewPager = Some(find[ViewPager](R.id.licenses_viewpager))
-    tabLayout = Some(find[TabLayout](R.id.licenses_tabs))
+    val viewPager = find[ViewPager](R.id.licenses_viewpager)
+    val tabLayout = find[TabLayout](R.id.licenses_tabs)
 
     // Set viewPager's PagerAdapter so that it can display items
-    viewPager.get.setAdapter(new LicenseFragmentPagerAdapter(getSupportFragmentManager, LicensesActivity.this))
+    viewPager.setAdapter(new LicenseFragmentPagerAdapter(getSupportFragmentManager, LicensesActivity.this))
 
     // Give the TabLayout the ViewPager
-    tabLayout.get.setupWithViewPager(viewPager.get)
+    tabLayout.setupWithViewPager(viewPager)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
 
-    tabLayout.get.setTabTextColors(theme.color1, theme.color2)
-    tabLayout.get.setSelectedTabIndicatorColor(theme.color2)
+    val tabLayout = find[TabLayout](R.id.licenses_tabs)
+
+    tabLayout.setTabTextColors(theme.color1, theme.color2)
+    tabLayout.setSelectedTabIndicatorColor(theme.color2)
   }
 }
 

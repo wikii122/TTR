@@ -15,27 +15,20 @@ import spray.json._
 
 class GameEndedActivity extends StyledActivity with AdUtils {
 
-  private[this] var gameEndedText: Option[TextView] = None
-  private[this] var playAgainButton: Option[(Button, Button)] = None
-  private[this] var gameCourseButton: Option[(Button, Button)] = None
-  private[this] var showGameEndButton: Option[(Button, Button)] = None
-  private[this] var backButton: Option[ImageButton] = None
-
   override def onCreate(state: Bundle): Unit = {
     super.onCreate(state)
 
     setContentView(R.layout.game_ended_layout)
 
-    gameEndedText = Some(find[TextView](R.id.text_game_ended))
-    playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
-    gameCourseButton = Some((find[Button](R.id.button_replay_moves), find[Button](R.id.button_replay_moves_prompt)))
-    showGameEndButton = Some((find[Button](R.id.button_show_game_end), find[Button](R.id.button_show_game_end_prompt)))
-    backButton = Some(find[ImageButton](R.id.button_back_to_main))
+    val playAgainButton = (find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt))
+    val gameCourseButton = (find[Button](R.id.button_replay_moves), find[Button](R.id.button_replay_moves_prompt))
+    val showGameEndButton = (find[Button](R.id.button_show_game_end), find[Button](R.id.button_show_game_end_prompt))
+    val backButton = find[ImageButton](R.id.button_back_to_main)
 
-    playAgainButton.get onClick onPlayAgain
-    gameCourseButton.get onClick onReplay
-    showGameEndButton.get onClick onShowGameEnd
-    backButton.get onClick onBack
+    playAgainButton onClick onPlayAgain
+    gameCourseButton onClick onReplay
+    showGameEndButton onClick onShowGameEnd
+    backButton onClick onBack
 
     if (!Configuration.isPaid) {
       loadAdToStub(R.id.stub_game_ended_ad)
@@ -52,20 +45,31 @@ class GameEndedActivity extends StyledActivity with AdUtils {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    gameEndedText.get.setTypeface(typeface)
-    playAgainButton.get.setTypeface(typeface)
-    gameCourseButton.get.setTypeface(typeface)
-    showGameEndButton.get.setTypeface(typeface)
+    val gameEndedText = find[TextView](R.id.text_game_ended)
+    val playAgainButton = (find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt))
+    val gameCourseButton = (find[Button](R.id.button_replay_moves), find[Button](R.id.button_replay_moves_prompt))
+    val showGameEndButton = (find[Button](R.id.button_show_game_end), find[Button](R.id.button_show_game_end_prompt))
+
+    gameEndedText.setTypeface(typeface)
+    playAgainButton.setTypeface(typeface)
+    gameCourseButton.setTypeface(typeface)
+    showGameEndButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
 
-    gameEndedText.get.setTextColor(theme.color2)
-    playAgainButton.get.setTextColor(theme.color1, theme.color2)
-    gameCourseButton.get.setTextColor(theme.color1, theme.color2)
-    showGameEndButton.get.setTextColor(theme.color1, theme.color2)
-    backButton.get.setColor(theme.color1)
+    val gameEndedText = find[TextView](R.id.text_game_ended)
+    val playAgainButton = (find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt))
+    val gameCourseButton = (find[Button](R.id.button_replay_moves), find[Button](R.id.button_replay_moves_prompt))
+    val showGameEndButton = (find[Button](R.id.button_show_game_end), find[Button](R.id.button_show_game_end_prompt))
+    val backButton = find[ImageButton](R.id.button_back_to_main)
+
+    gameEndedText.setTextColor(theme.color2)
+    playAgainButton.setTextColor(theme.color1, theme.color2)
+    gameCourseButton.setTextColor(theme.color1, theme.color2)
+    showGameEndButton.setTextColor(theme.color1, theme.color2)
+    backButton.setColor(theme.color1)
   }
 
   /**

@@ -21,15 +21,7 @@ import pl.enves.ttr.utils.themes.Theme
 class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
 
-  private[this] var chooseSymbolLayer: Option[View] = None
-
-  private[this] var chooseSymbolText: Option[TextView] = None
-  private[this] var chooseXButton: Option[ImageButton] = None
-  private[this] var chooseOButton: Option[ImageButton] = None
-
-  private[this] var difficultyText: Option[TextView] = None
-  private[this] var difficultyNumber: Option[TextView] = None
-  private[this] var difficultySeekBar: Option[SeekBar] = None
+  private[this] lazy val chooseSymbolLayer = getLayoutInflater.inflate(R.layout.choose_symbol_layout, null)
 
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
@@ -55,31 +47,25 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       ViewGroup.LayoutParams.MATCH_PARENT)
     frameLayout.addView(view, gameLayoutParams)
 
-    val inflater = getLayoutInflater
-
-    chooseSymbolLayer = Some(inflater.inflate(R.layout.choose_symbol_layout, null))
-    chooseSymbolLayer.get.setVisibility(View.GONE)
+    chooseSymbolLayer.setVisibility(View.GONE)
 
     val chooseSymbolLayoutParams = new FrameLayout.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
       ViewGroup.LayoutParams.MATCH_PARENT,
       Gravity.TOP)
-    frameLayout.addView(chooseSymbolLayer.get, chooseSymbolLayoutParams)
+    frameLayout.addView(chooseSymbolLayer, chooseSymbolLayoutParams)
 
     setContentView(frameLayout)
 
-    chooseSymbolText = Some(find[TextView](R.id.text_choose_symbol))
-    chooseXButton = Some(find[ImageButton](R.id.button_symbol_X))
-    chooseOButton = Some(find[ImageButton](R.id.button_symbol_O))
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    chooseXButton.get onClick onPlayWithBotAsX
-    chooseOButton.get onClick onPlayWithBotAsO
+    chooseXButton onClick onPlayWithBotAsX
+    chooseOButton onClick onPlayWithBotAsO
 
-    difficultySeekBar = Some(find[SeekBar](R.id.seekBar_difficulty))
-    difficultyText = Some(find[TextView](R.id.text_difficulty))
-    difficultyNumber = Some(find[TextView](R.id.text_difficulty_number))
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
-    difficultySeekBar.get onChange onDifficultyChanged
+    difficultySeekBar onChange onDifficultyChanged
 
     if (game.gameType == Game.AI) {
       if (game.asInstanceOf[AIGame].getHuman.isEmpty) {
@@ -96,25 +82,38 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    chooseSymbolText.get.setTypeface(typeface)
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
 
-    difficultyText.get.setTypeface(typeface)
-    difficultyNumber.get.setTypeface(typeface)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    chooseSymbolText.setTypeface(typeface)
+
+    difficultyText.setTypeface(typeface)
+    difficultyNumber.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
     view.setTheme(theme)
 
-    chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    chooseSymbolText.get.setTextColor(theme.color2)
-    chooseXButton.get.setColorMask(theme.background, theme.background, theme.color1)
-    chooseOButton.get.setColorMask(theme.background, theme.background, theme.color1)
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
-    difficultyText.get.setTextColor(theme.color2)
-    difficultyNumber.get.setTextColor(theme.color1)
-    difficultySeekBar.get.setColors(theme.color1, theme.color2)
+    chooseSymbolLayer.setBackgroundColor(colorTransparent(theme.background, 0.8f))
+
+    chooseSymbolText.setTextColor(theme.color2)
+    chooseXButton.setColorMask(theme.background, theme.background, theme.color1)
+    chooseOButton.setColorMask(theme.background, theme.background, theme.color1)
+
+    difficultyText.setTextColor(theme.color2)
+    difficultyNumber.setTextColor(theme.color1)
+    difficultySeekBar.setColors(theme.color1, theme.color2)
   }
 
   override def onPause(): Unit = {
@@ -156,43 +155,63 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
   def showChooser(): Unit = {
     log("showing chooser")
-    chooseSymbolLayer.get.setVisibility(View.VISIBLE)
+
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
+
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    chooseSymbolLayer.setVisibility(View.VISIBLE)
 
     //make sure that all buttons are visible, android gets crazy sometimes
-    chooseSymbolText.get.setVisibility(View.VISIBLE)
-    chooseXButton.get.setVisibility(View.VISIBLE)
-    chooseOButton.get.setVisibility(View.VISIBLE)
+    chooseSymbolText.setVisibility(View.VISIBLE)
+    chooseXButton.setVisibility(View.VISIBLE)
+    chooseOButton.setVisibility(View.VISIBLE)
 
-    difficultyText.get.setVisibility(View.VISIBLE)
-    difficultySeekBar.get.setVisibility(View.VISIBLE)
-    difficultyNumber.get.setVisibility(View.VISIBLE)
+    difficultyText.setVisibility(View.VISIBLE)
+    difficultySeekBar.setVisibility(View.VISIBLE)
+    difficultyNumber.setVisibility(View.VISIBLE)
 
     val difficulty = Configuration.botDifficulty
-    difficultySeekBar.get.setProgress(difficulty)
+    difficultySeekBar.setProgress(difficulty)
     if (difficulty == 0) {
       //seekBar' default progress is 0, so there is no change informed to ProgressChangeListener
-      onDifficultyChanged(difficultySeekBar.get, difficulty, false)
+      onDifficultyChanged(difficultySeekBar, difficulty, false)
     }
   }
 
   def closeChooser(): Unit = {
     log("closing chooser")
-    chooseSymbolLayer.get.setVisibility(View.GONE)
+
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
+
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    chooseSymbolLayer.setVisibility(View.GONE)
 
     //make sure that all buttons are gone, android gets crazy sometimes
-    chooseSymbolText.get.setVisibility(View.GONE)
-    chooseXButton.get.setVisibility(View.GONE)
-    chooseOButton.get.setVisibility(View.GONE)
+    chooseSymbolText.setVisibility(View.GONE)
+    chooseXButton.setVisibility(View.GONE)
+    chooseOButton.setVisibility(View.GONE)
 
-    difficultyText.get.setVisibility(View.GONE)
-    difficultySeekBar.get.setVisibility(View.GONE)
-    difficultyNumber.get.setVisibility(View.GONE)
+    difficultyText.setVisibility(View.GONE)
+    difficultySeekBar.setVisibility(View.GONE)
+    difficultyNumber.setVisibility(View.GONE)
   }
 
   private[this] def setupBot(): Unit = {
     val g = game.asInstanceOf[AIGame]
 
-    val difficulty = difficultySeekBar.get.getProgress
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+
+    val difficulty = difficultySeekBar.getProgress
     g.setMaxTime((difficulty + 1) * 1000)
 
     if (difficulty != Configuration.botDifficulty) {
@@ -215,6 +234,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   }
 
   private[this] def onDifficultyChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
-    difficultyNumber.get.setText((progress + 1).toString)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    difficultyNumber.setText((progress + 1).toString)
   }
 }
