@@ -23,7 +23,7 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     val playAgainButton = (find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt))
     val gameCourseButton = (find[Button](R.id.button_replay_moves), find[Button](R.id.button_replay_moves_prompt))
     val showGameEndButton = (find[Button](R.id.button_show_game_end), find[Button](R.id.button_show_game_end_prompt))
-    val backButton = find[ImageButton](R.id.button_back_to_main)
+    val backButton = find[ImageButton](R.id.button_back)
 
     playAgainButton onClick onPlayAgain
     gameCourseButton onClick onReplay
@@ -63,7 +63,7 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     val playAgainButton = (find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt))
     val gameCourseButton = (find[Button](R.id.button_replay_moves), find[Button](R.id.button_replay_moves_prompt))
     val showGameEndButton = (find[Button](R.id.button_show_game_end), find[Button](R.id.button_show_game_end_prompt))
-    val backButton = find[ImageButton](R.id.button_back_to_main)
+    val backButton = find[ImageButton](R.id.button_back)
 
     gameEndedText.setTextColor(theme.color2)
     playAgainButton.setTextColor(theme.color1, theme.color2)

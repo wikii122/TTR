@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center"
+    android:orientation="vertical">
+
+    <TextView
+        android:id="@+id/text_game_type"
+        style="@style/ButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="@string/game_type" />
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/button_create_bot_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <Button
+            android:id="@+id/button_create_bot"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_create_bot_prompt"
+            android:layout_toRightOf="@+id/button_create_bot_prompt"
+            android:text="@string/new_ai_game" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/button_create_network_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <Button
+            android:id="@+id/button_create_network"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_create_network_prompt"
+            android:layout_toRightOf="@+id/button_create_network_prompt"
+            android:text="@string/new_network_game" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/button_create_standard_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <Button
+            android:id="@+id/button_create_standard"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_create_standard_prompt"
+            android:layout_toRightOf="@+id/button_create_standard_prompt"
+            android:text="@string/new_standard_game" />
+    </RelativeLayout>
+</LinearLayout>

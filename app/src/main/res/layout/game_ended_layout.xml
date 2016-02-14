@@ -5,7 +5,7 @@
     android:fitsSystemWindows="true">
 
     <ImageButton
-        android:id="@+id/button_back_to_main"
+        android:id="@+id/button_back"
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_alignParentLeft="true"
@@ -21,7 +21,7 @@
         android:id="@+id/text_game_ended"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/button_back_to_main"
+        android:layout_below="@+id/button_back"
         android:layout_centerHorizontal="true"
         android:layout_marginTop="20dp"
         android:text="@string/game_ended"
