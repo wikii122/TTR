@@ -10,6 +10,8 @@ class GameField(game: Game, quadrant: Quadrant.Value, boardX: Int, boardY: Int)
   private[this] var shakeAnimation: Option[Shake] = None
   private[this] var rotationAnimation: Option[FieldRotation] = None
 
+  setValue(game.quadrantField(quadrant, boardX % Quadrant.size, boardY % Quadrant.size))
+
   def setValue(v: Option[Player.Value], animateChange: Boolean): Unit = {
     if (animateChange && v != getValue) {
       shakeAnimation.get.stop()
