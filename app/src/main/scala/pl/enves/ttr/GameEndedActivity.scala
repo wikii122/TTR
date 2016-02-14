@@ -85,8 +85,8 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
       case Game.STANDARD =>
         itnt.putExtra("TYPE", Game.STANDARD.toString)
-      case Game.AI =>
-        itnt.putExtra("TYPE", Game.AI.toString)
+      case Game.BOT =>
+        itnt.putExtra("TYPE", Game.BOT.toString)
       case Game.GPS_MULTIPLAYER => //TODO
       case _ =>
         error("bad game type")

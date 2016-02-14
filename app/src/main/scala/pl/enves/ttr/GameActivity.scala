@@ -33,8 +33,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       case Game.STANDARD =>
         game = Game.create(Game.STANDARD)
         view.startGame()
-      case Game.AI =>
-        game = Game.create(Game.AI)
+      case Game.BOT =>
+        game = Game.create(Game.BOT)
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
       case s =>
@@ -67,8 +67,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     difficultySeekBar onChange onDifficultyChanged
 
-    if (game.gameType == Game.AI) {
-      if (game.asInstanceOf[AIGame].getHuman.isEmpty) {
+    if (game.gameType == Game.BOT) {
+      if (game.asInstanceOf[BotGame].getHuman.isEmpty) {
         showChooser()
       }
     }
@@ -208,7 +208,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   }
 
   private[this] def setupBot(): Unit = {
-    val g = game.asInstanceOf[AIGame]
+    val g = game.asInstanceOf[BotGame]
 
     val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
@@ -221,14 +221,14 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   }
 
   private[this] def onPlayWithBotAsX(v: View) = {
-    game.asInstanceOf[AIGame].setHumanSymbol(Player.X)
+    game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
     setupBot()
     view.startGame()
     closeChooser()
   }
 
   private[this] def onPlayWithBotAsO(v: View) = {
-    game.asInstanceOf[AIGame].setHumanSymbol(Player.O)
+    game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
     setupBot()
     view.startGame()
     closeChooser()

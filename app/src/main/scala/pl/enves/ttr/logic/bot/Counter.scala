@@ -1,4 +1,4 @@
-package pl.enves.ttr.logic.ai
+package pl.enves.ttr.logic.bot
 
 class Counter() {
   private[this] var nx: Int = 0

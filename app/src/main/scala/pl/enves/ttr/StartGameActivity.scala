@@ -92,12 +92,12 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   }
 
   def startBotGame() = {
-    log("Intending to start new AIGame")
+    log("Intending to start new BotGame")
 
     unShowNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra("TYPE", Game.AI.toString)
+    itnt putExtra("TYPE", Game.BOT.toString)
     itnt start()
   }
 

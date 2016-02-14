@@ -29,7 +29,7 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/button_create_bot_prompt"
             android:layout_toRightOf="@+id/button_create_bot_prompt"
-            android:text="@string/new_ai_game" />
+            android:text="@string/new_bot_game" />
     </RelativeLayout>
 
     <RelativeLayout

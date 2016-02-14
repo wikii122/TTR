@@ -49,14 +49,14 @@ class Resources(context: Context, game: Game) extends Logging {
 
     val player1TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player1)
-      case Game.AI => context.getString(R.string.board_your_turn)
+      case Game.BOT => context.getString(R.string.board_your_turn)
       case Game.GPS_MULTIPLAYER => context.getString(R.string.board_your_turn)
       case Game.REPLAY => context.getString(R.string.board_replay)
     }
 
     val player2TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player2)
-      case Game.AI => context.getString(R.string.board_bots_turn)
+      case Game.BOT => context.getString(R.string.board_bots_turn)
       case Game.GPS_MULTIPLAYER => context.getString(R.string.board_opponents_turn)
       case Game.REPLAY => context.getString(R.string.board_replay)
     }

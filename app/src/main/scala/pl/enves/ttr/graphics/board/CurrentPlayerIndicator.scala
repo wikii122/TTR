@@ -98,7 +98,7 @@ class CurrentPlayerIndicator(game: Game)
 
     game.gameType match {
       case Game.STANDARD => setTextsStandard()
-      case Game.AI => setTextsBot(game.asInstanceOf[AIGame].getHuman.isDefined)
+      case Game.BOT => setTextsBot(game.asInstanceOf[BotGame].getHuman.isDefined)
       case Game.GPS_MULTIPLAYER => setTextsMulti()
       case Game.REPLAY => setTextsStandard()
     }

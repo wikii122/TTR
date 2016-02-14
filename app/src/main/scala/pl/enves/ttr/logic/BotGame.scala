@@ -1,18 +1,18 @@
 package pl.enves.ttr.logic
 
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.ai._
+import pl.enves.ttr.logic.bot._
 import pl.enves.ttr.logic.inner._
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
 /**
- * AI
+ * Bot
  */
-class AIGame(board: Board = Board()) extends Game(board) with Logging {
-  override val gameType = Game.AI
+class BotGame(board: Board = Board()) extends Game(board) with Logging {
+  override val gameType = Game.BOT
 
-  private[this] var ai: Option[MinMax] = None
+  private[this] var algorithm: Option[MinMax] = None
 
   private[this] var human: Option[Player.Value] = None
 
@@ -26,12 +26,12 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   private[this] val randomizeDecisions = true
 
-  //TODO: Make interface for different AI classes
+  //TODO: Make interface for different algorithm classes
   def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
 
-    def makeAIMove(move: Move): Unit = {
-      log(s"AI Move: $move for $player")
+    def makeBotMove(move: Move): Unit = {
+      log(s"Bot Move: $move for $player")
       onMove(move)
     }
 
@@ -39,7 +39,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
     else maxDepth
 
-    ai = Some(new MinMax(board, player, minTime, maxTime, depth, randomizeDecisions, makeAIMove))
+    algorithm = Some(new MinMax(board, player, minTime, maxTime, depth, randomizeDecisions, makeBotMove))
   }
 
   /**
@@ -68,7 +68,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
 
   /**
    * Makes a human move, whether it's a rotation or putting symbol.
-   * After it switches to ai.
+   * After it switches to bot.
    * May throw InvalidParameterException when given invalid move,
    * and ImpossibleMove when Position is taken or game finished.
    * If called before start, throws NoSuchElementException.
@@ -95,7 +95,7 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
     _player = if (player == Player.X) Player.O else Player.X
     log(s"Player set to ${_player}")
     if (_player == human.get) {
-      ai = None
+      algorithm = None
     } else {
       if (!board.finished) {
         startThinking()
@@ -112,8 +112,8 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   protected def boardVersion = board.version
 
   override def toMap = this.synchronized {
-    if (ai.isDefined) {
-      ai.get.stop()
+    if (algorithm.isDefined) {
+      algorithm.get.stop()
     }
 
     Map(
@@ -131,16 +131,16 @@ class AIGame(board: Board = Board()) extends Game(board) with Logging {
   def setMaxTime(max: Int): Unit = maxTime = max
 }
 
-object AIGame {
-  def apply(): Game = new AIGame()
+object BotGame {
+  def apply(): Game = new BotGame()
 
-  def apply(board: Board): Game = new AIGame(board)
+  def apply(board: Board): Game = new BotGame(board)
 
   def apply(jsValue: JsValue): Game = {
     val fields = jsValue.asJsObject.fields
     val board = Board(fields("board"))
     val human = fields("human").convertTo[Option[Player.Value]]
-    val game = new AIGame(board)
+    val game = new BotGame(board)
     game._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject)))
 

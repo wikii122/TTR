@@ -1,3 +1,3 @@
-package pl.enves.ttr.logic.ai
+package pl.enves.ttr.logic.bot
 
 class OutOfMovesException extends Exception

@@ -1,4 +1,4 @@
-package pl.enves.ttr.logic.ai
+package pl.enves.ttr.logic.bot
 
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.QRotation
@@ -33,12 +33,12 @@ class BoardQuadrantModel extends Logging {
 
   def unTickCooldown() = cooldown = cooldown + 1
 
-  private[ai] def setCooldown(i: Int) = cooldown = i
+  private[bot] def setCooldown(i: Int) = cooldown = i
 
   /**
    * should return value between 0 and rotationIndicator
    */
-  private[ai] def getCooldown = if (cooldown > 0) cooldown else 0
+  private[bot] def getCooldown = if (cooldown > 0) cooldown else 0
 }
 
 object BoardQuadrantModel {
