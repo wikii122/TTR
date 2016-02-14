@@ -25,10 +25,11 @@
             android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha"
             android:visibility="gone" />
 
-        <include layout="@layout/logo_layout"
+        <include
+            layout="@layout/logo_layout"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:layout_marginTop="50dp"/>
+            android:layout_marginTop="50dp" />
     </RelativeLayout>
 
     <ViewSwitcher
@@ -122,25 +123,6 @@
                 android:layout_gravity="center_horizontal">
 
                 <Button
-                    android:id="@+id/button_create_standard_prompt"
-                    style="@style/ButtonStyle"
-                    android:text="@string/nav_prompt" />
-
-                <Button
-                    android:id="@+id/button_create_standard"
-                    style="@style/ButtonStyle"
-                    android:layout_alignParentTop="true"
-                    android:layout_toEndOf="@+id/button_create_standard_prompt"
-                    android:layout_toRightOf="@+id/button_create_standard_prompt"
-                    android:text="@string/new_standard_game" />
-            </RelativeLayout>
-
-            <RelativeLayout
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal">
-
-                <Button
                     android:id="@+id/button_create_ai_prompt"
                     style="@style/ButtonStyle"
                     android:text="@string/nav_prompt" />
@@ -171,6 +153,25 @@
                     android:layout_toEndOf="@+id/button_create_network_prompt"
                     android:layout_toRightOf="@+id/button_create_network_prompt"
                     android:text="@string/new_network_game" />
+            </RelativeLayout>
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal">
+
+                <Button
+                    android:id="@+id/button_create_standard_prompt"
+                    style="@style/ButtonStyle"
+                    android:text="@string/nav_prompt" />
+
+                <Button
+                    android:id="@+id/button_create_standard"
+                    style="@style/ButtonStyle"
+                    android:layout_alignParentTop="true"
+                    android:layout_toEndOf="@+id/button_create_standard_prompt"
+                    android:layout_toRightOf="@+id/button_create_standard_prompt"
+                    android:text="@string/new_standard_game" />
             </RelativeLayout>
         </LinearLayout>
     </ViewSwitcher>
