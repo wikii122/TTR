@@ -10,13 +10,10 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
 
   private[this] val cellPx = sizePx / size
 
-  private[this] val backgroundMaskPaint = new Paint()
-  backgroundMaskPaint.setColor(Color.rgb(0, 255, 0))
-
   private[this] val textMaskPaint = new Paint()
   textMaskPaint.setAntiAlias(true)
   textMaskPaint.setTypeface(typeface)
-  textMaskPaint.setColor(Color.rgb(0, 0, 255))
+  textMaskPaint.setColor(Color.rgb(255, 0, 0))
 
   //Find optimal font size
   //TODO: more optimal
@@ -93,8 +90,6 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
 
     // get a canvas to paint over the bitmap
     val canvas = new Canvas(bitmap)
-
-    canvas.drawRect(0, 0, sizePx, sizePx, backgroundMaskPaint)
 
     for (i <- charset.indices) {
       val (x, y) = coordinates(i)

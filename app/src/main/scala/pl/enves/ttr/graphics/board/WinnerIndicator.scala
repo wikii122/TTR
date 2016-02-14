@@ -2,7 +2,6 @@ package pl.enves.ttr.graphics.board
 
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
-import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.{StaticText, TextAlignment}
@@ -36,11 +35,6 @@ class WinnerIndicator(game: Game) extends SceneObject with ColorManip {
   override protected def onUpdateTheme(theme: Theme): Unit = {
     winnerText.setTextColor(theme.color1)
     drawText.setTextColor(theme.color1)
-
-    val noColor: ColorArray = colorTransparent(theme.background, 0.0f)
-
-    winnerText.setTextBackground(noColor)
-    drawText.setTextBackground(noColor)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

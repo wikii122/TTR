@@ -2,13 +2,10 @@ package pl.enves.androidx.helpers
 
 import android.content.res.ColorStateList
 import android.graphics.{PorterDuff, PorterDuffColorFilter, Typeface}
-import android.graphics.drawable.BitmapDrawable
 import android.view.View
 import android.view.View.OnClickListener
 import android.widget._
-import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
 import pl.enves.androidx.color.ColorTypes.ColorAndroid
-import pl.enves.androidx.color.filters.MaskDrawable
 
 trait ButtonHelper {
 
@@ -44,14 +41,6 @@ trait ImageButtonHelper {
 
     def setColor(color: ColorAndroid): Unit = {
       button.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN))
-    }
-
-    def setColorMask(red: ColorAndroid, green: ColorAndroid, blue: ColorAndroid): Unit = {
-      button.getDrawable match {
-        case bitmapDrawable: BitmapDrawable =>
-          bitmapDrawable.mask(red, green, blue)
-        case _ =>
-      }
     }
   }
 }

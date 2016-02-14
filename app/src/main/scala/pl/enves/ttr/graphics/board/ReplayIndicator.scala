@@ -21,8 +21,6 @@ class ReplayIndicator(game: Game) extends SceneObject with ColorManip {
 
   override protected def onUpdateTheme(theme: Theme): Unit = {
     replayText.setTextColor(colorTransparent(theme.winner, 0.5f))
-    val noColor = colorTransparent(theme.winner, 0.0f)
-    replayText.setTextBackground(noColor)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

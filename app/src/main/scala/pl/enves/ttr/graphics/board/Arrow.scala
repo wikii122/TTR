@@ -23,7 +23,6 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value)
 
   private[this] var arrow: Option[Int] = None
 
-  private[this] var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
   private[this] var colorActive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
   private[this] var colorInactive: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
@@ -63,7 +62,6 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value)
   }
 
   override protected def onUpdateTheme(theme: Theme): Unit = {
-    noColor = colorTransparent(theme.background, 0.0f)
     colorActive = defaultArrowColor(quadrant, theme)
     colorInactive = colorTransparent(defaultArrowColor(quadrant, theme), 0.3f)
   }
@@ -79,7 +77,7 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value)
       colorInactive
     }
 
-    maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, inner, noColor, arrow.get)
+    maskShader.get.draw(mvMatrix, pMatrix, square.get, inner, arrow.get)
   }
 
   override def onClick(): Unit = {

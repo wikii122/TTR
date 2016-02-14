@@ -21,7 +21,7 @@ import pl.enves.ttr.utils.themes.Theme
 class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
 
-  private[this] lazy val chooseSymbolLayer = getLayoutInflater.inflate(R.layout.choose_symbol_layout, null)
+  private[this] lazy val botGameSetupLayer = getLayoutInflater.inflate(R.layout.bot_game_setup_layout, null)
 
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
@@ -47,13 +47,13 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       ViewGroup.LayoutParams.MATCH_PARENT)
     frameLayout.addView(view, gameLayoutParams)
 
-    chooseSymbolLayer.setVisibility(View.GONE)
+    botGameSetupLayer.setVisibility(View.GONE)
 
-    val chooseSymbolLayoutParams = new FrameLayout.LayoutParams(
+    val botGameSetupLayoutParams = new FrameLayout.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
       ViewGroup.LayoutParams.MATCH_PARENT,
       Gravity.TOP)
-    frameLayout.addView(chooseSymbolLayer, chooseSymbolLayoutParams)
+    frameLayout.addView(botGameSetupLayer, botGameSetupLayoutParams)
 
     setContentView(frameLayout)
 
@@ -105,11 +105,12 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val difficultyText = find[TextView](R.id.text_difficulty)
     val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
-    chooseSymbolLayer.setBackgroundColor(colorTransparent(theme.background, 0.8f))
+    botGameSetupLayer.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
     chooseSymbolText.setTextColor(theme.color2)
-    chooseXButton.setColorMask(theme.background, theme.background, theme.color1)
-    chooseOButton.setColorMask(theme.background, theme.background, theme.color1)
+
+    chooseXButton.setColor(theme.color1)
+    chooseOButton.setColor(theme.color1)
 
     difficultyText.setTextColor(theme.color2)
     difficultyNumber.setTextColor(theme.color1)
@@ -164,7 +165,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val difficultyText = find[TextView](R.id.text_difficulty)
     val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
-    chooseSymbolLayer.setVisibility(View.VISIBLE)
+    botGameSetupLayer.setVisibility(View.VISIBLE)
 
     //make sure that all buttons are visible, android gets crazy sometimes
     chooseSymbolText.setVisibility(View.VISIBLE)
@@ -194,7 +195,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val difficultyText = find[TextView](R.id.text_difficulty)
     val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
-    chooseSymbolLayer.setVisibility(View.GONE)
+    botGameSetupLayer.setVisibility(View.GONE)
 
     //make sure that all buttons are gone, android gets crazy sometimes
     chooseSymbolText.setVisibility(View.GONE)

@@ -2,7 +2,6 @@ package pl.enves.ttr.graphics.board
 
 import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
-import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.animations.InfiniteRotation
 import pl.enves.ttr.graphics.geometry.GeometryId
@@ -42,10 +41,6 @@ class CurrentPlayerIndicator(game: Game)
   override protected def onUpdateTheme(theme: Theme): Unit = {
     player1TurnText.setTextColor(theme.color2)
     player2TurnText.setTextColor(theme.color2)
-
-    val noColor: ColorArray = colorTransparent(theme.background, 0.0f)
-    player1TurnText.setTextBackground(noColor)
-    player2TurnText.setTextBackground(noColor)
   }
 
   override protected def onAnimate(dt: Float): Unit = {

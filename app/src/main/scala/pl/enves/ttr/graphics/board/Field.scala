@@ -21,8 +21,6 @@ class Field(quadrant: Quadrant.Value)
 
   private[this] var maskShader: Option[MaskShader] = None
 
-  private[this] var noColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-
   private[this] var ring: Option[Int] = None
   private[this] var cross: Option[Int] = None
   private[this] var empty: Option[Int] = None
@@ -51,7 +49,6 @@ class Field(quadrant: Quadrant.Value)
   }
 
   override protected def onUpdateTheme(theme: Theme): Unit = {
-    noColor = colorTransparent(theme.background, 0.0f)
     outerColor = quadrant match {
       case Quadrant.first => theme.color1
       case Quadrant.second => theme.color2
@@ -70,11 +67,11 @@ class Field(quadrant: Quadrant.Value)
 
     if (value.isDefined) {
       value.get match {
-        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, ring.get)
-        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, cross.get)
+        case Player.O => maskShader.get.draw(mvMatrix, pMatrix, square.get, outer, ring.get)
+        case Player.X => maskShader.get.draw(mvMatrix, pMatrix, square.get, outer, cross.get)
       }
     } else {
-      maskShader.get.draw(mvMatrix, pMatrix, square.get, noColor, noColor, outer, empty.get)
+      maskShader.get.draw(mvMatrix, pMatrix, square.get, outer, empty.get)
     }
   }
 

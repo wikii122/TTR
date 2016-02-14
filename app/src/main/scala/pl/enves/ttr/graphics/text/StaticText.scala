@@ -13,7 +13,6 @@ class StaticText(geometryId: GeometryId.Value, textureId: TextureId.Value,
   extends Logging with SceneObject {
 
   private[this] var textColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
-  private[this] var backgroundColor: ColorArray = Array(0.0f, 0.0f, 0.0f, 0.0f)
 
   private[this] var texture: Option[Int] = None
   private[this] var geometry: Option[Geometry] = None
@@ -49,11 +48,7 @@ class StaticText(geometryId: GeometryId.Value, textureId: TextureId.Value,
     textColor = color
   }
 
-  def setTextBackground(color: ColorArray): Unit = {
-    backgroundColor = color
-  }
-
   override def onDraw(mvMatrix: MatrixStack, pMatrix: MatrixStack): Unit = {
-    maskShader.get.draw(mvMatrix, pMatrix, geometry.get, backgroundColor, backgroundColor, textColor, texture.get)
+    maskShader.get.draw(mvMatrix, pMatrix, geometry.get, textColor, texture.get)
   }
 }
