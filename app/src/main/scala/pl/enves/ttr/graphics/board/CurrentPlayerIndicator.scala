@@ -5,7 +5,7 @@ import pl.enves.androidx.color.ColorManip
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.animations.InfiniteRotation
 import pl.enves.ttr.graphics.geometry.GeometryId
-import pl.enves.ttr.graphics.text.{StaticText, TextAlignment}
+import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.themes.Theme
@@ -16,8 +16,8 @@ import pl.enves.ttr.utils.themes.Theme
 class CurrentPlayerIndicator(game: Game)
   extends SceneObject with ColorManip {
 
-  private[this] val player1TurnText = new StaticText(GeometryId.Player1TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
-  private[this] val player2TurnText = new StaticText(GeometryId.Player2TurnText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val player1TurnText = new StaticText(GeometryId.Player1TurnText, TextureId.Font)
+  private[this] val player2TurnText = new StaticText(GeometryId.Player2TurnText, TextureId.Font)
   addChild(player1TurnText)
   addChild(player2TurnText)
 
@@ -26,12 +26,23 @@ class CurrentPlayerIndicator(game: Game)
 
   private[this] var animation: Option[InfiniteRotation] = None
 
-  override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
-    player1TurnText.addTranslation(-0.5f, 0.0f, 0.0f, true)
-    player2TurnText.addTranslation(-0.5f, 0.0f, 0.0f, true)
+  override protected def onAfterUpdateResources(resources: Resources, screenRatio: Float): Unit = {
+    val fieldScale = 0.15f
+    val textScale = 0.15f
 
-    field.addTranslation(0.425f, 0.0f, 0.0f, true)
-    field.addScale(0.15f, 0.15f, 1.0f, true)
+    val textWidth = Math.max(player1TurnText.getWidth * textScale, player2TurnText.getWidth * textScale)
+    val fieldWidth = 1.0f * fieldScale
+    val spaceWidth = 0.15f
+    val lineWidth = textWidth + spaceWidth + fieldWidth
+
+    player1TurnText.addTranslation(-(lineWidth / 2), 0.0f, 0.0f, true)
+    player1TurnText.addScale(textScale, textScale, 1.0f, true)
+
+    player2TurnText.addTranslation(-(lineWidth / 2), 0.0f, 0.0f, true)
+    player2TurnText.addScale(textScale, textScale, 1.0f, true)
+
+    field.addTranslation((lineWidth / 2) - (fieldWidth / 2), 0.0f, 0.0f, true)
+    field.addScale(fieldScale, fieldScale, 1.0f, true)
 
     val rotation = field.addRotation(0.0f, 0.0f, 0.0f, 1.0f, false)
     animation = Some(new InfiniteRotation(rotation, 360.0f))

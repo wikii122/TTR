@@ -9,14 +9,16 @@ class TextGeometry(text: String, characters: CharactersTexture) extends Geometry
   //TODO: breaking
   private[this] var positions = Array[Float]()
   private[this] var texCoords = Array[Float]()
-  private[this] var pos = 0.0f
-  private[this] val height = characters.getNormalizedFontHeight
+  private[this] var width = 0.0f
+  private[this] val height = 1.0f
   for (c <- text) {
     val (x, y) = characters.getNormalizedCoordinates(c)
-    val width = characters.getNormalizedWidth(c)
-    positions = positions ++ Rectangle.positionsCenterYTriangles(pos, 0.0f, width, height)
-    texCoords = texCoords ++ Rectangle.texCoordinatesTriangles(x, y, width, height)
-    pos = pos + width
+    val textureCellWidth = characters.getNormalizedWidth(c)
+    val textureCellHeight = characters.getNormalizedFontHeight
+    val charWidth = height * (textureCellWidth / textureCellHeight)
+    positions = positions ++ Rectangle.positionsCenterYTriangles(width, 0.0f, charWidth, height)
+    texCoords = texCoords ++ Rectangle.texCoordinatesTriangles(x, y, textureCellWidth, textureCellHeight)
+    width += charWidth
   }
 
   private[this] val buffersGpu = new Buffers[Int](
@@ -34,7 +36,7 @@ class TextGeometry(text: String, characters: CharactersTexture) extends Geometry
 
   override def getBoundingFigure: Array[Triangle] = Array[Triangle]() //TODO
 
-  def getWidth: Float = pos
+  def getWidth: Float = width
 
   def getHeight: Float = height
 }

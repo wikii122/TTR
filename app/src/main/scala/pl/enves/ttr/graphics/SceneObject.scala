@@ -16,6 +16,8 @@ trait SceneObject extends Algebra {
 
   protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {}
 
+  protected def onAfterUpdateResources(resources: Resources, screenRatio: Float): Unit = {}
+
   protected def onUpdateTheme(theme: Theme): Unit = {}
 
   protected def onAnimate(dt: Float): Unit = {}
@@ -86,6 +88,7 @@ trait SceneObject extends Algebra {
       children(i).updateResources(resources, screenRatio)
       i += 1
     }
+    onAfterUpdateResources(resources, screenRatio)
   }
 
   def updateTheme(theme: Theme): Unit = {

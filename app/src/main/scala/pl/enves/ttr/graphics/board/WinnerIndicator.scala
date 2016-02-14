@@ -4,7 +4,7 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToArray
 import pl.enves.androidx.color.ColorManip
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.geometry.GeometryId
-import pl.enves.ttr.graphics.text.{StaticText, TextAlignment}
+import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic.{Game, Quadrant}
 import pl.enves.ttr.utils.themes.Theme
@@ -16,20 +16,33 @@ class WinnerIndicator(game: Game) extends SceneObject with ColorManip {
 
   setVisible(false)
 
-  private[this] val winnerText = new StaticText(GeometryId.WinnerText, TextureId.Font, 0.80f, 0.15f, TextAlignment.Left)
+  private[this] val winnerText = new StaticText(GeometryId.WinnerText, TextureId.Font)
   addChild(winnerText)
 
-  private[this] val drawText = new StaticText(GeometryId.DrawText, TextureId.Font, 1.0f, 0.15f, TextAlignment.Center)
+  private[this] val drawText = new StaticText(GeometryId.DrawText, TextureId.Font)
   addChild(drawText)
 
   private[this] val field = new Field(Quadrant.second)
   addChild(field)
 
-  override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
-    winnerText.addTranslation(-0.5f, 0.0f, 0.0f, true)
+  override protected def onAfterUpdateResources(resources: Resources, screenRatio: Float): Unit = {
+    val fieldScale = 0.15f
+    val textScale = 0.15f
 
-    field.addTranslation(0.425f, 0.0f, 0.0f, true)
-    field.addScale(0.15f, 0.15f, 1.0f, true)
+    val winnerTextWidth = winnerText.getWidth * textScale
+    val fieldWidth = 1.0f * fieldScale
+    val spaceWidth = 0.15f
+    val lineWidth = winnerTextWidth + spaceWidth + fieldWidth
+
+    winnerText.addTranslation(-(lineWidth / 2), 0.0f, 0.0f, true)
+    winnerText.addScale(textScale, textScale, 1.0f, true)
+
+    field.addTranslation((lineWidth / 2) - (fieldWidth / 2), 0.0f, 0.0f, true)
+    field.addScale(fieldScale, fieldScale, 1.0f, true)
+
+    val drawTextWidth = drawText.getWidth * textScale
+    drawText.addTranslation(-(drawTextWidth / 2), 0.0f, 0.0f, true)
+    drawText.addScale(textScale, textScale, 1.0f, true)
   }
 
   override protected def onUpdateTheme(theme: Theme): Unit = {
