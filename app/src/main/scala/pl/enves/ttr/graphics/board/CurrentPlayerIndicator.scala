@@ -89,11 +89,7 @@ class CurrentPlayerIndicator(game: Game)
       case Game.STANDARD => setTextsStandard()
       case Game.AI => setTextsBot(game.asInstanceOf[AIGame].getHuman.isDefined)
       case Game.GPS_MULTIPLAYER => setTextsMulti()
-      case Game.REPLAY => game.asInstanceOf[ReplayGame].getReplayedGameType match {
-        case Game.STANDARD => setTextsStandard()
-        case Game.AI => setTextsBot(true)
-        case Game.GPS_MULTIPLAYER => setTextsMulti()
-      }
+      case Game.REPLAY => setTextsStandard()
     }
 
     if ((game.locked || game.gameType == Game.REPLAY) && !game.finished) {

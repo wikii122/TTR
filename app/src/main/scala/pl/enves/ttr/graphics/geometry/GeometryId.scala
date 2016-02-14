@@ -6,7 +6,6 @@ object GeometryId extends Enumeration {
   Square,
   Player1TurnText,
   Player2TurnText,
-  ReplayText,
   DrawText,
   WinnerText = Value
 }

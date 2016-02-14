@@ -33,6 +33,9 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
   }
 
   private[this] val fm = textMaskPaint.getFontMetrics
+  log("Font chars: " + charset.length)
+  log("Font cells: " + size * size)
+  log("Font cell size: " + cellPx)
   log("Font size: " + fontSize)
   log("Font height: " + fontHeight)
   log("Font top: " + fm.top)

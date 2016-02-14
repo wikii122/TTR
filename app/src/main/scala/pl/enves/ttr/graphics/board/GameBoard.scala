@@ -41,9 +41,6 @@ class GameBoard(game: Game) extends SceneObject with Logging with Algebra {
     addChild(pair._2)
   }
 
-  private[this] val replayIndicator = new ReplayIndicator(game)
-  addChild(replayIndicator)
-
   private def createArrowPair(quadrant: Quadrant.Value) = (
     new Arrow(game, quadrant, QRotation.r90),
     new Arrow(game, quadrant, QRotation.r270)
@@ -68,10 +65,6 @@ class GameBoard(game: Game) extends SceneObject with Logging with Algebra {
 
     winnerIndicator.addTranslation(0.0f, -indicatorPositionY, 0.0f, true)
     winnerIndicator.addScale(4.0f, 4.0f, 1.0f, true)
-
-    replayIndicator.addTranslation(0.0f, 0.0f, 0.5f, true)
-    replayIndicator.addRotation(45.0f, 0.0f, 0.0f, 1.0f, true)
-    replayIndicator.addScale(12.0f, 12.0f, 1.0f, true)
 
     for (quadrant <- Quadrant.values) {
       val pair = arrows(quadrant.id)

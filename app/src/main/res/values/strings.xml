@@ -29,9 +29,9 @@
     <string name="board_your_turn">your turn: </string>
     <string name="board_opponents_turn">opponent\'s turn: </string>
     <string name="board_bots_turn">bot\'s turn: </string>
-    <string name="board_winner">winner:</string>
+    <string name="board_winner">winner: </string>
     <string name="board_draw">draw!</string>
-    <string name="board_replay">replay</string>
+    <string name="board_replay">replay: </string>
     <string name="tutorial_figures">You can play either noughts or crosses. Cross player moves first.</string>
     <string name="tutorial_rotations">When quadrant\'s arrows are active, you can rotate it instead of marking a field</string>
     <string name="tutorial_goals">Try to put 5 of your marks straight in line to win the game</string>

@@ -6,7 +6,6 @@ import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
 class ReplayGame(replayedGameType: Game.Value,
-                 devicePlayer: Option[Player.Value],
                  win: Option[Player.Value],
                  board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.REPLAY
@@ -37,8 +36,6 @@ class ReplayGame(replayedGameType: Game.Value,
   def isReplaying = replayMove < movesLog.size
 
   def getReplayedGameType = replayedGameType
-
-  def getDevicePlayer = devicePlayer
 
   def startReplaying() = {
     stopReplaying()
@@ -84,7 +81,7 @@ class ReplayGame(replayedGameType: Game.Value,
     return false
   }
 
-  override def locked: Boolean = if (devicePlayer.isDefined) _player != devicePlayer.get else true
+  override def locked: Boolean = true
 
   override def winner: Option[Player.Value] = win
 
@@ -99,26 +96,11 @@ object ReplayGame {
 
   def apply(jsValue: JsValue, showEnd: Boolean): Game = {
     val fields = jsValue.asJsObject.fields
-    fields("type").convertTo[Game.Value] match {
-      case Game.STANDARD =>
-        val board = Board(fields("board"))
-        val replayGame = new ReplayGame(Game.STANDARD, None, board.winner)
-        fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject)))
-        if (showEnd) replayGame.rewind()
-        return replayGame
-
-      case Game.AI =>
-        val board = Board(fields("board"))
-        val human = fields("human").convertTo[Option[Player.Value]]
-        val replayGame = new ReplayGame(Game.AI, human, board.winner)
-        fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject)))
-        if (showEnd) replayGame.rewind()
-        return replayGame
-
-      //case Game.GPS_MULTIPLAYER => //TODO
-
-      case _ => throw new Exception("bad game type")
-    }
-
+    val gameType = fields("type").convertTo[Game.Value]
+    val board = Board(fields("board"))
+    val replayGame = new ReplayGame(gameType, board.winner)
+    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject)))
+    if (showEnd) replayGame.rewind()
+    return replayGame
   }
 }
