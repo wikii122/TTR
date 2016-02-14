@@ -102,7 +102,7 @@
             android:layout_alignParentTop="true"
             android:layout_toEndOf="@+id/button_licenses_prompt"
             android:layout_toRightOf="@+id/button_licenses_prompt"
-            android:text="@string/title_activity_licenses" />
+            android:text="@string/licenses" />
     </RelativeLayout>
 
     <FrameLayout
