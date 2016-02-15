@@ -16,7 +16,7 @@
     <string name="settings">settings</string>
     <string name="continue_game">continue</string>
     <string name="game_type">game mode:</string>
-    <string name="new_standard_game">hot seat multiplayer</string>
+    <string name="new_standard_game">hot seat</string>
     <string name="new_bot_game">single-player</string>
     <string name="new_network_game">g+ multiplayer</string>
     <string name="tic_tac">tictac</string>
