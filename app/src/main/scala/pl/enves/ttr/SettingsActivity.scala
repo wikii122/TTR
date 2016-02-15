@@ -6,6 +6,7 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget.{Button, TextView}
+import com.google.android.gms.ads.AdView
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.utils.styled.ToolbarActivity
 import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
@@ -39,9 +40,8 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     aboutButton onClick startAbout
     licensesButton onClick startLicenses
 
-    if (!Configuration.isPaid) {
-      loadAdToStub(R.id.stub_settings_ad)
-    }
+    val adView = find[AdView](R.id.ad_view_settings)
+    loadAd(adView)
   }
 
   override def onPause(): Unit = {

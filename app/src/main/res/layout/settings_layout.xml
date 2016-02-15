@@ -112,11 +112,13 @@
         android:layout_marginBottom="20dp"
         android:layout_marginTop="20dp">
 
-        <ViewStub
-            android:id="@+id/stub_settings_ad"
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/ad_view_settings"
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal|bottom"
-            android:layout="@layout/settings_ad" />
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/admob_test_banner_ad_unit_id" />
     </FrameLayout>
 </LinearLayout>

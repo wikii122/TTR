@@ -5,12 +5,13 @@ import android.graphics.Typeface
 import android.os.Bundle
 import android.view.View
 import android.widget._
+import com.google.android.gms.ads.AdView
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic._
+import pl.enves.ttr.utils.AdUtils
 import pl.enves.ttr.utils.JsonProtocol._
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.utils.{AdUtils, Configuration}
 import spray.json._
 
 class GameEndedActivity extends StyledActivity with AdUtils {
@@ -30,9 +31,8 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     showGameEndButton onClick onShowGameEnd
     backButton onClick onBack
 
-    if (!Configuration.isPaid) {
-      loadAdToStub(R.id.stub_game_ended_ad)
-    }
+    val adView = find[AdView](R.id.ad_view_game_ended)
+    loadAd(adView)
   }
 
   override def onStop(): Unit = {

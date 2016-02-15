@@ -1,17 +1,11 @@
 package pl.enves.ttr.utils
 
-import android.view.ViewStub
 import com.google.android.gms.ads.{AdRequest, AdView}
 import pl.enves.androidx.ExtendedActivity
 
 trait AdUtils extends ExtendedActivity {
 
-  def loadAdToStub(stubViewId: Int): Unit = {
-    val adView: AdView = find[ViewStub](stubViewId).inflate().asInstanceOf[AdView]
-    loadAd(adView)
-  }
-
-  private def loadAd(adView: AdView): Unit = {
+  def loadAd(adView: AdView): Unit = {
     val adRequest = createAdRequest()
     adView.loadAd(adRequest)
   }
