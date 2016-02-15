@@ -12,6 +12,7 @@
     <string name="title_activity_about">about</string>
     <string name="pick_theme">theme</string>
     <string name="licenses">licenses</string>
+    <string name="invitations">new invitations: %d</string>
     <string name="new_game">new game</string>
     <string name="settings">settings</string>
     <string name="continue_game">continue</string>

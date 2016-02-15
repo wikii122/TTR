@@ -8,6 +8,26 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:id="@+id/layout_invitations">
+
+        <Button
+            android:id="@+id/button_invitations_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <Button
+            android:id="@+id/button_invitations"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_invitations_prompt"
+            android:layout_toRightOf="@+id/button_invitations_prompt"
+            android:text="@string/invitations" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
 
         <Button
