@@ -34,15 +34,15 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     settingsButton onClick onSettings
   }
 
-  private[this] def onNewGame(v: View) = {
+  private[this] def onNewGame(v: View): Unit = {
     getActivity.asInstanceOf[StartGameActivity].showNewGameMenu()
   }
 
-  private[this] def onContinue(v: View) = {
+  private[this] def onContinue(v: View): Unit = {
     getActivity.asInstanceOf[StartGameActivity].continueGame()
   }
 
-  private[this] def onSettings(v: View) = {
+  private[this] def onSettings(v: View): Unit = {
     getActivity.asInstanceOf[StartGameActivity].launchSettings()
   }
 

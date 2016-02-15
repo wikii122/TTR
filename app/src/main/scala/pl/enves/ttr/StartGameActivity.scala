@@ -148,7 +148,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     transaction.commit()
   }
 
-  def showNewGameMenu() = {
+  def showNewGameMenu(): Unit = {
     log("Showing new game menu")
 
     val chooseGameFragment: Fragment = new ChooseGameFragment
