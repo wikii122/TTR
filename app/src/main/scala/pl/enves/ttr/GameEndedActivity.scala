@@ -69,7 +69,7 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     playAgainButton.setTextColor(theme.color1, theme.color2)
     gameCourseButton.setTextColor(theme.color1, theme.color2)
     showGameEndButton.setTextColor(theme.color1, theme.color2)
-    backButton.setColor(theme.color1)
+    backButton.setColor(theme.color2)
   }
 
   /**

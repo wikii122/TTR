@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ImageButton
+        android:id="@+id/button_back"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="center"
+        android:background="@null"
+        android:contentDescription="@string/abc_action_bar_up_description"
+        android:scaleType="center"
+        android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha" />
+</FrameLayout>

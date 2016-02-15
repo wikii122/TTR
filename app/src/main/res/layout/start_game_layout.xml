@@ -5,31 +5,17 @@
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_weight="1">
+    <FrameLayout
+        android:id="@+id/button_back_container"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_gravity="left" />
 
-        <ImageButton
-            android:id="@id/button_back"
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_gravity="left|top"
-            android:layout_marginLeft="0dp"
-            android:layout_marginTop="0dp"
-            android:background="@null"
-            android:contentDescription="@string/abc_action_bar_up_description"
-            android:scaleType="center"
-            android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha" />
-
-        <include
-            layout="@layout/logo_layout"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_marginTop="50dp" />
-    </RelativeLayout>
+    <include
+        layout="@layout/logo_layout"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_weight="1" />
 
     <FrameLayout
         android:id="@+id/menuContainer"

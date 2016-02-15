@@ -5,14 +5,12 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentTransaction}
-import android.view.View
-import android.widget.ImageButton
 import com.google.android.gms.games.Games
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState}
 import pl.enves.ttr.utils.dialogs.PaidOnlyDialog
-import pl.enves.ttr.utils.start.{ChooseGameFragment, MainMenuFragment}
+import pl.enves.ttr.utils.start.{BackButtonFragment, ChooseGameFragment, MainMenuFragment}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.utils.{Configuration, LogoUtils, dialogs}
@@ -142,12 +140,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   }
 
   private[this] def drawUI() = {
-
-    val backButton = find[ImageButton](R.id.button_back)
-
     alignLogo()
-
-    backButton onClick onBack
 
     val transaction = getSupportFragmentManager.beginTransaction
 
@@ -155,24 +148,19 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     transaction.commit()
   }
 
-  private[this] def onBack(v: View) = {
-    onBackPressed()
-  }
-
   def showNewGameMenu() = {
     log("Showing new game menu")
 
-    val newFragment: Fragment = new ChooseGameFragment
+    val chooseGameFragment: Fragment = new ChooseGameFragment
+    val backButtonFragment: Fragment = new BackButtonFragment
+
     val transaction = getSupportFragmentManager.beginTransaction
 
-    transaction.replace(R.id.menuContainer, newFragment)
+    transaction.replace(R.id.menuContainer, chooseGameFragment)
+    transaction.replace(R.id.button_back_container, backButtonFragment)
     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
     transaction.addToBackStack(null)
     transaction.commit()
-
-    val backToMainButton = Some(find[ImageButton](R.id.button_back))
-
-    backToMainButton.get.setVisibility(View.VISIBLE)
   }
 
   private[this] def unShowNewGameMenu() = {
@@ -189,9 +177,6 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
   override def setColorTheme(theme: Theme): Unit = {
     super.setColorTheme(theme)
-    val backButton = find[ImageButton](R.id.button_back)
-
-    backButton.setColor(theme.color1)
 
     setLogoColorTheme(theme)
   }
