@@ -35,11 +35,32 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     loadAd(adView)
   }
 
+  override def onResume(): Unit = {
+    super.onResume()
+
+    val adView = find[AdView](R.id.ad_view_game_ended)
+    adView.resume()
+  }
+
+  override def onPause(): Unit = {
+    super.onPause()
+
+    val adView = find[AdView](R.id.ad_view_game_ended)
+    adView.pause()
+  }
+
   override def onStop(): Unit = {
     super.onStop()
 
     //user definitely knows that game has ended
     GameState clear()
+  }
+
+  override def onDestroy(): Unit = {
+    super.onDestroy()
+
+    val adView = find[AdView](R.id.ad_view_game_ended)
+    adView.destroy()
   }
 
   override def setTypeface(typeface: Typeface): Unit = {

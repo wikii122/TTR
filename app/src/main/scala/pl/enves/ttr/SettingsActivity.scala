@@ -44,6 +44,13 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     loadAd(adView)
   }
 
+  override def onResume(): Unit = {
+    super.onResume()
+
+    val adView = find[AdView](R.id.ad_view_settings)
+    adView.resume()
+  }
+
   override def onPause(): Unit = {
     super.onPause()
 
@@ -52,6 +59,16 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     if (themePicker.isChanged) {
       Configuration.pickedTheme = themePicker.getTheme
     }
+
+    val adView = find[AdView](R.id.ad_view_settings)
+    adView.pause()
+  }
+
+  override def onDestroy(): Unit = {
+    super.onDestroy()
+
+    val adView = find[AdView](R.id.ad_view_settings)
+    adView.destroy()
   }
 
   private def readDefaultThemes: Array[Theme] = {
