@@ -9,6 +9,7 @@ import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
+import pl.enves.ttr.logic.games.BotGame
 import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
@@ -31,12 +32,15 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val b: Bundle = Option(getIntent.getExtras) getOrElse (throw new UninitializedError())
     Game withName (b getString "TYPE") match {
       case Game.STANDARD =>
-        game = Game.create(Game.STANDARD)
+        game = Game.plain()
         view.startGame()
       case Game.BOT =>
-        game = Game.create(Game.BOT)
+        game = Game.bot()
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
+      case Game.GPS_MULTIPLAYER =>
+        val ng = Game.network(b.getStringArrayList("PLAYERS"))
+        game = ng
       case s =>
         throw new IllegalArgumentException(s"Invalid game type: $s")
     }

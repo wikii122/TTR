@@ -3,7 +3,8 @@ package pl.enves.ttr
 import android.graphics.Typeface
 import android.os.Bundle
 import pl.enves.ttr.graphics.GameView
-import pl.enves.ttr.logic.{GameManager, ReplayGame}
+import pl.enves.ttr.logic.GameManager
+import pl.enves.ttr.logic.games.ReplayGame
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
 import spray.json._

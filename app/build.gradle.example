@@ -1,0 +1,90 @@
+apply plugin: 'com.android.application'
+
+android {
+    signingConfigs {
+
+        // Uncomment me
+        //debug {
+        //    keyAlias 'debug key'
+        //    keyPassword 'haslo'
+        //    storeFile file('path/to.jks')
+        //    storePassword 'haslo'
+        //}
+        //release {
+        //    keyAlias 'debug key'
+        //    keyPassword 'haslo'
+        //    storeFile file('path/to.jks')
+        //    storePassword 'haslo'
+        //}
+    }
+    compileSdkVersion 23
+    buildToolsVersion "23.0.2"
+    defaultConfig {
+        applicationId "pl.enves.ttr"
+        minSdkVersion 15
+        targetSdkVersion 23
+        versionCode 10000
+        versionName "DEVELOPMENT"
+    }
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.release
+        }
+        debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.debug
+        }
+    }
+    productFlavors {
+        free {
+            resValue "string", "VERSION", "FREE"
+            applicationId "pl.enves.ttr.free"
+        }
+        paid {
+            resValue "string", "VERSION", "PAID"
+            applicationId "pl.enves.ttr.paid"
+        }
+    }
+    packagingOptions {
+        exclude '.readme'
+        exclude 'LICENSE.txt'
+        exclude 'META-INF/DEPENDENCIES'
+        exclude 'META-INF/DEPENDENCIES.txt'
+        exclude 'META-INF/LGPL2.1'
+        exclude 'META-INF/LICENSE'
+        exclude 'META-INF/LICENSE.txt'
+        exclude 'META-INF/NOTICE'
+        exclude 'META-INF/NOTICE.txt'
+        exclude 'META-INF/README.txt'
+        exclude 'META-INF/dependencies.txt'
+        exclude 'META-INF/license.txt'
+        exclude 'META-INF/notice.txt'
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
+}
+
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'https://github.com/Goddchen/mvn-repo/raw/master/'
+    }
+}
+
+apply plugin: "com.android.application"
+apply plugin: "jp.leafytree.android-scala"
+
+dependencies {
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'org.scala-lang:scala-library:2.11.6'
+    compile 'io.spray:spray-json_2.11:1.3.2'
+    compile 'com.android.support:appcompat-v7:23.1.1'
+    compile 'com.android.support:design:23.1.1'
+    compile 'com.google.android.gms:play-services-ads:8.4.0'
+    compile 'com.google.android.gms:play-services-identity:8.4.0'
+    compile 'com.google.android.gms:play-services-gcm:8.4.0'
+    compile 'com.google.android.gms:play-services-games:8.4.0'
+}

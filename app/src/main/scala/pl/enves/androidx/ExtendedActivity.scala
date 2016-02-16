@@ -29,4 +29,6 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
       else handler.post(runnable)
     }
   }
+
+  protected implicit def UnitToUnit(f: => Unit): () => Unit = () => f
 }

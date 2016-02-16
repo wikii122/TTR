@@ -8,6 +8,7 @@ import pl.enves.ttr.graphics.geometry.GeometryId
 import pl.enves.ttr.graphics.text.StaticText
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.logic._
+import pl.enves.ttr.logic.games.BotGame
 import pl.enves.ttr.utils.themes.Theme
 
 /**

@@ -1,7 +1,11 @@
 package pl.enves.ttr.logic
 
+import java.util
+
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic.games._
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.JsonMappable
 import spray.json._
 import pl.enves.ttr.utils.JsonProtocol._
@@ -103,10 +107,11 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 object Game extends Enumeration {
   val STANDARD, BOT, GPS_MULTIPLAYER, CONTINUE, REPLAY = Value
 
-  def create(typo: Game.Value): Game = typo match {
-    case STANDARD => StandardGame()
-    case BOT => BotGame()
-  }
+  def plain() = StandardGame()
+
+  def network(players: util.ArrayList[String]) = PlayServicesGame(Option(players))
+
+  def bot() = BotGame()
 
   def load(jsValue: JsValue): Game = {
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {

@@ -3,15 +3,14 @@ package pl.enves.ttr.utils
 import android.content.{Context, SharedPreferences}
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.R
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.themes.Theme
 
 object Configuration {
-  private[this] val prefs = ContextRegistry.context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
-  private[this] val prefed: SharedPreferences.Editor = prefs.edit()
+  private[this] lazy val prefs = ContextRegistry.context.getSharedPreferences("preferences", Context.MODE_PRIVATE)
+  private[this] lazy val prefed: SharedPreferences.Editor = prefs.edit()
 
   val defaultColorThemeId: Int = R.array.theme_five
-
-  def isPaid = ContextRegistry.context.getString(R.string.VERSION) == "PAID"
 
   def isFirstRun = prefs.getBoolean("FIRSTRUN", true)
 
@@ -19,8 +18,6 @@ object Configuration {
     prefed.putBoolean("FIRSTRUN", b)
     prefed.commit()
   }
-
-  def isMultiplayerAvailable = isPaid
 
   def pickedTheme: Theme = {
     val defaultTheme = Theme(ContextRegistry.context.getResources, defaultColorThemeId)
@@ -38,4 +35,6 @@ object Configuration {
     prefed.putInt("BOT_DIFFICULTY", d)
     prefed.commit()
   }
+
+  def isMultiplayerAvailable: Boolean = false // PlayServices.isAvailable
 }

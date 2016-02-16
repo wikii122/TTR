@@ -1,6 +1,7 @@
-package pl.enves.ttr.logic
+package pl.enves.ttr.logic.games
 
 import pl.enves.androidx.Logging
+import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.bot._
 import pl.enves.ttr.logic.inner._
 import pl.enves.ttr.utils.JsonProtocol._

@@ -5,11 +5,13 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentTransaction}
+import android.view.View
+import android.widget.Button
 import com.google.android.gms.games.Games
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState}
-import pl.enves.ttr.utils.dialogs.PaidOnlyDialog
+import pl.enves.ttr.utils.dialogs.NotAvailableDialog
 import pl.enves.ttr.utils.start.{BackButtonFragment, ChooseGameFragment, MainMenuFragment}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
@@ -50,23 +52,19 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
     case SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
-    else return;
-    case PlayServices.SIGN_IN => log("Signed in to Google Play Services")
-      log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
-      drawUI()
-    case a => warn(s"onActivityResult did not match request with id: $a")
+      else return
+    case PlayServices.SIGN_IN => if (response == Activity.RESULT_OK) {
+        log(s"Signed in to Google Play Services")
+        log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
+        enableButtons()
+      } else {
+        warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
+      }
+    case a => error(s"onActivityResult did not match request with id: $a")
   }
 
   def showDialog(reason: dialogs.Reason) = reason match {
-    case dialogs.PaidOnly => val dialog = PaidOnlyDialog().show()
-  }
-
-  private[this] def startNetworkGame(i: Intent) = {
-    log("Intending to start new StandardGame")
-    val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra("TYPE", Game.GPS_MULTIPLAYER.toString)
-    itnt putExtra("PLAYERS", i getStringArrayListExtra Games.EXTRA_PLAYER_IDS)
-    itnt start()
+    case dialogs.PaidOnly => val dialog = NotAvailableDialog.show()
   }
 
   private[this] def prepareGameIntent(i: Intent): Intent = {
@@ -82,7 +80,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   def startStandardGame() = {
     log("Intending to start new StandardGame")
 
-    unShowNewGameMenu()
+    hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
     itnt putExtra("TYPE", Game.STANDARD.toString)
@@ -92,7 +90,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   def startBotGame() = {
     log("Intending to start new BotGame")
 
-    unShowNewGameMenu()
+    hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
     itnt putExtra("TYPE", Game.BOT.toString)
@@ -100,14 +98,21 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   }
 
   def startNetworkGame() = if (Configuration.isMultiplayerAvailable) {
-
-    unShowNewGameMenu()
-
     val intn = PlayServices.getPlayerSelectIntent
     startActivityForResult(intn, SELECT_PLAYERS)
   } else {
     showDialog(dialogs.PaidOnly)
   }
+
+  private def startNetworkGame(i: Intent) = {
+    log("Intending to start new StandardGame")
+
+    val itnt = prepareGameIntent(intent[GameActivity])
+    itnt putExtra ("TYPE", Game.GPS_MULTIPLAYER.toString)
+    itnt putExtra ("PLAYERS", i getStringArrayListExtra Games.EXTRA_PLAYER_IDS)
+    itnt start ()
+  }
+
 
   /**
    * Used to continue game in progress
@@ -163,10 +168,16 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     transaction.commit()
   }
 
-  private[this] def unShowNewGameMenu() = {
+  private[this] def hideNewGameMenu() = {
     log("Showing main menu")
 
     getSupportFragmentManager.popBackStack()
+  }
+
+  private[this] def enableButtons(): Unit = UiThread {
+    if (mainMenuFragment.isVisible) {
+      mainMenuFragment.asInstanceOf[MainMenuFragment].setContinueButtonEnabled(GameState.active)
+    }
   }
 
   override def setTypeface(typeface: Typeface): Unit = {
@@ -181,9 +192,8 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     setLogoColorTheme(theme)
   }
 
-  private[this] def enableButtons(): Unit = UiThread(() => {
-    if (mainMenuFragment.isVisible) {
-      mainMenuFragment.asInstanceOf[MainMenuFragment].setContinueButtonEnabled(GameState.active)
-    }
-  })
+  /**
+   * Used to check if there is a game in progress.
+   */
+  private[this] def activeGame: Boolean = GameState.active
 }

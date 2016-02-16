@@ -112,3 +112,6 @@ project/plugins/project/
 
 # Dolphin
 .directory
+
+# Sensitive files
+app/build.gradle
