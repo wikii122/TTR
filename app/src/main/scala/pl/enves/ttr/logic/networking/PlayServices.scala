@@ -8,16 +8,19 @@ import android.app.Activity
 import android.content.IntentSender
 import android.os.Bundle
 import android.support.v7.app.AlertDialog
-import com.google.android.gms.common.{GoogleApiAvailability, GooglePlayServicesUtil, ConnectionResult}
-import com.google.android.gms.common.api.{ResultCallback, GoogleApiClient}
-import com.google.android.gms.common.api.GoogleApiClient.{Builder, OnConnectionFailedListener, ConnectionCallbacks}
+import com.google.android.gms.common.api.GoogleApiClient.{ConnectionCallbacks, OnConnectionFailedListener}
+import com.google.android.gms.common.api.{GoogleApiClient, ResultCallback}
+import com.google.android.gms.common.{ConnectionResult, GoogleApiAvailability}
 import com.google.android.gms.games.Games
-import com.google.android.gms.games.multiplayer.ParticipantResult
-import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatchConfig, TurnBasedMatch}
+import com.google.android.gms.games.multiplayer.{Invitation, Invitations}
+import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMatch, TurnBasedMatchConfig, TurnBasedMultiplayer}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.utils.Configuration
+import pl.enves.ttr.utils.ExecutorContext._
 import pl.enves.ttr.utils.exceptions.ServiceUnavailableException
+
+import scala.concurrent.Future
 
 object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener with Logging {
   final val SIGN_IN = 9001 // Because reasons
@@ -49,6 +52,17 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   def takeTurn(matchInstance: TurnBasedMatch, turnData: String, participant: String) = {
     Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant)
   }
+
+  def invitations: Future[List[Invitation]] = Future {
+    val promise = Games.Invitations.loadInvitations(client.get)
+    val result = promise.await()
+    val invitationBuffer = result.getInvitations
+    val e = for (i <- 0 until invitationBuffer.getCount) yield invitationBuffer.get(i)
+
+    e.toList
+  }
+
+  def accept(invitation: Invitation) = ???
 
   def finishMatch(matchInstance: TurnBasedMatch) = ???
 
