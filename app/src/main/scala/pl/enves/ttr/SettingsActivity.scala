@@ -1,11 +1,12 @@
 package pl.enves.ttr
 
-import android.content.Intent
+import android.content.{ActivityNotFoundException, Intent}
 import android.content.res.TypedArray
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.{Button, TextView}
+import android.widget.{Toast, Button, TextView}
 import com.google.android.gms.ads.AdView
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.utils.styled.ToolbarActivity
@@ -13,6 +14,7 @@ import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
 import pl.enves.ttr.utils.{AdUtils, Configuration}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.util.Try
 
 class SettingsActivity extends ToolbarActivity with AdUtils {
 
@@ -26,6 +28,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val tutorialButton = (find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt))
     val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
     val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
+    val feedbackButton = (find[Button](R.id.button_feedback), find[Button](R.id.button_feedback_prompt))
 
     themePicker.setChangeListener(this)
     val themes = readDefaultThemes
@@ -39,6 +42,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     tutorialButton onClick startTutorial
     aboutButton onClick startAbout
     licensesButton onClick startLicenses
+    feedbackButton onClick sendFeedback
 
     val adView = find[AdView](R.id.ad_view_settings)
     loadAd(adView)
@@ -103,6 +107,19 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     itnt start()
   }
 
+  private[this] def sendFeedback(v:View) = {
+    val email = "enves@enves.pl"
+    val itnt = sendIntent
+    itnt setType "message/rfc822"
+    itnt setData Uri.parse(s"mailto:$email")
+    
+    itnt.putExtra(Intent.EXTRA_EMAIL, email)
+    itnt.putExtra(Intent.EXTRA_SUBJECT, "[TTT_FEEDBACK] User feedback")
+    itnt.putExtra(Intent.EXTRA_TEXT, "Please fill in your query")
+
+    startActivity(itnt)
+  }
+
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
@@ -110,12 +127,14 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val tutorialButton = (find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt))
     val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
     val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
+    val feedbackButton = (find[Button](R.id.button_feedback), find[Button](R.id.button_feedback_prompt))
 
     pickThemeText._1.setTypeface(typeface)
     pickThemeText._2.setTypeface(typeface)
     tutorialButton.setTypeface(typeface)
     aboutButton.setTypeface(typeface)
     licensesButton.setTypeface(typeface)
+    feedbackButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -125,11 +144,13 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val tutorialButton = (find[Button](R.id.button_tutorial), find[Button](R.id.button_tutorial_prompt))
     val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
     val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
+    val feedbackButton = (find[Button](R.id.button_feedback), find[Button](R.id.button_feedback_prompt))
 
     pickThemeText._1.setTextColor(theme.color1)
     pickThemeText._2.setTextColor(theme.color2)
     tutorialButton.setTextColor(theme.color1, theme.color2)
     aboutButton.setTextColor(theme.color1, theme.color2)
     licensesButton.setTextColor(theme.color1, theme.color2)
+    feedbackButton.setTextColor(theme.color1, theme.color2)
   }
 }

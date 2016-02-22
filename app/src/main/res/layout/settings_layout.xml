@@ -105,6 +105,27 @@
             android:text="@string/licenses" />
     </RelativeLayout>
 
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="5dp"
+        android:layout_marginTop="5dp">
+
+        <Button
+            android:id="@+id/button_feedback_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <Button
+            android:id="@+id/button_feedback"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_feedback_prompt"
+            android:layout_toRightOf="@+id/button_feedback_prompt"
+            android:text="@string/feedback" />
+    </RelativeLayout>
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="fill_parent"

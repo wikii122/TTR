@@ -17,6 +17,8 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
 
   protected def intent[A: ClassTag] = new Intent(this, classTag[A].runtimeClass)
 
+  protected def sendIntent = new Intent(Intent.ACTION_SENDTO)
+
   protected def UiThread(f: () => Unit) = {
     lazy val runnable = new Runnable() {
       def run() = f()
