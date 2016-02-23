@@ -93,7 +93,11 @@ class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value)
     }
   }
 
-  override def getBoundingFigure: Array[Triangle] = square.get.getBoundingFigure
+  override def getBoundingFigure: Array[Triangle] = if (square.isDefined) {
+    square.get.getBoundingFigure
+  } else {
+    Array(Triangle())
+  }
 
   override def discardIllegal(): Unit = {
     shakeAnimation.get.stop()
