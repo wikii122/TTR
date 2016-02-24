@@ -24,16 +24,15 @@ import scala.concurrent.Future
 
 object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener with Logging {
   final val SIGN_IN = 9001 // Because reasons
-  private[this] val client = if (Configuration.isMultiplayerAvailable) Option(clientInit())
-    else None
+  private[this] val client = Option(clientInit())
   private[this] var signingIn = false
 
   def connect() = {
-    if (nonAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
+    if (!Configuration.isMultiplayerAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
     client.get connect ()
   }
 
-  def disconnect() = if (isConnected) client.get disconnect()
+  def disconnect() = if (isConnected) client.get disconnect ()
 
   def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
 
@@ -43,7 +42,6 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       .addInvitedPlayers(players)
       .build()
 
-    // TODO thresher
     Games.TurnBasedMultiplayer
       .createMatch(client.get, config)
       .setResultCallback(callee)
@@ -66,7 +64,7 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   def finishMatch(matchInstance: TurnBasedMatch) = ???
 
-  def isAvailable = Configuration.isMultiplayerAvailable && client.isDefined
+  def isAvailable = client.isDefined
   def nonAvailable = !isAvailable
 
   def isConnected = isAvailable && client.get.isConnected

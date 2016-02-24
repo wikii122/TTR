@@ -1,10 +1,10 @@
 package pl.enves.androidx.helpers
 
 import android.content.res.ColorStateList
-import android.graphics.Typeface
+import android.graphics.{PorterDuff, PorterDuffColorFilter, Typeface}
 import android.view.View
 import android.view.View.OnClickListener
-import android.widget.{Button, ImageButton, TextView}
+import android.widget._
 import pl.enves.androidx.color.ColorTypes.ColorAndroid
 
 trait ButtonHelper {
@@ -38,6 +38,10 @@ trait ImageButtonHelper {
 
     def enable() = button.setEnabled(true)
     def disable() = button.setEnabled(false)
+
+    def setColor(color: ColorAndroid): Unit = {
+      button.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN))
+    }
   }
 }
 
@@ -81,5 +85,18 @@ trait DoubleButtonHelper {
       buttons._1.setVisibility(visibility)
       buttons._2.setVisibility(visibility)
     }
+  }
+}
+
+trait SwitchHelper {
+  implicit class SwitchHelper(switch: Switch) {
+    def onCheck(function: (CompoundButton, Boolean) => Unit): Unit = {
+      switch.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+        override def onCheckedChanged(buttonView: CompoundButton, isChecked: Boolean): Unit = function(buttonView, isChecked)
+      })
+    }
+
+    def enable(): Unit = switch.setEnabled(true)
+    def disable(): Unit = switch.setEnabled(false)
   }
 }

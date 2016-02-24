@@ -4,14 +4,15 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view._
-import android.widget.{ImageButton, TextView, Button, FrameLayout}
+import android.widget._
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
-import pl.enves.ttr.logic.games.AIGame
+import pl.enves.ttr.logic.games.BotGame
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.styled.StyledActivity
-import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
+import pl.enves.ttr.utils.themes.Theme
 
 /**
  * Core game activity.
@@ -20,17 +21,8 @@ import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
  */
 class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
-  private[this] var afterGameMenuLayer: Option[View] = None
 
-  private[this] var playAgainButton: Option[(Button, Button)] = None
-  private[this] var gameCourseButton: Option[(Button, Button)] = None
-  private[this] var contemplateButton: Option[(Button, Button)] = None
-  private[this] var backToMainButton: Option[ThemedOneImageButton] = None
-
-  private[this] var chooseSymbolLayer: Option[View] = None
-  private[this] var chooseSymbolText: Option[TextView] = None
-  private[this] var chooseXButton: Option[ThemedOneImageButton] = None
-  private[this] var chooseOButton: Option[ThemedOneImageButton] = None
+  private[this] lazy val botGameSetupLayer = getLayoutInflater.inflate(R.layout.bot_game_setup_layout, null)
 
   override def onCreate(state: Bundle): Unit = {
     log("Creating")
@@ -42,8 +34,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       case Game.STANDARD =>
         game = Game.plain()
         view.startGame()
-      case Game.AI =>
-        game = Game.ai()
+      case Game.BOT =>
+        game = Game.bot()
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
       case Game.GPS_MULTIPLAYER =>
@@ -53,56 +45,34 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         throw new IllegalArgumentException(s"Invalid game type: $s")
     }
 
-    if (game.isReplaying) {
-      view.startReplaying()
-    }
-
     val frameLayout = new FrameLayout(this)
     val gameLayoutParams = new ViewGroup.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
       ViewGroup.LayoutParams.MATCH_PARENT)
     frameLayout.addView(view, gameLayoutParams)
 
-    val inflater = getLayoutInflater
-    afterGameMenuLayer = Some(inflater.inflate(R.layout.after_game_menu_layout, null))
-    afterGameMenuLayer.get.setVisibility(View.GONE)
+    botGameSetupLayer.setVisibility(View.GONE)
 
-    val afterGameMenuLayoutParams = new FrameLayout.LayoutParams(
-      ViewGroup.LayoutParams.MATCH_PARENT,
-      ViewGroup.LayoutParams.MATCH_PARENT,
-      Gravity.CENTER)
-    frameLayout.addView(afterGameMenuLayer.get, afterGameMenuLayoutParams)
-
-    chooseSymbolLayer = Some(inflater.inflate(R.layout.choose_symbol_layout, null))
-    chooseSymbolLayer.get.setVisibility(View.GONE)
-
-    val chooseSymbolLayoutParams = new FrameLayout.LayoutParams(
+    val botGameSetupLayoutParams = new FrameLayout.LayoutParams(
       ViewGroup.LayoutParams.MATCH_PARENT,
       ViewGroup.LayoutParams.MATCH_PARENT,
       Gravity.TOP)
-    frameLayout.addView(chooseSymbolLayer.get, chooseSymbolLayoutParams)
+    frameLayout.addView(botGameSetupLayer, botGameSetupLayoutParams)
 
     setContentView(frameLayout)
 
-    playAgainButton = Some((find[Button](R.id.button_play_again), find[Button](R.id.button_play_again_prompt)))
-    gameCourseButton = Some((find[Button](R.id.button_game_course), find[Button](R.id.button_game_course_prompt)))
-    contemplateButton = Some((find[Button](R.id.button_contemplate), find[Button](R.id.button_contemplate_prompt)))
-    backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    playAgainButton.get onClick onPlayAgain
-    gameCourseButton.get onClick onReplay
-    contemplateButton.get onClick onCloseMenu
-    backToMainButton.get onClick onBackToMainMenu
+    chooseXButton onClick onPlayWithBotAsX
+    chooseOButton onClick onPlayWithBotAsO
 
-    chooseSymbolText = Some(find[TextView](R.id.text_choose_symbol))
-    chooseXButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_symbol_X), R.drawable.pat_cross_mod_mask))
-    chooseOButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_symbol_O), R.drawable.pat_ring_mod_mask))
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
-    chooseXButton.get onClick onPlayWithBotAsX
-    chooseOButton.get onClick onPlayWithBotAsO
+    difficultySeekBar onChange onDifficultyChanged
 
-    if(game.gameType == Game.AI) {
-      if(game.asInstanceOf[AIGame].getHuman.isEmpty) {
+    if (game.gameType == Game.BOT) {
+      if (game.asInstanceOf[BotGame].getHuman.isEmpty) {
         showChooser()
       }
     }
@@ -116,28 +86,39 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    playAgainButton.get.setTypeface(typeface)
-    gameCourseButton.get.setTypeface(typeface)
-    contemplateButton.get.setTypeface(typeface)
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
 
-    chooseSymbolText.get.setTypeface(typeface)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    chooseSymbolText.setTypeface(typeface)
+
+    difficultyText.setTypeface(typeface)
+    difficultyNumber.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
+    super.setColorTheme(theme)
     view.setTheme(theme)
 
-    afterGameMenuLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    playAgainButton.get.setTextColor(theme.color1, theme.color2)
-    gameCourseButton.get.setTextColor(theme.color1, theme.color2)
-    contemplateButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColorTheme(theme)
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
-    chooseSymbolLayer.get.setBackgroundColor(colorTransparent(theme.background, 0.8f))
+    botGameSetupLayer.setBackgroundColor(colorTransparent(theme.background, 0.8f))
 
-    chooseSymbolText.get.setTextColor(theme.color2)
-    chooseXButton.get.setColorTheme(theme)
-    chooseOButton.get.setColorTheme(theme)
+    chooseSymbolText.setTextColor(theme.color2)
+
+    chooseXButton.setColor(theme.color1)
+    chooseOButton.setColor(theme.color1)
+
+    difficultyText.setTextColor(theme.color2)
+    difficultyNumber.setTextColor(theme.color1)
+    difficultySeekBar.setColors(theme.color1, theme.color2)
   }
 
   override def onPause(): Unit = {
@@ -145,9 +126,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     super.onPause()
     view.onPause()
-
-    if (game.canBeSaved) GameState store game
-    else GameState clear()
   }
 
   override def onResume(): Unit = {
@@ -161,102 +139,108 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onStop()
 
     // There is no point to keep game that cannot be saved.
-    if (!game.canBeSaved) {
-      GameState.clear()
-      this.finish()
+    if (game.canBeSaved) {
+      GameState store game
+    } else {
+      GameState clear()
     }
+
+    //if game was saved, user can select to continue it in main menu
+    finish()
   }
 
-  def showMenu(winner: Option[Player.Value]): Unit = {
-    log("showing game menu")
-    runOnUiThread(new Runnable() {
-      override def run(): Unit = {
-        afterGameMenuLayer.get.setVisibility(View.VISIBLE)
-
-        //make sure that all buttons are visible, android gets crazy sometimes
-        playAgainButton.get.setVisibility(View.VISIBLE)
-        gameCourseButton.get.setVisibility(View.VISIBLE)
-        contemplateButton.get.setVisibility(View.VISIBLE)
-        backToMainButton.get.setVisibility(View.VISIBLE)
-      }
-    })
-  }
-
-  private[this] def onCloseMenu(v: View): Unit = {
-    afterGameMenuLayer.get.setVisibility(View.GONE)
-
-    //make sure that all buttons are gone, android gets crazy sometimes
-    playAgainButton.get.setVisibility(View.GONE)
-    gameCourseButton.get.setVisibility(View.GONE)
-    contemplateButton.get.setVisibility(View.GONE)
-    backToMainButton.get.setVisibility(View.GONE)
+  def showMenu(): Unit = {
+    val itnt = intent[GameEndedActivity]
+    itnt.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+    itnt.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+    itnt.putExtra("GAME_DATA", game.toJson.compactPrint)
+    finish()
+    itnt.start()
   }
 
   def showChooser(): Unit = {
     log("showing chooser")
-    chooseSymbolLayer.get.setVisibility(View.VISIBLE)
+
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
+
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    botGameSetupLayer.setVisibility(View.VISIBLE)
 
     //make sure that all buttons are visible, android gets crazy sometimes
-    chooseSymbolText.get.setVisibility(View.VISIBLE)
-    chooseXButton.get.setVisibility(View.VISIBLE)
-    chooseOButton.get.setVisibility(View.VISIBLE)
+    chooseSymbolText.setVisibility(View.VISIBLE)
+    chooseXButton.setVisibility(View.VISIBLE)
+    chooseOButton.setVisibility(View.VISIBLE)
+
+    difficultyText.setVisibility(View.VISIBLE)
+    difficultySeekBar.setVisibility(View.VISIBLE)
+    difficultyNumber.setVisibility(View.VISIBLE)
+
+    val difficulty = Configuration.botDifficulty
+    difficultySeekBar.setProgress(difficulty)
+    if (difficulty == 0) {
+      //seekBar' default progress is 0, so there is no change informed to ProgressChangeListener
+      onDifficultyChanged(difficultySeekBar, difficulty, false)
+    }
   }
 
   def closeChooser(): Unit = {
     log("closing chooser")
-    chooseSymbolLayer.get.setVisibility(View.GONE)
+
+    val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
+    val chooseXButton = find[ImageButton](R.id.button_symbol_X)
+    val chooseOButton = find[ImageButton](R.id.button_symbol_O)
+
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+    val difficultyText = find[TextView](R.id.text_difficulty)
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    botGameSetupLayer.setVisibility(View.GONE)
 
     //make sure that all buttons are gone, android gets crazy sometimes
-    chooseSymbolText.get.setVisibility(View.GONE)
-    chooseXButton.get.setVisibility(View.GONE)
-    chooseOButton.get.setVisibility(View.GONE)
+    chooseSymbolText.setVisibility(View.GONE)
+    chooseXButton.setVisibility(View.GONE)
+    chooseOButton.setVisibility(View.GONE)
+
+    difficultyText.setVisibility(View.GONE)
+    difficultySeekBar.setVisibility(View.GONE)
+    difficultyNumber.setVisibility(View.GONE)
   }
 
-  /**
-   * Starts new game with the same options
-   */
-  private[this] def onPlayAgain(v: View): Unit = {
-    log("Intending to play again")
-    var itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-    itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-    game.gameType match {
-      case Game.STANDARD =>
-        itnt putExtra("TYPE", Game.STANDARD.toString)
-      case Game.AI =>
-        itnt putExtra("TYPE", Game.AI.toString)
-        itnt putExtra("AI_HUMAN_SYMBOL", game.asInstanceOf[AIGame].getHuman.toString)
-//      case Game.NETWORK =>
-//        itnt = intent[StartNetworkGameActivity]
-//        itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-//        itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-      case _ =>
-        error("bad game type")
-        return
+  private[this] def setupBot(): Unit = {
+    val g = game.asInstanceOf[BotGame]
+
+    val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
+
+    val difficulty = difficultySeekBar.getProgress
+    g.setMaxTime((difficulty + 1) * 1000)
+
+    if (difficulty != Configuration.botDifficulty) {
+      Configuration.botDifficulty = difficulty
     }
-    finish()
-    itnt start()
-  }
-
-  private[this] def onReplay(v: View): Unit = {
-    onCloseMenu(v)
-    replayGame()
-    view.startReplaying()
-  }
-
-  private[this] def onBackToMainMenu(v: View) = {
-    finish()
   }
 
   private[this] def onPlayWithBotAsX(v: View) = {
-    game.asInstanceOf[AIGame].setHumanSymbol(Player.X)
+    game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
+    setupBot()
     view.startGame()
     closeChooser()
   }
 
   private[this] def onPlayWithBotAsO(v: View) = {
-    game.asInstanceOf[AIGame].setHumanSymbol(Player.O)
+    game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
+    setupBot()
     view.startGame()
     closeChooser()
+  }
+
+  private[this] def onDifficultyChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
+    val difficultyNumber = find[TextView](R.id.text_difficulty_number)
+
+    difficultyNumber.setText((progress + 1).toString)
   }
 }

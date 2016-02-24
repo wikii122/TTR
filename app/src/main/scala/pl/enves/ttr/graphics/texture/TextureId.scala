@@ -8,6 +8,5 @@ object TextureId extends Enumeration {
   MaskEmpty,
   MaskArrowRight,
   MaskArrowLeft,
-  Font,
-  Font2 = Value
+  Font = Value
 }

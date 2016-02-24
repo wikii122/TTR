@@ -12,7 +12,7 @@ import pl.enves.ttr.utils.themes.Theme
  *
  * Takes responsibility for handling input from system and managing graphics rendering.
  */
-class GameView(val context: Context with GameManager, onEnd: Option[Player.Value] => Unit) extends GLSurfaceView(context) with Logging {
+class GameView(val context: Context with GameManager, onEnd: () => Unit) extends GLSurfaceView(context) with Logging {
   private[this] val renderer = GameRenderer(context, onEnd)
 
   log("Creating")
@@ -27,11 +27,9 @@ class GameView(val context: Context with GameManager, onEnd: Option[Player.Value
 
   def setTheme(theme: Theme) = renderer.setTheme(theme)
 
-  def startReplaying() = renderer.startReplaying()
-
   override def onTouchEvent(e: MotionEvent): Boolean = renderer.onTouchEvent(e)
 }
 
 object GameView {
-  def apply(context: Context with GameManager, onEnd: Option[Player.Value] => Unit) = new GameView(context, onEnd)
+  def apply(context: Context with GameManager, onEnd: () => Unit) = new GameView(context, onEnd)
 }

@@ -1,25 +1,30 @@
 package pl.enves.ttr.graphics.shaders
 
 import android.opengl.GLES20
-import pl.enves.androidx.color.ColorTypes.ColorArray
-import pl.enves.ttr.graphics.{AbstractGeometry, MatrixStack}
+import pl.enves.androidx.color.ColorTypes._
+import pl.enves.ttr.graphics.MatrixStack
+import pl.enves.ttr.graphics.geometry.Geometry
 
 /**
- * output.rgba = color1*mask.r + color2*mask.g + color3*mask.b
+ * From now on, shape is defined only by alpha channel.
+ * This works well with glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA),
+ * and is somewhat compatible with PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN),
+ * that we are using to style some UI components.
+ * ( PorterDuff.Mode.SRC_IN is [Sa*Da, Sc*Da], whereas this shader implements [Sa*Da, Sc] )
+ * ( S = color, D = mask, c = [red, green, blue], a = alpha )
+ * ( Calculations cannot be the same because mask is interpolated earlier here )
  */
 
 class MaskShader extends Shader {
 
   // Get handlers to attributes
-  val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
-  val texCoordHandle = GLES20.glGetAttribLocation(program, "a_MaskTexCoord")
+  private[this] val positionHandle = GLES20.glGetAttribLocation(program, "a_Position")
+  private[this] val texCoordHandle = GLES20.glGetAttribLocation(program, "a_MaskTexCoord")
 
   // Get handlers to uniforms
-  val MVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
-  val samplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
-  val color1Handle = GLES20.glGetUniformLocation(program, "u_Color1")
-  val color2Handle = GLES20.glGetUniformLocation(program, "u_Color2")
-  val color3Handle = GLES20.glGetUniformLocation(program, "u_Color3")
+  private[this] val MVPMatrixHandle = GLES20.glGetUniformLocation(program, "u_MVPMatrix")
+  private[this] val samplerHandle = GLES20.glGetUniformLocation(program, "u_Sampler")
+  private[this] val colorHandle = GLES20.glGetUniformLocation(program, "u_Color")
 
   override def getVertexShaderCode: String =
     """
@@ -42,9 +47,7 @@ class MaskShader extends Shader {
       precision highp float;
     #endif
 
-    uniform vec4 u_Color1;
-    uniform vec4 u_Color2;
-    uniform vec4 u_Color3;
+    uniform vec4 u_Color;
     uniform sampler2D u_Sampler;
 
     varying vec2 v_MaskTexCoord;
@@ -52,22 +55,17 @@ class MaskShader extends Shader {
     void main(void) {
       vec4 mask = texture2D(u_Sampler, vec2(v_MaskTexCoord.s, v_MaskTexCoord.t));
       vec4 color;
-      color.r = u_Color1.r*mask.r + u_Color2.r*mask.g + u_Color3.r*mask.b;
-      color.g = u_Color1.g*mask.r + u_Color2.g*mask.g + u_Color3.g*mask.b;
-      color.b = u_Color1.b*mask.r + u_Color2.b*mask.g + u_Color3.b*mask.b;
-      color.a = u_Color1.a*mask.r + u_Color2.a*mask.g + u_Color3.a*mask.b;
+      color.a = u_Color.a * mask.a;
+      color.r = u_Color.r;
+      color.g = u_Color.g;
+      color.b = u_Color.b;
 
-      gl_FragColor = clamp(color, 0.0, 1.0);
-      //gl_FragColor = mask;
+      //gl_FragColor = clamp(color, 0.0, 1.0);
+      gl_FragColor = color;
     }
     """
 
-  /**
-   * (color1rgba, color2rgba, color3rgba, mask)
-   */
-  override type dataType = (ColorArray, ColorArray, ColorArray, Int)
-
-  override def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: AbstractGeometry, data: dataType) {
+  def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, color: ColorArray, mask: Int) {
     makeMVPMatrix(mvMatrix, pMatrix)
 
     val positionsBuffer = model.getBuffers.positions
@@ -95,17 +93,13 @@ class MaskShader extends Shader {
     GLES20.glUniformMatrix4fv(MVPMatrixHandle, 1, false, mvpMatrix, 0)
 
     //Apply Colors
-    GLES20.glUniform4fv(color1Handle, 1, data._1, 0)
-
-    GLES20.glUniform4fv(color2Handle, 1, data._2, 0)
-
-    GLES20.glUniform4fv(color3Handle, 1, data._3, 0)
+    GLES20.glUniform4fv(colorHandle, 1, color, 0)
 
     // Set the active texture unit to texture unit 0.
     GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
 
     // Bind the texture to this unit.
-    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, data._4)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mask)
 
     // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
     GLES20.glUniform1i(samplerHandle, 0)

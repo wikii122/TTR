@@ -19,7 +19,7 @@ class LogEntry(player: Player.Value, move: Move) extends Logging with JsonMappab
 object LogEntry {
   def apply(player: Player.Value, move: Move) = new LogEntry(player, move)
 
-  def apply(jsValue: JsValue, game: Game): LogEntry = {
+  def apply(jsValue: JsValue): LogEntry = {
     val fields = jsValue.asJsObject.fields
     val player = fields("player").convertTo[Player.Value]
     val move = fields("move").convertTo[Move]
