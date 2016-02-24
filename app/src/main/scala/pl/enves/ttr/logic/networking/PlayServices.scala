@@ -12,7 +12,7 @@ import com.google.android.gms.common.api.GoogleApiClient.{ConnectionCallbacks, O
 import com.google.android.gms.common.api.{GoogleApiClient, ResultCallback}
 import com.google.android.gms.common.{ConnectionResult, GoogleApiAvailability}
 import com.google.android.gms.games.Games
-import com.google.android.gms.games.multiplayer.{Invitation, Invitations}
+import com.google.android.gms.games.multiplayer.Invitation
 import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMatch, TurnBasedMatchConfig, TurnBasedMultiplayer}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
@@ -47,8 +47,8 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       .setResultCallback(callee)
   }
 
-  def takeTurn(matchInstance: TurnBasedMatch, turnData: String, participant: String) = {
-    Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant)
+  def takeTurn(matchInstance: TurnBasedMatch, turnData: String, participant: String) = Future {
+    Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant).await()
   }
 
   def invitations: Future[List[Invitation]] = Future {
@@ -60,7 +60,9 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     e.toList
   }
 
-  def accept(invitation: Invitation) = ???
+  def accept(invitation: Invitation) = Future {
+    Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId).await()
+  }
 
   def finishMatch(matchInstance: TurnBasedMatch) = ???
 
