@@ -52,12 +52,19 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   }
 
   def invitations: Future[List[Invitation]] = Future {
-    val promise = Games.Invitations.loadInvitations(client.get)
-    val result = promise.await()
-    val invitationBuffer = result.getInvitations
-    val e = for (i <- 0 until invitationBuffer.getCount) yield invitationBuffer.get(i)
+    if (isConnected) {
+      val promise = Games.Invitations.loadInvitations(client.get)
+      val result = promise.await()
+      val invitationBuffer = result.getInvitations
+      val e = for (i <- 0 until invitationBuffer.getCount) yield invitationBuffer.get(i)
+      log(s"Number of new invitations found: ${e.length}")
 
-    e.toList
+      e.toList
+    } else {
+      warn("Play services is not connected. Cannot list invitations.")
+
+      Nil
+    }
   }
 
   def accept(invitation: Invitation) = Future {
