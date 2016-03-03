@@ -60,7 +60,9 @@
     <string name="difficulty">difficulty:</string>
     <string name="enves">enves</string>
     <string name="created_by">created by</string>
-    <string name="game_description">TicTacTurn is a hell of a game!</string>
+    <string name="game_description_1">Old classic with a twist… literally! 6x6 version of TicTacToe where you can turn parts of the board around.</string>
+    <string name="game_description_2">Exercise your brain while playing solo or challenge your friends to a mind-duel - hot seat or online. Enjoy customizable flat design and several levels of bot\'s difficulty.</string>
+    <string name="game_description_3">Will you become the ultimate TicTacTurn master?</string>
     <string name="game_license">DO NOT EVEN THINK ABOUT IT</string>
     <string name="admob_test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 </resources>
