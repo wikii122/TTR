@@ -10,7 +10,7 @@ class TutorialFragmentPagerAdapter(fm: FragmentManager, context: Context) extend
     AnimationFragment(R.string.tutorial_figures, R.xml.tutorial_figures_animation, autoPlay = true),
     AnimationFragment(R.string.tutorial_rotations, R.xml.tutorial_rotations_animation, autoPlay = false),
     AnimationFragment(R.string.tutorial_goals, R.xml.tutorial_goals_animation, autoPlay = false),
-    DoubleTextFragment(R.string.tutorial_standard, R.string.tutorial_network)
+    TripleTextFragment(R.string.tutorial_standard, R.string.tutorial_network, R.string.tutorial_bot)
   )
 
   override def getCount: Int = items.length
