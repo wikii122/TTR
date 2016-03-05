@@ -1,7 +1,7 @@
 package pl.enves.ttr.utils.styled
 
 import android.graphics.Typeface
-import pl.enves.androidx.ExtendedFragment
+import pl.enves.androidx.views.ExtendedFragment
 import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.themes.Theme
 

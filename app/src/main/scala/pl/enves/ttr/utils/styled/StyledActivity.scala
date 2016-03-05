@@ -2,7 +2,7 @@ package pl.enves.ttr.utils.styled
 
 import android.graphics.Typeface
 import android.view.{View, WindowManager}
-import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.views.ExtendedActivity
 import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.themes.Theme
 

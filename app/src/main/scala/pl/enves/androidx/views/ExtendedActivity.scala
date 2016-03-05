@@ -1,8 +1,10 @@
 package pl.enves.androidx
+package views
 
-import android.content.{Context, Intent, SharedPreferences}
-import android.os.{Build, Bundle, Handler, Looper}
+import android.content.Intent
+import android.os.{Build, Handler, Looper}
 import android.support.v7.app.AppCompatActivity
+import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
 
 import scala.reflect.{ClassTag, classTag}
@@ -19,7 +21,7 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
 
   protected def sendIntent = new Intent(Intent.ACTION_SENDTO)
 
-  protected def UiThread(f: () => Unit) = {
+  protected[views] def runOnMainThread(f: () => Unit) = {
     lazy val runnable = new Runnable() {
       def run() = f()
     }

@@ -174,7 +174,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     getSupportFragmentManager.popBackStack()
   }
 
-  private[this] def enableButtons(): Unit = UiThread {
+  private[this] def enableButtons(): Unit = runOnMainThread {
     if (mainMenuFragment.isVisible) {
       mainMenuFragment.asInstanceOf[MainMenuFragment].setContinueButtonEnabled(GameState.active)
     }
