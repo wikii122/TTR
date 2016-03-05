@@ -21,9 +21,9 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
 
   private[this] var maxTime: Int = 3000
 
-  private[this] val maxDepth: Int = 5
+  private[this] var maxDepth: Int = 5
 
-  private[this] val adaptiveDepth = true
+  private[this] val adaptiveTime = true
 
   private[this] val randomizeDecisions = true
 
@@ -36,11 +36,10 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
       onMove(move)
     }
 
-    //TODO: make it more intelligent
-    val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
-    else maxDepth
+    val time = if (adaptiveTime) Math.min((36 - board.getFreeFields + 1) * 1000, maxTime)
+    else maxTime
 
-    algorithm = Some(new MinMax(board, player, minTime, maxTime, depth, randomizeDecisions, makeBotMove))
+    algorithm = Some(new MinMax(board, player, minTime, time, maxDepth, randomizeDecisions, makeBotMove))
   }
 
   /**
@@ -130,6 +129,8 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
   def getHuman: Option[Player.Value] = human
 
   def setMaxTime(max: Int): Unit = maxTime = max
+
+  def setMaxDepth(max: Int): Unit = maxDepth = max
 }
 
 object BotGame {
