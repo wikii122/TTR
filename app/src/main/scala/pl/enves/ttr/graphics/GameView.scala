@@ -4,7 +4,7 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.{GameManager, Player}
+import pl.enves.ttr.logic.GameManager
 import pl.enves.ttr.utils.themes.Theme
 
 /**
@@ -22,8 +22,6 @@ class GameView(val context: Context with GameManager, onEnd: () => Unit) extends
   setRenderer(renderer)
 
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
-
-  def startGame() = context.game.start(Player.X)
 
   def setTheme(theme: Theme) = renderer.setTheme(theme)
 

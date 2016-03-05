@@ -28,7 +28,7 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
   private[this] val randomizeDecisions = true
 
   //TODO: Make interface for different algorithm classes
-  def startThinking(): Unit = {
+  private def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
 
     def makeBotMove(move: Move): Unit = {
@@ -42,16 +42,27 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     algorithm = Some(new MinMax(board, player, minTime, time, maxDepth, randomizeDecisions, makeBotMove))
   }
 
+  def startThinkingIfNeeded(): Unit = {
+    if (algorithm.isEmpty && human.isDefined && human.get != _player && nonFinished) {
+      startThinking()
+    }
+  }
+
   /**
    * Initiates the game with given player.
    */
-  protected def onStart(startingPlayer: Player.Value) = {
+  override protected def onStart(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
     _player = startingPlayer
 
-    if (_player != human.get) {
-      startThinking()
+    startThinkingIfNeeded()
+  }
+
+  override protected def onStop(): Unit = this.synchronized {
+    if (algorithm.isDefined) {
+      algorithm.get.stop()
+      algorithm = None
     }
   }
 
@@ -63,8 +74,6 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
       throw new UnsupportedOperationException("Cannot redefine human symbol")
     }
   }
-
-  override def canBeSaved: Boolean = human.isDefined
 
   /**
    * Makes a human move, whether it's a rotation or putting symbol.
@@ -96,11 +105,8 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     log(s"Player set to ${_player}")
     if (_player == human.get) {
       algorithm = None
-    } else {
-      if (!board.finished) {
-        startThinking()
-      }
     }
+    startThinkingIfNeeded()
   }
 
   def locked: Boolean = if (human.isDefined) {
@@ -111,20 +117,14 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
 
   protected def boardVersion = board.version
 
-  override def toMap = this.synchronized {
-    if (algorithm.isDefined) {
-      algorithm.get.stop()
-    }
-
-    Map(
-      "player" -> _player,
-      "human" -> human,
-      "maxTime" -> maxTime,
-      "board" -> board.toJson,
-      "log" -> (movesLog.toList map { entry => entry.toJson }),
-      "type" -> gameType
-    )
-  }
+  override def toMap = Map(
+    "player" -> _player,
+    "human" -> human,
+    "maxTime" -> maxTime,
+    "board" -> board.toJson,
+    "log" -> (movesLog.toList map { entry => entry.toJson }),
+    "type" -> gameType
+  )
 
   def getHuman: Option[Player.Value] = human
 
@@ -151,11 +151,9 @@ object BotGame {
 
     if (human.isDefined) {
       game.setHumanSymbol(human.get)
-
-      if (game._player != human.get && game.nonFinished) {
-        game.startThinking()
-      }
     }
+
+    game.startThinkingIfNeeded()
 
     return game
   }

@@ -11,8 +11,6 @@ class ReplayGame(replayedGameType: Game.Value,
                  board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.REPLAY
 
-  override def canBeSaved = false
-
   override protected def boardVersion = 0
 
   private var replayMove = 0
