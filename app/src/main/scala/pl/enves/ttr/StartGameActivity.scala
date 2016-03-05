@@ -15,12 +15,10 @@ import pl.enves.ttr.utils.dialogs.NotAvailableDialog
 import pl.enves.ttr.utils.start.{BackButtonFragment, ChooseGameFragment, MainMenuFragment}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.utils.{Configuration, LogoUtils, dialogs}
+import pl.enves.ttr.utils.{Code, Configuration, LogoUtils, dialogs}
 
 class StartGameActivity extends StyledActivity with LogoUtils {
-  private[this] final val SELECT_PLAYERS = 9003
-
-  private[this] lazy val mainMenuFragment: Fragment = new MainMenuFragment
+  private[this] lazy val mainMenuFragment = new MainMenuFragment
 
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
@@ -51,15 +49,17 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   }
 
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
-    case SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
+    case Code.SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
       else return
-    case PlayServices.SIGN_IN => if (response == Activity.RESULT_OK) {
+    case Code.SIGN_IN => if (response == Activity.RESULT_OK) {
         log(s"Signed in to Google Play Services")
         log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
         enableButtons()
+        mainMenuFragment.onConnected()
       } else {
         warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
       }
+    case Code.SELECT_INVITATIONS => ???
     case a => error(s"onActivityResult did not match request with id: $a")
   }
 
@@ -99,7 +99,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
   def startNetworkGame() = if (Configuration.isMultiplayerAvailable) {
     val intn = PlayServices.getPlayerSelectIntent
-    startActivityForResult(intn, SELECT_PLAYERS)
+    startActivityForResult(intn, Code.SELECT_PLAYERS)
   } else {
     showDialog(dialogs.PaidOnly)
   }

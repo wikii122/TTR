@@ -4,12 +4,13 @@ package views
 import android.content.Intent
 import android.os.{Build, Handler, Looper}
 import android.support.v7.app.AppCompatActivity
-import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
+import pl.enves.androidx.helpers.FunctionHelper
 
 import scala.reflect.{ClassTag, classTag}
 
-abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry with Logging {
+abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry
+with Logging with FunctionHelper {
   type ID = Int
 
   private lazy val handler = new Handler(Looper.getMainLooper)
@@ -23,7 +24,7 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
 
   protected[views] def runOnMainThread(f: () => Unit) = {
     lazy val runnable = new Runnable() {
-      def run() = f()
+      override def run() = f()
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
       runOnUiThread(runnable)
@@ -33,6 +34,4 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
       else handler.post(runnable)
     }
   }
-
-  protected implicit def UnitToUnit(f: => Unit): () => Unit = () => f
 }

@@ -16,14 +16,13 @@ import com.google.android.gms.games.multiplayer.Invitation
 import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMatch, TurnBasedMatchConfig, TurnBasedMultiplayer}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
-import pl.enves.ttr.utils.Configuration
+import pl.enves.ttr.utils.{Code, Configuration}
 import pl.enves.ttr.utils.ExecutorContext._
 import pl.enves.ttr.utils.exceptions.ServiceUnavailableException
 
 import scala.concurrent.Future
 
 object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener with Logging {
-  final val SIGN_IN = 9001 // Because reasons
   private[this] val client = Option(clientInit())
   private[this] var signingIn = false
 
@@ -51,6 +50,8 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant).await()
   }
 
+  def finishMatch(matchInstance: TurnBasedMatch) = ???
+
   def invitations: Future[List[Invitation]] = Future {
     if (isConnected) {
       val promise = Games.Invitations.loadInvitations(client.get)
@@ -71,7 +72,7 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId).await()
   }
 
-  def finishMatch(matchInstance: TurnBasedMatch) = ???
+  def inboxIntent = Games.TurnBasedMultiplayer.getInboxIntent(client.get)
 
   def isAvailable = client.isDefined
   def nonAvailable = !isAvailable
@@ -111,14 +112,14 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     val activity = ContextRegistry.context.asInstanceOf[Activity]
     if (result.hasResolution) {
       try {
-        result.startResolutionForResult(activity, SIGN_IN)
+        result.startResolutionForResult(activity, Code.SIGN_IN)
       } catch {
         case e:IntentSender.SendIntentException => client.get.connect()
       }
     } else {
       // not resolvable... so show an error message
       val errorCode = result.getErrorCode
-      val dialog = Option(GoogleApiAvailability.getInstance.getErrorDialog(activity, errorCode, SIGN_IN))
+      val dialog = Option(GoogleApiAvailability.getInstance.getErrorDialog(activity, errorCode, Code.SIGN_IN))
       if (dialog.isDefined) {
         dialog.get.show()
       } else {

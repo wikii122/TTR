@@ -9,3 +9,4 @@ package object helpers
   with IntentHelper
   with ToolbarHelper
   with SeekBarHelper
+  with FunctionHelper

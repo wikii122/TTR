@@ -1,16 +1,20 @@
-package pl.enves.ttr.utils.start
+package pl.enves.ttr
+package utils
+package start
 
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{Button, RelativeLayout}
+import com.google.android.gms.games.multiplayer.Invitation
 import pl.enves.androidx.Logging
 import pl.enves.androidx.color.ColorUiTweaks
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.GameState
+import pl.enves.ttr.logic.networking.PlayServices
+import pl.enves.ttr.utils.ExecutorContext._
 import pl.enves.ttr.utils.styled.StyledFragment
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.{R, StartGameActivity}
 
 class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
 
@@ -29,27 +33,28 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
 
     setContinueButtonEnabled(GameState.active)
-    setInvitationsNumber(0)
+    setInvitationsNumber()
 
-    invitationsButton onClick onInvitations
-    newGameButton onClick onNewGame
-    continueGameButton onClick onContinue
-    settingsButton onClick onSettings
+    invitationsButton onClick listInvitations(Nil)
+    newGameButton onClick startNewGame
+    continueGameButton onClick continueGame
+    settingsButton onClick showSettings
   }
 
-  private[this] def onInvitations(v: View): Unit = {
-    //TODO
+  private[this] def listInvitations(invitations: List[Invitation])(v: View): Unit = {
+    val itnt = PlayServices.inboxIntent
+    getActivity.startActivityForResult(itnt, Code.SELECT_INVITATIONS)
   }
 
-  private[this] def onNewGame(v: View): Unit = {
+  private[this] def startNewGame(v: View): Unit = {
     getActivity.asInstanceOf[StartGameActivity].showNewGameMenu()
   }
 
-  private[this] def onContinue(v: View): Unit = {
+  private[this] def continueGame(v: View): Unit = {
     getActivity.asInstanceOf[StartGameActivity].continueGame()
   }
 
-  private[this] def onSettings(v: View): Unit = {
+  private[this] def showSettings(v: View): Unit = {
     getActivity.asInstanceOf[StartGameActivity].launchSettings()
   }
 
@@ -79,6 +84,10 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     settingsButton.setTextColor(theme.color1, theme.color2)
   }
 
+  def onConnected() = {
+    setInvitationsNumber()
+  }
+
   def setContinueButtonEnabled(enabled: Boolean): Unit = {
     val view = getView
     if (view != null) {
@@ -92,16 +101,29 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     }
   }
 
-  def setInvitationsNumber(number: Int): Unit = {
-    val view = getView
-    if (view != null) {
-      val invitationsLayout = find[RelativeLayout](view, R.id.layout_invitations)
+  private[this] def setInvitationsNumber(): Unit = {
+    log("Requesting invitation list")
+    setInvitationsNumber(Nil)
+    PlayServices.invitations.onSuccess {
+      case list => {
+        log(s"Received invitation list with ${list.length} invitations")
+        runOnMainThread { setInvitationsNumber(list) }
+      }
+    }
+  }
 
-      if (number != 0) {
-        invitationsLayout.setVisibility(View.VISIBLE)
-        val invitationsButton = find[Button](view, R.id.button_invitations)
+  private[this] def setInvitationsNumber(invitations: List[Invitation]): Unit = runOnMainThread {
+    val view = Option(getView)
+    if (view.isDefined) {
+      val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_invitations)
+      val invitationsButton = find[Button](view.get, R.id.button_invitations)
+
+      invitationsButton onClick listInvitations(invitations)
+
+      if (invitations.nonEmpty) {
         val text = getActivity.getResources.getText(R.string.invitations).toString
-        invitationsButton.setText(text.format(number))
+        invitationsLayout.setVisibility(View.VISIBLE)
+        invitationsButton.setText(text.format(invitations.length))
       } else {
         invitationsLayout.setVisibility(View.GONE)
       }
