@@ -75,5 +75,9 @@ class Field(quadrant: Quadrant.Value)
     }
   }
 
-  override def getBoundingFigure: Array[Triangle] = square.get.getBoundingFigure
+  override def getBoundingFigure: Array[Triangle] = if (square.isDefined) {
+    square.get.getBoundingFigure
+  } else {
+    Array(Triangle())
+  }
 }

@@ -1,47 +1,30 @@
 package pl.enves.ttr
 
 import android.content.{ActivityNotFoundException, Intent}
-import android.graphics.{Color, Typeface}
+import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
-import android.view.{View, WindowManager}
-import android.widget.{TextView, ImageButton}
+import android.view.View
+import android.widget.{ImageButton, TextView}
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.utils.styled.StyledActivity
+import pl.enves.ttr.utils.styled.ToolbarActivity
 import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.utils.{Configuration, LogoUtils}
 
-class AboutActivity extends StyledActivity with LogoUtils {
+class AboutActivity extends ToolbarActivity with LogoUtils {
 
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.about_layout)
 
-    val backButton = find[ImageButton](R.id.button_back_to_settings)
+    setupToolbar(R.id.about_toolbar)
+
     val envesImageButton = find[ImageButton](R.id.image_button_enves)
 
     alignLogo()
     displayVersion()
 
-    backButton.setColor(Color.BLACK)
-    backButton onClick onBack
     envesImageButton onClick onEnves
-  }
-
-  override def onStart() = {
-    super.onStart()
-
-    setGui()
-  }
-
-  override def setGui(): Unit = {
-    val window = getWindow
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_NAVIGATION)
-    window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)
-  }
-
-  private def onBack(v: View): Unit = {
-    onBackPressed()
   }
 
   private def onEnves(v: View): Unit = {
@@ -61,19 +44,39 @@ class AboutActivity extends StyledActivity with LogoUtils {
     setLogoTypeface(typeface)
 
     val createdByText = find[TextView](R.id.text_created_by)
-    val descriptionText = find[TextView](R.id.text_game_description)
+    val descriptionText1 = find[TextView](R.id.text_game_description_1)
+    val descriptionText2 = find[TextView](R.id.text_game_description_2)
+    val descriptionText3 = find[TextView](R.id.text_game_description_3)
     val licenseText = find[TextView](R.id.text_game_license)
 
     createdByText.setTypeface(typeface)
-    descriptionText.setTypeface(typeface)
+    descriptionText1.setTypeface(typeface)
+    descriptionText2.setTypeface(typeface)
+    descriptionText3.setTypeface(typeface)
     licenseText.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
-    // no call to super as we don't want background color to be changed
-
-    //use default theme to colorize logo
+    //get default theme
     val t = Theme.apply(getResources, Configuration.defaultColorThemeId)
+
+    //colorize logo
     setLogoColorTheme(t)
+
+    //texts
+    val createdByText = find[TextView](R.id.text_created_by)
+    val descriptionText1 = find[TextView](R.id.text_game_description_1)
+    val descriptionText2 = find[TextView](R.id.text_game_description_2)
+    val descriptionText3 = find[TextView](R.id.text_game_description_3)
+    val licenseText = find[TextView](R.id.text_game_license)
+
+    createdByText.setTextColor(t.color1)
+    descriptionText1.setTextColor(t.color2)
+    descriptionText2.setTextColor(t.color1)
+    descriptionText3.setTextColor(t.color2)
+    licenseText.setTextColor(t.color1)
+
+    //and everything else
+    super.setColorTheme(t)
   }
 }

@@ -36,10 +36,11 @@
     <string name="board_draw">draw!</string>
     <string name="board_replay">replay:</string>
     <string name="tutorial_figures">You can play either noughts or crosses. Cross player moves first.</string>
-    <string name="tutorial_rotations">When quadrant\'s arrows are active, you can rotate it instead of marking a field</string>
+    <string name="tutorial_rotations">When quadrant\'s arrows are active, you can rotate it instead of marking a field</string>
     <string name="tutorial_goals">Try to put 5 of your marks straight in line to win the game</string>
     <string name="tutorial_standard">Play with a friend on one device</string>
-    <string name="tutorial_network">Or play online</string>
+    <string name="tutorial_network">or play online</string>
+    <string name="tutorial_bot">or play with bot</string>
     <string name="tutorial_image_description">Image that shows game</string>
     <string name="tutorial_skip">skip</string>
     <string name="tutorial_next">next</string>
@@ -59,7 +60,9 @@
     <string name="difficulty">difficulty:</string>
     <string name="enves">enves</string>
     <string name="created_by">created by</string>
-    <string name="game_description">TicTacTurn is a hell of a game!</string>
+    <string name="game_description_1">Old classic with a twist… literally! 6x6 version of TicTacToe where you can turn parts of the board around.</string>
+    <string name="game_description_2">Exercise your brain while playing solo or challenge your friends to a mind-duel - hot seat or online. Enjoy customizable flat design and several levels of bot\'s difficulty.</string>
+    <string name="game_description_3">Will you become the ultimate TicTacTurn master?</string>
     <string name="game_license">DO NOT EVEN THINK ABOUT IT</string>
     <string name="admob_test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 </resources>
