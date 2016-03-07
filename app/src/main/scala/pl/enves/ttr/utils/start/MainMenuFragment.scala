@@ -120,13 +120,13 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
 
       invitationsButton onClick listInvitations(invitations)
 
-      if (invitations.nonEmpty) {
-        val text = getActivity.getResources.getText(R.string.invitations).toString
-        invitationsLayout.setVisibility(View.VISIBLE)
-        invitationsButton.setText(text.format(invitations.length))
-      } else {
-        invitationsLayout.setVisibility(View.GONE)
-      }
+// if (invitations.nonEmpty) {
+      val text = getActivity.getResources.getText(R.string.invitations).toString
+      invitationsLayout.setVisibility(View.VISIBLE)
+      invitationsButton.setText(text.format(invitations.length))
+//      } else {
+//        invitationsLayout.setVisibility(View.GONE)
+//      }
     }
   }
 }
