@@ -16,6 +16,7 @@ import pl.enves.ttr.graphics.geometry._
 import pl.enves.ttr.graphics.shaders._
 import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
 import pl.enves.ttr.logic.Game
+import pl.enves.ttr.utils.Configuration
 
 import scala.collection.mutable
 
@@ -29,7 +30,7 @@ class Resources(context: Context, game: Game) extends Logging {
 
   private[this] var maskShader: Option[MaskShader] = None
 
-  private[this] val typeFace = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
+  private[this] val typeFace = Typeface.createFromAsset(assetManager, Configuration.defaultTypefacePath)
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")
