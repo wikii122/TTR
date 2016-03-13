@@ -2,6 +2,9 @@ package pl.enves.ttr.logic
 
 import java.util
 
+import android.content.Intent
+import com.google.android.gms.games.multiplayer.Invitation
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.games._
 import pl.enves.ttr.logic.inner.Board
@@ -42,7 +45,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Set starting player.
    */
-  final def start(startingPlayer: Player.Value) = onStart(startingPlayer)
+  final def firstPlayer(startingPlayer: Player.Value) = onStart(startingPlayer)
 
   /**
    * Make a move, obviously.
@@ -85,6 +88,8 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
    */
   def canRotate(quadrant: Quadrant.Value) = board.canRotate(quadrant)
 
+  def onActivityResult(request: Int, response: Int, intent: Intent) = {}
+
   /**
    * Indicates whether this device can alter the board at the moment,
    */
@@ -109,7 +114,7 @@ object Game extends Enumeration {
 
   def plain() = StandardGame()
 
-  def network(players: util.ArrayList[String]) = PlayServicesGame(Option(players))
+  def network() = PlayServicesGame()
 
   def bot() = BotGame()
 

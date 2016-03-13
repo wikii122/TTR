@@ -23,7 +23,7 @@ class GameView(val context: Context with GameManager, onEnd: () => Unit) extends
 
   setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY)
 
-  def startGame() = context.game.start(Player.X)
+  def startGame() = context.game.firstPlayer(Player.X)
 
   def setTheme(theme: Theme) = renderer.setTheme(theme)
 

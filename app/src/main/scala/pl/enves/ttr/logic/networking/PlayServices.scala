@@ -13,14 +13,14 @@ import com.google.android.gms.common.api.{GoogleApiClient, ResultCallback}
 import com.google.android.gms.common.{ConnectionResult, GoogleApiAvailability}
 import com.google.android.gms.games.Games
 import com.google.android.gms.games.multiplayer.Invitation
-import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMatch, TurnBasedMatchConfig, TurnBasedMultiplayer}
+import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatch, TurnBasedMatchConfig}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.utils.{Code, Configuration}
 import pl.enves.ttr.utils.ExecutorContext._
 import pl.enves.ttr.utils.exceptions.ServiceUnavailableException
 
-import scala.concurrent.Future
+import scala.concurrent.{Promise, Future}
 
 object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener with Logging {
   private[this] val client = Option(clientInit())
@@ -33,17 +33,20 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   def disconnect() = if (isConnected) client.get disconnect ()
 
-  def getPlayerSelectIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
+  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
 
-  def createMatch(callee: ResultCallback[TurnBasedMultiplayer.InitiateMatchResult],
-                  players: util.ArrayList[String]) = {
+  def createMatch(players: util.ArrayList[String]): Future[TurnBasedMatch] = {
+    val promise = Promise[TurnBasedMatch]()
+    val callback = new InitiateMatchCallback(promise)
     val config = TurnBasedMatchConfig.builder()
       .addInvitedPlayers(players)
       .build()
 
     Games.TurnBasedMultiplayer
       .createMatch(client.get, config)
-      .setResultCallback(callee)
+      .setResultCallback(callback)
+
+    return promise.future
   }
 
   def takeTurn(matchInstance: TurnBasedMatch, turnData: String, participant: String) = Future {
@@ -69,7 +72,9 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   }
 
   def accept(invitation: Invitation) = Future {
-    Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId).await()
+    Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId)
+      .await()
+      .getMatch
   }
 
   def inboxIntent = Games.TurnBasedMultiplayer.getInboxIntent(client.get)
@@ -126,5 +131,9 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
         new AlertDialog.Builder(activity).setMessage(fallbackMessage).setNeutralButton(android.R.string.ok, null).create().show()
       }
     }
+  }
+
+  private class InitiateMatchCallback(promise: Promise[TurnBasedMatch]) extends ResultCallback[TurnBasedMultiplayer.InitiateMatchResult] {
+    override def onResult(r: TurnBasedMultiplayer.InitiateMatchResult): Unit = promise success r.getMatch
   }
 }

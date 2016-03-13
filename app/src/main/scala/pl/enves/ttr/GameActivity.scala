@@ -1,16 +1,22 @@
 package pl.enves.ttr
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Network
 import android.os.Bundle
 import android.view._
 import android.widget._
+import com.google.android.gms.games.multiplayer.{Multiplayer, Invitation}
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
-import pl.enves.ttr.logic.games.BotGame
-import pl.enves.ttr.utils.Configuration
+import pl.enves.ttr.logic.games.{PlayServicesGame, BotGame}
+import pl.enves.ttr.logic.networking.PlayServices
+import pl.enves.ttr.utils.exceptions.MissingParameter
+import pl.enves.ttr.utils.{Code, Configuration}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
 
@@ -30,7 +36,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onCreate(state)
 
     val b: Bundle = Option(getIntent.getExtras) getOrElse (throw new UninitializedError())
-    Game withName (b getString "TYPE") match {
+    Game withName b.getString(Code.TYPE) match {
       case Game.STANDARD =>
         game = Game.plain()
         view.startGame()
@@ -38,11 +44,15 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         game = Game.bot()
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
-      case Game.GPS_MULTIPLAYER =>
-        val ng = Game.network(b.getStringArrayList("PLAYERS"))
-        game = ng
+      case Game.GPS_MULTIPLAYER => {
+        game = PlayServicesGame()
+        b getString Code.DATA match {
+          case Code.INVITATION => startActivityForResult(PlayServices.inboxIntent, Code.SELECT_INVITATIONS)
+          case Code.PLAYERS => startActivityForResult(PlayServices.selectPlayerIntent, Code.SELECT_PLAYERS)
+        }
+      }
       case s =>
-        throw new IllegalArgumentException(s"Invalid game type: $s")
+        throw new MissingParameter(s"Invalid game type: $s")
     }
 
     val frameLayout = new FrameLayout(this)
@@ -64,12 +74,12 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val chooseXButton = find[ImageButton](R.id.button_symbol_X)
     val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    chooseXButton onClick onPlayWithBotAsX
-    chooseOButton onClick onPlayWithBotAsO
+    chooseXButton onClick playWithBotAsX
+    chooseOButton onClick playWithBotAsO
 
     val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
-    difficultySeekBar onChange onDifficultyChanged
+    difficultySeekBar onChange changeDifficulty
 
     if (game.gameType == Game.BOT) {
       if (game.asInstanceOf[BotGame].getHuman.isEmpty) {
@@ -77,6 +87,9 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       }
     }
   }
+
+  override def onActivityResult(request: Int, response: Int, data: Intent): Unit =
+    game.onActivityResult(request, response, data)
 
   override def onTouchEvent(e: MotionEvent): Boolean = {
     log("touched")
@@ -184,7 +197,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     difficultySeekBar.setProgress(difficulty)
     if (difficulty == 0) {
       //seekBar' default progress is 0, so there is no change informed to ProgressChangeListener
-      onDifficultyChanged(difficultySeekBar, difficulty, false)
+      changeDifficulty(difficultySeekBar, difficulty, false)
     }
   }
 
@@ -224,21 +237,21 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     }
   }
 
-  private[this] def onPlayWithBotAsX(v: View) = {
+  private[this] def playWithBotAsX(v: View) = {
     game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
     setupBot()
     view.startGame()
     closeChooser()
   }
 
-  private[this] def onPlayWithBotAsO(v: View) = {
+  private[this] def playWithBotAsO(v: View) = {
     game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
     setupBot()
     view.startGame()
     closeChooser()
   }
 
-  private[this] def onDifficultyChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
+  private[this] def changeDifficulty(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
     val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
     difficultyNumber.setText((progress + 1).toString)

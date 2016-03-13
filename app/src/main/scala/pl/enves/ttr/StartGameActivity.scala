@@ -8,7 +8,10 @@ import android.support.v4.app.{Fragment, FragmentTransaction}
 import android.view.View
 import android.widget.Button
 import com.google.android.gms.games.Games
+import com.google.android.gms.games.multiplayer.{Invitation, Multiplayer}
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.logic.games.PlayServicesGame
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState}
 import pl.enves.ttr.utils.dialogs.NotAvailableDialog
@@ -49,22 +52,17 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   }
 
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
-    case Code.SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
-      else return
     case Code.SIGN_IN => if (response == Activity.RESULT_OK) {
-        log(s"Signed in to Google Play Services")
-        log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
-        enableButtons()
-        mainMenuFragment.onConnected()
-      } else {
-        warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
-      }
-    case Code.SELECT_INVITATIONS => ???
-    case a => error(s"onActivityResult did not match request with id: $a")
-  }
+      log(s"Signed in to Google Play Services")
+      log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
 
-  def showDialog(reason: dialogs.Reason) = reason match {
-    case dialogs.PaidOnly => val dialog = NotAvailableDialog.show()
+      enableButtons()
+
+      mainMenuFragment.onConnected()
+    } else {
+      warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
   }
 
   private[this] def prepareGameIntent(i: Intent): Intent = {
@@ -83,7 +81,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra("TYPE", Game.STANDARD.toString)
+    itnt putExtra(Code.TYPE, Game.STANDARD.toString)
     itnt start()
   }
 
@@ -93,26 +91,16 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra("TYPE", Game.BOT.toString)
+    itnt putExtra(Code.TYPE, Game.BOT.toString)
     itnt start()
   }
 
-  def startNetworkGame() = if (Configuration.isMultiplayerAvailable) {
-    val intn = PlayServices.getPlayerSelectIntent
-    startActivityForResult(intn, Code.SELECT_PLAYERS)
-  } else {
-    showDialog(dialogs.PaidOnly)
-  }
-
-  private def startNetworkGame(i: Intent) = {
-    log("Intending to start new StandardGame")
-
+  def startNetworkGame(code: String) = {
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra ("TYPE", Game.GPS_MULTIPLAYER.toString)
-    itnt putExtra ("PLAYERS", i getStringArrayListExtra Games.EXTRA_PLAYER_IDS)
+    itnt putExtra (Code.TYPE, Game.GPS_MULTIPLAYER.toString)
+    itnt putExtra (Code.DATA, code)
     itnt start ()
   }
-
 
   /**
    * Used to continue game in progress
@@ -122,7 +110,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     log("Intending to continue previously run game")
     val itnt = intent[GameActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra("TYPE", Game.CONTINUE.toString)
+    itnt putExtra (Code.TYPE, Game.CONTINUE.toString)
     itnt start()
   }
 
@@ -140,7 +128,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     log("Intending to launch tutorial")
     val itnt = intent[TutorialActivity]
     itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra("FIRSTRUN", true)
+    itnt putExtra ("FIRSTRUN", true)
     itnt start()
   }
 

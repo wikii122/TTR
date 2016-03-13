@@ -1,90 +1,69 @@
 package pl.enves.ttr.logic.games
 
-import java.util
-
-import com.google.android.gms.common.api.ResultCallback
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer.InitiateMatchResult
-import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatch}
+import android.app.Activity
+import android.content.Intent
+import com.google.android.gms.games.Games
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
+import com.google.android.gms.games.multiplayer.{Invitation, Multiplayer}
+import pl.enves.androidx.context.ContextRegistry
+import pl.enves.ttr.GameActivity
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.networking.PlayServices
-import pl.enves.ttr.utils.JsonProtocol._
-import spray.json._
-import scala.collection.JavaConversions._
+import pl.enves.ttr.utils.Code
+import pl.enves.ttr.utils.ExecutorContext._
 
-class PlayServicesGame(inputPlayers: Option[util.ArrayList[String]], board: Board = Board())
-  extends Game(board)
-  with ResultCallback[TurnBasedMultiplayer.InitiateMatchResult] {
+import scala.util.{Failure, Success}
+
+class PlayServicesGame(board: Board = Board()) extends Game(board) {
   override val gameType: Game.Value = Game.GPS_MULTIPLAYER
-  private[this] var playerSide = Player.X
-  private[this] var step = 0
-  private[this] val players = inputPlayers getOrElse ???
-  private[this] var game: Option[TurnBasedMatch] = None
 
-  private[this] lazy val otherPlayer: String = if (inputPlayers.isDefined)
-      game.get getParticipantId inputPlayers.get.last
-    else
-      "" // TODO join existing game
+  private[this] lazy val activity = ContextRegistry.context.asInstanceOf[GameActivity] // Potentially errorprone
+  private[this] var turnBasedMatch: Option[TurnBasedMatch] = None
 
-  PlayServices createMatch (this, players)
-  override def locked: Boolean = player != playerSide && step > 0
+  override def locked: Boolean = turnBasedMatch.isDefined &&
 
   override protected def boardVersion: Int = ???
 
-  def initialize() = {
-    val data = Map[String, Any](
-        "state" -> this.toMap,
-        "step" -> step,
-        "currentPlayer" -> Player.X.toString // X always starts
-      ).toJson.toString()
+  override protected def onStart(player: Player.Value): Unit = ???
 
-    PlayServices.takeTurn(game.get, data, otherPlayer)
-  }
+  override protected def onMove(move: Move): Boolean = ???
 
-  def update(data: String) = {
-    val state = data.parseJson
-  }
+  private[this] def start(turnBasedMatch: TurnBasedMatch) = ???
 
-
-  override def onResult(r: InitiateMatchResult): Unit = {
-    game = Option(r.getMatch)
-    if (game.isDefined) {
-      Option(game.get.getData) match {
-        case None => initialize()
-        case Some(state) => update(state.toString)
+  override def onActivityResult(request: Int, response: Int, data: Intent) = request match {
+    case Code.SELECT_PLAYERS => if (response == Activity.RESULT_OK) {
+      log("Inviting player to match")
+      val players = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS)
+      PlayServices createMatch players onComplete {
+        case Success(newMatch) => start(newMatch)
+        case Failure(any) => error(s"Failture when creating match with $any")
       }
     } else {
-      error(s"Game offline, reason: ${r.getStatus}")
-    }
-  }
-
-  override protected def onMove(move: Move): Boolean = {
-    implicit val player = this.player
-
-    if (finished) throw new GameWon(s"Game is finished. $winner has won.")
-
-    log(s"Move: $move for $player")
-
-    val res = move match {
-      case Position(x, y) => board move (x, y)
-      case Rotation(b, r) => board rotate (b, r)
+      log("Choose player activity cancelled by player")
+      activity.finish()
     }
 
-    _player = player.other
-    step += 1
-
-    log(s"Player set to ${_player}")
-
-    ???
-
-    return res
-  }
-
-  override protected def onStart(player: Player.Value): Unit = {
-    playerSide = player
+    case Code.SELECT_INVITATIONS => if (response == Activity.RESULT_OK) {
+      val turnBasedMatch: Option[TurnBasedMatch] = Option(data.getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH))
+      val invitation: Option[Invitation] = Option(data.getParcelableExtra(Multiplayer.EXTRA_INVITATION))
+      if (turnBasedMatch.isDefined) {
+        log("Starting received match")
+        start(turnBasedMatch.get)
+      } else if (invitation.isDefined) {
+        PlayServices accept invitation.get onComplete {
+          case Success(newMatch) => start(newMatch)
+          case Failure(any) => error(s"Failture when accepting invitation with $any")
+        }
+      }
+    } else {
+      log("Select game dialog cancelled")
+      activity.finish()
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
   }
 }
 
 object PlayServicesGame {
-  def apply(players: Option[util.ArrayList[String]]) = new PlayServicesGame(players)
+  def apply() = new PlayServicesGame(Board())
 }

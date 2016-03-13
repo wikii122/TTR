@@ -35,28 +35,24 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     setContinueButtonEnabled(GameState.active)
     setInvitationsNumber()
 
-    invitationsButton onClick listInvitations(Nil)
+    invitationsButton onClick listInvitations
     newGameButton onClick startNewGame
     continueGameButton onClick continueGame
     settingsButton onClick showSettings
   }
 
-  private[this] def listInvitations(invitations: List[Invitation])(v: View): Unit = {
-    val itnt = PlayServices.inboxIntent
-    getActivity.startActivityForResult(itnt, Code.SELECT_INVITATIONS)
-  }
-
-  private[this] def startNewGame(v: View): Unit = {
+  private[this] def startNewGame(v: View): Unit =
     getActivity.asInstanceOf[StartGameActivity].showNewGameMenu()
-  }
 
-  private[this] def continueGame(v: View): Unit = {
+
+  private[this] def continueGame(v: View): Unit =
     getActivity.asInstanceOf[StartGameActivity].continueGame()
-  }
 
-  private[this] def showSettings(v: View): Unit = {
+  private[this] def showSettings(v: View): Unit =
     getActivity.asInstanceOf[StartGameActivity].launchSettings()
-  }
+
+  private[this] def listInvitations(v: View): Unit =
+    getActivity.asInstanceOf[StartGameActivity].startNetworkGame(Code.INVITATION)
 
   override def setTypeface(typeface: Typeface): Unit = {
     val view = getView
@@ -117,16 +113,9 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     if (view.isDefined) {
       val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_invitations)
       val invitationsButton = find[Button](view.get, R.id.button_invitations)
-
-      invitationsButton onClick listInvitations(invitations)
-
-// if (invitations.nonEmpty) {
       val text = getActivity.getResources.getText(R.string.invitations).toString
-      invitationsLayout.setVisibility(View.VISIBLE)
-      invitationsButton.setText(text.format(invitations.length))
-//      } else {
-//        invitationsLayout.setVisibility(View.GONE)
-//      }
+      invitationsLayout setVisibility View.VISIBLE
+      invitationsButton setText text.format(invitations.length)
     }
   }
 }
