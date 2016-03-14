@@ -19,17 +19,23 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
   override val gameType: Game.Value = Game.GPS_MULTIPLAYER
 
   private[this] lazy val activity = ContextRegistry.context.asInstanceOf[GameActivity] // Potentially errorprone
+
   private[this] var turnBasedMatch: Option[TurnBasedMatch] = None
+  private[this] var version = 0
 
-  override def locked: Boolean = turnBasedMatch.isDefined &&
+  override def locked: Boolean = !myTurn
 
-  override protected def boardVersion: Int = ???
+  override protected def boardVersion: Int = version
 
   override protected def onStart(player: Player.Value): Unit = ???
 
   override protected def onMove(move: Move): Boolean = ???
 
   private[this] def start(turnBasedMatch: TurnBasedMatch) = ???
+
+  private[this] def myTurn =
+    turnBasedMatch.isDefined &&
+    turnBasedMatch.get.getTurnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN
 
   override def onActivityResult(request: Int, response: Int, data: Intent) = request match {
     case Code.SELECT_PLAYERS => if (response == Activity.RESULT_OK) {
