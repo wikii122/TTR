@@ -47,8 +47,6 @@ class StandardGame(board: Board = Board()) extends Game(board) {
   }
 
   def locked: Boolean = false
-
-  protected def boardVersion = board.version
 }
 
 object StandardGame {

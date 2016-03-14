@@ -13,7 +13,7 @@ class ReplayGame(replayedGameType: Game.Value,
 
   override def canBeSaved = false
 
-  override protected def boardVersion = 0
+  override protected def version = 0
 
   private var replayMove = 0
 

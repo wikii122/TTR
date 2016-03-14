@@ -88,8 +88,6 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
    */
   def canRotate(quadrant: Quadrant.Value) = board.canRotate(quadrant)
 
-  def onActivityResult(request: Int, response: Int, intent: Intent) = {}
-
   /**
    * Indicates whether this device can alter the board at the moment,
    */
@@ -98,8 +96,8 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   protected def onStart(player: Player.Value)
 
   protected def onMove(move: Move): Boolean
-
-  protected def boardVersion: Int
+  
+  protected def version: Int = board.version
 
   override def toMap = Map(
     "player" -> _player,

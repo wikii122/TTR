@@ -7,6 +7,7 @@ import android.net.Network
 import android.os.Bundle
 import android.view._
 import android.widget._
+import com.google.android.gms.games.Games
 import com.google.android.gms.games.multiplayer.{Multiplayer, Invitation}
 import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.color.ColorManip
@@ -19,6 +20,8 @@ import pl.enves.ttr.utils.exceptions.MissingParameter
 import pl.enves.ttr.utils.{Code, Configuration}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.ExecutorContext._
+import scala.util.{Failure, Success}
 
 /**
  * Core game activity.
@@ -88,8 +91,37 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     }
   }
 
-  override def onActivityResult(request: Int, response: Int, data: Intent): Unit =
-    game.onActivityResult(request, response, data)
+  override def onActivityResult(request: Int, response: Int, data: Intent) = request match {
+    case Code.SELECT_PLAYERS => if (response == Activity.RESULT_OK) {
+      log("Inviting player to match")
+      val players = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS)
+      PlayServices createMatch players onComplete {
+        case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
+        case Failure(any) => error(s"Failture when creating match with $any")
+      }
+    } else {
+      log("Choose player activity cancelled by player")
+      finish()
+    }
+
+    case Code.SELECT_INVITATIONS => if (response == Activity.RESULT_OK) {
+      val turnBasedMatch: Option[TurnBasedMatch] = Option(data.getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH))
+      val invitation: Option[Invitation] = Option(data.getParcelableExtra(Multiplayer.EXTRA_INVITATION))
+      if (turnBasedMatch.isDefined) {
+        log("Starting received match")
+        game.asInstanceOf[PlayServicesGame] start turnBasedMatch.get
+      } else if (invitation.isDefined) {
+        PlayServices accept invitation.get onComplete {
+          case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
+          case Failure(any) => error(s"Failture when accepting invitation with $any")
+        }
+      }
+    } else {
+      log("Select game dialog cancelled")
+      finish()
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
+  }
 
   override def onTouchEvent(e: MotionEvent): Boolean = {
     log("touched")

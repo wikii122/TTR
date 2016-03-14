@@ -110,8 +110,6 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     true
   }
 
-  protected def boardVersion = board.version
-
   override def toMap = this.synchronized {
     if (algorithm.isDefined) {
       algorithm.get.stop()
