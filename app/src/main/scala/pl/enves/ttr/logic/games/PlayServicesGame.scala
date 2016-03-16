@@ -19,7 +19,10 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
   override protected def onMove(move: Move): Boolean = ???
 
-  def start(turnBasedMatch: TurnBasedMatch) = ???
+  def start(newMatch: TurnBasedMatch) = {
+    log("Received match instance")
+    turnBasedMatch = Option(newMatch)
+  }
 
   private[this] def startMatch(turnBasedMatch: TurnBasedMatch) = ???
 
