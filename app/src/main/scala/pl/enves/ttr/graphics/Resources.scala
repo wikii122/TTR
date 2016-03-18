@@ -42,11 +42,11 @@ class Resources(context: Context, game: Game) extends Logging {
 
     addGeometry(GeometryId.Square, new SquareGeometry)
 
-    addTexture(TextureId.MaskCross, new AssetTexture(context, "images/pat_cross_mod_mask.png").getTexture)
-    addTexture(TextureId.MaskRing, new AssetTexture(context, "images/pat_ring_mod_mask.png").getTexture)
-    addTexture(TextureId.MaskEmpty, new AssetTexture(context, "images/pat_empty_mod_mask.png").getTexture)
-    addTexture(TextureId.MaskArrowLeft, new AssetTexture(context, "images/pat_arrow_left_mod_mask.png").getTexture)
-    addTexture(TextureId.MaskArrowRight, new AssetTexture(context, "images/pat_arrow_right_mod_mask.png").getTexture)
+    addTexture(TextureId.MaskCross, new AssetTexture(context, "images/game/cross_mask.png").getTexture)
+    addTexture(TextureId.MaskRing, new AssetTexture(context, "images/game/ring_mask.png").getTexture)
+    addTexture(TextureId.MaskEmpty, new AssetTexture(context, "images/game/empty_mask.png").getTexture)
+    addTexture(TextureId.MaskArrowLeft, new AssetTexture(context, "images/game/arrow_left_mask.png").getTexture)
+    addTexture(TextureId.MaskArrowRight, new AssetTexture(context, "images/game/arrow_right_mask.png").getTexture)
 
     val player1TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player1)
