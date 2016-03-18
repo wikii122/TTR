@@ -70,8 +70,8 @@ class ReplayGame(replayedGameType: Game.Value,
     log("replaying next move")
     if (replayMove < movesLog.size) {
       val entry = movesLog(replayMove)
-      implicit val player = entry.getPlayer
-      entry.getMove match {
+      implicit val player = entry.player
+      entry.move match {
         case Position(x, y) => board move(x, y)
         case Rotation(b, r) => board rotate(b, r)
       }

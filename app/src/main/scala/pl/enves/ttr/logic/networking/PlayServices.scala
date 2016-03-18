@@ -33,8 +33,6 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   def disconnect() = if (isConnected) client.get disconnect ()
 
-  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
-
   def createMatch(players: util.ArrayList[String]): Future[TurnBasedMatch] = {
     val promise = Promise[TurnBasedMatch]()
     val callback = new InitiateMatchCallback(promise)
@@ -70,6 +68,10 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       Nil
     }
   }
+
+  def playerData = Games.Players.getCurrentPlayer(client.get)
+
+  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
 
   def accept(invitation: Invitation) = Future {
     Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId)

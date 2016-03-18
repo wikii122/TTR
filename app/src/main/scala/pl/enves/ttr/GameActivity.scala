@@ -30,7 +30,6 @@ import scala.util.{Failure, Success}
  */
 class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
-
   private[this] lazy val botGameSetupLayer = getLayoutInflater.inflate(R.layout.bot_game_setup_layout, null)
 
   override def onCreate(state: Bundle): Unit = {
