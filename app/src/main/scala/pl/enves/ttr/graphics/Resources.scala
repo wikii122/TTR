@@ -14,7 +14,7 @@ import pl.enves.androidx.Logging
 import pl.enves.ttr.R
 import pl.enves.ttr.graphics.geometry._
 import pl.enves.ttr.graphics.shaders._
-import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
+import pl.enves.ttr.graphics.texture.{AssetTexture, CharactersTexture, TextureId}
 import pl.enves.ttr.logic.Game
 import pl.enves.ttr.utils.Configuration
 
@@ -42,11 +42,11 @@ class Resources(context: Context, game: Game) extends Logging {
 
     addGeometry(GeometryId.Square, new SquareGeometry)
 
-    addTexture(TextureId.MaskCross, new DrawableTexture(context, R.drawable.pat_cross_mod_mask).getTexture)
-    addTexture(TextureId.MaskRing, new DrawableTexture(context, R.drawable.pat_ring_mod_mask).getTexture)
-    addTexture(TextureId.MaskEmpty, new DrawableTexture(context, R.drawable.pat_empty_mod_mask).getTexture)
-    addTexture(TextureId.MaskArrowLeft, new DrawableTexture(context, R.drawable.pat_arrow_left_mod_mask).getTexture)
-    addTexture(TextureId.MaskArrowRight, new DrawableTexture(context, R.drawable.pat_arrow_right_mod_mask).getTexture)
+    addTexture(TextureId.MaskCross, new AssetTexture(context, "images/pat_cross_mod_mask.png").getTexture)
+    addTexture(TextureId.MaskRing, new AssetTexture(context, "images/pat_ring_mod_mask.png").getTexture)
+    addTexture(TextureId.MaskEmpty, new AssetTexture(context, "images/pat_empty_mod_mask.png").getTexture)
+    addTexture(TextureId.MaskArrowLeft, new AssetTexture(context, "images/pat_arrow_left_mod_mask.png").getTexture)
+    addTexture(TextureId.MaskArrowRight, new AssetTexture(context, "images/pat_arrow_right_mod_mask.png").getTexture)
 
     val player1TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player1)
