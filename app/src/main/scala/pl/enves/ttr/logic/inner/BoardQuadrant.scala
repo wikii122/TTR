@@ -44,8 +44,10 @@ private[inner] class BoardQuadrant extends Logging with JsonMappable {
   def sync(data: BoardQuadrant): Unit = {
     _rotation = data._rotation
     _cooldown = data._cooldown
+
     data._fields.zipWithIndex foreach {
-      case (field, i) => _fields.update(i, field)
+      case (field, i) =>
+        _fields(i) = field
     }
   }
   

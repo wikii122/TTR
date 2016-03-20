@@ -40,7 +40,7 @@ class StandardGame(board: Board = Board()) extends Game(board) {
 
     movesLog.append(LogEntry(player, move))
 
-    _player = if (player == Player.X) Player.O else Player.X
+    _player = _player.other
     log(s"Player set to ${_player}")
 
     return res

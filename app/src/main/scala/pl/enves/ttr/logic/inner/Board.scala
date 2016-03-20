@@ -77,7 +77,7 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   def quadrantRotation(quadrant: Quadrant.Value) = quadrants(quadrant).rotation
 
-  def availableRotations = quadrants filter (_._2.isRotable) keys
+  def availableRotations = quadrants.filter(_._2.isRotable).keys
 
   def canRotate(quadrant: Quadrant.Value) = quadrants(quadrant).isRotable
 
@@ -86,9 +86,9 @@ private[logic] class Board private () extends Logging with JsonMappable {
     _version = board._version
     _winner = _winner
 
-    quadrants foreach {
+    board.quadrants foreach {
       p => val (quad, data) = p
-        quadrants(quad).sync(data)
+        quadrants(quad) sync data
     }
   }
 
@@ -96,7 +96,7 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   private def checkVictory(): Boolean = VictoryConditions.check(lines) exists {
     t => val (player, fields) = t
-      _winner = Option(player orNull)
+      _winner = Option(player.orNull)
       _combination = fields
       freeFields = 0
 
@@ -137,7 +137,7 @@ private[logic] class Board private () extends Logging with JsonMappable {
   def getQuadrant(quadrant: Quadrant.Value) = quadrants(quadrant)
 }
 
-object Board {
+object Board extends Logging {
   def apply() = new Board()
   def apply(jsValue: JsValue): Board = {
     val fields = jsValue.asJsObject.fields
@@ -150,6 +150,8 @@ object Board {
       field =>
         val quad = field("quadrant").convertTo[Quadrant.Value]
         val data = field("data").asJsObject.fields
+
+        log(s"Recreating $quad quad from $data")
 
         val quadrant = board.quadrants(quad)
         quadrant.rotation = data("rotation").convertTo[Int]

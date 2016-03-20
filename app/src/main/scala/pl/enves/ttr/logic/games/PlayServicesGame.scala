@@ -26,7 +26,24 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
   override protected def onStart(player: Player.Value): Unit = ???
 
-  override protected def onMove(move: Move): Boolean = ???
+  override protected def onMove(move: Move): Boolean = {
+    implicit val player = this.player
+    if (finished) throw new GameWon(s"Game is finished. $winner has won.")
+
+    log(s"Move: $move for $player")
+
+    val res = move match {
+      case Position(x, y) => board move (x, y)
+      case Rotation(b, r) => board rotate (b, r)
+    }
+
+    movesLog.append(LogEntry(player, move))
+
+    _player = player.other
+    if (myTurn) takeTurn()
+
+    return res
+  }
 
   def start(newMatch: TurnBasedMatch) = {
     log("Received match instance")
@@ -37,7 +54,8 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
   private[this] def startMatch(turnBasedMatch: TurnBasedMatch) = {
     val data = Option(turnBasedMatch.getData)
     if (data.isDefined) {
-      updateState(new String(data.get, "utf-8"))
+      log("Catching up to state")
+      updateLocalState(new String(data.get, "utf-8"))
     }
     else initializeMatch()
   }
@@ -52,16 +70,20 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
     PlayServices.takeTurn(turnBasedMatch.get, data, otherParticipantId)
   }
 
-  private[this] def updateState(rawData: String) = {
+  private[this] def takeTurn() = {
+    PlayServices.takeTurn(turnBasedMatch.get, this.toMap.toJson.toString(), otherParticipantId)
+  }
+
+  private[this] def updateLocalState(rawData: String) = {
     val data = rawData.parseJson.asJsObject
 
     val player = data.fields("player").convertTo[Player.Value]
     _player = if (myTurn) player
       else player.other
 
-
+    board sync Board(data.fields("board"))
   }
-}
+  }
 
 object PlayServicesGame {
   def apply() = new PlayServicesGame(Board())
