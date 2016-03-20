@@ -12,7 +12,7 @@ import spray.json._
 private[logic] class Board private () extends Logging with JsonMappable {
   private val quadrants = createQuadrants.toMap
 
-  private[this] var _combination: List[(Int, Int)] = Nil
+  private var _combination: List[(Int, Int)] = Nil
   private var _winner: Option[Player.Value] = None
   private var _version = 0
   private var freeFields = 36
@@ -84,7 +84,8 @@ private[logic] class Board private () extends Logging with JsonMappable {
   def sync(board: Board) = {
     freeFields = board.freeFields
     _version = board._version
-    _winner = _winner
+    _winner = board._winner
+    _combination = board._combination
 
     board.quadrants foreach {
       p => val (quad, data) = p
