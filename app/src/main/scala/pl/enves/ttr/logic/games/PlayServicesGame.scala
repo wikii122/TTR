@@ -17,8 +17,17 @@ with OnTurnBasedMatchUpdateReceivedListener {
     turnBasedMatch.get getParticipantId PlayServices.playerData.getPlayerId
   private[this] lazy val otherParticipantId: String =
     turnBasedMatch.get.getParticipantIds.toList.filterNot(_ == currentParticipantId).head
-  private[this] var turnBasedMatch: Option[TurnBasedMatch] = None
+  private[this] var _turnBasedMatch: Option[TurnBasedMatch] = None
 
+  private[this] def turnBasedMatch = _turnBasedMatch
+  private[this] def turnBasedMatch_=(newMatch: Option[TurnBasedMatch]) = {
+    _turnBasedMatch = newMatch
+    moved = false
+  }
+  /**
+   * Setting their_turn flag by GPS seems to be too slow, this is fallback indicator.
+   */
+  private[this] var moved = false
 
   override def locked: Boolean = !myTurn
 
@@ -51,6 +60,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
 
     if (myTurn)
       takeTurn()
+    moved = true
 
     return res
   }
@@ -85,7 +95,8 @@ with OnTurnBasedMatchUpdateReceivedListener {
   private[this] def myTurn =
     turnBasedMatch.isDefined &&
     turnBasedMatch.get.getTurnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN &&
-    turnBasedMatch.get.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE
+    turnBasedMatch.get.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE &&
+    !moved
 
   private[this] def initializeMatch() = {
     log("Sending game initialization data")

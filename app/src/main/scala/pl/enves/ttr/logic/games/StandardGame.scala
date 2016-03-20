@@ -38,7 +38,7 @@ class StandardGame(board: Board = Board()) extends Game(board) {
       case Rotation(b, r) => board rotate (b, r)
     }
 
-    movesLog.append(LogEntry(player, move))
+    movesLog append LogEntry(player, move)
 
     _player = _player.other
     log(s"Player set to ${_player}")
