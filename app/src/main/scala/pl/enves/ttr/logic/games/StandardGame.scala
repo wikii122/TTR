@@ -14,7 +14,7 @@ class StandardGame(board: Board = Board()) extends Game(board) {
   /**
    * Initiates the game with given player.
    */
-  protected def onStart(startingPlayer: Player.Value) = {
+  protected def start(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
     _player = startingPlayer

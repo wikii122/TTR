@@ -13,7 +13,7 @@ import com.google.android.gms.common.api.{GoogleApiClient, ResultCallback}
 import com.google.android.gms.common.{ConnectionResult, GoogleApiAvailability}
 import com.google.android.gms.games.Games
 import com.google.android.gms.games.multiplayer.Invitation
-import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatch, TurnBasedMatchConfig}
+import com.google.android.gms.games.multiplayer.turnbased.{OnTurnBasedMatchUpdateReceivedListener, TurnBasedMultiplayer, TurnBasedMatch, TurnBasedMatchConfig}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.utils.{Code, Configuration}
@@ -86,6 +86,12 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   def isConnected = isAvailable && client.get.isConnected
   def notConnected = !isConnected
+
+  def register(listener: OnTurnBasedMatchUpdateReceivedListener) =
+    Games.TurnBasedMultiplayer.registerMatchUpdateListener(client.get, listener)
+
+  def unregister() =
+    Games.TurnBasedMultiplayer.unregisterMatchUpdateListener(client.get)
 
   override def onConnectionSuspended(i: Int): Unit = {
     log("Connection suspended, retrying")

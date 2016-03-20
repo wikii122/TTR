@@ -168,6 +168,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   override def onPause(): Unit = {
     log("Pausing")
 
+    game.pause()
+
     super.onPause()
     view.onPause()
   }
@@ -176,6 +178,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     log("Resuming")
     super.onResume()
     view.onResume()
+
+    game.resume()
   }
 
   override def onStop() = {

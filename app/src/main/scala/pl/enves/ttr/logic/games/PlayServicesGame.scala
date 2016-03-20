@@ -1,6 +1,6 @@
 package pl.enves.ttr.logic.games
 
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
+import com.google.android.gms.games.multiplayer.turnbased.{OnTurnBasedMatchUpdateReceivedListener, TurnBasedMatch}
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.networking.PlayServices
@@ -9,20 +9,30 @@ import spray.json._
 
 import scala.collection.JavaConversions._
 
-class PlayServicesGame(board: Board = Board()) extends Game(board) {
+class PlayServicesGame(board: Board = Board()) extends Game(board)
+with OnTurnBasedMatchUpdateReceivedListener {
   override val gameType: Game.Value = Game.GPS_MULTIPLAYER
 
   private[this] lazy val currentParticipantId: String =
     turnBasedMatch.get getParticipantId PlayServices.playerData.getPlayerId
   private[this] lazy val otherParticipantId: String =
     turnBasedMatch.get.getParticipantIds.toList.filterNot(_ == currentParticipantId).head
-
   private[this] var turnBasedMatch: Option[TurnBasedMatch] = None
-  private[this] var moved = false
+
 
   override def locked: Boolean = !myTurn
 
-  override protected def onStart(player: Player.Value): Unit = ???
+  override protected def start(player: Player.Value): Unit = ???
+
+  override def resume() = {
+    log("Registered match update listener")
+    PlayServices.register(this)
+  }
+
+  override def pause() = {
+    log("Unregistered match update listener")
+    PlayServices.unregister()
+  }
 
   override protected def onMove(move: Move): Boolean = {
     implicit val player = this.player
@@ -38,10 +48,23 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
     movesLog.append(LogEntry(player, move))
 
     _player = player.other
-    if (myTurn) takeTurn()
-    moved = true
+
+    if (myTurn)
+      takeTurn()
 
     return res
+  }
+
+
+
+  override def onTurnBasedMatchRemoved(s: String): Unit = ???
+
+  override def onTurnBasedMatchReceived(turnBasedMatch: TurnBasedMatch): Unit = {
+    log("Received update from remote device")
+    this.turnBasedMatch = Some(turnBasedMatch)
+
+    val data = new String(turnBasedMatch.getData, "utf-8")
+    updateLocalState(data)
   }
 
   def start(newMatch: TurnBasedMatch) = {
@@ -62,7 +85,7 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
   private[this] def myTurn =
     turnBasedMatch.isDefined &&
     turnBasedMatch.get.getTurnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN &&
-    !moved
+    turnBasedMatch.get.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE
 
   private[this] def initializeMatch() = {
     log("Sending game initialization data")
@@ -72,7 +95,7 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
   private[this] def takeTurn() =
     PlayServices.takeTurn(turnBasedMatch.get, this.toMap.toJson.toString(), otherParticipantId)
-  
+
   private[this] def updateLocalState(rawData: String) = {
     val data = rawData.parseJson.asJsObject
 

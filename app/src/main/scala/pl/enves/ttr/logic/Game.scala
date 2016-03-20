@@ -38,7 +38,11 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Set starting player.
    */
-  final def firstPlayer(startingPlayer: Player.Value) = onStart(startingPlayer)
+  final def firstPlayer(startingPlayer: Player.Value) = start(startingPlayer)
+
+  def pause() = {}
+
+  def resume() = {}
 
   /**
    * Make a move, obviously.
@@ -86,7 +90,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
    */
   def locked: Boolean
 
-  protected def onStart(player: Player.Value)
+  protected def start(player: Player.Value)
 
   protected def onMove(move: Move): Boolean
   

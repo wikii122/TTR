@@ -86,7 +86,7 @@ class ReplayGame(replayedGameType: Game.Value,
 
   override def winner: Option[Player.Value] = win
 
-  override protected def onStart(player: Player.Value): Unit = {
+  override protected def start(player: Player.Value): Unit = {
     _player = player
   }
 
