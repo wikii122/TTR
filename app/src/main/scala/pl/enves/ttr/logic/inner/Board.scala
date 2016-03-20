@@ -10,10 +10,10 @@ import spray.json._
  * Manages fields states.
  */
 private[logic] class Board private () extends Logging with JsonMappable {
-  private var _winner: Option[Player.Value] = None
-  private[this] var _combination: List[(Int, Int)] = Nil
-
   private val quadrants = createQuadrants.toMap
+
+  private[this] var _combination: List[(Int, Int)] = Nil
+  private var _winner: Option[Player.Value] = None
   private var _version = 0
   private var freeFields = 36
 

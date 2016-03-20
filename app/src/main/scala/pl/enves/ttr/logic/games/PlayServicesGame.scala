@@ -5,9 +5,6 @@ import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.JsonProtocol._
-
-// Import optimization deletes:
-// import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
 import scala.collection.JavaConversions._
@@ -21,6 +18,7 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
     turnBasedMatch.get.getParticipantIds.toList.filterNot(_ == currentParticipantId).head
 
   private[this] var turnBasedMatch: Option[TurnBasedMatch] = None
+  private[this] var moved = false
 
   override def locked: Boolean = !myTurn
 
@@ -41,6 +39,7 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
     _player = player.other
     if (myTurn) takeTurn()
+    moved = true
 
     return res
   }
@@ -62,7 +61,8 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
   private[this] def myTurn =
     turnBasedMatch.isDefined &&
-    turnBasedMatch.get.getTurnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN
+    turnBasedMatch.get.getTurnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN &&
+    !moved
 
   private[this] def initializeMatch() = {
     log("Sending game initialization data")
@@ -70,10 +70,9 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
     PlayServices.takeTurn(turnBasedMatch.get, data, otherParticipantId)
   }
 
-  private[this] def takeTurn() = {
+  private[this] def takeTurn() =
     PlayServices.takeTurn(turnBasedMatch.get, this.toMap.toJson.toString(), otherParticipantId)
-  }
-
+  
   private[this] def updateLocalState(rawData: String) = {
     val data = rawData.parseJson.asJsObject
 
@@ -83,7 +82,7 @@ class PlayServicesGame(board: Board = Board()) extends Game(board) {
 
     board sync Board(data.fields("board"))
   }
-  }
+}
 
 object PlayServicesGame {
   def apply() = new PlayServicesGame(Board())
