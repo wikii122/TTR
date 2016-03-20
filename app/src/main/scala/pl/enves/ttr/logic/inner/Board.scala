@@ -75,11 +75,22 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int) = quadrants(quadrant).get(x % Quadrant.size, y % Quadrant.size)
 
-  def quadrantRotation(quadrant: Quadrant.Value) = quadrants(quadrant).getRotation
+  def quadrantRotation(quadrant: Quadrant.Value) = quadrants(quadrant).rotation
 
-  def availableRotations = quadrants filter (_._2.canRotate) keys
+  def availableRotations = quadrants filter (_._2.isRotable) keys
 
-  def canRotate(quadrant: Quadrant.Value) = quadrants(quadrant).canRotate
+  def canRotate(quadrant: Quadrant.Value) = quadrants(quadrant).isRotable
+
+  def sync(board: Board) = {
+    freeFields = board.freeFields
+    _version = board._version
+    _winner = _winner
+
+    quadrants foreach {
+      p => val (quad, data) = p
+        quadrants(quad).sync(data)
+    }
+  }
 
   private def createQuadrants = Quadrant.values.toList map BoardQuadrant.named
 
@@ -135,21 +146,21 @@ object Board {
     board._version = fields("version").convertTo[Int]
     board._winner = fields("winner").convertTo[Option[Player.Value]]
 
-    val quadrants = fields("quadrants").asInstanceOf[JsArray].elements map (_.asJsObject.fields) map {
+    fields("quadrants").asInstanceOf[JsArray].elements map (_.asJsObject.fields) foreach {
       field =>
-        field("quadrant").convertTo[Quadrant.Value] ->
-        field("data").asJsObject.fields
-    }
+        val quad = field("quadrant").convertTo[Quadrant.Value]
+        val data = field("data").asJsObject.fields
 
-    quadrants foreach {
-      p => val (quad, data) = p
         val quadrant = board.quadrants(quad)
-        quadrant setRotation data("rotation").convertTo[Int]
-        quadrant setCooldown data("cooldown").convertTo[Int]
-        val triple = data("fields").asInstanceOf[JsArray].elements map (_.asInstanceOf[JsArray].elements)
-        for (i <- 0 until triple.length;
-          j <- 0 until triple(i).length
-        ) quadrant.fields(i)(j) = triple(i)(j).convertTo[Option[Player.Value]]
+        quadrant.rotation = data("rotation").convertTo[Int]
+        quadrant.cooldown = data("cooldown").convertTo[Int]
+
+        val triple =
+          data("fields").asInstanceOf[JsArray].elements map (_.asInstanceOf[JsArray].elements)
+
+        for(i <- triple.indices;
+            j <- triple(i).indices)
+          quadrant.fields(i)(j) = triple(i)(j).convertTo[Option[Player.Value]]
     }
 
     board.checkVictory()

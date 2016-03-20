@@ -709,7 +709,7 @@ object BoardModel {
     for (q <- Quadrant.values) {
       val oldq = old.getQuadrant(q)
       val newq = board.getQuadrant(q.id)
-      newq.setCooldown(oldq.getCooldown)
+      newq.setCooldown(oldq.cooldown)
     }
     val state = old.lines
     for (i <- 0 until 2 * Quadrant.size;
