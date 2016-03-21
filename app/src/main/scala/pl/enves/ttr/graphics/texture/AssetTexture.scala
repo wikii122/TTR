@@ -18,7 +18,8 @@ class AssetTexture(context: Context, path: String) extends TextureProvider with 
       val bitmap = BitmapFactory.decodeByteArray(rawData, 0, rawData.length)
 
       val texture = createTexture(bitmap)
-      bitmap.recycle()
+
+      //bitmap is recycled in createTexture()
 
       return texture
     } catch {
