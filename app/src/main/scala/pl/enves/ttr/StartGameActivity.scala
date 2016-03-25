@@ -52,7 +52,8 @@ class StartGameActivity extends StyledActivity with LogoUtils {
       log(s"Signed in to Google Play Services")
       log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
 
-      enableButtons()
+      if (PlayServices.notConnected) PlayServices.connect()
+      else enableButtons()
 
       mainMenuFragment.onConnected()
     } else {
@@ -77,8 +78,8 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra(Code.TYPE, Game.STANDARD.toString)
-    itnt start()
+    itnt.putExtra(Code.TYPE, Game.STANDARD.toString)
+    itnt.start()
   }
 
   def startBotGame() = {
@@ -87,15 +88,15 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra(Code.TYPE, Game.BOT.toString)
-    itnt start()
+    itnt.putExtra(Code.TYPE, Game.BOT.toString)
+    itnt.start()
   }
 
   def startNetworkGame(code: String) = {
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra (Code.TYPE, Game.GPS_MULTIPLAYER.toString)
-    itnt putExtra (Code.DATA, code)
-    itnt start ()
+    itnt.putExtra(Code.TYPE, Game.GPS_MULTIPLAYER.toString)
+    itnt.putExtra(Code.DATA, code)
+    itnt.start ()
   }
 
   /**
@@ -104,10 +105,11 @@ class StartGameActivity extends StyledActivity with LogoUtils {
    */
   def continueGame() = {
     log("Intending to continue previously run game")
+
     val itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra (Code.TYPE, Game.CONTINUE.toString)
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.putExtra(Code.TYPE, Game.CONTINUE.toString)
+    itnt.start()
   }
 
   /**
@@ -115,17 +117,19 @@ class StartGameActivity extends StyledActivity with LogoUtils {
    */
   def launchSettings() = {
     log("Intending to continue previously run game")
+
     val itnt = intent[SettingsActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.start()
   }
 
   private[this] def launchTutorial() = {
     log("Intending to launch tutorial")
+
     val itnt = intent[TutorialActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra ("FIRSTRUN", true)
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.putExtra("FIRSTRUN", true)
+    itnt.start()
   }
 
   private[this] def drawUI() = {
