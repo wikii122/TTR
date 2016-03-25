@@ -47,10 +47,6 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     }
   }
 
-  override def onPause() {
-    super.onPause()
-  }
-
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
     case Code.SIGN_IN => if (response == Activity.RESULT_OK) {
       log(s"Signed in to Google Play Services")
