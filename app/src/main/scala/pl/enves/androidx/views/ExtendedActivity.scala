@@ -22,15 +22,15 @@ with Logging with FunctionHelper {
 
   protected def sendIntent = new Intent(Intent.ACTION_SENDTO)
 
-  protected[views] def runOnMainThread(f: () => Unit) = {
+  def runOnMainThread(f: => Unit): Unit = {
     lazy val runnable = new Runnable() {
-      override def run() = f()
+      override def run() = f
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
       runOnUiThread(runnable)
     }
     else {
-      if (uiThread == Thread.currentThread) f()
+      if (uiThread == Thread.currentThread) f
       else handler.post(runnable)
     }
   }

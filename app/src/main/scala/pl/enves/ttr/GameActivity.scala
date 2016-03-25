@@ -46,13 +46,12 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         game = Game.bot()
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
-      case Game.GPS_MULTIPLAYER => {
+      case Game.GPS_MULTIPLAYER =>
         game = PlayServicesGame()
         b getString Code.DATA match {
           case Code.INVITATION => startActivityForResult(PlayServices.inboxIntent, Code.SELECT_INVITATIONS)
           case Code.PLAYERS => startActivityForResult(PlayServices.selectPlayerIntent, Code.SELECT_PLAYERS)
         }
-      }
       case s =>
         throw new MissingParameter(s"Invalid game type: $s")
     }
@@ -76,8 +75,8 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val chooseXButton = find[ImageButton](R.id.button_symbol_X)
     val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    chooseXButton onClick playWithBotAsX
-    chooseOButton onClick playWithBotAsO
+    chooseXButton onClick playAsX
+    chooseOButton onClick playAsO
 
     val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
@@ -212,7 +211,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     itnt.start()
   }
 
-  def showChooser(): Unit = {
+  def showChooser(showDifficulty: Boolean = true) = runOnMainThread {
     log("showing chooser")
 
     val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
@@ -229,10 +228,15 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseSymbolText.setVisibility(View.VISIBLE)
     chooseXButton.setVisibility(View.VISIBLE)
     chooseOButton.setVisibility(View.VISIBLE)
-
-    difficultyText.setVisibility(View.VISIBLE)
-    difficultySeekBar.setVisibility(View.VISIBLE)
-    difficultyNumber.setVisibility(View.VISIBLE)
+    if (showDifficulty) {
+      difficultyText.setVisibility(View.VISIBLE)
+      difficultySeekBar.setVisibility(View.VISIBLE)
+      difficultyNumber.setVisibility(View.VISIBLE)
+    } else {
+      difficultyText.setVisibility(View.GONE)
+      difficultySeekBar.setVisibility(View.GONE)
+      difficultyNumber.setVisibility(View.GONE)
+    }
 
     val difficulty = Configuration.botDifficulty
     difficultySeekBar.setProgress(difficulty)
@@ -278,18 +282,26 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     }
   }
 
-  private[this] def playWithBotAsX(v: View) = {
-    game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
-    setupBot()
-    view.startGame()
-    closeChooser()
+  private[this] def playAsX(v: View) = game match {
+    case game: BotGame =>
+      game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
+      setupBot()
+      view.startGame()
+      closeChooser()
+    case game: PlayServicesGame =>
+      game.setPlayerSide(Player.X)
+      closeChooser()
   }
 
-  private[this] def playWithBotAsO(v: View) = {
-    game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
-    setupBot()
-    view.startGame()
-    closeChooser()
+  private[this] def playAsO(v: View) = game match {
+    case game: BotGame =>
+      game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
+      setupBot()
+      view.startGame()
+      closeChooser()
+    case game: PlayServicesGame =>
+      game.setPlayerSide(Player.O)
+      closeChooser()
   }
 
   private[this] def changeDifficulty(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {

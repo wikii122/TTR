@@ -1,6 +1,8 @@
 package pl.enves.ttr.logic.games
 
 import com.google.android.gms.games.multiplayer.turnbased.{OnTurnBasedMatchUpdateReceivedListener, TurnBasedMatch}
+import pl.enves.androidx.context.ContextRegistry
+import pl.enves.ttr.GameActivity
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.networking.PlayServices
@@ -13,11 +15,12 @@ class PlayServicesGame(board: Board = Board()) extends Game(board)
 with OnTurnBasedMatchUpdateReceivedListener {
   override val gameType: Game.Value = Game.GPS_MULTIPLAYER
 
-  private[this] lazy val currentParticipantId: String =
+  private[this] lazy val myParticipantId: String =
     turnBasedMatch.get getParticipantId PlayServices.playerData.getPlayerId
   private[this] lazy val otherParticipantId: String =
-    turnBasedMatch.get.getParticipantIds.toList.filterNot(_ == currentParticipantId).head
+    turnBasedMatch.get.getParticipantIds.toList.filterNot(_ == myParticipantId).head
   private[this] var _turnBasedMatch: Option[TurnBasedMatch] = None
+  private[this] lazy val activity: GameActivity = ContextRegistry.context.asInstanceOf[GameActivity]
 
   private[this] def turnBasedMatch = _turnBasedMatch
   private[this] def turnBasedMatch_=(newMatch: Option[TurnBasedMatch]) = {
@@ -33,7 +36,17 @@ with OnTurnBasedMatchUpdateReceivedListener {
 
   override def locked: Boolean = !myTurn
 
-  override protected def start(player: Player.Value): Unit = ???
+  override protected def start(player: Player.Value): Unit = {
+    log(s"Initializing this player to $player")
+
+    player match {
+      case Player.O =>
+        _player = player.other
+        takeTurn()
+      case Player.X =>
+        _player = player
+    }
+  }
 
   override def resume() = {
     log("Registered match update listener")
@@ -109,11 +122,14 @@ with OnTurnBasedMatchUpdateReceivedListener {
   private[this] def initializeMatch() = {
     log("Sending game initialization data")
     val data = this.toMap.toJson.toString()
-    PlayServices.takeTurn(turnBasedMatch.get, data, otherParticipantId)
+    PlayServices.takeTurn(turnBasedMatch.get, data, myParticipantId)
+    activity.showChooser(showDifficulty=false)
   }
 
-  private[this] def takeTurn() =
+  private[this] def takeTurn() = {
     PlayServices.takeTurn(turnBasedMatch.get, this.toMap.toJson.toString(), otherParticipantId)
+    moved = true
+  }
 
   private[this] def updateLocalState(rawData: String) = {
     val data = rawData.parseJson.asJsObject

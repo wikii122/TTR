@@ -38,7 +38,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Set starting player.
    */
-  final def firstPlayer(startingPlayer: Player.Value) = start(startingPlayer)
+  final def setPlayerSide(startingPlayer: Player.Value) = start(startingPlayer)
 
   def pause() = {}
 
