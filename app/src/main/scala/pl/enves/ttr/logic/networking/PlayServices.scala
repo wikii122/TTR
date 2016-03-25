@@ -51,7 +51,10 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant).await()
   }
 
-  def finishMatch(matchInstance: TurnBasedMatch) = ???
+  def finish(matchInstance: TurnBasedMatch) = {
+    log("Finalizing game")
+    Games.TurnBasedMultiplayer.finishMatch(client.get, matchInstance.getMatchId)
+  }
 
   def invitations: Future[List[Invitation]] = Future {
     if (isConnected) {

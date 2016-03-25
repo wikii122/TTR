@@ -24,6 +24,8 @@ with OnTurnBasedMatchUpdateReceivedListener {
     _turnBasedMatch = newMatch
     moved = false
   }
+
+
   /**
    * Setting their_turn flag by GPS seems to be too slow, this is fallback indicator.
    */
@@ -41,6 +43,9 @@ with OnTurnBasedMatchUpdateReceivedListener {
   override def pause() = {
     log("Unregistered match update listener")
     PlayServices.unregister()
+    
+    if (finished)
+      PlayServices.finish(turnBasedMatch.get)
   }
 
   override protected def onMove(move: Move): Boolean = {
@@ -69,13 +74,16 @@ with OnTurnBasedMatchUpdateReceivedListener {
 
   override def onTurnBasedMatchRemoved(s: String): Unit = ???
 
-  override def onTurnBasedMatchReceived(turnBasedMatch: TurnBasedMatch): Unit = {
-    log("Received update from remote device")
-    this.turnBasedMatch = Some(turnBasedMatch)
+  override def onTurnBasedMatchReceived(newMatch: TurnBasedMatch): Unit =
+    if (newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
+      log("Received update from remote device")
+      this.turnBasedMatch = Some(newMatch)
 
-    val data = new String(turnBasedMatch.getData, "utf-8")
-    updateLocalState(data)
-  }
+      val data = new String(newMatch.getData, "utf-8")
+      updateLocalState(data)
+    } else {
+      log("Ignored update from different match")
+    }
 
   def start(newMatch: TurnBasedMatch) = {
     log("Received match instance")
