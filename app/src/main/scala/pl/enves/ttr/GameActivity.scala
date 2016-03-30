@@ -192,7 +192,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onStop()
 
     // There is no point to keep game that cannot be saved.
-    if (game.canBeSaved) {
+    if (game.isSavable) {
       GameState store game
     } else {
       GameState clear()

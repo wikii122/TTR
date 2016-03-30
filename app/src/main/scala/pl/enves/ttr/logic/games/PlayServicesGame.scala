@@ -27,14 +27,12 @@ with OnTurnBasedMatchUpdateReceivedListener {
     _turnBasedMatch = newMatch
     moved = false
   }
-
-
-  /**
-   * Setting their_turn flag by GPS seems to be too slow, this is fallback indicator.
-   */
+  /** Setting their_turn flag by GPS seems to be too slow, this is fallback indicator. */
   private[this] var moved = false
 
   override def locked: Boolean = !myTurn
+
+  override def isSavable = false
 
   override protected def start(player: Player.Value): Unit = {
     log(s"Initializing this player to $player")

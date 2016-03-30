@@ -65,7 +65,7 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     }
   }
 
-  override def canBeSaved: Boolean = human.isDefined
+  override def isSavable: Boolean = human.isDefined
 
   /**
    * Makes a human move, whether it's a rotation or putting symbol.

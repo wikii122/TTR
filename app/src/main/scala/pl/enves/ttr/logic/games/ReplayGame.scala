@@ -11,7 +11,7 @@ class ReplayGame(replayedGameType: Game.Value,
                  board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.REPLAY
 
-  override def canBeSaved = false
+  override def isSavable = false
 
   override protected def version = 0
 

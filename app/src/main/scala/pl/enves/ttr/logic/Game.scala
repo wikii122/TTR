@@ -31,7 +31,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 
   val movesLog = ListBuffer[LogEntry]()
 
-  def canBeSaved = true
+  def isSavable = true
 
   def player = _player
 
