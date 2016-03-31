@@ -11,4 +11,5 @@ object Code {
   final val INVITATION = "INVITATION"
   final val MATCH = "MATCH"
   final val TYPE = "TYPE"
+  final val REMATCH = "REMATCH"
 }

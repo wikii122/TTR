@@ -81,7 +81,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
     return res
   }
 
-
+  def matchId = turnBasedMatch.get.getMatchId
 
   override def onTurnBasedMatchRemoved(s: String): Unit = ???
 

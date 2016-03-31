@@ -47,6 +47,12 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
     return promise.future
   }
 
+  def rematch(matchId: String) = Future {
+    Games.TurnBasedMultiplayer.rematch(client.get, matchId)
+      .await()
+      .getMatch
+  }
+
   def takeTurn(matchInstance: TurnBasedMatch, turnData: String, participant: String) = Future {
     Games.TurnBasedMultiplayer.takeTurn(client.get, matchInstance.getMatchId, turnData.getBytes, participant).await()
   }

@@ -51,6 +51,11 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
         b getString Code.DATA match {
           case Code.INVITATION => startActivityForResult(PlayServices.inboxIntent, Code.SELECT_INVITATIONS)
           case Code.PLAYERS => startActivityForResult(PlayServices.selectPlayerIntent, Code.SELECT_PLAYERS)
+          case Code.REMATCH => PlayServices rematch b.getString(Code.REMATCH) onComplete {
+            case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
+            case Failure(any) => error(s"Failture when starting rematch")
+              finish()
+          }
         }
       case s =>
         throw new MissingParameter(s"Invalid game type: $s")
@@ -96,6 +101,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
       PlayServices createMatch players onComplete {
         case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
         case Failure(any) => error(s"Failture when creating match with $any")
+          finish()
       }
     } else {
       log("Choose player activity cancelled by player")
@@ -207,6 +213,11 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     itnt.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     itnt.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     itnt.putExtra("GAME_DATA", game.toJson.compactPrint)
+
+    game match {
+      case multiplayer: PlayServicesGame => itnt.putExtra(Code.REMATCH, multiplayer.matchId)
+    }
+
     finish()
     itnt.start()
   }
