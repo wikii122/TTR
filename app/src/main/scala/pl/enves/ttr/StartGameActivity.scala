@@ -5,23 +5,17 @@ import android.content.Intent
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentTransaction}
-import android.view.View
-import android.widget.Button
-import com.google.android.gms.games.Games
-import com.google.android.gms.games.multiplayer.{Invitation, Multiplayer}
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.logic.games.PlayServicesGame
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState}
-import pl.enves.ttr.utils.dialogs.NotAvailableDialog
 import pl.enves.ttr.utils.start.{BackButtonFragment, ChooseGameFragment, MainMenuFragment}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.utils.{Code, Configuration, LogoUtils, dialogs}
+import pl.enves.ttr.utils.{Code, Configuration, LogoUtils}
 
 class StartGameActivity extends StyledActivity with LogoUtils {
   private[this] lazy val mainMenuFragment = new MainMenuFragment
+  private[this] val GPS_LAUNCH = 0x14400000
 
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
@@ -44,6 +38,16 @@ class StartGameActivity extends StyledActivity with LogoUtils {
       launchTutorial()
     } else if (Configuration.isMultiplayerAvailable) {
       PlayServices.connect()
+    }
+  }
+
+  override def onResume() = {
+    super.onResume()
+    log("Resuming")
+
+    if ((getIntent.getFlags & GPS_LAUNCH) == GPS_LAUNCH) {
+      log("Play services intented this activity, jumping to chooser")
+      startNetworkGame(Code.INVITATION)
     }
   }
 
