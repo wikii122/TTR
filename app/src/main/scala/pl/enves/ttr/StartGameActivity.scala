@@ -45,9 +45,10 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     super.onResume()
     log("Resuming")
 
-    if ((getIntent.getFlags & GPS_LAUNCH) == GPS_LAUNCH) {
+    if (launchedFromGPSNotification) {
       log("Play services intented this activity, jumping to chooser")
       startNetworkGame(Code.INVITATION)
+      getIntent.putExtra(Code.LAUNCHED, true)
     }
   }
 
@@ -126,6 +127,10 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
     itnt.start()
   }
+
+  private[this] def launchedFromGPSNotification =
+    (getIntent.getFlags & GPS_LAUNCH) == GPS_LAUNCH &&
+    !getIntent.getBooleanExtra(Code.LAUNCHED, false)
 
   private[this] def launchTutorial() = {
     log("Intending to launch tutorial")

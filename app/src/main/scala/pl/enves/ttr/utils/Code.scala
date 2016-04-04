@@ -12,4 +12,5 @@ object Code {
   final val MATCH = "MATCH"
   final val TYPE = "TYPE"
   final val REMATCH = "REMATCH"
+  final val LAUNCHED = "LAUNCHED"
 }

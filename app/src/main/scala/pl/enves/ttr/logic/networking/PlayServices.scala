@@ -91,7 +91,7 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       log(s"Number of games awaiting activity found: ${e.length}")
       gameBuffer.release()
 
-      e.toList
+      e.toList.filter(_.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE)
     } else {
       warn("Play services is not connected. Cannot list games.")
 

@@ -216,6 +216,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     game match {
       case multiplayer: PlayServicesGame => itnt.putExtra(Code.REMATCH, multiplayer.matchId)
+      case _ => {}
     }
 
     finish()
