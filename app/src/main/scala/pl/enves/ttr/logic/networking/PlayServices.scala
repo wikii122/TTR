@@ -67,12 +67,33 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       val promise = Games.Invitations.loadInvitations(client.get)
       val result = promise.await()
       val invitationBuffer = result.getInvitations
-      val e = for (i <- 0 until invitationBuffer.getCount) yield invitationBuffer.get(i)
+      val e = for (i <- 0 until invitationBuffer.getCount) yield invitationBuffer get i
+
       log(s"Number of new invitations found: ${e.length}")
+      invitationBuffer.release()
 
       e.toList
     } else {
       warn("Play services is not connected. Cannot list invitations.")
+
+      Nil
+    }
+  }
+
+  def myGames: Future[List[TurnBasedMatch]] = Future {
+    if (isConnected) {
+      val promise = Games.TurnBasedMultiplayer.loadMatchesByStatus(client.get,
+        Array[Int](TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN))
+      val result = promise.await()
+      val gameBuffer = result.getMatches.getMyTurnMatches
+      val e = for (i <- 0 until gameBuffer.getCount) yield gameBuffer get i
+
+      log(s"Number of games awaiting activity found: ${e.length}")
+      gameBuffer.release()
+
+      e.toList
+    } else {
+      warn("Play services is not connected. Cannot list games.")
 
       Nil
     }

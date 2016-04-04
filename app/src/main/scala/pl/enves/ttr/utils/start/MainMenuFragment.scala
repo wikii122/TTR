@@ -2,6 +2,7 @@ package pl.enves.ttr
 package utils
 package start
 
+
 import android.graphics.Typeface
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
@@ -16,6 +17,8 @@ import pl.enves.ttr.utils.ExecutorContext._
 import pl.enves.ttr.utils.styled.StyledFragment
 import pl.enves.ttr.utils.themes.Theme
 
+import scala.concurrent.Future
+
 class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
@@ -27,7 +30,7 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     super.onStart()
 
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_invitations), find[Button](view, R.id.button_invitations_prompt))
+    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
     val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
     val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
@@ -56,7 +59,7 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
 
   override def setTypeface(typeface: Typeface): Unit = {
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_invitations), find[Button](view, R.id.button_invitations_prompt))
+    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
     val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
     val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
@@ -69,7 +72,7 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
 
   override def setColorTheme(theme: Theme): Unit = {
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_invitations), find[Button](view, R.id.button_invitations_prompt))
+    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
     val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
     val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
@@ -99,23 +102,21 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
 
   private[this] def setInvitationsNumber(): Unit = {
     log("Requesting invitation list")
-    setInvitationsNumber(Nil)
-    PlayServices.invitations.onSuccess {
-      case list => {
-        log(s"Received invitation list with ${list.length} invitations")
-        runOnMainThread { setInvitationsNumber(list) }
-      }
+    setInvitationsNumber(0)
+
+    Future.sequence(PlayServices.invitations :: PlayServices.myGames :: Nil) onSuccess {
+      case list => setInvitationsNumber (list map ( _.length) sum)
     }
   }
 
-  private[this] def setInvitationsNumber(invitations: List[Invitation]): Unit = runOnMainThread {
+  private[this] def setInvitationsNumber(count: Int): Unit = runOnMainThread {
     val view = Option(getView)
     if (view.isDefined) {
-      val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_invitations)
-      val invitationsButton = find[Button](view.get, R.id.button_invitations)
-      val text = getActivity.getResources.getText(R.string.invitations).toString
+      val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_activity)
+      val invitationsButton = find[Button](view.get, R.id.button_activity)
+      val text = getActivity.getResources.getText(R.string.activity).toString
       invitationsLayout setVisibility View.VISIBLE
-      invitationsButton setText text.format(invitations.length)
+      invitationsButton setText text.format(count)
     }
   }
 }
