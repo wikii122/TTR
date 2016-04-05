@@ -3,7 +3,6 @@ package pl.enves.ttr.utils
 import android.content.{Context, SharedPreferences}
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.R
-import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.themes.Theme
 
 object Configuration {
@@ -11,6 +10,8 @@ object Configuration {
   private[this] lazy val prefed: SharedPreferences.Editor = prefs.edit()
 
   val defaultColorThemeId: Int = R.array.theme_five
+
+  val defaultTypefacePath: String = "fonts/Comfortaa-Regular.ttf"
 
   def isFirstRun = prefs.getBoolean("FIRSTRUN", true)
 

@@ -60,9 +60,14 @@
     <string name="difficulty">difficulty:</string>
     <string name="enves">enves</string>
     <string name="created_by">created by</string>
-    <string name="game_description_1">Old classic with a twist… literally! 6x6 version of TicTacToe where you can turn parts of the board around.</string>
-    <string name="game_description_2">Exercise your brain while playing solo or challenge your friends to a mind-duel - hot seat or online. Enjoy customizable flat design and several levels of bot\'s difficulty.</string>
-    <string name="game_description_3">Will you become the ultimate TicTacTurn master?</string>
-    <string name="game_license">DO NOT EVEN THINK ABOUT IT</string>
+    <string name="app_description_1">Old classic with a twist… literally! 6x6 version of TicTacToe where you can turn parts of the board around.</string>
+    <string name="app_description_2">Exercise your brain while playing solo or challenge your friends to a mind-duel - hot seat or online. Enjoy customizable flat design and several levels of bot\'s difficulty.</string>
+    <string name="app_description_3">Will you become the ultimate TicTacTurn master?</string>
+    <string name="app_copyright">Copyright © enves.pl</string>
+    <string name="app_authors">Authors: %s</string>
+    <string name="app_license_1">Disclaimer of warranties. To the extent possible, the authors or copyright holders offer this software as-is and as-available, and make no representations or warranties of any kind concerning this software, whether express, implied, statutory, or other. This includes, without limitation, warranties of title, merchantability, fitness for a particular purpose, non-infringement, absence of latent or other defects, accuracy, or the presence or absence of errors, whether or not known or discoverable.</string>
+    <string name="app_license_2">Limitation of liability. To the extent possible, in no event will the authors or copyright holders be liable to You on any legal theory (including, without limitation, negligence) or otherwise for any direct, special, indirect, incidental, consequential, punitive, exemplary, or other losses, costs, expenses, or damages arising out of the use or inability to use this software, even if the authors or copyright holders had been advised of the possibility of such losses, costs, expenses, or damages.</string>
+    <string name="app_license_3">The disclaimer of warranties and limitation of liability provided above shall be interpreted in a manner that, to the extent possible, most closely approximates an absolute disclaimer and waiver of all liability.</string>
+    <string name="app_license_4">Safety-Critical Systems. This software is not intended for use with life-critical or safety-critical systems, such as use in operation of medical equipment, automated transportation systems, autonomous vehicles, aircraft or air traffic control, nuclear facilities, manned spacecraft, or military use in connection with live combat. However, this restriction will not apply in the event of the occurrence (certified by the World Health Organization or successor body) of a widespread viral infection transmitted via bites or contact with bodily fluids that causes human corpses to reanimate and seek to consume living human flesh, blood, brain or nerve tissue and is likely to result in the fall of organized civilization.</string>
     <string name="admob_test_banner_ad_unit_id">ca-app-pub-3940256099942544/6300978111</string>
 </resources>

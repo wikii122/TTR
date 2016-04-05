@@ -12,7 +12,7 @@ abstract class StyledActivity extends ExtendedActivity with Styled {
 
     setGui()
 
-    val typeface = Typeface.createFromAsset(getAssets, fontPath)
+    val typeface = Typeface.createFromAsset(getAssets, Configuration.defaultTypefacePath)
     setTypeface(typeface)
 
     val theme = Configuration.pickedTheme

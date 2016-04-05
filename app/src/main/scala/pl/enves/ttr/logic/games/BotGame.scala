@@ -21,14 +21,14 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
 
   private[this] var maxTime: Int = 3000
 
-  private[this] val maxDepth: Int = 5
+  private[this] var maxDepth: Int = 5
 
-  private[this] val adaptiveDepth = true
+  private[this] val adaptiveTime = true
 
   private[this] val randomizeDecisions = true
 
   //TODO: Make interface for different algorithm classes
-  def startThinking(): Unit = {
+  private def startThinking(): Unit = {
     implicit val player = if (human.get == Player.X) Player.O else Player.X
 
     def makeBotMove(move: Move): Unit = {
@@ -36,23 +36,34 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
       onMove(move)
     }
 
-    //TODO: make it more intelligent
-    val depth = if (adaptiveDepth) Math.min(36 - board.getFreeFields + 1, maxDepth)
-    else maxDepth
+    val time = if (adaptiveTime) Math.min((36 - board.getFreeFields + 1) * 1000, maxTime)
+    else maxTime
 
-    algorithm = Some(new MinMax(board, player, minTime, maxTime, depth, randomizeDecisions, makeBotMove))
+    algorithm = Some(new MinMax(board, player, minTime, time, maxDepth, randomizeDecisions, makeBotMove))
+  }
+
+  def startThinkingIfNeeded(): Unit = {
+    if (algorithm.isEmpty && human.isDefined && human.get != _player && nonFinished) {
+      startThinking()
+    }
   }
 
   /**
    * Initiates the game with given player.
    */
   protected def start(startingPlayer: Player.Value) = {
+
     log("Creating new game")
     log(s"Starting player: ${_player}")
     _player = startingPlayer
 
-    if (_player != human.get) {
-      startThinking()
+    startThinkingIfNeeded()
+  }
+
+  override protected def onStop(): Unit = this.synchronized {
+    if (algorithm.isDefined) {
+      algorithm.get.stop()
+      algorithm = None
     }
   }
 
@@ -97,11 +108,8 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     log(s"Player set to ${_player}")
     if (_player == human.get) {
       algorithm = None
-    } else {
-      if (!board.finished) {
-        startThinking()
-      }
     }
+    startThinkingIfNeeded()
   }
 
   def locked: Boolean = if (human.isDefined) {
@@ -110,24 +118,20 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     true
   }
 
-  override def toMap = this.synchronized {
-    if (algorithm.isDefined) {
-      algorithm.get.stop()
-    }
-
-    Map(
-      "player" -> _player,
-      "human" -> human,
-      "maxTime" -> maxTime,
-      "board" -> board.toJson,
-      "log" -> (movesLog.toList map { entry => entry.toJson }),
-      "type" -> gameType
-    )
-  }
+  override def toMap = Map(
+    "player" -> _player,
+    "human" -> human,
+    "maxTime" -> maxTime,
+    "board" -> board.toJson,
+    "log" -> (movesLog.toList map { entry => entry.toJson }),
+    "type" -> gameType
+  )
 
   def getHuman: Option[Player.Value] = human
 
   def setMaxTime(max: Int): Unit = maxTime = max
+
+  def setMaxDepth(max: Int): Unit = maxDepth = max
 }
 
 object BotGame {
@@ -148,11 +152,9 @@ object BotGame {
 
     if (human.isDefined) {
       game.setHumanSymbol(human.get)
-
-      if (game._player != human.get && game.nonFinished) {
-        game.startThinking()
-      }
     }
+
+    game.startThinkingIfNeeded()
 
     return game
   }

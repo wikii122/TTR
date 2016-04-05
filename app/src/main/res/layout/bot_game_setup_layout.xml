@@ -33,7 +33,7 @@
                 android:background="@null"
                 android:contentDescription="@string/button_symbol_X_description"
                 android:scaleType="centerInside"
-                android:src="@drawable/pat_cross_mod_mask" />
+                android:src="@drawable/cross_mask" />
 
             <Space
                 android:layout_width="36dp"
@@ -46,7 +46,7 @@
                 android:background="@null"
                 android:contentDescription="@string/button_symbol_O_description"
                 android:scaleType="centerInside"
-                android:src="@drawable/pat_ring_mod_mask" />
+                android:src="@drawable/ring_mask" />
 
         </LinearLayout>
 

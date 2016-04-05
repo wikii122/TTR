@@ -1,105 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animation-list>
     <item
-        drawable="images/tutorial_rotations_1.png"
-        duration="1000"/>
+        drawable="images/tutorial/rotations/1.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_rotations_2.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/2.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_3.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/3.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_4.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/4.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_5.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/5.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_6.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/6.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_7.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/7.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_8.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/8.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_9.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/9.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_10.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/10.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_11.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/11.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_12.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/12.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_13.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/13.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_14.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/14.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_15.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/15.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_16.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/16.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_17.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/17.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_18.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/18.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_19.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/19.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_20.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/20.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_21.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/21.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_22.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/22.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_23.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/23.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_24.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/24.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_25.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/25.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_26.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/26.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_27.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/27.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_28.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/28.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_29.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/29.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_30.png"
-        duration="33"/>
+        drawable="images/tutorial/rotations/30.png"
+        duration="33" />
     <item
-        drawable="images/tutorial_rotations_31.png"
-        duration="34"/>
+        drawable="images/tutorial/rotations/31.png"
+        duration="34" />
     <item
-        drawable="images/tutorial_rotations_32.png"
-        duration="1000"/>
+        drawable="images/tutorial/rotations/32.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_rotations_33.png"
-        duration="1000"/>
+        drawable="images/tutorial/rotations/33.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_rotations_34.png"
-        duration="3000"/>
+        drawable="images/tutorial/rotations/34.png"
+        duration="3000" />
 </animation-list>

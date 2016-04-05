@@ -8,10 +8,9 @@ import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.games._
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.JsonMappable
-import spray.json._
 import pl.enves.ttr.utils.JsonProtocol._
+import spray.json._
 
 import scala.collection.mutable.ListBuffer
 
@@ -21,13 +20,12 @@ import scala.collection.mutable.ListBuffer
  * It is not aware of any of the game rules by itself, as this is
  * the what Board is responsible for.
  */
-abstract class Game(protected val board: Board) extends JsonMappable with Logging{
+abstract class Game(protected val board: Board) extends JsonMappable with Logging {
   val gameType: Game.Value
 
   type State = Seq[Seq[Option[Player.Value]]]
 
   protected var _player: Player.Value = Player.X
-
 
   val movesLog = ListBuffer[LogEntry]()
 
@@ -38,11 +36,17 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Set starting player.
    */
-  final def setPlayerSide(startingPlayer: Player.Value) = start(startingPlayer)
+  def playerSide = player
+  final def playerSide_=(startingPlayer: Player.Value) = start(startingPlayer)
 
   def pause() = {}
 
   def resume() = {}
+
+  /**
+   * Stop game processes
+   */
+  final def stop(): Unit = onStop()
 
   /**
    * Make a move, obviously.
@@ -55,6 +59,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   def winner: Option[Player.Value] = board.winner
 
   def finished = board.finished
+
   final def nonFinished = !finished
 
   def finishingMove = board.finishingMove
@@ -78,7 +83,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
    * Get list of available rotations
    */
   def availableRotations: List[Quadrant.Value] = if (nonFinished) board.availableRotations.toList
-    else Nil
+  else Nil
 
   /**
    * Can quadrant be rotated
@@ -92,6 +97,8 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 
   protected def start(player: Player.Value)
 
+  protected def onStop(): Unit = {}
+
   protected def onMove(move: Move): Boolean
   
   protected def version: Int = board.version
@@ -99,7 +106,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   override def toMap = Map(
     "player" -> _player,
     "board" -> board.toJson,
-    "log" -> (movesLog.toList map { entry => entry.toJson}),
+    "log" -> (movesLog.toList map { entry => entry.toJson }),
     "type" -> gameType
   )
 }

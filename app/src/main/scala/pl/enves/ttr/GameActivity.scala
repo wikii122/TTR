@@ -37,11 +37,16 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     super.onCreate(state)
 
-    val b: Bundle = Option(getIntent.getExtras) getOrElse (throw new UninitializedError())
+    val b: Bundle =
+      Option(state) orElse
+        Option(getIntent.getExtras) getOrElse {
+        throw new UninitializedError()
+      }
+
     Game withName b.getString(Code.TYPE) match {
       case Game.STANDARD =>
         game = Game.plain()
-        view.startGame()
+        game.playerSide = Player.X
       case Game.BOT =>
         game = Game.bot()
       case Game.CONTINUE =>
@@ -86,12 +91,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
     difficultySeekBar onChange changeDifficulty
-
-    if (game.gameType == Game.BOT) {
-      if (game.asInstanceOf[BotGame].getHuman.isEmpty) {
-        showChooser()
-      }
-    }
   }
 
   override def onActivityResult(request: Int, response: Int, data: Intent) = request match {
@@ -130,6 +129,14 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
   override def onTouchEvent(e: MotionEvent): Boolean = {
     log("touched")
     return super.onTouchEvent(e)
+  }
+
+  override def onSaveInstanceState(outState: Bundle): Unit = {
+    super.onSaveInstanceState(outState)
+    outState.putString("TYPE", Game.CONTINUE.toString)
+
+    game.stop()
+    if (game.isSavable) GameState store game
   }
 
   override def setTypeface(typeface: Typeface): Unit = {
@@ -172,7 +179,6 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
   override def onPause(): Unit = {
     log("Pausing")
-
     super.onPause()
     view.onPause()
   }
@@ -187,6 +193,14 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     log("Starting")
     super.onStart()
 
+    if (game.gameType == Game.BOT) {
+      val botGame = game.asInstanceOf[BotGame]
+      botGame.startThinkingIfNeeded()
+      if (botGame.getHuman.isEmpty) {
+        showChooser()
+      }
+    }
+
     game.resume()
   }
 
@@ -198,14 +212,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onStop()
 
     // There is no point to keep game that cannot be saved.
-    if (game.isSavable) {
-      GameState store game
-    } else {
-      GameState clear()
-    }
-
-    //if game was saved, user can select to continue it in main menu
-    finish()
+    if (game.isSavable) GameState store game
   }
 
   def showMenu(): Unit = {
@@ -288,6 +295,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     val difficulty = difficultySeekBar.getProgress
     g.setMaxTime((difficulty + 1) * 1000)
+    g.setMaxDepth(difficulty + 1)
 
     if (difficulty != Configuration.botDifficulty) {
       Configuration.botDifficulty = difficulty
@@ -298,10 +306,10 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     case game: BotGame =>
       game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
       setupBot()
-      view.startGame()
+      game.playerSide = Player.X
       closeChooser()
     case game: PlayServicesGame =>
-      game.setPlayerSide(Player.X)
+      game.playerSide = Player.X
       closeChooser()
   }
 
@@ -309,10 +317,10 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     case game: BotGame =>
       game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
       setupBot()
-      view.startGame()
+      game.playerSide = Player.X
       closeChooser()
     case game: PlayServicesGame =>
-      game.setPlayerSide(Player.O)
+      game.playerSide = Player.O
       closeChooser()
   }
 

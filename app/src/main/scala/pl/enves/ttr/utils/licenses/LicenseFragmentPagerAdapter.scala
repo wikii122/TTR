@@ -6,6 +6,7 @@ import android.support.v4.app.{Fragment, FragmentManager, FragmentPagerAdapter}
 import android.text.{SpannableStringBuilder, Spanned}
 import pl.enves.androidx.{CustomTypefaceSpan, Logging}
 import pl.enves.ttr.R
+import pl.enves.ttr.utils.Configuration
 
 class LicenseFragmentPagerAdapter(fm: FragmentManager, context: Context) extends FragmentPagerAdapter(fm) with Logging {
   val items = Array(
@@ -15,7 +16,7 @@ class LicenseFragmentPagerAdapter(fm: FragmentManager, context: Context) extends
 
   override def getPageTitle(position: Int): CharSequence = {
     val text = items(position)._1
-    val typeface: Typeface = Typeface.createFromAsset(context.getAssets, "fonts/comfortaa.ttf")
+    val typeface: Typeface = Typeface.createFromAsset(context.getAssets, Configuration.defaultTypefacePath)
     val ssb: SpannableStringBuilder = new SpannableStringBuilder(text)
     ssb.setSpan(new CustomTypefaceSpan(typeface), 0, text.length, Spanned.SPAN_EXCLUSIVE_INCLUSIVE)
     return ssb
