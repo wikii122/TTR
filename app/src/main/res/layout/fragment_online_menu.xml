@@ -5,50 +5,24 @@
     android:layout_gravity="center"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/text_game_type"
-        style="@style/ButtonStyle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:text="@string/game_type" />
-
     <RelativeLayout
+        android:id="@+id/layout_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_create_bot_prompt"
+            android:id="@+id/button_activity_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_create_bot"
+            android:id="@+id/button_activity"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_create_bot_prompt"
-            android:layout_toRightOf="@+id/button_create_bot_prompt"
-            android:text="@string/new_bot_game" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
-
-        <Button
-            android:id="@+id/button_create_standard_prompt"
-            style="@style/ButtonStyle"
-            android:text="@string/nav_prompt" />
-
-        <Button
-            android:id="@+id/button_create_standard"
-            style="@style/ButtonStyle"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_create_standard_prompt"
-            android:layout_toRightOf="@+id/button_create_standard_prompt"
-            android:text="@string/new_standard_game" />
+            android:layout_toEndOf="@+id/button_activity_prompt"
+            android:layout_toRightOf="@+id/button_activity_prompt"
+            android:text="@string/activity" />
     </RelativeLayout>
 
     <RelativeLayout

@@ -11,17 +11,17 @@
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_online_prompt"
+            android:id="@+id/button_create_bot_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_online"
+            android:id="@+id/button_create_bot"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_online_prompt"
-            android:layout_toRightOf="@+id/button_online_prompt"
-            android:text="@string/menu_online" />
+            android:layout_toEndOf="@+id/button_create_bot_prompt"
+            android:layout_toRightOf="@+id/button_create_bot_prompt"
+            android:text="@string/new_bot_game" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -30,17 +30,17 @@
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_offline_prompt"
+            android:id="@+id/button_create_standard_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_offline"
+            android:id="@+id/button_create_standard"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_offline_prompt"
-            android:layout_toRightOf="@+id/button_offline_prompt"
-            android:text="@string/menu_offline" />
+            android:layout_toEndOf="@+id/button_create_standard_prompt"
+            android:layout_toRightOf="@+id/button_create_standard_prompt"
+            android:text="@string/new_standard_game" />
     </RelativeLayout>
 
     <RelativeLayout
@@ -49,16 +49,16 @@
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_settings_prompt"
+            android:id="@+id/button_continue_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_settings"
+            android:id="@+id/button_continue"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_settings_prompt"
-            android:layout_toRightOf="@+id/button_settings_prompt"
-            android:text="@string/settings" />
+            android:layout_toEndOf="@+id/button_continue_prompt"
+            android:layout_toRightOf="@+id/button_continue_prompt"
+            android:text="@string/continue_game" />
     </RelativeLayout>
 </LinearLayout>
