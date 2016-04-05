@@ -30,7 +30,7 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     super.onStart()
 
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
     val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
     val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
@@ -38,7 +38,7 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     setContinueButtonEnabled(GameState.active)
     setInvitationsNumber()
 
-    invitationsButton onClick listInvitations
+    activityButton onClick listActivity
     newGameButton onClick startNewGame
     continueGameButton onClick continueGame
     settingsButton onClick showSettings
@@ -54,7 +54,7 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
   private[this] def showSettings(v: View): Unit =
     getActivity.asInstanceOf[StartGameActivity].launchSettings()
 
-  private[this] def listInvitations(v: View): Unit =
+  private[this] def listActivity(v: View): Unit =
     getActivity.asInstanceOf[StartGameActivity].startNetworkGame(Code.INVITATION)
 
   override def setTypeface(typeface: Typeface): Unit = {
@@ -105,18 +105,28 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     setInvitationsNumber(0)
 
     Future.sequence(PlayServices.invitations :: PlayServices.myGames :: Nil) onSuccess {
-      case list => setInvitationsNumber (list map ( _.length) sum)
+      case list => setInvitationsNumber (list map (_.length) sum)
     }
   }
 
   private[this] def setInvitationsNumber(count: Int): Unit = runOnMainThread {
+    log("Resolving activity button")
     val view = Option(getView)
     if (view.isDefined) {
       val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_activity)
       val invitationsButton = find[Button](view.get, R.id.button_activity)
-      val text = getActivity.getResources.getText(R.string.activity).toString
-      invitationsLayout setVisibility View.VISIBLE
-      invitationsButton setText text.format(count)
+
+      if (PlayServices.isConnected) {
+        val text = getActivity.getResources.getText(R.string.activity).toString
+        invitationsLayout setVisibility View.VISIBLE
+        invitationsButton enable ()
+        invitationsButton setText text.format(count)
+      } else {
+        val text = getActivity.getResources.getText(R.string.noconnection).toString
+        invitationsLayout setVisibility View.GONE
+        invitationsButton disable ()
+        invitationsButton setText text
+      }
     }
   }
 }

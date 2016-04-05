@@ -3,6 +3,7 @@ package pl.enves.ttr
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
+import android.media.browse.MediaBrowser.ConnectionCallback
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentTransaction}
 import pl.enves.androidx.helpers._
@@ -85,6 +86,10 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     val itnt = prepareGameIntent(intent[GameActivity])
     itnt.putExtra(Code.TYPE, Game.STANDARD.toString)
     itnt.start()
+  }
+
+  def onConnected() = {
+    mainMenuFragment.onConnected()
   }
 
   def startBotGame() = {
