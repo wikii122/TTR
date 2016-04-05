@@ -1,9 +1,9 @@
 package pl.enves.ttr.utils.start
 
-import android.graphics.Typeface
+import android.graphics.{PorterDuff, Typeface}
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
-import android.widget.{Button, RelativeLayout}
+import android.widget.Button
 import pl.enves.androidx.Logging
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
@@ -26,12 +26,14 @@ class OnlineMenuFragment extends StyledFragment with Logging {
     super.onStart()
 
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityNumberButton = find[Button](view, R.id.button_activity_number)
     val newNetworkButton = (find[Button] (view, R.id.button_create_network), find[Button](view, R.id.button_create_network_prompt))
 
     setInvitationsNumber()
 
-    invitationsButton onClick listInvitations
+    activityButton onClick listInvitations
+    activityNumberButton onClick listInvitations
     newNetworkButton onClick onNetworkGame
   }
 
@@ -44,19 +46,24 @@ class OnlineMenuFragment extends StyledFragment with Logging {
 
   override def setTypeface(typeface: Typeface): Unit = {
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityNumberButton = find[Button](view, R.id.button_activity_number)
     val newNetworkButton = (find[Button] (view, R.id.button_create_network), find[Button](view, R.id.button_create_network_prompt))
 
-    invitationsButton.setTypeface(typeface)
+    activityButton.setTypeface(typeface)
+    activityNumberButton.setTypeface(typeface)
     newNetworkButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
+    val activityNumberButton = find[Button](view, R.id.button_activity_number)
     val newNetworkButton = (find[Button] (view, R.id.button_create_network), find[Button](view, R.id.button_create_network_prompt))
 
-    invitationsButton.setTextColor(theme.color1, theme.color2)
+    activityButton.setTextColor(theme.color1, theme.color2)
+    activityNumberButton.getBackground.setColorFilter(theme.color1, PorterDuff.Mode.SRC_IN)
+    activityNumberButton.setTextColor(theme.background)
     newNetworkButton.setTextColor(theme.color1, theme.color2)
   }
 
@@ -78,11 +85,8 @@ class OnlineMenuFragment extends StyledFragment with Logging {
   private[this] def setInvitationsNumber(count: Int): Unit = runOnMainThread {
     val view = Option(getView)
     if (view.isDefined) {
-      val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_activity)
-      val invitationsButton = find[Button](view.get, R.id.button_activity)
-      val text = getActivity.getResources.getText(R.string.activity).toString
-      invitationsLayout setVisibility View.VISIBLE
-      invitationsButton setText text.format(count)
+      val activityNumberButton = find[Button](view.get, R.id.button_activity_number)
+      activityNumberButton setText count.toString
     }
   }
 }

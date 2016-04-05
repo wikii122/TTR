@@ -13,7 +13,7 @@
     <string name="pick_theme">theme</string>
     <string name="licenses">licenses</string>
     <string name="feedback">feedback</string>
-    <string name="activity">activity: %d</string>
+    <string name="activity">activity:</string>
     <string name="menu_online">online</string>
     <string name="menu_offline">offline</string>
     <string name="settings">settings</string>
