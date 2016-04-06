@@ -9,6 +9,7 @@ import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.Button
 import pl.enves.androidx.Logging
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.styled.StyledFragment
 import pl.enves.ttr.utils.themes.Theme
 
@@ -30,6 +31,8 @@ class MainMenuFragment extends StyledFragment with Logging {
     onlineButton onClick startOnlineMenu
     offlineButton onClick startOfflineMenu
     settingsButton onClick showSettings
+
+    onConnected()
   }
 
   private[this] def startOnlineMenu(v: View): Unit =
@@ -61,5 +64,20 @@ class MainMenuFragment extends StyledFragment with Logging {
     onlineButton.setTextColor(theme.color1, theme.color2)
     offlineButton.setTextColor(theme.color1, theme.color2)
     settingsButton.setTextColor(theme.color1, theme.color2)
+  }
+
+  def onConnected() = {
+    val view = Option(getView)
+    if (view.isDefined) {
+      val onlineButton = (find[Button](view.get, R.id.button_online), find[Button](view.get, R.id.button_online_prompt))
+
+      if (PlayServices.isConnected) {
+        onlineButton setVisibility View.VISIBLE
+        onlineButton enable()
+      } else {
+        onlineButton setVisibility View.GONE
+        onlineButton disable()
+      }
+    }
   }
 }

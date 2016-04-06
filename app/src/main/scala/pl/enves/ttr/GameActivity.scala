@@ -212,7 +212,11 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     super.onStop()
 
     // There is no point to keep game that cannot be saved.
-    if (game.isSavable) GameState store game
+    if (game.isSavable)
+      if (game.finished) GameState.clear()
+      else GameState store game
+    if (game.finished)
+      finish()
   }
 
   def showMenu(): Unit = {

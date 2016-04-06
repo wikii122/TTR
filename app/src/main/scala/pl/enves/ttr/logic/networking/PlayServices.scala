@@ -130,6 +130,10 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   override def onConnected(bundle: Bundle): Unit = {
     log("Logged in")
+    ContextRegistry.context match {
+      case ctx: StartGameActivity => ctx.onConnected()
+      case _ => {}
+    }
   }
 
   override def onConnectionFailed(connectionResult: ConnectionResult): Unit = if (!signingIn) {

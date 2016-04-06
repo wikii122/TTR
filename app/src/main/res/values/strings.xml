@@ -13,10 +13,11 @@
     <string name="pick_theme">theme</string>
     <string name="licenses">licenses</string>
     <string name="feedback">feedback</string>
-    <string name="activity">activity:</string>
     <string name="menu_online">online</string>
     <string name="menu_offline">offline</string>
     <string name="settings">settings</string>
+    <string name="activity">activity:</string>
+    <string name="no_connection">no connection</string>
     <string name="continue_game">continue</string>
     <string name="new_standard_game">new hot seat</string>
     <string name="new_bot_game">new single-player</string>

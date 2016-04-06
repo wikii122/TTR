@@ -16,6 +16,7 @@ import pl.enves.ttr.utils.{Code, Configuration, LogoUtils}
 class StartGameActivity extends StyledActivity with LogoUtils {
   private[this] val GPS_LAUNCH = 0x14400000
 
+  private[this] lazy val mainMenuFragment = new MainMenuFragment
   private[this] lazy val onlineMenuFragment = new OnlineMenuFragment
   private[this] lazy val offlineMenuFragment = new OfflineMenuFragment
 
@@ -83,6 +84,19 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     itnt.start()
   }
 
+  def onConnected() = {
+    // disable / enable 'risky' buttons
+    onlineMenuFragment.onConnected()
+
+    // if 'online' menu was open and we lost connection
+    if (PlayServices.notConnected && onlineMenuFragment.isVisible) {
+      getSupportFragmentManager.popBackStack()
+    }
+
+    // disable / enable 'online' entry in main menu
+    mainMenuFragment.onConnected()
+  }
+
   def startBotGame() = {
     log("Intending to start new BotGame")
 
@@ -137,8 +151,6 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
   private[this] def drawUI() = {
     alignLogo()
-
-    val mainMenuFragment = new MainMenuFragment
 
     val transaction = getSupportFragmentManager.beginTransaction
     transaction.replace(R.id.menuContainer, mainMenuFragment)

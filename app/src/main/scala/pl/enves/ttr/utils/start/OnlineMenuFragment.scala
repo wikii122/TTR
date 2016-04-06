@@ -3,7 +3,7 @@ package pl.enves.ttr.utils.start
 import android.graphics.{PorterDuff, Typeface}
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
-import android.widget.Button
+import android.widget.{Button, RelativeLayout, TextView}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
@@ -68,9 +68,7 @@ class OnlineMenuFragment extends StyledFragment with Logging {
   }
 
   def onConnected() = {
-    if (isVisible) {
-      setInvitationsNumber()
-    }
+    setInvitationsNumber()
   }
 
   private[this] def setInvitationsNumber(): Unit = {
@@ -83,10 +81,25 @@ class OnlineMenuFragment extends StyledFragment with Logging {
   }
 
   private[this] def setInvitationsNumber(count: Int): Unit = runOnMainThread {
+    log("Resolving activity button")
     val view = Option(getView)
     if (view.isDefined) {
+      val activityButton = find[Button](view.get, R.id.button_activity)
       val activityNumberButton = find[Button](view.get, R.id.button_activity_number)
-      activityNumberButton setText count.toString
+      val newNetworkButton = (find[Button] (view.get, R.id.button_create_network), find[Button](view.get, R.id.button_create_network_prompt))
+
+      if (PlayServices.isConnected) {
+        activityButton enable()
+        activityNumberButton enable()
+        activityNumberButton setText count.toString
+
+        newNetworkButton enable()
+      } else {
+        activityButton disable()
+        activityNumberButton disable()
+
+        newNetworkButton disable()
+      }
     }
   }
 }
