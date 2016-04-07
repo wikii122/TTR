@@ -1,18 +1,27 @@
 package pl.enves.ttr
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
+import android.net.Network
 import android.os.Bundle
 import android.view._
 import android.widget._
+import com.google.android.gms.games.Games
+import com.google.android.gms.games.multiplayer.{Multiplayer, Invitation}
+import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.color.ColorManip
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.graphics.GameView
 import pl.enves.ttr.logic._
-import pl.enves.ttr.logic.games.BotGame
-import pl.enves.ttr.utils.Configuration
+import pl.enves.ttr.logic.games.{PlayServicesGame, BotGame}
+import pl.enves.ttr.logic.networking.PlayServices
+import pl.enves.ttr.utils.exceptions.MissingParameter
+import pl.enves.ttr.utils.{Code, Configuration}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.ExecutorContext._
+import scala.util.{Failure, Success}
 
 /**
  * Core game activity.
@@ -21,7 +30,6 @@ import pl.enves.ttr.utils.themes.Theme
  */
 class GameActivity extends StyledActivity with GameManager with ColorManip {
   private[this] lazy val view: GameView = GameView(this, showMenu)
-
   private[this] lazy val botGameSetupLayer = getLayoutInflater.inflate(R.layout.bot_game_setup_layout, null)
 
   override def onCreate(state: Bundle): Unit = {
@@ -29,23 +37,33 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
 
     super.onCreate(state)
 
-    val b: Bundle = if (state != null) state
-    else Option(getIntent.getExtras) getOrElse (throw new UninitializedError())
+    val b: Bundle =
+      Option(state) orElse
+        Option(getIntent.getExtras) getOrElse {
+        throw new UninitializedError()
+      }
 
-    val gameType = Game withName (b getString "TYPE")
-    gameType match {
+    Game withName b.getString(Code.TYPE) match {
       case Game.STANDARD =>
         game = Game.plain()
-        game.start(Player.X)
+        game.playerSide = Player.X
       case Game.BOT =>
         game = Game.bot()
       case Game.CONTINUE =>
         game = Game.load(GameState.load())
       case Game.GPS_MULTIPLAYER =>
-        val ng = Game.network(b.getStringArrayList("PLAYERS"))
-        game = ng
+        game = PlayServicesGame()
+        b getString Code.DATA match {
+          case Code.INVITATION => startActivityForResult(PlayServices.inboxIntent, Code.SELECT_INVITATIONS)
+          case Code.PLAYERS => startActivityForResult(PlayServices.selectPlayerIntent, Code.SELECT_PLAYERS)
+          case Code.REMATCH => PlayServices rematch b.getString(Code.REMATCH) onComplete {
+            case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
+            case Failure(any) => error(s"Failture when starting rematch")
+              finish()
+          }
+        }
       case s =>
-        throw new IllegalArgumentException(s"Invalid game type: $s")
+        throw new MissingParameter(s"Invalid game type: $s")
     }
 
     val frameLayout = new FrameLayout(this)
@@ -67,36 +85,50 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val chooseXButton = find[ImageButton](R.id.button_symbol_X)
     val chooseOButton = find[ImageButton](R.id.button_symbol_O)
 
-    chooseXButton onClick onPlayWithBotAsX
-    chooseOButton onClick onPlayWithBotAsO
+    chooseXButton onClick playAsX
+    chooseOButton onClick playAsO
 
     val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
-    difficultySeekBar onChange onDifficultyChanged
+    difficultySeekBar onChange changeDifficulty
   }
 
-  override def onStart(): Unit = {
-    super.onStart()
-    log("Starting")
-    if (game.gameType == Game.BOT) {
-      val botGame = game.asInstanceOf[BotGame]
-      botGame.startThinkingIfNeeded()
-      if (botGame.getHuman.isEmpty) {
-        showChooser()
+  override def onActivityResult(request: Int, response: Int, data: Intent) = request match {
+    case Code.SELECT_PLAYERS => if (response == Activity.RESULT_OK) {
+      log("Inviting player to match")
+      val players = data.getStringArrayListExtra(Games.EXTRA_PLAYER_IDS)
+      PlayServices createMatch players onComplete {
+        case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
+        case Failure(any) => error(s"Failture when creating match with $any")
+          finish()
       }
+    } else {
+      log("Choose player activity cancelled by player")
+      finish()
     }
+
+    case Code.SELECT_INVITATIONS => if (response == Activity.RESULT_OK) {
+      val turnBasedMatch: Option[TurnBasedMatch] = Option(data.getParcelableExtra(Multiplayer.EXTRA_TURN_BASED_MATCH))
+      val invitation: Option[Invitation] = Option(data.getParcelableExtra(Multiplayer.EXTRA_INVITATION))
+      if (turnBasedMatch.isDefined) {
+        log("Starting received match")
+        game.asInstanceOf[PlayServicesGame] start turnBasedMatch.get
+      } else if (invitation.isDefined) {
+        PlayServices accept invitation.get onComplete {
+          case Success(newMatch) => game.asInstanceOf[PlayServicesGame] start newMatch
+          case Failure(any) => error(s"Failture when accepting invitation with $any")
+        }
+      }
+    } else {
+      log("Select game dialog cancelled")
+      finish()
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
   }
 
-  override def onResume(): Unit = {
-    super.onResume()
-    log("Resuming")
-    view.onResume()
-  }
-
-  override def onPause(): Unit = {
-    super.onPause()
-    log("Pausing")
-    view.onPause()
+  override def onTouchEvent(e: MotionEvent): Boolean = {
+    log("touched")
+    return super.onTouchEvent(e)
   }
 
   override def onSaveInstanceState(outState: Bundle): Unit = {
@@ -104,17 +136,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     outState.putString("TYPE", Game.CONTINUE.toString)
 
     game.stop()
-
-    GameState store game
-  }
-
-  override def onStop() = {
-    super.onStop()
-    log("Stopping")
-
-    game.stop()
-
-    GameState store game
+    if (game.isSavable) GameState store game
   }
 
   override def setTypeface(typeface: Typeface): Unit = {
@@ -155,16 +177,64 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     difficultySeekBar.setColors(theme.color1, theme.color2)
   }
 
+  override def onPause(): Unit = {
+    log("Pausing")
+    super.onPause()
+    view.onPause()
+  }
+
+  override def onResume(): Unit = {
+    log("Resuming")
+    super.onResume()
+    view.onResume()
+  }
+
+  override def onStart() = {
+    log("Starting")
+    super.onStart()
+
+    if (game.gameType == Game.BOT) {
+      val botGame = game.asInstanceOf[BotGame]
+      botGame.startThinkingIfNeeded()
+      if (botGame.getHuman.isEmpty) {
+        showChooser()
+      }
+    }
+
+    game.resume()
+  }
+
+  override def onStop() = {
+    log("Stopping")
+
+    game.pause()
+
+    super.onStop()
+
+    // There is no point to keep game that cannot be saved.
+    if (game.isSavable)
+      if (game.finished) GameState.clear()
+      else GameState store game
+    if (game.finished)
+      finish()
+  }
+
   def showMenu(): Unit = {
     val itnt = intent[GameEndedActivity]
     itnt.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
     itnt.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     itnt.putExtra("GAME_DATA", game.toJson.compactPrint)
+
+    game match {
+      case multiplayer: PlayServicesGame => itnt.putExtra(Code.REMATCH, multiplayer.matchId)
+      case _ => {}
+    }
+
     finish()
     itnt.start()
   }
 
-  def showChooser(): Unit = {
+  def showChooser(showDifficulty: Boolean = true) = runOnMainThread {
     log("showing chooser")
 
     val chooseSymbolText = find[TextView](R.id.text_choose_symbol)
@@ -181,16 +251,21 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     chooseSymbolText.setVisibility(View.VISIBLE)
     chooseXButton.setVisibility(View.VISIBLE)
     chooseOButton.setVisibility(View.VISIBLE)
-
-    difficultyText.setVisibility(View.VISIBLE)
-    difficultySeekBar.setVisibility(View.VISIBLE)
-    difficultyNumber.setVisibility(View.VISIBLE)
+    if (showDifficulty) {
+      difficultyText.setVisibility(View.VISIBLE)
+      difficultySeekBar.setVisibility(View.VISIBLE)
+      difficultyNumber.setVisibility(View.VISIBLE)
+    } else {
+      difficultyText.setVisibility(View.GONE)
+      difficultySeekBar.setVisibility(View.GONE)
+      difficultyNumber.setVisibility(View.GONE)
+    }
 
     val difficulty = Configuration.botDifficulty
     difficultySeekBar.setProgress(difficulty)
     if (difficulty == 0) {
       //seekBar' default progress is 0, so there is no change informed to ProgressChangeListener
-      onDifficultyChanged(difficultySeekBar, difficulty, false)
+      changeDifficulty(difficultySeekBar, difficulty, false)
     }
   }
 
@@ -231,21 +306,29 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     }
   }
 
-  private[this] def onPlayWithBotAsX(v: View) = {
-    game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
-    setupBot()
-    game.start(Player.X)
-    closeChooser()
+  private[this] def playAsX(v: View) = game match {
+    case game: BotGame =>
+      game.asInstanceOf[BotGame].setHumanSymbol(Player.X)
+      setupBot()
+      game.playerSide = Player.X
+      closeChooser()
+    case game: PlayServicesGame =>
+      game.playerSide = Player.X
+      closeChooser()
   }
 
-  private[this] def onPlayWithBotAsO(v: View) = {
-    game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
-    setupBot()
-    game.start(Player.X)
-    closeChooser()
+  private[this] def playAsO(v: View) = game match {
+    case game: BotGame =>
+      game.asInstanceOf[BotGame].setHumanSymbol(Player.O)
+      setupBot()
+      game.playerSide = Player.X
+      closeChooser()
+    case game: PlayServicesGame =>
+      game.playerSide = Player.O
+      closeChooser()
   }
 
-  private[this] def onDifficultyChanged(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
+  private[this] def changeDifficulty(seekBar: SeekBar, progress: Int, fromUser: Boolean): Unit = {
     val difficultyNumber = find[TextView](R.id.text_difficulty_number)
 
     difficultyNumber.setText((progress + 1).toString)

@@ -8,7 +8,7 @@ import android.widget._
 import com.google.android.gms.ads.AdView
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.AdUtils
+import pl.enves.ttr.utils.{Code, AdUtils}
 import pl.enves.ttr.utils.JsonProtocol._
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
@@ -105,10 +105,13 @@ class GameEndedActivity extends StyledActivity with AdUtils {
     itnt.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
     jsValue.asJsObject.fields("type").convertTo[Game.Value] match {
       case Game.STANDARD =>
-        itnt.putExtra("TYPE", Game.STANDARD.toString)
+        itnt.putExtra(Code.TYPE, Game.STANDARD.toString)
       case Game.BOT =>
-        itnt.putExtra("TYPE", Game.BOT.toString)
-      case Game.GPS_MULTIPLAYER => //TODO
+        itnt.putExtra(Code.TYPE, Game.BOT.toString)
+      case Game.GPS_MULTIPLAYER =>
+        itnt.putExtra(Code.TYPE, Game.GPS_MULTIPLAYER.toString)
+        itnt.putExtra(Code.DATA, Code.REMATCH)
+        itnt.putExtra(Code.REMATCH, b.getString(Code.REMATCH))
       case _ =>
         error("bad game type")
         return

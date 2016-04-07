@@ -1,13 +1,16 @@
 package pl.enves.androidx
+package views
 
-import android.content.{Context, Intent, SharedPreferences}
-import android.os.{Build, Bundle, Handler, Looper}
+import android.content.Intent
+import android.os.{Build, Handler, Looper}
 import android.support.v7.app.AppCompatActivity
 import pl.enves.androidx.context.ContextRegistry
+import pl.enves.androidx.helpers.FunctionHelper
 
 import scala.reflect.{ClassTag, classTag}
 
-abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry with Logging {
+abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry
+with Logging with FunctionHelper {
   type ID = Int
 
   private lazy val handler = new Handler(Looper.getMainLooper)
@@ -19,18 +22,16 @@ abstract class ExtendedActivity extends AppCompatActivity with ContextRegistry w
 
   protected def sendIntent = new Intent(Intent.ACTION_SENDTO)
 
-  protected def UiThread(f: () => Unit) = {
+  def runOnMainThread(f: => Unit): Unit = {
     lazy val runnable = new Runnable() {
-      def run() = f()
+      override def run() = f
     }
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP_MR1) {
       runOnUiThread(runnable)
     }
     else {
-      if (uiThread == Thread.currentThread) f()
+      if (uiThread == Thread.currentThread) f
       else handler.post(runnable)
     }
   }
-
-  protected implicit def UnitToUnit(f: => Unit): () => Unit = () => f
 }

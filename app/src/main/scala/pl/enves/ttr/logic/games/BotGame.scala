@@ -51,7 +51,8 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
   /**
    * Initiates the game with given player.
    */
-  override protected def onStart(startingPlayer: Player.Value) = {
+  protected def start(startingPlayer: Player.Value) = {
+
     log("Creating new game")
     log(s"Starting player: ${_player}")
     _player = startingPlayer
@@ -74,6 +75,8 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
       throw new UnsupportedOperationException("Cannot redefine human symbol")
     }
   }
+
+  override def isSavable: Boolean = human.isDefined
 
   /**
    * Makes a human move, whether it's a rotation or putting symbol.
@@ -114,8 +117,6 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
   } else {
     true
   }
-
-  protected def boardVersion = board.version
 
   override def toMap = Map(
     "player" -> _player,

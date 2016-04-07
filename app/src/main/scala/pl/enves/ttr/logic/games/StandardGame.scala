@@ -14,7 +14,7 @@ class StandardGame(board: Board = Board()) extends Game(board) {
   /**
    * Initiates the game with given player.
    */
-  protected def onStart(startingPlayer: Player.Value) = {
+  protected def start(startingPlayer: Player.Value) = {
     log("Creating new game")
     log(s"Starting player: ${_player}")
     _player = startingPlayer
@@ -38,17 +38,15 @@ class StandardGame(board: Board = Board()) extends Game(board) {
       case Rotation(b, r) => board rotate (b, r)
     }
 
-    movesLog.append(LogEntry(player, move))
+    movesLog append LogEntry(player, move)
 
-    _player = if (player == Player.X) Player.O else Player.X
+    _player = _player.other
     log(s"Player set to ${_player}")
 
     return res
   }
 
   def locked: Boolean = false
-
-  protected def boardVersion = board.version
 }
 
 object StandardGame {

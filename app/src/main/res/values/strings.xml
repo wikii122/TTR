@@ -13,7 +13,8 @@
     <string name="pick_theme">theme</string>
     <string name="licenses">licenses</string>
     <string name="feedback">feedback</string>
-    <string name="invitations">new invitations: %d</string>
+    <string name="noconnection">no connection</string>
+    <string name="activity">activity: %d</string>
     <string name="new_game">new game</string>
     <string name="settings">settings</string>
     <string name="continue_game">continue</string>

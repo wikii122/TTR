@@ -1,7 +1,7 @@
 package pl.enves.ttr.utils
 
 import com.google.android.gms.ads.{AdRequest, AdView}
-import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.views.ExtendedActivity
 
 trait AdUtils extends ExtendedActivity {
 

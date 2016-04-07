@@ -3,7 +3,7 @@ package pl.enves.ttr.utils
 import android.graphics.Typeface
 import android.view.View
 import android.widget.TextView
-import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.views.ExtendedActivity
 import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.{BuildConfig, R}
 

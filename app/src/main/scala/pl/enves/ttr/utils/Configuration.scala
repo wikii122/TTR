@@ -37,5 +37,5 @@ object Configuration {
     prefed.commit()
   }
 
-  def isMultiplayerAvailable: Boolean = false // PlayServices.isAvailable
+  def isMultiplayerAvailable: Boolean = true // PlayServices.isAvailable
 }

@@ -4,7 +4,7 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.GameManager
+import pl.enves.ttr.logic.{Player, GameManager}
 import pl.enves.ttr.utils.themes.Theme
 
 /**

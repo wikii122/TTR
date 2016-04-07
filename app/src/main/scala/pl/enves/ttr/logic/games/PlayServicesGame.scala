@@ -1,66 +1,66 @@
 package pl.enves.ttr.logic.games
 
-import java.util
-
-import com.google.android.gms.common.api.ResultCallback
-import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMultiplayer.InitiateMatchResult
-import com.google.android.gms.games.multiplayer.turnbased.{TurnBasedMultiplayer, TurnBasedMatch}
+import com.google.android.gms.games.multiplayer.turnbased.{OnTurnBasedMatchUpdateReceivedListener, TurnBasedMatch}
+import pl.enves.androidx.context.ContextRegistry
+import pl.enves.ttr.GameActivity
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
+
 import scala.collection.JavaConversions._
 
-class PlayServicesGame(inputPlayers: Option[util.ArrayList[String]], board: Board = Board())
-  extends Game(board)
-  with ResultCallback[TurnBasedMultiplayer.InitiateMatchResult] {
+class PlayServicesGame(board: Board = Board()) extends Game(board)
+with OnTurnBasedMatchUpdateReceivedListener {
   override val gameType: Game.Value = Game.GPS_MULTIPLAYER
-  private[this] var playerSide = Player.X
-  private[this] var step = 0
-  private[this] val players = inputPlayers getOrElse ???
-  private[this] var game: Option[TurnBasedMatch] = None
 
-  private[this] lazy val otherPlayer: String = if (inputPlayers.isDefined)
-      game.get getParticipantId inputPlayers.get.last
-    else
-      "" // TODO join existing game
+  private[this] lazy val myParticipantId: String =
+    turnBasedMatch.get getParticipantId PlayServices.playerData.getPlayerId
+  private[this] lazy val otherParticipantId: String =
+    turnBasedMatch.get.getParticipantIds.toList.filterNot(_ == myParticipantId).head
+  private[this] var _turnBasedMatch: Option[TurnBasedMatch] = None
+  private[this] lazy val activity: GameActivity = ContextRegistry.context.asInstanceOf[GameActivity]
 
-  PlayServices createMatch (this, players)
-  override def locked: Boolean = player != playerSide && step > 0
-
-  override protected def boardVersion: Int = ???
-
-  def initialize() = {
-    val data = Map[String, Any](
-        "state" -> this.toMap,
-        "step" -> step,
-        "currentPlayer" -> Player.X.toString // X always starts
-      ).toJson.toString()
-
-    PlayServices.takeTurn(game.get, data, otherPlayer)
+  private[this] def turnBasedMatch = _turnBasedMatch
+  private[this] def turnBasedMatch_=(newMatch: Option[TurnBasedMatch]) = {
+    _turnBasedMatch = newMatch
+    moved = false
   }
+  /** Setting their_turn flag by GPS seems to be too slow, this is fallback indicator. */
+  private[this] var moved = false
 
-  def update(data: String) = {
-    val state = data.parseJson
-  }
+  override def locked: Boolean = !myTurn
 
+  override def isSavable = false
 
-  override def onResult(r: InitiateMatchResult): Unit = {
-    game = Option(r.getMatch)
-    if (game.isDefined) {
-      Option(game.get.getData) match {
-        case None => initialize()
-        case Some(state) => update(state.toString)
-      }
-    } else {
-      error(s"Game offline, reason: ${r.getStatus}")
+  override protected def start(player: Player.Value): Unit = {
+    log(s"Initializing this player to $player")
+
+    player match {
+      case Player.O =>
+        _player = player.other
+        takeTurn()
+      case Player.X =>
+        _player = player
     }
+  }
+
+  override def resume() = {
+    log("Registered match update listener")
+    PlayServices.register(this)
+  }
+
+  override def pause() = {
+    log("Unregistered match update listener")
+    PlayServices.unregister()
+    
+    if (finished)
+      PlayServices.finish(turnBasedMatch.get)
   }
 
   override protected def onMove(move: Move): Boolean = {
     implicit val player = this.player
-
     if (finished) throw new GameWon(s"Game is finished. $winner has won.")
 
     log(s"Move: $move for $player")
@@ -70,21 +70,76 @@ class PlayServicesGame(inputPlayers: Option[util.ArrayList[String]], board: Boar
       case Rotation(b, r) => board rotate (b, r)
     }
 
+    movesLog.append(LogEntry(player, move))
+
     _player = player.other
-    step += 1
 
-    log(s"Player set to ${_player}")
-
-    ???
+    if (myTurn)
+      takeTurn()
+    moved = true
 
     return res
   }
 
-  override protected def onStart(player: Player.Value): Unit = {
-    playerSide = player
+  def matchId = turnBasedMatch.get.getMatchId
+
+  override def onTurnBasedMatchRemoved(s: String): Unit = ???
+
+  override def onTurnBasedMatchReceived(newMatch: TurnBasedMatch): Unit =
+    if (newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
+      log("Received update from remote device")
+      this.turnBasedMatch = Some(newMatch)
+
+      val data = new String(newMatch.getData, "utf-8")
+      updateLocalState(data)
+    } else {
+      log("Ignored update from different match")
+    }
+
+  def start(newMatch: TurnBasedMatch) = {
+    log("Received match instance")
+    turnBasedMatch = Option(newMatch)
+    startMatch(turnBasedMatch.get)
+  }
+
+  private[this] def startMatch(turnBasedMatch: TurnBasedMatch) = {
+    val data = Option(turnBasedMatch.getData)
+    if (data.isDefined) {
+      log("Catching up to state")
+      updateLocalState(new String(data.get, "utf-8"))
+    }
+    else initializeMatch()
+  }
+
+  private[this] def myTurn =
+    turnBasedMatch.isDefined &&
+    turnBasedMatch.get.getTurnStatus == TurnBasedMatch.MATCH_TURN_STATUS_MY_TURN &&
+    turnBasedMatch.get.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE &&
+    !moved
+
+  private[this] def initializeMatch() = {
+    log("Sending game initialization data")
+    val data = this.toMap.toJson.toString()
+    PlayServices.takeTurn(turnBasedMatch.get, data, myParticipantId)
+    activity.showChooser(showDifficulty=false)
+  }
+
+  private[this] def takeTurn() = {
+    PlayServices.takeTurn(turnBasedMatch.get, this.toMap.toJson.toString(), otherParticipantId)
+    moved = true
+  }
+
+  private[this] def updateLocalState(rawData: String) = {
+    val data = rawData.parseJson.asJsObject
+
+    val player = data.fields("player").convertTo[Player.Value]
+    _player = if (myTurn) player
+      else player.other
+
+    board sync Board(data.fields("board"))
   }
 }
 
 object PlayServicesGame {
-  def apply(players: Option[util.ArrayList[String]]) = new PlayServicesGame(players)
+  def apply() = new PlayServicesGame(Board())
 }

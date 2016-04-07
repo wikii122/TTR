@@ -6,6 +6,7 @@ import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{Button, TextView}
 import pl.enves.androidx.Logging
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.utils.Code
 import pl.enves.ttr.utils.styled.StyledFragment
 import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.{R, StartGameActivity}
@@ -39,7 +40,7 @@ class ChooseGameFragment extends StyledFragment with Logging {
   }
 
   private[this] def onNetworkGame(v: View) = {
-    getActivity.asInstanceOf[StartGameActivity].startNetworkGame()
+    getActivity.asInstanceOf[StartGameActivity].startNetworkGame(Code.PLAYERS)
   }
 
   override def setTypeface(typeface: Typeface): Unit = {

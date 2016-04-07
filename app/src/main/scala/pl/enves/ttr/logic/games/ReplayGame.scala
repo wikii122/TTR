@@ -11,7 +11,9 @@ class ReplayGame(replayedGameType: Game.Value,
                  board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.REPLAY
 
-  override protected def boardVersion = 0
+  override def isSavable = false
+
+  override protected def version = 0
 
   private var replayMove = 0
 
@@ -68,8 +70,8 @@ class ReplayGame(replayedGameType: Game.Value,
     log("replaying next move")
     if (replayMove < movesLog.size) {
       val entry = movesLog(replayMove)
-      implicit val player = entry.getPlayer
-      entry.getMove match {
+      implicit val player = entry.player
+      entry.move match {
         case Position(x, y) => board move(x, y)
         case Rotation(b, r) => board rotate(b, r)
       }
@@ -84,7 +86,7 @@ class ReplayGame(replayedGameType: Game.Value,
 
   override def winner: Option[Player.Value] = win
 
-  override protected def onStart(player: Player.Value): Unit = {
+  override protected def start(player: Player.Value): Unit = {
     _player = player
   }
 

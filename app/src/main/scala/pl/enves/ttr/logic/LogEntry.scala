@@ -5,11 +5,8 @@ import pl.enves.ttr.utils.JsonMappable
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
-class LogEntry(player: Player.Value, move: Move) extends Logging with JsonMappable {
-  def getPlayer = player
-
-  def getMove = move
-
+class LogEntry(val player: Player.Value, val move: Move) extends Logging with JsonMappable {
+  
   override def toMap: Map[String, Any] = Map(
     "player" -> player.toJson,
     "move" -> move.toJson

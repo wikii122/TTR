@@ -1,12 +1,12 @@
 package pl.enves.ttr
 
-import android.content.{ActivityNotFoundException, Intent}
+import android.content.Intent
 import android.content.res.TypedArray
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.{Toast, Button, TextView}
+import android.widget.{Button, TextView}
 import com.google.android.gms.ads.AdView
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.utils.styled.ToolbarActivity
@@ -14,7 +14,6 @@ import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
 import pl.enves.ttr.utils.{AdUtils, Configuration}
 
 import scala.collection.mutable.ArrayBuffer
-import scala.util.Try
 
 class SettingsActivity extends ToolbarActivity with AdUtils {
 

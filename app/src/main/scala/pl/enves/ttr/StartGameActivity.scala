@@ -3,24 +3,20 @@ package pl.enves.ttr
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Typeface
+import android.media.browse.MediaBrowser.ConnectionCallback
 import android.os.Bundle
 import android.support.v4.app.{Fragment, FragmentTransaction}
-import android.view.View
-import android.widget.Button
-import com.google.android.gms.games.Games
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState}
-import pl.enves.ttr.utils.dialogs.NotAvailableDialog
 import pl.enves.ttr.utils.start.{BackButtonFragment, ChooseGameFragment, MainMenuFragment}
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.utils.{Configuration, LogoUtils, dialogs}
+import pl.enves.ttr.utils.{Code, Configuration, LogoUtils}
 
 class StartGameActivity extends StyledActivity with LogoUtils {
-  private[this] final val SELECT_PLAYERS = 9003
-
-  private[this] lazy val mainMenuFragment: Fragment = new MainMenuFragment
+  private[this] lazy val mainMenuFragment = new MainMenuFragment
+  private[this] val GPS_LAUNCH = 0x14400000
 
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
@@ -46,25 +42,30 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     }
   }
 
-  override def onPause() {
-    super.onPause()
+  override def onResume() = {
+    super.onResume()
+    log("Resuming")
+
+    if (launchedFromGPSNotification) {
+      log("Play services intented this activity, jumping to chooser")
+      startNetworkGame(Code.INVITATION)
+      getIntent.putExtra(Code.LAUNCHED, true)
+    }
   }
 
   override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
-    case SELECT_PLAYERS => if (response == Activity.RESULT_OK) startNetworkGame(data)
-      else return
-    case PlayServices.SIGN_IN => if (response == Activity.RESULT_OK) {
-        log(s"Signed in to Google Play Services")
-        log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
-        enableButtons()
-      } else {
-        warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
-      }
-    case a => error(s"onActivityResult did not match request with id: $a")
-  }
+    case Code.SIGN_IN => if (response == Activity.RESULT_OK) {
+      log(s"Signed in to Google Play Services")
+      log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
 
-  def showDialog(reason: dialogs.Reason) = reason match {
-    case dialogs.PaidOnly => val dialog = NotAvailableDialog.show()
+      if (PlayServices.notConnected) PlayServices.connect()
+      else enableButtons()
+
+      mainMenuFragment.onConnected()
+    } else {
+      warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
   }
 
   private[this] def prepareGameIntent(i: Intent): Intent = {
@@ -83,8 +84,12 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra("TYPE", Game.STANDARD.toString)
-    itnt start()
+    itnt.putExtra(Code.TYPE, Game.STANDARD.toString)
+    itnt.start()
+  }
+
+  def onConnected() = {
+    mainMenuFragment.onConnected()
   }
 
   def startBotGame() = {
@@ -93,26 +98,16 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     hideNewGameMenu()
 
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra("TYPE", Game.BOT.toString)
-    itnt start()
+    itnt.putExtra(Code.TYPE, Game.BOT.toString)
+    itnt.start()
   }
 
-  def startNetworkGame() = if (Configuration.isMultiplayerAvailable) {
-    val intn = PlayServices.getPlayerSelectIntent
-    startActivityForResult(intn, SELECT_PLAYERS)
-  } else {
-    showDialog(dialogs.PaidOnly)
-  }
-
-  private def startNetworkGame(i: Intent) = {
-    log("Intending to start new StandardGame")
-
+  def startNetworkGame(code: String) = {
     val itnt = prepareGameIntent(intent[GameActivity])
-    itnt putExtra ("TYPE", Game.GPS_MULTIPLAYER.toString)
-    itnt putExtra ("PLAYERS", i getStringArrayListExtra Games.EXTRA_PLAYER_IDS)
-    itnt start ()
+    itnt.putExtra(Code.TYPE, Game.GPS_MULTIPLAYER.toString)
+    itnt.putExtra(Code.DATA, code)
+    itnt.start ()
   }
-
 
   /**
    * Used to continue game in progress
@@ -120,10 +115,11 @@ class StartGameActivity extends StyledActivity with LogoUtils {
    */
   def continueGame() = {
     log("Intending to continue previously run game")
+
     val itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra("TYPE", Game.CONTINUE.toString)
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.putExtra(Code.TYPE, Game.CONTINUE.toString)
+    itnt.start()
   }
 
   /**
@@ -131,17 +127,23 @@ class StartGameActivity extends StyledActivity with LogoUtils {
    */
   def launchSettings() = {
     log("Intending to continue previously run game")
+
     val itnt = intent[SettingsActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.start()
   }
+
+  private[this] def launchedFromGPSNotification =
+    (getIntent.getFlags & GPS_LAUNCH) == GPS_LAUNCH &&
+    !getIntent.getBooleanExtra(Code.LAUNCHED, false)
 
   private[this] def launchTutorial() = {
     log("Intending to launch tutorial")
+
     val itnt = intent[TutorialActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra("FIRSTRUN", true)
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.putExtra("FIRSTRUN", true)
+    itnt.start()
   }
 
   private[this] def drawUI() = {
@@ -174,7 +176,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     getSupportFragmentManager.popBackStack()
   }
 
-  private[this] def enableButtons(): Unit = UiThread {
+  private[this] def enableButtons(): Unit = runOnMainThread {
     if (mainMenuFragment.isVisible) {
       mainMenuFragment.asInstanceOf[MainMenuFragment].setContinueButtonEnabled(GameState.active)
     }
