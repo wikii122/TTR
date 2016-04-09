@@ -298,8 +298,7 @@ class GameActivity extends StyledActivity with GameManager with ColorManip {
     val difficultySeekBar = find[SeekBar](R.id.seekBar_difficulty)
 
     val difficulty = difficultySeekBar.getProgress
-    g.setMaxTime((difficulty + 1) * 1000)
-    g.setMaxDepth(difficulty + 1)
+    g.difficulty = difficulty
 
     if (difficulty != Configuration.botDifficulty) {
       Configuration.botDifficulty = difficulty

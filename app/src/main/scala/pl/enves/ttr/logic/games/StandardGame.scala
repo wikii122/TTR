@@ -2,6 +2,7 @@ package pl.enves.ttr.logic.games
 
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.logic.networking.{Achievement, PlayServices}
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
@@ -42,6 +43,8 @@ class StandardGame(board: Board = Board()) extends Game(board) {
 
     _player = _player.other
     log(s"Player set to ${_player}")
+
+    if (res) PlayServices.achievement.step(Achievement.achievementHotSeat)
 
     return res
   }

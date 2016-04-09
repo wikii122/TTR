@@ -16,3 +16,11 @@ class Achievement(client: Option[GoogleApiClient]) {
   def increment(id: String, i: Int) = if (PlayServices.isConnected)
     Games.Achievements.increment(client.get, id, i)
 }
+
+object Achievement {
+  val achievement50thWin = "CgkIjumTpdwbEAIQAg"
+  val achievementWinWithHardestBot = "CgkIjumTpdwbEAIQAw"
+  val achievementDefeatFriends = "CgkIjumTpdwbEAIQBA"
+  val achievementHotSeat = "CgkIjumTpdwbEAIQBQ"
+  val achievement100thGame = "CgkIjumTpdwbEAIQBg"
+}

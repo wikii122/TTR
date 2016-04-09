@@ -8,6 +8,7 @@ import com.google.android.gms.games.multiplayer.turnbased.TurnBasedMatch
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic.games._
 import pl.enves.ttr.logic.inner.Board
+import pl.enves.ttr.logic.networking.{Achievement, PlayServices}
 import pl.enves.ttr.utils.JsonMappable
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
@@ -53,7 +54,15 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
    */
   final def make(move: Move): Boolean = {
     if (locked) throw new BoardLocked
-    onMove(move)
+    val res = onMove(move)
+
+    if (version == 1)
+      PlayServices.achievement.step(Achievement.achievement100thGame)
+
+    if (res)
+      PlayServices.achievement.step(Achievement.achievement50thWin)
+
+    return res
   }
 
   def winner: Option[Player.Value] = board.winner
@@ -72,7 +81,8 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Get field values
    */
-  def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int): Option[Player.Value] = board.quadrantField(quadrant, x, y)
+  def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int): Option[Player.Value] =
+    board.quadrantField(quadrant, x, y)
 
   /**
    * Get quadrant rotation
@@ -82,8 +92,9 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Get list of available rotations
    */
-  def availableRotations: List[Quadrant.Value] = if (nonFinished) board.availableRotations.toList
-  else Nil
+  def availableRotations: List[Quadrant.Value] =
+    if (nonFinished) board.availableRotations.toList
+    else Nil
 
   /**
    * Can quadrant be rotated
