@@ -4,6 +4,7 @@ import pl.enves.androidx.Logging
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.bot._
 import pl.enves.ttr.logic.inner._
+import pl.enves.ttr.logic.networking.{Achievement, PlayServices}
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
@@ -14,18 +15,14 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.BOT
 
   private[this] var algorithm: Option[MinMax] = None
-
   private[this] var human: Option[Player.Value] = None
-
   private[this] val minTime: Int = 1000
-
-  private[this] var maxTime: Int = 3000
-
-  private[this] var maxDepth: Int = 5
-
+  private[this] var _difficulty = 0
   private[this] val adaptiveTime = true
-
   private[this] val randomizeDecisions = true
+
+  private var maxTime: Int = 3000
+  private var maxDepth: Int = 5
 
   //TODO: Make interface for different algorithm classes
   private def startThinking(): Unit = {
@@ -100,6 +97,11 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
 
     switchPlayer()
 
+    if (difficulty == 9 && res &&
+      human.isDefined &&
+      player == human.get)
+      PlayServices.achievement.unlock(Achievement.achievementWinWithHardestBot)
+
     return res
   }
 
@@ -129,9 +131,13 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
 
   def getHuman: Option[Player.Value] = human
 
-  def setMaxTime(max: Int): Unit = maxTime = max
-
-  def setMaxDepth(max: Int): Unit = maxDepth = max
+  def difficulty = _difficulty
+  def difficulty_=(i: Int) = {
+    log(s"Setting difficulty to $i")
+    _difficulty = i
+    maxTime = (difficulty + 1) * 1000
+    maxDepth = difficulty + 1
+  }
 }
 
 object BotGame {
@@ -147,8 +153,7 @@ object BotGame {
     game._player = fields("player").convertTo[Player.Value]
     fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject)))
 
-    val maxTime = fields("maxTime").convertTo[Int]
-    game.setMaxTime(maxTime)
+    game.maxTime = fields("maxTime").convertTo[Int]
 
     if (human.isDefined) {
       game.setHumanSymbol(human.get)

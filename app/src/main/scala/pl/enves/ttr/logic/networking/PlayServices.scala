@@ -26,6 +26,8 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   private[this] val client = Option(clientInit())
   private[this] var signingIn = false
 
+  val achievement = new Achievement(client)
+
   def connect() = {
     if (!Configuration.isMultiplayerAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
     client.get connect ()
