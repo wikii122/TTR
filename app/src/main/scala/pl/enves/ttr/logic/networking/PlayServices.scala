@@ -29,8 +29,10 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   val achievement = new Achievement(client)
 
   def connect() = {
-    if (!Configuration.isMultiplayerAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
-    client.get connect ()
+    if (!Configuration.isMultiplayerAvailable)
+      throw new ServiceUnavailableException("There seems to be no " +
+        "Google Play Game Services available or not supported in this version")
+    client.get.connect()
   }
 
   def disconnect() = if (isConnected) client.get disconnect ()

@@ -3,6 +3,7 @@ package pl.enves.ttr.utils
 import android.content.{Context, SharedPreferences}
 import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.R
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.themes.Theme
 
 object Configuration {
@@ -37,5 +38,12 @@ object Configuration {
     prefed.commit()
   }
 
-  def isMultiplayerAvailable: Boolean = true // PlayServices.isAvailable
+  def GPS_opt_in = prefs.getBoolean("GPS_SUPPORT", true)
+
+  def GPS_opt_in_=(b: Boolean) = {
+    prefed.putBoolean("GPS_SUPPORT", b)
+    prefed.commit()
+  }
+
+  def isMultiplayerAvailable: Boolean = PlayServices.isAvailable && GPS_opt_in
 }
