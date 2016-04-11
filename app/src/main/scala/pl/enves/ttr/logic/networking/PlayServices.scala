@@ -105,7 +105,7 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   def playerData = Games.Players.getCurrentPlayer(client.get)
 
-  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
+  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, false)
 
   def accept(invitation: Invitation) = Future {
     Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId)
