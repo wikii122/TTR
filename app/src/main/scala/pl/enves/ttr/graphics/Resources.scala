@@ -12,73 +12,74 @@ import android.content.res.AssetManager
 import android.graphics.Typeface
 import pl.enves.androidx.Logging
 import pl.enves.ttr.R
-import pl.enves.ttr.graphics.geometry.{GeometryId, TextGeometryProvider}
-import pl.enves.ttr.graphics.models.Square
+import pl.enves.ttr.graphics.geometry._
 import pl.enves.ttr.graphics.shaders._
-import pl.enves.ttr.graphics.texture.{CharactersTexture, TextureId}
+import pl.enves.ttr.graphics.texture.{AssetTexture, CharactersTexture, TextureId}
 import pl.enves.ttr.logic.Game
-import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.Configuration
 
 import scala.collection.mutable
 
 class Resources(context: Context, game: Game) extends Logging {
 
-  private val assetManager: AssetManager = context.getResources.getAssets
+  private[this] val assetManager: AssetManager = context.getResources.getAssets
 
-  private val models: mutable.HashMap[GeometryId.Value, AbstractGeometry] = mutable.HashMap()
+  private[this] val models: mutable.HashMap[GeometryId.Value, Geometry] = mutable.HashMap()
 
-  private val textures: mutable.HashMap[TextureId.Value, Int] = mutable.HashMap()
+  private[this] val textures: mutable.HashMap[TextureId.Value, Int] = mutable.HashMap()
 
-  private var maskShader: Option[MaskShader] = None
+  private[this] var maskShader: Option[MaskShader] = None
 
-  private var _theme: Option[Theme] = None
-
-  private val typeFace = Typeface.createFromAsset(assetManager, "fonts/comfortaa.ttf")
+  private[this] val typeFace = Typeface.createFromAsset(assetManager, Configuration.defaultTypefacePath)
 
   def createOpenGLResources(): Unit = {
     log("Creating OpenGL Resources")
 
-    addGeometry(GeometryId.Square, Square.getGeometry)
+    // clear old objects, just to be sure
+    models.clear()
+    textures.clear()
+    maskShader = None
 
-    addTexture(TextureId.MaskCross, new DrawableTexture(context, R.drawable.pat_cross_mod_mask).getTexture)
-    addTexture(TextureId.MaskRing, new DrawableTexture(context, R.drawable.pat_ring_mod_mask).getTexture)
-    addTexture(TextureId.MaskEmpty, new DrawableTexture(context, R.drawable.pat_empty_mod_mask).getTexture)
-    addTexture(TextureId.MaskArrowLeft, new DrawableTexture(context, R.drawable.pat_arrow_left_mod_mask).getTexture)
-    addTexture(TextureId.MaskArrowRight, new DrawableTexture(context, R.drawable.pat_arrow_right_mod_mask).getTexture)
+    addGeometry(GeometryId.Square, new SquareGeometry)
+
+    addTexture(TextureId.MaskCross, new AssetTexture(context, "images/game/cross_mask.png").getTexture)
+    addTexture(TextureId.MaskRing, new AssetTexture(context, "images/game/ring_mask.png").getTexture)
+    addTexture(TextureId.MaskEmpty, new AssetTexture(context, "images/game/empty_mask.png").getTexture)
+    addTexture(TextureId.MaskArrowLeft, new AssetTexture(context, "images/game/arrow_left_mask.png").getTexture)
+    addTexture(TextureId.MaskArrowRight, new AssetTexture(context, "images/game/arrow_right_mask.png").getTexture)
 
     val player1TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player1)
-      case Game.AI => context.getString(R.string.board_your_turn)
-      case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_your_turn)
+      case Game.BOT => context.getString(R.string.board_your_turn)
+      case Game.GPS_MULTIPLAYER => context.getString(R.string.board_your_turn)
+      case Game.REPLAY => context.getString(R.string.board_replay)
     }
 
     val player2TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player2)
-      case Game.AI => context.getString(R.string.board_bots_turn)
-      case _ /*TODO: Game.NETWORK*/ => context.getString(R.string.board_opponents_turn)
+      case Game.BOT => context.getString(R.string.board_bots_turn)
+      case Game.GPS_MULTIPLAYER => context.getString(R.string.board_opponents_turn)
+      case Game.REPLAY => context.getString(R.string.board_replay)
     }
+
+    val drawTextString = context.getString(R.string.board_draw)
     val winnerTextString = context.getString(R.string.board_winner)
-    val replayTextString = context.getString(R.string.board_replay)
 
     val words = Array(
       player1TurnTextString,
       player2TurnTextString,
-      winnerTextString)
-
-    val words2 = Array(
-      replayTextString
+      drawTextString,
+      winnerTextString
     )
 
     val charactersTexture = new CharactersTexture(256, typeFace, allChars(words))
     addTexture(TextureId.Font, charactersTexture.getTexture)
 
-    val charactersTexture2 = new CharactersTexture(512, typeFace, allChars(words2))
-    addTexture(TextureId.Font2, charactersTexture2.getTexture)
+    addGeometry(GeometryId.Player1TurnText, new TextGeometry(player1TurnTextString, charactersTexture))
+    addGeometry(GeometryId.Player2TurnText, new TextGeometry(player2TurnTextString, charactersTexture))
+    addGeometry(GeometryId.DrawText, new TextGeometry(drawTextString, charactersTexture))
+    addGeometry(GeometryId.WinnerText, new TextGeometry(winnerTextString, charactersTexture))
 
-    addGeometry(GeometryId.Player1TurnText, new TextGeometryProvider(player1TurnTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.Player2TurnText, new TextGeometryProvider(player2TurnTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.WinnerText, new TextGeometryProvider(winnerTextString, charactersTexture).getGeometry)
-    addGeometry(GeometryId.ReplayText, new TextGeometryProvider(replayTextString, charactersTexture2).getGeometry)
     //create shaders
     maskShader = Some(new MaskShader())
   }
@@ -95,7 +96,7 @@ class Resources(context: Context, game: Game) extends Logging {
     return set.toArray
   }
 
-  private def addGeometry(name: GeometryId.Value, geometry: AbstractGeometry): Unit = {
+  private def addGeometry(name: GeometryId.Value, geometry: Geometry): Unit = {
     models.update(name, geometry)
   }
 
@@ -105,13 +106,9 @@ class Resources(context: Context, game: Game) extends Logging {
 
   def getTexture(texture: TextureId.Value): Int = textures(texture)
 
-  def getGeometry(model: GeometryId.Value): AbstractGeometry = models(model)
+  def getGeometry(model: GeometryId.Value): Geometry = models(model)
 
   def getMaskShader: MaskShader = maskShader.get
-
-  def getTheme: Theme = _theme.get
-
-  def setTheme(theme: Theme): Unit = _theme = Some(theme)
 
   def getTypeFace: Typeface = typeFace
 }

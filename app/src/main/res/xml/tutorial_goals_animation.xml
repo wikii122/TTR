@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <animation-list>
     <item
-        drawable="images/tutorial_goals_1.png"
-        duration="1000"/>
+        drawable="images/tutorial/goals/1.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_goals_2.png"
-        duration="1000"/>
+        drawable="images/tutorial/goals/2.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_goals_3.png"
-        duration="1000"/>
+        drawable="images/tutorial/goals/3.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_goals_4.png"
-        duration="1000"/>
+        drawable="images/tutorial/goals/4.png"
+        duration="1000" />
     <item
-        drawable="images/tutorial_goals_5.png"
-        duration="3000"/>
+        drawable="images/tutorial/goals/5.png"
+        duration="3000" />
 </animation-list>

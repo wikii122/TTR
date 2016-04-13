@@ -8,11 +8,11 @@ import android.util.Log
 trait Logging {
   private[this] val name = getClass.getName
 
-  protected def log(msg: String) = Log.d(name, msg)
+  protected def log(msg: Any) = Log.d(name, msg.toString)
 
-  protected def warn(msg: String) = Log.w(name, msg)
+  protected def warn(msg: Any) = Log.w(name, msg.toString)
 
-  protected def error(msg: String) = Log.e(name, msg)
+  protected def error(msg: Any) = Log.e(name, msg.toString)
 
-  protected def wtf(msg: String) = Log.wtf(name, msg)
+  protected def wtf(msg: Any) = Log.wtf(name, msg.toString)
 }

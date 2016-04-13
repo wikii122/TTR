@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
+
+    <ImageButton
+        android:id="@+id/button_back"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginLeft="0dp"
+        android:layout_marginTop="0dp"
+        android:background="@null"
+        android:contentDescription="@string/abc_action_bar_up_description"
+        android:scaleType="center"
+        android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha" />
+
+    <TextView
+        android:id="@+id/text_game_ended"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/button_back"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="20dp"
+        android:text="@string/game_ended"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <LinearLayout
+        android:id="@+id/game_ended_menu_items_layout"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_centerVertical="true"
+        android:layout_gravity="center"
+        android:orientation="vertical">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/button_play_again_prompt"
+                style="@style/ButtonStyle"
+                android:text="@string/nav_prompt" />
+
+            <Button
+                android:id="@+id/button_play_again"
+                style="@style/ButtonStyle"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/button_play_again_prompt"
+                android:layout_toRightOf="@+id/button_play_again_prompt"
+                android:text="@string/play_again" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/button_replay_moves_prompt"
+                style="@style/ButtonStyle"
+                android:text="@string/nav_prompt" />
+
+            <Button
+                android:id="@+id/button_replay_moves"
+                style="@style/ButtonStyle"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/button_replay_moves_prompt"
+                android:layout_toRightOf="@+id/button_replay_moves_prompt"
+                android:text="@string/replay_moves" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal">
+
+            <Button
+                android:id="@+id/button_show_game_end_prompt"
+                style="@style/ButtonStyle"
+                android:text="@string/nav_prompt" />
+
+            <Button
+                android:id="@+id/button_show_game_end"
+                style="@style/ButtonStyle"
+                android:layout_alignParentTop="true"
+                android:layout_toEndOf="@+id/button_show_game_end_prompt"
+                android:layout_toRightOf="@+id/button_show_game_end_prompt"
+                android:text="@string/show_game_end" />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/game_ended_menu_items_layout"
+        android:layout_marginBottom="20dp"
+        android:layout_marginTop="20dp">
+
+        <com.google.android.gms.ads.AdView
+            android:id="@+id/ad_view_game_ended"
+            xmlns:ads="http://schemas.android.com/apk/res-auto"
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal|bottom"
+            ads:adSize="BANNER"
+            ads:adUnitId="@string/admob_test_banner_ad_unit_id" />
+
+    </FrameLayout>
+</RelativeLayout>

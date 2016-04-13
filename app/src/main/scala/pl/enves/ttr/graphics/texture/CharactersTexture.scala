@@ -6,36 +6,36 @@ import pl.enves.ttr.graphics._
 
 class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) extends Logging with TextureProvider {
 
-  private val size: Int = Math.ceil(Math.sqrt(charset.length)).toInt
+  private[this] val size: Int = Math.ceil(Math.sqrt(charset.length)).toInt
 
-  private val cellPx = sizePx / size
+  private[this] val cellPx = sizePx / size
 
-  private val backgroundMaskPaint = new Paint()
-  backgroundMaskPaint.setColor(Color.rgb(0, 255, 0))
-
-  private val textMaskPaint = new Paint()
+  private[this] val textMaskPaint = new Paint()
   textMaskPaint.setAntiAlias(true)
   textMaskPaint.setTypeface(typeface)
-  textMaskPaint.setColor(Color.rgb(0, 0, 255))
+  textMaskPaint.setColor(Color.rgb(255, 0, 0))
 
   //Find optimal font size
   //TODO: more optimal
   //TODO: respect font ascent and descent
-  private var fontSize = 10
+  private[this] var fontSize = 10
   while (measureFont(fontSize + 1)) {
     fontSize += 1
   }
 
   textMaskPaint.setTextSize(fontSize)
-  private val fontHeight = measureFontHeight(fontSize, textMaskPaint)
-  private val charWidthMax = measureFontWidth(fontSize, textMaskPaint)
-  private val charsWidths = Array.fill(charset.length)(0.0f)
+  private[this] val fontHeight = measureFontHeight(fontSize, textMaskPaint)
+  private[this] val charWidthMax = measureFontWidth(fontSize, textMaskPaint)
+  private[this] val charsWidths = Array.fill(charset.length)(0.0f)
   for (i <- charset.indices) {
     val cw = textMaskPaint.measureText(charset(i).toString)
     charsWidths(i) = cw
   }
-  private val fm = textMaskPaint.getFontMetrics
 
+  private[this] val fm = textMaskPaint.getFontMetrics
+  log("Font chars: " + charset.length)
+  log("Font cells: " + size * size)
+  log("Font cell size: " + cellPx)
   log("Font size: " + fontSize)
   log("Font height: " + fontHeight)
   log("Font top: " + fm.top)
@@ -93,8 +93,6 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
 
     // get a canvas to paint over the bitmap
     val canvas = new Canvas(bitmap)
-
-    canvas.drawRect(0, 0, sizePx, sizePx, backgroundMaskPaint)
 
     for (i <- charset.indices) {
       val (x, y) = coordinates(i)

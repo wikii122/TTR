@@ -2,7 +2,8 @@ package pl.enves.ttr.utils.styled
 
 import android.graphics.Typeface
 import android.view.{View, WindowManager}
-import pl.enves.androidx.ExtendedActivity
+import pl.enves.androidx.views.ExtendedActivity
+import pl.enves.ttr.utils.Configuration
 import pl.enves.ttr.utils.themes.Theme
 
 abstract class StyledActivity extends ExtendedActivity with Styled {
@@ -11,10 +12,10 @@ abstract class StyledActivity extends ExtendedActivity with Styled {
 
     setGui()
 
-    val typeface = Typeface.createFromAsset(getAssets, fontPath)
+    val typeface = Typeface.createFromAsset(getAssets, Configuration.defaultTypefacePath)
     setTypeface(typeface)
 
-    val theme = getSavedTheme(getResources, prefs.get)
+    val theme = Configuration.pickedTheme
     setColorTheme(theme)
   }
 

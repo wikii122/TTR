@@ -5,5 +5,8 @@ package object helpers
   with TextButtonHelper
   with ImageButtonHelper
   with DoubleButtonHelper
+  with SwitchHelper
   with IntentHelper
   with ToolbarHelper
+  with SeekBarHelper
+  with FunctionHelper

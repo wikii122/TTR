@@ -1,72 +1,29 @@
 package pl.enves.ttr
 
-import android.content.{Intent, SharedPreferences}
+import android.app.Activity
+import android.content.Intent
 import android.graphics.Typeface
+import android.media.browse.MediaBrowser.ConnectionCallback
 import android.os.Bundle
-import android.view.View
-import android.view.animation.AnimationUtils
-import android.widget.{ImageButton, ViewSwitcher, Button, TextView}
-import pl.enves.androidx.color.{ColorUiTweaks, DrawableManip}
+import android.support.v4.app.{Fragment, FragmentTransaction}
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.logic.{Game, GameState, Player}
+import pl.enves.ttr.logic.networking.PlayServices
+import pl.enves.ttr.logic.{Game, GameState}
+import pl.enves.ttr.utils.start.{BackButtonFragment, ChooseGameFragment, MainMenuFragment}
 import pl.enves.ttr.utils.styled.StyledActivity
-import pl.enves.ttr.utils.themes.{ThemedOneImageButton, Theme}
+import pl.enves.ttr.utils.themes.Theme
+import pl.enves.ttr.utils.{Code, Configuration, LogoUtils}
 
-class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableManip {
-  private[this] var gameActive = false
-  private[this] var viewSwitcher: Option[ViewSwitcher] = None
-  private[this] var viewSwitcherSwitched: Boolean = false
-
-  private[this] var newGameButton: Option[(Button, Button)] = None
-  private[this] var continueGameButton: Option[(Button, Button)] = None
-  private[this] var settingsButton: Option[(Button, Button)] = None
-
-  private[this] var newStandardButton: Option[(Button, Button)] = None
-  private[this] var newAIGameButton: Option[(Button, Button)] = None
-  private[this] var newNetworkButton: Option[(Button, Button)] = None
-  private[this] var backToMainButton: Option[ThemedOneImageButton] = None
-  private[this] var gameTypeText: Option[TextView] = None
-
-  private[this] var ticTacText: Option[TextView] = None
-  private[this] var turnText: Option[TextView] = None
-  private[this] var ttText: Option[TextView] = None
-  private[this] var tText: Option[TextView] = None
+class StartGameActivity extends StyledActivity with LogoUtils {
+  private[this] lazy val mainMenuFragment = new MainMenuFragment
+  private[this] val GPS_LAUNCH = 0x14400000
 
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
     super.onCreate(savedInstanceState)
     setContentView(R.layout.start_game_layout)
 
-    viewSwitcher = Some(find[ViewSwitcher](R.id.menuViewSwitcher))
-
-    newGameButton = Some((find[Button](R.id.button_new), find[Button](R.id.button_new_prompt)))
-    continueGameButton = Some((find[Button](R.id.button_continue), find[Button](R.id.button_continue_prompt)))
-    settingsButton = Some((find[Button](R.id.button_settings), find[Button](R.id.button_settings_prompt)))
-
-    newStandardButton = Some((find[Button] (R.id.button_create_standard), find[Button](R.id.button_create_standard_prompt)))
-    newAIGameButton = Some((find[Button] (R.id.button_create_ai), find[Button](R.id.button_create_ai_prompt)))
-    newNetworkButton = Some((find[Button] (R.id.button_create_network), find[Button](R.id.button_create_network_prompt)))
-    backToMainButton = Some(new ThemedOneImageButton(this, find[ImageButton](R.id.button_back_to_main), R.drawable.ic_action_back_mask))
-    gameTypeText = Some(find[TextView](R.id.text_game_type))
-
-    ticTacText = Some(find[TextView](R.id.text_tic_tac))
-    turnText = Some(find[TextView](R.id.text_turn))
-    ttText = Some(find[TextView](R.id.text_tt))
-    tText = Some(find[TextView](R.id.text_t))
-
-    newGameButton.get onClick flip
-    continueGameButton.get onClick continueGame
-    settingsButton.get onClick launchSettings
-
-    newStandardButton.get onClick startStandardGame
-    newAIGameButton.get onClick startAIGame
-    backToMainButton.get onClick unflip
-
-    val inAnimation = AnimationUtils.loadAnimation(this,  android.R.anim.fade_in)
-    val outAnimation = AnimationUtils.loadAnimation(this, android.R.anim.fade_out)
-
-    viewSwitcher.get.setInAnimation(inAnimation)
-    viewSwitcher.get.setOutAnimation(outAnimation)
+    drawUI()
 
     GameState.onDataChanged(enableButtons)
   }
@@ -77,146 +34,170 @@ class StartGameActivity extends StyledActivity with ColorUiTweaks with DrawableM
 
     enableButtons()
 
-    launchTutorialIfFirstrun()
-
-    if(viewSwitcherSwitched) {
-      unflip(viewSwitcher.get)
+    if (Configuration.isFirstRun) {
+      Configuration.isFirstRun = false
+      launchTutorial()
+    } else if (Configuration.isMultiplayerAvailable) {
+      PlayServices.connect()
     }
   }
 
-  override def onPause() {
-    super.onPause()
+  override def onResume() = {
+    super.onResume()
+    log("Resuming")
+
+    if (launchedFromGPSNotification) {
+      log("Play services intented this activity, jumping to chooser")
+      startNetworkGame(Code.INVITATION)
+      getIntent.putExtra(Code.LAUNCHED, true)
+    }
   }
 
+  override def onActivityResult(request: Int, response: Int, data: Intent): Unit = request match {
+    case Code.SIGN_IN => if (response == Activity.RESULT_OK) {
+      log(s"Signed in to Google Play Services")
+      log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
+
+      if (PlayServices.notConnected) PlayServices.connect()
+      else enableButtons()
+      Configuration.GPS_opt_in = true
+      mainMenuFragment.onConnected()
+    } else if (response == Activity.RESULT_CANCELED) {
+      Configuration.GPS_opt_in = false
+    } else {
+      warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
+    }
+    case a => error(s"onActivityResult did not match request with id: $a")
+  }
+
+  private[this] def prepareGameIntent(i: Intent): Intent = {
+    i addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
+    i addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
+
+    return i
+  }
 
   /**
    * Starts a new, two player game on single device.
    */
-  private[this] def startStandardGame(v: View) = {
+  def startStandardGame() = {
     log("Intending to start new StandardGame")
-    val itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-    itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-    itnt putExtra("TYPE", Game.STANDARD.toString)
-    itnt start()
+
+    hideNewGameMenu()
+
+    val itnt = prepareGameIntent(intent[GameActivity])
+    itnt.putExtra(Code.TYPE, Game.STANDARD.toString)
+    itnt.start()
   }
 
-  private[this] def startAIGame(v: View) = {
-    log("Intending to start new AIGame")
-    val botSymbol = Player.withName(prefs.get.getString("BOT_SYMBOL", Player.X.toString))
-    val humanSymbol = if (botSymbol == Player.X) Player.O else Player.X
-    val itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_CLEAR_TOP
-    itnt addFlags Intent.FLAG_ACTIVITY_SINGLE_TOP
-    itnt putExtra("TYPE", Game.AI.toString)
-    itnt putExtra("AI_HUMAN_SYMBOL", humanSymbol.toString)
-    itnt start()
+  def onConnected() = {
+    mainMenuFragment.onConnected()
+  }
+
+  def startBotGame() = {
+    log("Intending to start new BotGame")
+
+    hideNewGameMenu()
+
+    val itnt = prepareGameIntent(intent[GameActivity])
+    itnt.putExtra(Code.TYPE, Game.BOT.toString)
+    itnt.start()
+  }
+
+  def startNetworkGame(code: String) = {
+    val itnt = prepareGameIntent(intent[GameActivity])
+    itnt.putExtra(Code.TYPE, Game.GPS_MULTIPLAYER.toString)
+    itnt.putExtra(Code.DATA, code)
+    itnt.start ()
   }
 
   /**
    * Used to continue game in progress
    * Currently, only last game is taken into account.
    */
-  private[this] def continueGame(v: View) = {
+  def continueGame() = {
     log("Intending to continue previously run game")
+
     val itnt = intent[GameActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt putExtra("TYPE", Game.CONTINUE.toString)
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.putExtra(Code.TYPE, Game.CONTINUE.toString)
+    itnt.start()
   }
 
   /**
    * Used to launch settings activity
    */
-  private[this] def launchSettings(v: View) = {
+  def launchSettings() = {
     log("Intending to continue previously run game")
+
     val itnt = intent[SettingsActivity]
-    itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-    itnt start()
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.start()
   }
 
-  private[this] def launchTutorialIfFirstrun() = {
-    if (prefs.get.getBoolean("FIRSTRUN", true)) {
-      val ed: SharedPreferences.Editor = prefs.get.edit()
-      ed.putBoolean("FIRSTRUN", false)
-      ed.commit()
-      log("Intending to launch tutorial")
-      val itnt = intent[TutorialActivity]
-      itnt addFlags Intent.FLAG_ACTIVITY_REORDER_TO_FRONT
-      itnt putExtra("FIRSTRUN", true)
-      itnt start()
-    }
+  private[this] def launchedFromGPSNotification =
+    (getIntent.getFlags & GPS_LAUNCH) == GPS_LAUNCH &&
+    !getIntent.getBooleanExtra(Code.LAUNCHED, false)
+
+  private[this] def launchTutorial() = {
+    log("Intending to launch tutorial")
+
+    val itnt = intent[TutorialActivity]
+    itnt.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+    itnt.putExtra("FIRSTRUN", true)
+    itnt.start()
   }
 
-  private[this] def flip(v: View) = {
+  private[this] def drawUI() = {
+    alignLogo()
+
+    val transaction = getSupportFragmentManager.beginTransaction
+
+    transaction.replace(R.id.menuContainer, mainMenuFragment)
+    transaction.commit()
+  }
+
+  def showNewGameMenu(): Unit = {
     log("Showing new game menu")
-    viewSwitcher.get.showNext()
-    backToMainButton.get.setVisibility(View.VISIBLE)
-    viewSwitcherSwitched = true
+
+    val chooseGameFragment: Fragment = new ChooseGameFragment
+    val backButtonFragment: Fragment = new BackButtonFragment
+
+    val transaction = getSupportFragmentManager.beginTransaction
+
+    transaction.replace(R.id.menuContainer, chooseGameFragment)
+    transaction.replace(R.id.button_back_container, backButtonFragment)
+    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+    transaction.addToBackStack(null)
+    transaction.commit()
   }
 
-  private[this] def unflip(v: View) = {
+  private[this] def hideNewGameMenu() = {
     log("Showing main menu")
-    viewSwitcher.get.showPrevious()
-    backToMainButton.get.setVisibility(View.GONE)
-    viewSwitcherSwitched = false
+
+    getSupportFragmentManager.popBackStack()
   }
 
-  private[this] def enableButtons(): Unit = UiThread(() => {
-    if (activeGame) {
-      continueGameButton.get.enable()
-    } else {
-      continueGameButton.get.disable()
+  private[this] def enableButtons(): Unit = runOnMainThread {
+    if (mainMenuFragment.isVisible) {
+      mainMenuFragment.asInstanceOf[MainMenuFragment].setContinueButtonEnabled(GameState.active)
     }
-  })
+  }
 
   override def setTypeface(typeface: Typeface): Unit = {
     super.setTypeface(typeface)
 
-    newGameButton.get.setTypeface(typeface)
-    continueGameButton.get.setTypeface(typeface)
-    settingsButton.get.setTypeface(typeface)
-
-    newStandardButton.get.setTypeface(typeface)
-    newAIGameButton.get.setTypeface(typeface)
-    newNetworkButton.get.setTypeface(typeface)
-    gameTypeText.get.setTypeface(typeface)
-
-    ticTacText.get.setTypeface(typeface)
-    turnText.get.setTypeface(typeface)
-    ttText.get.setTypeface(typeface)
-    tText.get.setTypeface(typeface)
-
-    alignUpsideDownText(turnText.get)
+    setLogoTypeface(typeface)
   }
 
-  private[this] def alignUpsideDownText(text: TextView): Unit = {
-    val fm = text.getPaint.getFontMetrics
-    val descent = Math.round(fm.descent)
-    text.setPadding(0, 0, 0, descent)
+  override def setColorTheme(theme: Theme): Unit = {
+    super.setColorTheme(theme)
+
+    setLogoColorTheme(theme)
   }
 
   /**
    * Used to check if there is a game in progress.
    */
   private[this] def activeGame: Boolean = GameState.active
-
-  override def setColorTheme(theme: Theme): Unit = {
-    super.setColorTheme(theme)
-
-    newGameButton.get.setTextColor(theme.color1, theme.color2)
-    continueGameButton.get.setTextColor(colorStateList(theme.color1, 0.25f), colorStateList(theme.color2, 0.25f))
-    settingsButton.get.setTextColor(theme.color1, theme.color2)
-
-    newStandardButton.get.setTextColor(theme.color1, theme.color2)
-    newAIGameButton.get.setTextColor(theme.color1, theme.color2)
-    newNetworkButton.get.setTextColor(theme.color1, theme.color2)
-    backToMainButton.get.setColorTheme(theme)
-    gameTypeText.get.setTextColor(theme.color2)
-
-    ticTacText.get.setTextColor(theme.color1)
-    turnText.get.setTextColor(theme.color2)
-    ttText.get.setTextColor(theme.color1)
-    tText.get.setTextColor(theme.color2)
-  }
 }
