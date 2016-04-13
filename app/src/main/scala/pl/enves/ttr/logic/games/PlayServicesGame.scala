@@ -140,6 +140,11 @@ with OnTurnBasedMatchUpdateReceivedListener {
       else player.other
 
     board sync Board(data.fields("board"))
+
+    movesLog.clear()
+    data.fields("log").asInstanceOf[JsArray].elements foreach { jsValue =>
+      movesLog append LogEntry(jsValue.asJsObject)
+    }
   }
 }
 
