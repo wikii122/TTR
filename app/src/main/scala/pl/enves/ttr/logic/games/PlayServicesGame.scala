@@ -89,7 +89,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
   override def onTurnBasedMatchRemoved(s: String): Unit = ???
 
   override def onTurnBasedMatchReceived(newMatch: TurnBasedMatch): Unit =
-    if (newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
+    if (turnBasedMatch.isDefined && newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
       log("Received update from remote device")
       this.turnBasedMatch = Some(newMatch)
 
