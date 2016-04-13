@@ -73,7 +73,18 @@ private[logic] class Board private () extends Logging with JsonMappable {
       quadrants(Quadrant.second).line(x % Quadrant.size) ++ quadrants(Quadrant.fourth).line(x % Quadrant.size)
   }
 
-  def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int) = quadrants(quadrant).get(x % Quadrant.size, y % Quadrant.size)
+  def fieldState(x: Int, y: Int): Option[Player.Value] = {
+    // TODO automate this
+    val quadrant = if (y < Quadrant.size) {
+      if (x < Quadrant.size) Quadrant.first
+      else Quadrant.second
+    } else {
+      if (x < Quadrant.size) Quadrant.third
+      else Quadrant.fourth
+    }
+
+    return quadrants(quadrant).get(x % Quadrant.size, y % Quadrant.size)
+  }
 
   def quadrantRotation(quadrant: Quadrant.Value) = quadrants(quadrant).rotation
 
