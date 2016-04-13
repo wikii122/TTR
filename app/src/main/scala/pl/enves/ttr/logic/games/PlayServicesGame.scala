@@ -70,7 +70,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
       case Rotation(b, r) => board rotate(b, r)
     }
 
-    movesLog.append(LogEntry(player, move))
+    movesLog = LogEntry(player, move) :: movesLog
 
     _player = player.other
 
@@ -141,10 +141,9 @@ with OnTurnBasedMatchUpdateReceivedListener {
 
     board sync Board(data.fields("board"))
 
-    movesLog.clear()
-    data.fields("log").asInstanceOf[JsArray].elements foreach { jsValue =>
-      movesLog append LogEntry(jsValue.asJsObject)
-    }
+    movesLog = data.fields("log").asInstanceOf[JsArray].elements map { value =>
+      LogEntry(value.asJsObject)
+    } toList
   }
 }
 

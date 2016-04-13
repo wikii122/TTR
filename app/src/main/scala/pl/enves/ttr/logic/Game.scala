@@ -28,7 +28,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
 
   protected var _player: Player.Value = Player.X
 
-  val movesLog = ListBuffer[LogEntry]()
+  var movesLog: List[LogEntry] = Nil
 
   def isSavable = true
 
@@ -116,7 +116,7 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   override def toMap = Map(
     "player" -> _player,
     "board" -> board.toJson,
-    "log" -> (movesLog.toList map { entry => entry.toJson }),
+    "log" -> (movesLog map {_.toJson}),
     "type" -> gameType
   )
 }

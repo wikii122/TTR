@@ -106,7 +106,7 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
   override protected def onSyncState(game: Game): Unit = {
     // this is here and not in quadrants/fields for performance reasons
     if (game.movesLog.nonEmpty) {
-      val lastMove = game.movesLog.last.move
+      val lastMove = game.movesLog.head.move
       lastMove match {
         case rotation: Rotation =>
           val oldR = quadrants(rotation.board.id).getRotation

@@ -6,6 +6,9 @@ import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
+import scala.annotation.tailrec
+import scala.util.Try
+
 class ReplayGame(replayedGameType: Game.Value,
                  win: Option[Player.Value],
                  board: Board = Board()) extends Game(board) with Logging {
@@ -19,22 +22,13 @@ class ReplayGame(replayedGameType: Game.Value,
 
   private var thread: Option[Thread] = None
 
-  private def makeThread = new Thread(new Runnable {
-    override def run(): Unit = {
-      var done = false
-      while (!done) {
-        try {
-          Thread.sleep(1000)
-        } catch {
-          case e: InterruptedException =>
-            return
-        }
-        done = !replayNextMove()
-      }
+  private def makeThread = new Thread(
+    new Runnable {
+      override def run(): Unit = replayMoves(movesLog.reverse, sleep = true)
     }
-  })
+  )
 
-  def isReplaying = replayMove < movesLog.size
+  def isReplaying = replayMove < movesLog.length
 
   def getReplayedGameType = replayedGameType
 
@@ -55,31 +49,32 @@ class ReplayGame(replayedGameType: Game.Value,
     }
   }
 
-  def rewind(): Unit = {
-    var done = false
-    while (!done) {
-      done = !replayNextMove()
-    }
-  }
+  private def rewind(): Unit = replayMoves(movesLog.reverse.drop(board.version), sleep = false)
 
   override protected def onMove(move: Move): Boolean = {
     throw new GameWon(s"Game is finished. $winner has won.")
   }
 
-  def replayNextMove(): Boolean = {
-    log("replaying next move")
-    if (replayMove < movesLog.size) {
-      val entry = movesLog(replayMove)
-      implicit val player = entry.player
-      entry.move match {
-        case Position(x, y) => board move(x, y)
-        case Rotation(b, r) => board rotate(b, r)
+  private[this] def replayMoves(moves: List[LogEntry], sleep: Boolean=false): Unit = moves match {
+    case Nil =>
+    case entry::rest =>
+      log("replaying next move")
+      if (sleep) Try{
+        Thread.sleep(1000)
+      } recoverWith {
+        case e: InterruptedException => return
+        case e => throw e
       }
-      replayMove += 1
+
+      Try {
+        entry.move match {
+          case Position(x, y) => board.move(x, y)(entry.player)
+          case Rotation(b, r) => board.rotate(b, r)(entry.player)
+        }
+      }
+
       _player = if (player == Player.X) Player.O else Player.X
-      return true
-    }
-    return false
+      replayMoves(rest, sleep)
   }
 
   override def locked: Boolean = true
@@ -100,7 +95,11 @@ object ReplayGame {
     val gameType = fields("type").convertTo[Game.Value]
     val board = Board(fields("board"))
     val replayGame = new ReplayGame(gameType, board.winner)
-    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => replayGame.movesLog.append(LogEntry(jsValue.asJsObject)))
+
+    replayGame.movesLog = fields("log").asInstanceOf[JsArray].elements map { any =>
+      LogEntry(any.asJsObject)
+    } toList
+
     if (showEnd) replayGame.rewind()
     return replayGame
   }
