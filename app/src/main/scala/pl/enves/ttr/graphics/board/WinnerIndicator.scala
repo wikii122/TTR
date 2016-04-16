@@ -12,7 +12,7 @@ import pl.enves.ttr.utils.themes.Theme
 /**
  * Display winner in 1x0.25 rectangle
  */
-class WinnerIndicator(game: Game) extends SceneObject with ColorManip {
+class WinnerIndicator() extends SceneObject with ColorManip {
 
   setVisible(false)
 
@@ -50,7 +50,7 @@ class WinnerIndicator(game: Game) extends SceneObject with ColorManip {
     drawText.setTextColor(theme.color1)
   }
 
-  override protected def onAnimate(dt: Float): Unit = {
+  override protected def onSyncState(game: Game): Unit = {
     if (game.finished || game.gameType == Game.REPLAY) {
       setVisible(true)
       if (game.winner.isDefined) {

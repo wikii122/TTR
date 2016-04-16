@@ -32,7 +32,7 @@ class Field(quadrant: Quadrant.Value)
     value = v
   }
 
-  protected def getValue = value
+  def getValue = value
 
   def setWinning(w: Boolean): Unit = {
     winning = w

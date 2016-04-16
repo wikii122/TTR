@@ -2,6 +2,7 @@ package pl.enves.ttr.graphics
 
 import android.opengl.Matrix
 import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, Translation}
+import pl.enves.ttr.logic.Game
 import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.utils.{Algebra, Ray, Triangle}
 
@@ -19,6 +20,8 @@ trait SceneObject extends Algebra {
   protected def onAfterUpdateResources(resources: Resources, screenRatio: Float): Unit = {}
 
   protected def onUpdateTheme(theme: Theme): Unit = {}
+
+  protected def onSyncState(game: Game): Unit = {}
 
   protected def onAnimate(dt: Float): Unit = {}
 
@@ -97,6 +100,16 @@ trait SceneObject extends Algebra {
     var i = 0
     while (i < size) {
       children(i).updateTheme(theme)
+      i += 1
+    }
+  }
+
+  def syncState(game: Game): Unit = {
+    onSyncState(game)
+    val size = children.size
+    var i = 0
+    while (i < size) {
+      children(i).syncState(game)
       i += 1
     }
   }
