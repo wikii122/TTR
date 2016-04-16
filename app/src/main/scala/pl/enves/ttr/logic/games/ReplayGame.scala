@@ -6,7 +6,6 @@ import pl.enves.ttr.logic.inner.Board
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
-import scala.annotation.tailrec
 import scala.util.Try
 
 class ReplayGame(replayedGameType: Game.Value,
@@ -58,12 +57,11 @@ class ReplayGame(replayedGameType: Game.Value,
   private[this] def replayMoves(moves: List[LogEntry], sleep: Boolean=false): Unit = moves match {
     case Nil =>
     case entry::rest =>
-      log("replaying next move")
-      if (sleep) Try{
+      log(s"Replaying moves, left ${rest.length}")
+      if (sleep) try {
         Thread.sleep(1000)
-      } recoverWith {
+      } catch {
         case e: InterruptedException => return
-        case e => throw e
       }
 
       Try {
