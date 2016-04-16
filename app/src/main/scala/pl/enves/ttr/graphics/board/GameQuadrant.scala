@@ -10,9 +10,9 @@ import pl.enves.ttr.utils.Algebra
  * Basic size: 3.0x3.0
  * (0.0, 0.0) - in the middle
  */
-class GameQuadrant(makeMove: Move => Unit, quadrant: Quadrant.Value) extends SceneObject with Logging with Algebra {
+class GameQuadrant(game: Game, quadrant: Quadrant.Value) extends SceneObject with Logging with Algebra {
 
-  private[this] var rotation = QRotation.r0
+  private[this] var rotationOld = game.quadrantRotation(quadrant)
 
   private[this] var rotationAnimation: Option[QuadrantRotation] = None
 
@@ -20,7 +20,7 @@ class GameQuadrant(makeMove: Move => Unit, quadrant: Quadrant.Value) extends Sce
     (x, y) => {
       val nx = x + Quadrant.offset(quadrant)._1
       val ny = y + Quadrant.offset(quadrant)._2
-      new GameField(makeMove, quadrant, nx, ny)
+      new GameField(game, quadrant, nx, ny)
     }
   }
 
@@ -47,34 +47,43 @@ class GameQuadrant(makeMove: Move => Unit, quadrant: Quadrant.Value) extends Sce
     rotationAnimation = Some(new QuadrantRotation(1.0f, rotation, scale))
   }
 
-  override protected def onSyncState(game: Game): Unit = {
-    rotation = game.quadrantRotation(quadrant)
-  }
-
   override def onAnimate(dt: Float): Unit = {
-    rotationAnimation.get.animate(dt)
-  }
+    val rotationNew = game.quadrantRotation(quadrant)
+    val rotationDiff = rotationNew sub rotationOld
 
-  def startRotationAnimation(rotation: QRotation.Value): Unit = {
-    val ccw = rotation != QRotation.r90
-    rotationAnimation.get.setCCW(ccw)
-    rotationAnimation.get.start()
-
+    val animateChange = rotationDiff == QRotation.r0
     var x = 0
     var y = 0
     while (x < Quadrant.size) {
       y = 0
       while (y < Quadrant.size) {
-        fields(x)(y).stopAnimations()
+        fields(x)(y).setValue(game.quadrantField(quadrant, x, y), animateChange)
         y += 1
       }
       x += 1
     }
+
+    if (rotationDiff != QRotation.r0) {
+      //TODO: Consider 180 degrees rotations
+      val ccw = rotationDiff != QRotation.r90
+      rotationAnimation.get.setCCW(ccw)
+
+      rotationAnimation.get.start()
+
+      x = 0
+      while (x < Quadrant.size) {
+        y = 0
+        while (y < Quadrant.size) {
+          fields(x)(y).stopAnimations()
+          y += 1
+        }
+        x += 1
+      }
+    }
+    rotationOld = rotationNew
+
+    rotationAnimation.get.animate(dt)
   }
 
   def setWinning(x: Int, y: Int) = fields(x)(y).setWinning(true)
-
-  def getGameField(x: Int, y: Int): GameField = fields(x)(y)
-
-  def getRotation: QRotation.Value = rotation
 }

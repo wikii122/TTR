@@ -12,7 +12,7 @@ import pl.enves.ttr.logic._
 import pl.enves.ttr.utils.Triangle
 import pl.enves.ttr.utils.themes.Theme
 
-class Arrow(makeMove: Move => Unit, quadrant: Quadrant.Value, rotation: QRotation.Value)
+class Arrow(game: Game, quadrant: Quadrant.Value, rotation: QRotation.Value)
   extends SceneObject with ColorManip with Illegal {
 
   private[this] var square: Option[Geometry] = None
@@ -66,10 +66,6 @@ class Arrow(makeMove: Move => Unit, quadrant: Quadrant.Value, rotation: QRotatio
     colorInactive = colorTransparent(defaultArrowColor(quadrant, theme), 0.3f)
   }
 
-  override protected def onSyncState(game: Game): Unit = {
-    active = game.canRotate(quadrant)
-  }
-
   override protected def onAnimate(dt: Float): Unit = {
     shakeAnimation.get.animate(dt)
   }
@@ -87,7 +83,7 @@ class Arrow(makeMove: Move => Unit, quadrant: Quadrant.Value, rotation: QRotatio
   override def onClick(): Unit = {
     try {
       val move = new Rotation(quadrant, rotation)
-      makeMove(move)
+      game.make(move)
       discardIllegal()
     } catch {
       case e: RotationLocked =>

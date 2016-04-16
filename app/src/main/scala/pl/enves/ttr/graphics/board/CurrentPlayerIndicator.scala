@@ -14,7 +14,8 @@ import pl.enves.ttr.utils.themes.Theme
 /**
  * Display current player in 1x0.25 rectangle
  */
-class CurrentPlayerIndicator() extends SceneObject with ColorManip {
+class CurrentPlayerIndicator(game: Game)
+  extends SceneObject with ColorManip {
 
   private[this] val player1TurnText = new StaticText(GeometryId.Player1TurnText, TextureId.Font)
   private[this] val player2TurnText = new StaticText(GeometryId.Player2TurnText, TextureId.Font)
@@ -54,7 +55,7 @@ class CurrentPlayerIndicator() extends SceneObject with ColorManip {
     player2TurnText.setTextColor(theme.color2)
   }
 
-  override protected def onSyncState(game: Game): Unit = {
+  override protected def onAnimate(dt: Float): Unit = {
     field.setValue(Some(game.player))
 
     def setTextsStandard(): Unit = {
@@ -108,9 +109,7 @@ class CurrentPlayerIndicator() extends SceneObject with ColorManip {
     } else {
       animation.get.pause(true)
     }
-  }
 
-  override protected def onAnimate(dt: Float): Unit = {
     animation.get.animate(dt)
   }
 }

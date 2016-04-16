@@ -81,7 +81,8 @@ abstract class Game(protected val board: Board) extends JsonMappable with Loggin
   /**
    * Get field values
    */
-  def fieldState(x: Int, y: Int): Option[Player.Value] = board.fieldState(x, y)
+  def quadrantField(quadrant: Quadrant.Value, x: Int, y: Int): Option[Player.Value] =
+    board.quadrantField(quadrant, x, y)
 
   /**
    * Get quadrant rotation

@@ -4,11 +4,21 @@ import pl.enves.ttr.graphics.Resources
 import pl.enves.ttr.graphics.animations.{FieldRotation, Shake}
 import pl.enves.ttr.logic._
 
-class GameField(makeMove: Move => Unit, quadrant: Quadrant.Value, boardX: Int, boardY: Int)
+class GameField(game: Game, quadrant: Quadrant.Value, boardX: Int, boardY: Int)
   extends Field(quadrant) with Illegal {
 
   private[this] var shakeAnimation: Option[Shake] = None
   private[this] var rotationAnimation: Option[FieldRotation] = None
+
+  setValue(game.quadrantField(quadrant, boardX % Quadrant.size, boardY % Quadrant.size))
+
+  def setValue(v: Option[Player.Value], animateChange: Boolean): Unit = {
+    if (animateChange && v != getValue) {
+      shakeAnimation.get.stop()
+      rotationAnimation.get.start()
+    }
+    setValue(v)
+  }
 
   override protected def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
     super.onUpdateResources(resources, screenRatio)
@@ -20,10 +30,6 @@ class GameField(makeMove: Move => Unit, quadrant: Quadrant.Value, boardX: Int, b
     rotationAnimation = Some(new FieldRotation(1.0f, rotation, scale))
   }
 
-  override protected def onSyncState(game: Game): Unit = {
-    setValue(game.fieldState(boardX, boardY))
-  }
-
   override protected def onAnimate(dt: Float): Unit = {
     shakeAnimation.get.animate(dt)
     rotationAnimation.get.animate(dt)
@@ -32,7 +38,7 @@ class GameField(makeMove: Move => Unit, quadrant: Quadrant.Value, boardX: Int, b
   override protected def onClick(): Unit = {
     try {
       val move = new Position(boardX, boardY)
-      makeMove(move)
+      game.make(move)
       discardIllegal()
     } catch {
       case e: FieldTaken =>
@@ -40,11 +46,6 @@ class GameField(makeMove: Move => Unit, quadrant: Quadrant.Value, boardX: Int, b
       case e: BoardLocked =>
         setIllegal()
     }
-  }
-
-  def startChangeAnimation(): Unit = {
-    shakeAnimation.get.stop()
-    rotationAnimation.get.start()
   }
 
   def stopAnimations(): Unit = {
@@ -60,4 +61,5 @@ class GameField(makeMove: Move => Unit, quadrant: Quadrant.Value, boardX: Int, b
     rotationAnimation.get.stop()
     shakeAnimation.get.start()
   }
+
 }

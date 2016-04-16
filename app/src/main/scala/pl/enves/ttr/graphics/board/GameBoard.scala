@@ -9,19 +9,19 @@ import pl.enves.ttr.utils.Algebra
  * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)
  * (0.0, 0.0) is in the middle
  */
-class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Algebra {
+class GameBoard(game: Game) extends SceneObject with Logging with Algebra {
 
-  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator()
+  private[this] val currentPlayerIndicator = new CurrentPlayerIndicator(game)
   addChild(currentPlayerIndicator)
 
-  private[this] val winnerIndicator = new WinnerIndicator()
+  private[this] val winnerIndicator = new WinnerIndicator(game)
   addChild(winnerIndicator)
 
   private[this] val quadrants = Array(
-    new GameQuadrant(makeMove, Quadrant.first),
-    new GameQuadrant(makeMove, Quadrant.second),
-    new GameQuadrant(makeMove, Quadrant.third),
-    new GameQuadrant(makeMove, Quadrant.fourth)
+    new GameQuadrant(game, Quadrant.first),
+    new GameQuadrant(game, Quadrant.second),
+    new GameQuadrant(game, Quadrant.third),
+    new GameQuadrant(game, Quadrant.fourth)
   )
 
   private[this] val arrows = Array(
@@ -42,8 +42,8 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
   }
 
   private def createArrowPair(quadrant: Quadrant.Value) = (
-    new Arrow(makeMove, quadrant, QRotation.r90),
-    new Arrow(makeMove, quadrant, QRotation.r270)
+    new Arrow(game, quadrant, QRotation.r90),
+    new Arrow(game, quadrant, QRotation.r270)
     )
 
   override def onUpdateResources(resources: Resources, screenRatio: Float): Unit = {
@@ -103,25 +103,18 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
     case Quadrant.fourth => (3.5f, 2.5f)
   }
 
-  override protected def onSyncState(game: Game): Unit = {
-    // this is here and not in quadrants/fields for performance reasons
-    if (game.movesLog.nonEmpty) {
-      val lastMove = game.movesLog.head.move
-      lastMove match {
-        case rotation: Rotation =>
-          val oldR = quadrants(rotation.board.id).getRotation
-          if (oldR != game.quadrantRotation(rotation.board)) {
-            quadrants(rotation.board.id).startRotationAnimation(rotation.r)
-          }
-        case position: Position =>
-          val oldValue = getGameField(position.x, position.y).getValue
-          if (oldValue.isEmpty) {
-            getGameField(position.x, position.y).startChangeAnimation()
-          }
-      }
+  override def onAnimate(dt: Float): Unit = {
+    var i = 0
+    while (i < 4) {
+      val quadrant = Quadrant(i)
+      val pair = arrows(quadrant.id)
+      val active = game.canRotate(quadrant)
+      pair._1.setActive(active)
+      pair._2.setActive(active)
+      i += 1
     }
 
-    // this is here and not in fields for performance reasons
+
     if (game.finished && game.finishingMove != Nil) {
       for ((x, y) <- game.finishingMove) {
         val quadrant = if (y < Quadrant.size) {
@@ -135,15 +128,5 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
         quadrants(quadrant.id).setWinning(x % Quadrant.size, y % Quadrant.size)
       }
     }
-  }
-
-  private def getGameField(x: Int, y: Int): GameField = {
-    val q = if (y < Quadrant.size) {
-      if (x < Quadrant.size) 0 else 1
-    } else {
-      if (x < Quadrant.size) 2 else 3
-    }
-
-    return quadrants(q).getGameField(x % Quadrant.size, y % Quadrant.size)
   }
 }
