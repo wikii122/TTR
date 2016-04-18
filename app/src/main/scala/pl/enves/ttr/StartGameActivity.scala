@@ -62,7 +62,6 @@ class StartGameActivity extends StyledActivity with LogoUtils {
       Configuration.GPS_opt_in = true
 
       mainMenuFragment.onConnected()
-      onlineMenuFragment.onConnected()
     } else if (response == Activity.RESULT_CANCELED) {
       Configuration.GPS_opt_in = false
     } else {
@@ -91,16 +90,13 @@ class StartGameActivity extends StyledActivity with LogoUtils {
   }
 
   def onConnected() = {
-    // disable / enable 'risky' buttons
-    onlineMenuFragment.onConnected()
+    // disable / enable 'online' entry in main menu
+    mainMenuFragment.onConnected()
 
     // if 'online' menu was open and we lost connection
     if (PlayServices.notConnected && onlineMenuFragment.isVisible) {
       getSupportFragmentManager.popBackStack()
     }
-
-    // disable / enable 'online' entry in main menu
-    mainMenuFragment.onConnected()
   }
 
   def startBotGame() = {

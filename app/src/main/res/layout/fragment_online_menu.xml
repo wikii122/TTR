@@ -6,39 +6,30 @@
     android:orientation="vertical">
 
     <RelativeLayout
-        android:id="@+id/layout_activity"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="5dp">
 
         <Button
-            android:id="@+id/button_activity_prompt"
+            android:id="@+id/button_active_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_activity"
+            android:id="@+id/button_active"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_activity_prompt"
-            android:layout_toRightOf="@+id/button_activity_prompt"
-            android:text="@string/activity" />
-
-        <!-- Base.Widget.AppCompat.Button minHeight is 48dip, so we set minWidth accordingly -->
-        <Button
-            android:id="@+id/button_activity_number"
-            style="@style/ButtonStyle"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_activity"
-            android:layout_toRightOf="@+id/button_activity"
-            android:background="@drawable/round_background"
-            android:minWidth="48dip" />
+            android:layout_toEndOf="@+id/button_active_prompt"
+            android:layout_toRightOf="@+id/button_active_prompt"
+            android:text="@string/active" />
     </RelativeLayout>
 
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="5dp">
 
         <Button
             android:id="@+id/button_create_network_prompt"

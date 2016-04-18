@@ -11,25 +11,6 @@
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_online_prompt"
-            style="@style/ButtonStyle"
-            android:text="@string/nav_prompt" />
-
-        <Button
-            android:id="@+id/button_online"
-            style="@style/ButtonStyle"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_online_prompt"
-            android:layout_toRightOf="@+id/button_online_prompt"
-            android:text="@string/menu_online" />
-    </RelativeLayout>
-
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
-
-        <Button
             android:id="@+id/button_offline_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
@@ -41,6 +22,36 @@
             android:layout_toEndOf="@+id/button_offline_prompt"
             android:layout_toRightOf="@+id/button_offline_prompt"
             android:text="@string/menu_offline" />
+    </RelativeLayout>
+
+    <RelativeLayout
+        android:id="@+id/layout_online_menu_entry"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal">
+
+        <Button
+            android:id="@+id/button_online_prompt"
+            style="@style/ButtonStyle"
+            android:text="@string/nav_prompt" />
+
+        <Button
+            android:id="@+id/button_online"
+            style="@style/ButtonStyle"
+            android:layout_alignParentTop="true"
+            android:layout_toEndOf="@+id/button_online_prompt"
+            android:layout_toRightOf="@+id/button_online_prompt"
+            android:text="@string/menu_online" />
+
+        <!-- Base.Widget.AppCompat.Button minHeight is 48dip, so we set minWidth accordingly -->
+        <Button
+            android:id="@+id/button_online_activity"
+            style="@style/ButtonStyle"
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/button_online"
+            android:layout_toRightOf="@+id/button_online"
+            android:background="@drawable/oval_background"
+            android:minWidth="48dip" />
     </RelativeLayout>
 
     <RelativeLayout
