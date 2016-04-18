@@ -59,10 +59,16 @@ class StartGameActivity extends StyledActivity with LogoUtils {
       if (PlayServices.notConnected) PlayServices.connect()
       else offlineMenuFragment.enableButtons()
 
+      Configuration.GPS_opt_in = true
+
+      mainMenuFragment.onConnected()
       onlineMenuFragment.onConnected()
+    } else if (response == Activity.RESULT_CANCELED) {
+      Configuration.GPS_opt_in = false
     } else {
       warn(s"Play Services log in failed with response $response (${Activity.RESULT_OK} is good)")
     }
+
     case a => error(s"onActivityResult did not match request with id: $a")
   }
 

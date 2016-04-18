@@ -15,6 +15,8 @@
     <string name="feedback">feedback</string>
     <string name="menu_online">online</string>
     <string name="menu_offline">offline</string>
+    <string name="playservices_signedin">signout from google</string>
+    <string name="playservices_signedout">signin to google</string>
     <string name="settings">settings</string>
     <string name="activity">activity:</string>
     <string name="no_connection">no connection</string>

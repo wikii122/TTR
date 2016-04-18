@@ -9,6 +9,7 @@ import android.view.View
 import android.widget.{Button, TextView}
 import com.google.android.gms.ads.AdView
 import pl.enves.androidx.helpers._
+import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.styled.ToolbarActivity
 import pl.enves.ttr.utils.themes.{Theme, ThemePicker}
 import pl.enves.ttr.utils.{AdUtils, Configuration}
@@ -28,6 +29,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
     val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
     val feedbackButton = (find[Button](R.id.button_feedback), find[Button](R.id.button_feedback_prompt))
+    val playservicesButton = (find[Button](R.id.button_playservices), find[Button](R.id.button_playservices_prompt))
 
     themePicker.setChangeListener(this)
     val themes = readDefaultThemes
@@ -42,6 +44,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     aboutButton onClick startAbout
     licensesButton onClick startLicenses
     feedbackButton onClick sendFeedback
+    playservicesButton onClick togglePlayServices
 
     val adView = find[AdView](R.id.ad_view_settings)
     loadAd(adView)
@@ -52,6 +55,11 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
 
     val adView = find[AdView](R.id.ad_view_settings)
     adView.resume()
+
+    find[Button](R.id.button_playservices) setText (
+      if (Configuration.GPS_opt_in) R.string.playservices_signedin
+      else R.string.playservices_signedout
+      )
   }
 
   override def onPause(): Unit = {
@@ -111,7 +119,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val itnt = sendIntent
     itnt setType "message/rfc822"
     itnt setData Uri.parse(s"mailto:$email")
-    
+
     itnt.putExtra(Intent.EXTRA_EMAIL, email)
     itnt.putExtra(Intent.EXTRA_SUBJECT, "[TTT_FEEDBACK] User feedback")
     itnt.putExtra(Intent.EXTRA_TEXT, "Please fill in your query")
@@ -127,6 +135,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
     val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
     val feedbackButton = (find[Button](R.id.button_feedback), find[Button](R.id.button_feedback_prompt))
+    val playservicesButton = (find[Button](R.id.button_playservices), find[Button](R.id.button_playservices_prompt))
 
     pickThemeText._1.setTypeface(typeface)
     pickThemeText._2.setTypeface(typeface)
@@ -134,6 +143,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     aboutButton.setTypeface(typeface)
     licensesButton.setTypeface(typeface)
     feedbackButton.setTypeface(typeface)
+    playservicesButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
@@ -144,6 +154,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     val aboutButton = (find[Button](R.id.button_about), find[Button](R.id.button_about_prompt))
     val licensesButton = (find[Button](R.id.button_licenses), find[Button](R.id.button_licenses_prompt))
     val feedbackButton = (find[Button](R.id.button_feedback), find[Button](R.id.button_feedback_prompt))
+    val playservicesButton = (find[Button](R.id.button_playservices), find[Button](R.id.button_playservices_prompt))
 
     pickThemeText._1.setTextColor(theme.color1)
     pickThemeText._2.setTextColor(theme.color2)
@@ -151,5 +162,16 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
     aboutButton.setTextColor(theme.color1, theme.color2)
     licensesButton.setTextColor(theme.color1, theme.color2)
     feedbackButton.setTextColor(theme.color1, theme.color2)
+    playservicesButton.setTextColor(theme.color1, theme.color2)
+  }
+
+  private[this] def togglePlayServices(view: View) = if (Configuration.GPS_opt_in) {
+    Configuration.GPS_opt_in = false
+    PlayServices.disconnect()
+    find[Button](R.id.button_playservices).setText(R.string.playservices_signedout)
+  } else {
+    Configuration.GPS_opt_in = true
+    PlayServices.connect()
+    find[Button](R.id.button_playservices).setText(R.string.playservices_signedin)
   }
 }

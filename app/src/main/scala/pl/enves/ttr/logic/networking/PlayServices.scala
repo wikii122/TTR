@@ -26,9 +26,13 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
   private[this] val client = Option(clientInit())
   private[this] var signingIn = false
 
+  val achievement = new Achievement(client)
+
   def connect() = {
-    if (!Configuration.isMultiplayerAvailable) throw new ServiceUnavailableException("There seems to be no Google Play Game Services available or not supported in this version")
-    client.get connect ()
+    if (!Configuration.isMultiplayerAvailable)
+      throw new ServiceUnavailableException("There seems to be no " +
+        "Google Play Game Services available or not supported in this version")
+    client.get.connect()
   }
 
   def disconnect() = if (isConnected) client.get disconnect ()
@@ -70,7 +74,6 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       val e = for (i <- 0 until invitationBuffer.getCount) yield invitationBuffer get i
 
       log(s"Number of new invitations found: ${e.length}")
-      invitationBuffer.release()
 
       e.toList
     } else {
@@ -89,9 +92,8 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
       val e = for (i <- 0 until gameBuffer.getCount) yield gameBuffer get i
 
       log(s"Number of games awaiting activity found: ${e.length}")
-      gameBuffer.release()
 
-      e.toList.filter(_.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE)
+      e.toList filter {_.getStatus == TurnBasedMatch.MATCH_STATUS_ACTIVE}
     } else {
       warn("Play services is not connected. Cannot list games.")
 
@@ -101,7 +103,7 @@ object PlayServices extends ConnectionCallbacks with OnConnectionFailedListener 
 
   def playerData = Games.Players.getCurrentPlayer(client.get)
 
-  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, true)
+  def selectPlayerIntent = Games.TurnBasedMultiplayer.getSelectOpponentsIntent(client.get, 1, 1, false)
 
   def accept(invitation: Invitation) = Future {
     Games.TurnBasedMultiplayer.acceptInvitation(client.get, invitation.getInvitationId)

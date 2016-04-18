@@ -5,7 +5,7 @@ import pl.enves.androidx.context.ContextRegistry
 import pl.enves.ttr.GameActivity
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.logic.networking.PlayServices
+import pl.enves.ttr.logic.networking.{Achievement, PlayServices}
 import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
@@ -66,16 +66,19 @@ with OnTurnBasedMatchUpdateReceivedListener {
     log(s"Move: $move for $player")
 
     val res = move match {
-      case Position(x, y) => board move (x, y)
-      case Rotation(b, r) => board rotate (b, r)
+      case Position(x, y) => board move(x, y)
+      case Rotation(b, r) => board rotate(b, r)
     }
 
-    movesLog.append(LogEntry(player, move))
+    movesLog = LogEntry(player, move) :: movesLog
 
     _player = player.other
 
-    if (myTurn)
+    if (myTurn) {
       takeTurn()
+      if (res) PlayServices.achievement.step(Achievement.achievementDefeatFriends)
+    }
+
     moved = true
 
     return res
@@ -86,7 +89,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
   override def onTurnBasedMatchRemoved(s: String): Unit = ???
 
   override def onTurnBasedMatchReceived(newMatch: TurnBasedMatch): Unit =
-    if (newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
+    if (turnBasedMatch.isDefined && newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
       log("Received update from remote device")
       this.turnBasedMatch = Some(newMatch)
 
@@ -137,6 +140,10 @@ with OnTurnBasedMatchUpdateReceivedListener {
       else player.other
 
     board sync Board(data.fields("board"))
+
+    movesLog = data.fields("log").asInstanceOf[JsArray].elements map { value =>
+      LogEntry(value.asJsObject)
+    } toList
   }
 }
 
