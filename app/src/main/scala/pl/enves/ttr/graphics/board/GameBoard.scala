@@ -17,6 +17,8 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
   private[this] val winnerIndicator = new WinnerIndicator()
   addChild(winnerIndicator)
 
+  private[this] var lastAnimatedMove: Option[Move] = None
+
   private[this] val quadrants = Array(
     new GameQuadrant(makeMove, Quadrant.first),
     new GameQuadrant(makeMove, Quadrant.second),
@@ -105,19 +107,17 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
 
   override protected def onSyncState(game: Game): Unit = {
     // this is here and not in quadrants/fields for performance reasons
-    if (game.movesLog.nonEmpty) {
-      val lastMove = game.movesLog.head.move
-      lastMove match {
-        case rotation: Rotation =>
-          val oldR = quadrants(rotation.board.id).getRotation
-          if (oldR != game.quadrantRotation(rotation.board)) {
+    val log = game.movesLog
+    if (log.nonEmpty) {
+      val lastMove = log.head.move
+      if (!lastAnimatedMove.contains(lastMove)) {
+        lastMove match {
+          case rotation: Rotation =>
             quadrants(rotation.board.id).startRotationAnimation(rotation.r)
-          }
-        case position: Position =>
-          val oldValue = getGameField(position.x, position.y).getValue
-          if (oldValue.isEmpty) {
+          case position: Position =>
             getGameField(position.x, position.y).startChangeAnimation()
-          }
+        }
+        lastAnimatedMove = Some(lastMove)
       }
     }
 
