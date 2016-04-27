@@ -4,7 +4,7 @@ import android.content.Context
 import android.opengl.GLSurfaceView
 import android.view.MotionEvent
 import pl.enves.androidx.Logging
-import pl.enves.ttr.logic.{Player, GameManager}
+import pl.enves.ttr.logic.GameManager
 import pl.enves.ttr.utils.themes.Theme
 
 /**
@@ -16,7 +16,7 @@ class GameView(val context: Context with GameManager, onEnd: () => Unit) extends
   private[this] val renderer = GameRenderer(context, onEnd)
 
   log("Creating")
-  setEGLConfigChooser(8, 8, 8, 8, 0, 0)
+
   setEGLContextClientVersion(2)
 
   setRenderer(renderer)
