@@ -8,59 +8,50 @@
     <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal"
-        android:id="@+id/layout_activity">
+        android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_activity_prompt"
+            android:id="@+id/button_offline_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_activity"
+            android:id="@+id/button_offline"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_activity_prompt"
-            android:layout_toRightOf="@+id/button_activity_prompt"
-            android:text="@string/activity" />
+            android:layout_toEndOf="@+id/button_offline_prompt"
+            android:layout_toRightOf="@+id/button_offline_prompt"
+            android:text="@string/menu_offline" />
     </RelativeLayout>
 
     <RelativeLayout
+        android:id="@+id/layout_online_menu_entry"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal">
 
         <Button
-            android:id="@+id/button_new_prompt"
+            android:id="@+id/button_online_prompt"
             style="@style/ButtonStyle"
             android:text="@string/nav_prompt" />
 
         <Button
-            android:id="@+id/button_new"
+            android:id="@+id/button_online"
             style="@style/ButtonStyle"
             android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_new_prompt"
-            android:layout_toRightOf="@+id/button_new_prompt"
-            android:text="@string/new_game" />
-    </RelativeLayout>
+            android:layout_toEndOf="@+id/button_online_prompt"
+            android:layout_toRightOf="@+id/button_online_prompt"
+            android:text="@string/menu_online" />
 
-    <RelativeLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_horizontal">
-
+        <!-- Base.Widget.AppCompat.Button minHeight is 48dip, so we set minWidth accordingly -->
         <Button
-            android:id="@+id/button_continue_prompt"
+            android:id="@+id/button_online_activity"
             style="@style/ButtonStyle"
-            android:text="@string/nav_prompt" />
-
-        <Button
-            android:id="@+id/button_continue"
-            style="@style/ButtonStyle"
-            android:layout_alignParentTop="true"
-            android:layout_toEndOf="@+id/button_continue_prompt"
-            android:layout_toRightOf="@+id/button_continue_prompt"
-            android:text="@string/continue_game" />
+            android:layout_centerVertical="true"
+            android:layout_toEndOf="@+id/button_online"
+            android:layout_toRightOf="@+id/button_online"
+            android:background="@drawable/oval_background"
+            android:minWidth="48dip" />
     </RelativeLayout>
 
     <RelativeLayout

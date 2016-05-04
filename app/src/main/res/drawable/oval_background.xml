@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- colorAccent is not set, so we have to create state items manually -->
+
+    <item android:drawable="@drawable/oval_solid_padded" android:state_focused="true" />
+
+    <item android:drawable="@drawable/oval_solid_padded" android:state_pressed="true" />
+
+    <item android:drawable="@drawable/oval_solid_padded" />
+
+</selector>
