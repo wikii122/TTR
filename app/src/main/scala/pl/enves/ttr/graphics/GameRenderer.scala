@@ -22,7 +22,7 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
   log("Creating")
 
   private[this] val resources = new Resources(context, context.game)
-  private[this] val board = new GameBoard(context.game)
+  private[this] val board = new GameBoard(makeMove)
   private[this] var viewportWidth: Int = 1
   private[this] var viewportHeight: Int = 1
   private[this] var lastFrame: Long = 0
@@ -32,6 +32,11 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
 
   private[this] val mvMatrix = new MatrixStack(8)
   private[this] val pMatrix = new MatrixStack()
+
+
+  def makeMove(move: Move): Unit = this.synchronized {
+    context.game.make(move)
+  }
 
   def setCamera(mvMatrix: MatrixStack): Unit = {
     //In case of inconsistent use of push and pop
@@ -61,10 +66,13 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
     val now = System.currentTimeMillis()
 
     if (lastFrame != 0) {
+
       this.synchronized {
-        setCamera(mvMatrix)
-        board.animate((now - lastFrame) / 1000.0f)
+        board.syncState(context.game)
       }
+
+      setCamera(mvMatrix)
+      board.animate((now - lastFrame) / 1000.0f)
 
       GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT)
       board.draw(mvMatrix, pMatrix)
@@ -128,9 +136,7 @@ class GameRenderer(context: Context with GameManager, onEnd: () => Unit) extends
       try {
         val ray = unProjectMatrices(tempMVMatrix.get(), tempPMatrix.get(), clickX, clickY, viewport)
         try {
-          this.synchronized {
-            board.click(ray, tempMVMatrix)
-          }
+          board.click(ray, tempMVMatrix)
         } catch {
           //TODO: remind user that game has ended
           case e: GameFinished =>

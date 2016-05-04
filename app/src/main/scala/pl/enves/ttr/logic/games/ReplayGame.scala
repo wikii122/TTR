@@ -3,12 +3,11 @@ package pl.enves.ttr.logic.games
 import pl.enves.androidx.Logging
 import pl.enves.ttr.logic._
 import pl.enves.ttr.logic.inner.Board
-import pl.enves.ttr.utils.JsonProtocol._
 import spray.json._
 
 import scala.util.Try
 
-class ReplayGame(replayedGameType: Game.Value,
+class ReplayGame(movesToReplay: List[LogEntry],
                  win: Option[Player.Value],
                  board: Board = Board()) extends Game(board) with Logging {
   override val gameType = Game.REPLAY
@@ -17,19 +16,13 @@ class ReplayGame(replayedGameType: Game.Value,
 
   override protected def version = 0
 
-  private var replayMove = 0
+  private[this] var thread: Option[Thread] = None
 
-  private var thread: Option[Thread] = None
-
-  private def makeThread = new Thread(
+  private[this] def makeThread = new Thread(
     new Runnable {
-      override def run(): Unit = replayMoves(movesLog.reverse, sleep = true)
+      override def run(): Unit = replayMoves(movesToReplay)
     }
   )
-
-  def isReplaying = replayMove < movesLog.length
-
-  def getReplayedGameType = replayedGameType
 
   def startReplaying() = {
     stopReplaying()
@@ -48,17 +41,15 @@ class ReplayGame(replayedGameType: Game.Value,
     }
   }
 
-  private def rewind(): Unit = replayMoves(movesLog.reverse.drop(board.version), sleep = false)
-
   override protected def onMove(move: Move): Boolean = {
     throw new GameWon(s"Game is finished. $winner has won.")
   }
 
-  private[this] def replayMoves(moves: List[LogEntry], sleep: Boolean=false): Unit = moves match {
+  private[this] def replayMoves(moves: List[LogEntry]): Unit = moves match {
     case Nil =>
-    case entry::rest =>
+    case entry :: rest =>
       log(s"Replaying moves, left ${rest.length}")
-      if (sleep) try {
+      try {
         Thread.sleep(1000)
       } catch {
         case e: InterruptedException => return
@@ -69,10 +60,11 @@ class ReplayGame(replayedGameType: Game.Value,
           case Position(x, y) => board.move(x, y)(entry.player)
           case Rotation(b, r) => board.rotate(b, r)(entry.player)
         }
+        movesLog = entry :: movesLog
       }
 
       _player = if (player == Player.X) Player.O else Player.X
-      replayMoves(rest, sleep)
+      replayMoves(rest)
   }
 
   override def locked: Boolean = true
@@ -90,15 +82,18 @@ object ReplayGame {
 
   def apply(jsValue: JsValue, showEnd: Boolean): Game = {
     val fields = jsValue.asJsObject.fields
-    val gameType = fields("type").convertTo[Game.Value]
     val board = Board(fields("board"))
-    val replayGame = new ReplayGame(gameType, board.winner)
 
-    replayGame.movesLog = fields("log").asInstanceOf[JsArray].elements map { any =>
+    val movesLog = fields("log").asInstanceOf[JsArray].elements map { any =>
       LogEntry(any.asJsObject)
     } toList
 
-    if (showEnd) replayGame.rewind()
-    return replayGame
+    if (showEnd) {
+      val replayGame = new ReplayGame(Nil, board.winner, board)
+      if (movesLog.nonEmpty) replayGame._player = movesLog.last.player
+      replayGame
+    } else {
+      new ReplayGame(movesLog.reverse, board.winner)
+    }
   }
 }
