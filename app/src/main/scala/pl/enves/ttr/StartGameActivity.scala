@@ -8,7 +8,7 @@ import android.support.v4.app.{Fragment, FragmentTransaction}
 import pl.enves.androidx.helpers._
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.logic.{Game, GameState}
-import pl.enves.ttr.utils.start.{BackButtonFragment, MainMenuFragment, OfflineMenuFragment, OnlineMenuFragment}
+import pl.enves.ttr.utils.start._
 import pl.enves.ttr.utils.styled.StyledActivity
 import pl.enves.ttr.utils.themes.Theme
 import pl.enves.ttr.utils.{Code, Configuration, LogoUtils}
@@ -16,16 +16,21 @@ import pl.enves.ttr.utils.{Code, Configuration, LogoUtils}
 class StartGameActivity extends StyledActivity with LogoUtils {
   private[this] val GPS_LAUNCH = 0x14400000
 
-  private[this] lazy val mainMenuFragment = new MainMenuFragment
-  private[this] lazy val onlineMenuFragment = new OnlineMenuFragment
-  private[this] lazy val offlineMenuFragment = new OfflineMenuFragment
-
   override def onCreate(savedInstanceState: Bundle) {
     log("Creating")
     super.onCreate(savedInstanceState)
     setContentView(R.layout.start_game_layout)
 
-    drawUI()
+    alignLogo()
+
+    // MainMenuFragment creation is needed only when there is no saved state,
+    // FragmentManager recreates fragments when activity state was saved before
+    if (savedInstanceState == null) {
+      val mainMenuFragment = new MainMenuFragment
+      val transaction = getSupportFragmentManager.beginTransaction
+      transaction.replace(R.id.menuContainer, mainMenuFragment, "MainMenu")
+      transaction.commit()
+    }
   }
 
   override def onStart() = {
@@ -57,11 +62,13 @@ class StartGameActivity extends StyledActivity with LogoUtils {
       log(s"Play Services status: ${if (PlayServices.notConnected) "not " else "successfully "}connected")
 
       if (PlayServices.notConnected) PlayServices.connect()
-      else offlineMenuFragment.enableButtons()
 
       Configuration.GPS_opt_in = true
 
-      mainMenuFragment.onConnected()
+      val mainMenuFragment = getSupportFragmentManager.findFragmentByTag("MainMenu").asInstanceOf[MainMenuFragment]
+      if (mainMenuFragment != null) {
+        mainMenuFragment.onConnected()
+      }
     } else if (response == Activity.RESULT_CANCELED) {
       Configuration.GPS_opt_in = false
     } else {
@@ -91,10 +98,14 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
   def onConnected() = {
     // disable / enable 'online' entry in main menu
-    mainMenuFragment.onConnected()
+    val mainMenuFragment = getSupportFragmentManager.findFragmentByTag("MainMenu").asInstanceOf[MainMenuFragment]
+    if (mainMenuFragment != null) {
+      mainMenuFragment.onConnected()
+    }
 
     // if 'online' menu was open and we lost connection
-    if (PlayServices.notConnected && onlineMenuFragment.isVisible) {
+    val onlineMenuFragment = getSupportFragmentManager.findFragmentByTag("OnlineMenu").asInstanceOf[OnlineMenuFragment]
+    if (PlayServices.notConnected && onlineMenuFragment != null && onlineMenuFragment.isVisible) {
       getSupportFragmentManager.popBackStack()
     }
   }
@@ -151,14 +162,6 @@ class StartGameActivity extends StyledActivity with LogoUtils {
     itnt.start()
   }
 
-  private[this] def drawUI() = {
-    alignLogo()
-
-    val transaction = getSupportFragmentManager.beginTransaction
-    transaction.replace(R.id.menuContainer, mainMenuFragment)
-    transaction.commit()
-  }
-
   def showOnlineMenu(): Unit = {
     log("Showing online menu")
 
@@ -167,7 +170,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
     val transaction = getSupportFragmentManager.beginTransaction
 
-    transaction.replace(R.id.menuContainer, onlineMenuFragment)
+    transaction.replace(R.id.menuContainer, onlineMenuFragment, "OnlineMenu")
     transaction.replace(R.id.button_back_container, backButtonFragment)
     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
     transaction.addToBackStack(null)
@@ -182,7 +185,7 @@ class StartGameActivity extends StyledActivity with LogoUtils {
 
     val transaction = getSupportFragmentManager.beginTransaction
 
-    transaction.replace(R.id.menuContainer, offlineMenuFragment)
+    transaction.replace(R.id.menuContainer, offlineMenuFragment, "OfflineMenu")
     transaction.replace(R.id.button_back_container, backButtonFragment)
     transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
     transaction.addToBackStack(null)
