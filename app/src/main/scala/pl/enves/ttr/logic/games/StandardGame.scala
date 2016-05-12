@@ -39,7 +39,7 @@ class StandardGame(board: Board = Board()) extends Game(board) {
       case Rotation(b, r) => board rotate (b, r)
     }
 
-    movesLog append LogEntry(player, move)
+    movesLog = LogEntry(player, move) :: movesLog
 
     _player = _player.other
     log(s"Player set to ${_player}")
@@ -62,7 +62,9 @@ object StandardGame {
     val board = Board(fields("board"))
     val game = new StandardGame(board)
     game._player = fields("player").convertTo[Player.Value]
-    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject)))
+    game.movesLog = fields("log").asInstanceOf[JsArray].elements map { any =>
+      LogEntry(any.asJsObject)
+    } toList
 
     return game
   }

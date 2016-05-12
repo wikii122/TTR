@@ -93,7 +93,7 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
       case Rotation(b, r) => board rotate(b, r)
     }
 
-    movesLog.append(LogEntry(player, move))
+    movesLog = LogEntry(player, move) :: movesLog
 
     switchPlayer()
 
@@ -125,7 +125,7 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
     "human" -> human,
     "maxTime" -> maxTime,
     "board" -> board.toJson,
-    "log" -> (movesLog.toList map { entry => entry.toJson }),
+    "log" -> (movesLog map (_.toJson)),
     "type" -> gameType
   )
 
@@ -151,7 +151,10 @@ object BotGame {
     val human = fields("human").convertTo[Option[Player.Value]]
     val game = new BotGame(board)
     game._player = fields("player").convertTo[Player.Value]
-    fields("log").asInstanceOf[JsArray].elements foreach (jsValue => game.movesLog.append(LogEntry(jsValue.asJsObject)))
+
+    game.movesLog = fields("log").asInstanceOf[JsArray].elements map { any =>
+      LogEntry(any.asJsObject)
+    } toList
 
     game.maxTime = fields("maxTime").convertTo[Int]
 

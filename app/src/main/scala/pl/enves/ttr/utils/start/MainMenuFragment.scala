@@ -3,15 +3,12 @@ package utils
 package start
 
 
-import android.graphics.Typeface
+import android.graphics.{PorterDuff, Typeface}
 import android.os.Bundle
 import android.view.{LayoutInflater, View, ViewGroup}
 import android.widget.{Button, RelativeLayout}
-import com.google.android.gms.games.multiplayer.Invitation
 import pl.enves.androidx.Logging
-import pl.enves.androidx.color.ColorUiTweaks
 import pl.enves.androidx.helpers._
-import pl.enves.ttr.logic.GameState
 import pl.enves.ttr.logic.networking.PlayServices
 import pl.enves.ttr.utils.ExecutorContext._
 import pl.enves.ttr.utils.styled.StyledFragment
@@ -19,7 +16,7 @@ import pl.enves.ttr.utils.themes.Theme
 
 import scala.concurrent.Future
 
-class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
+class MainMenuFragment extends StyledFragment with Logging {
 
   override def onCreateView(inflater: LayoutInflater, container: ViewGroup, args: Bundle): View = {
     val view: View = inflater.inflate(R.layout.fragment_main_menu, container, false)
@@ -30,102 +27,91 @@ class MainMenuFragment extends StyledFragment with ColorUiTweaks with Logging {
     super.onStart()
 
     val view = getView
-    val activityButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
-    val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
-    val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
+    val onlineButton = (find[Button](view, R.id.button_online), find[Button](view, R.id.button_online_prompt))
+    val onlineActivityButton = find[Button](view, R.id.button_online_activity)
+    val offlineButton = (find[Button](view, R.id.button_offline), find[Button](view, R.id.button_offline_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
 
-    setContinueButtonEnabled(GameState.active)
-    setInvitationsNumber()
-
-    activityButton onClick listActivity
-    newGameButton onClick startNewGame
-    continueGameButton onClick continueGame
+    onlineButton onClick startOnlineMenu
+    onlineActivityButton onClick listInvitations
+    offlineButton onClick startOfflineMenu
     settingsButton onClick showSettings
+
+    onConnected()
   }
 
-  private[this] def startNewGame(v: View): Unit =
-    getActivity.asInstanceOf[StartGameActivity].showNewGameMenu()
+  private[this] def listInvitations(v: View): Unit =
+    getActivity.asInstanceOf[StartGameActivity].startNetworkGame(Code.INVITATION)
 
+  private[this] def startOnlineMenu(v: View): Unit =
+    getActivity.asInstanceOf[StartGameActivity].showOnlineMenu()
 
-  private[this] def continueGame(v: View): Unit =
-    getActivity.asInstanceOf[StartGameActivity].continueGame()
+  private[this] def startOfflineMenu(v: View): Unit =
+    getActivity.asInstanceOf[StartGameActivity].showOfflineMenu()
 
   private[this] def showSettings(v: View): Unit =
     getActivity.asInstanceOf[StartGameActivity].launchSettings()
 
-  private[this] def listActivity(v: View): Unit =
-    getActivity.asInstanceOf[StartGameActivity].startNetworkGame(Code.INVITATION)
-
   override def setTypeface(typeface: Typeface): Unit = {
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
-    val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
-    val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
+    val onlineButton = (find[Button](view, R.id.button_online), find[Button](view, R.id.button_online_prompt))
+    val onlineActivityButton = find[Button](view, R.id.button_online_activity)
+    val offlineButton = (find[Button](view, R.id.button_offline), find[Button](view, R.id.button_offline_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
 
-    invitationsButton.setTypeface(typeface)
-    newGameButton.setTypeface(typeface)
-    continueGameButton.setTypeface(typeface)
+    onlineButton.setTypeface(typeface)
+    onlineActivityButton.setTypeface(typeface)
+    offlineButton.setTypeface(typeface)
     settingsButton.setTypeface(typeface)
   }
 
   override def setColorTheme(theme: Theme): Unit = {
     val view = getView
-    val invitationsButton = (find[Button](view, R.id.button_activity), find[Button](view, R.id.button_activity_prompt))
-    val newGameButton = (find[Button](view, R.id.button_new), find[Button](view, R.id.button_new_prompt))
-    val continueGameButton = (find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt))
+    val onlineButton = (find[Button](view, R.id.button_online), find[Button](view, R.id.button_online_prompt))
+    val onlineActivityButton = find[Button](view, R.id.button_online_activity)
+    val offlineButton = (find[Button](view, R.id.button_offline), find[Button](view, R.id.button_offline_prompt))
     val settingsButton = (find[Button](view, R.id.button_settings), find[Button](view, R.id.button_settings_prompt))
 
-    invitationsButton.setTextColor(theme.color1, theme.color2)
-    newGameButton.setTextColor(theme.color1, theme.color2)
-    continueGameButton.setTextColor(colorStateList(theme.color1, 0.25f), colorStateList(theme.color2, 0.25f))
+    onlineButton.setTextColor(theme.color1, theme.color2)
+    onlineActivityButton.getBackground.setColorFilter(theme.color1, PorterDuff.Mode.SRC_IN)
+    onlineActivityButton.setTextColor(theme.background)
+
+    offlineButton.setTextColor(theme.color1, theme.color2)
     settingsButton.setTextColor(theme.color1, theme.color2)
   }
 
   def onConnected() = {
-    setInvitationsNumber()
-  }
+    val view = Option(getView)
+    if (view.isDefined) {
+      val onlineMenuEntry = find[RelativeLayout](view.get, R.id.layout_online_menu_entry)
 
-  def setContinueButtonEnabled(enabled: Boolean): Unit = {
-    val view = getView
-    if (view != null) {
-      val continueGameButton = Some((find[Button](view, R.id.button_continue), find[Button](view, R.id.button_continue_prompt)))
-
-      if (enabled) {
-        continueGameButton.get.enable()
+      if (PlayServices.isConnected) {
+        onlineMenuEntry setVisibility View.VISIBLE
+        setActivityCount()
       } else {
-        continueGameButton.get.disable()
+        onlineMenuEntry setVisibility View.GONE
       }
     }
   }
 
-  private[this] def setInvitationsNumber(): Unit = {
-    log("Requesting invitation list")
-    setInvitationsNumber(0)
+  private[this] def setActivityCount(): Unit = {
+    log("Requesting activity list")
+    setActivityCount(0)
 
     Future.sequence(PlayServices.invitations :: PlayServices.myGames :: Nil) onSuccess {
-      case list => setInvitationsNumber (list map (_.length) sum)
+      case list => setActivityCount(list map (_.length) sum)
     }
   }
 
-  private[this] def setInvitationsNumber(count: Int): Unit = runOnMainThread {
-    log("Resolving activity button")
+  private[this] def setActivityCount(count: Int): Unit = runOnMainThread {
     val view = Option(getView)
     if (view.isDefined) {
-      val invitationsLayout = find[RelativeLayout](view.get, R.id.layout_activity)
-      val invitationsButton = find[Button](view.get, R.id.button_activity)
-
-      if (PlayServices.isConnected) {
-        val text = getActivity.getResources.getText(R.string.activity).toString
-        invitationsLayout setVisibility View.VISIBLE
-        invitationsButton enable ()
-        invitationsButton setText text.format(count)
+      val onlineActivityButton = find[Button](view.get, R.id.button_online_activity)
+      if (count != 0) {
+        onlineActivityButton setVisibility View.VISIBLE
+        onlineActivityButton setText count.toString
       } else {
-        val text = getActivity.getResources.getText(R.string.noconnection).toString
-        invitationsLayout setVisibility View.GONE
-        invitationsButton disable ()
-        invitationsButton setText text
+        onlineActivityButton setVisibility View.GONE
       }
     }
   }

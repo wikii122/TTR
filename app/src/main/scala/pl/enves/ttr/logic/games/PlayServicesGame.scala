@@ -70,7 +70,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
       case Rotation(b, r) => board rotate(b, r)
     }
 
-    movesLog.append(LogEntry(player, move))
+    movesLog = LogEntry(player, move) :: movesLog
 
     _player = player.other
 
@@ -89,7 +89,7 @@ with OnTurnBasedMatchUpdateReceivedListener {
   override def onTurnBasedMatchRemoved(s: String): Unit = ???
 
   override def onTurnBasedMatchReceived(newMatch: TurnBasedMatch): Unit =
-    if (newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
+    if (turnBasedMatch.isDefined && newMatch.getMatchId == turnBasedMatch.get.getMatchId) {
       log("Received update from remote device")
       this.turnBasedMatch = Some(newMatch)
 
@@ -140,6 +140,10 @@ with OnTurnBasedMatchUpdateReceivedListener {
       else player.other
 
     board sync Board(data.fields("board"))
+
+    movesLog = data.fields("log").asInstanceOf[JsArray].elements map { value =>
+      LogEntry(value.asJsObject)
+    } toList
   }
 }
 

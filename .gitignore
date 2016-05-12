@@ -115,3 +115,4 @@ project/plugins/project/
 
 # Sensitive files
 app/build.gradle
+*.db
