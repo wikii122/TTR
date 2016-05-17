@@ -4,7 +4,7 @@ import android.graphics._
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 
-class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) extends Logging with TextureProvider {
+class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Seq[Char]) extends Logging with TextureUtils {
 
   private[this] val size: Int = Math.ceil(Math.sqrt(charset.length)).toInt
 
@@ -15,17 +15,10 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
   textMaskPaint.setTypeface(typeface)
   textMaskPaint.setColor(Color.rgb(255, 0, 0))
 
-  //Find optimal font size
-  //TODO: more optimal
-  //TODO: respect font ascent and descent
-  private[this] var fontSize = 10
-  while (measureFont(fontSize + 1)) {
-    fontSize += 1
-  }
+  private[this] val fontSize = calculateFontSize(cellPx, cellPx)
 
   textMaskPaint.setTextSize(fontSize)
   private[this] val fontHeight = measureFontHeight(fontSize, textMaskPaint)
-  private[this] val charWidthMax = measureFontWidth(fontSize, textMaskPaint)
   private[this] val charsWidths = Array.fill(charset.length)(0.0f)
   for (i <- charset.indices) {
     val cw = textMaskPaint.measureText(charset(i).toString)
@@ -33,24 +26,26 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
   }
 
   private[this] val fm = textMaskPaint.getFontMetrics
-  log("Font chars: " + charset.length)
-  log("Font cells: " + size * size)
-  log("Font cell size: " + cellPx)
-  log("Font size: " + fontSize)
-  log("Font height: " + fontHeight)
-  log("Font top: " + fm.top)
-  log("Font bottom: " + fm.bottom)
-  log("Text width: " + charWidthMax)
 
-  private def measureFont(fontSize: Int): Boolean = {
+  //TODO: more optimal
+  //TODO: respect font ascent and descent
+  private[this] def calculateFontSize(maxWidth: Int, maxHeight: Int): Int = {
+    var fontSize = 10
+
     val paint = new Paint()
     paint.setAntiAlias(true)
     paint.setTypeface(typeface)
     paint.setTextSize(fontSize)
-    return measureFontWidth(fontSize, paint) <= cellPx && measureFontHeight(fontSize, paint) <= cellPx
+
+    while (measureFontWidth(fontSize, paint) <= maxWidth && measureFontHeight(fontSize, paint) <= maxHeight) {
+      fontSize += 1
+      paint.setTextSize(fontSize)
+    }
+
+    return fontSize - 1
   }
 
-  private def measureFontWidth(fontSize: Int, paint: Paint): Float = {
+  private[this] def measureFontWidth(fontSize: Int, paint: Paint): Float = {
     var width = 0.0f
     for (i <- charset.indices) {
       val cw = paint.measureText(charset(i).toString)
@@ -61,31 +56,31 @@ class CharactersTexture(sizePx: Int, typeface: Typeface, charset: Array[Char]) e
     return width
   }
 
-  private def measureFontHeight(fontSize: Int, paint: Paint): Float = {
+  private[this] def measureFontHeight(fontSize: Int, paint: Paint): Float = {
     val fm = paint.getFontMetrics
     val height = math.ceil(math.abs(fm.bottom) + math.abs(fm.top)).toFloat
     return height
   }
 
-  def coordinates(x: Int) = (x % size, x / size)
+  private[this] def coordinates(x: Int) = (x % size, x / size)
 
   //TODO: Make this faster for dynamic text render
-  def index(char: Char): Int = {
+  private[this] def index(char: Char): Int = {
     val a = charset.indexOf(char)
     return if (a != -1) a else 0
   }
 
   def getNormalizedCoordinates(char: Char): (Float, Float) = {
     val (x, y) = coordinates(index(char))
-    val nsize = 1.0f / size
-    return (x * nsize, y * nsize)
+    val nSize = 1.0f / size
+    return (x * nSize, y * nSize)
   }
 
   def getNormalizedWidth(char: Char): Float = charsWidths(index(char)) / sizePx
 
   def getNormalizedFontHeight = fontHeight / sizePx
 
-  override def getTexture: Int = createTexture(createBitmap())
+  def getTexture: Int = createTexture(createBitmap())
 
   private def createBitmap(): Bitmap = {
     val bitmap = Bitmap.createBitmap(sizePx, sizePx, Bitmap.Config.ARGB_4444)

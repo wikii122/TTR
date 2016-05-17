@@ -5,9 +5,7 @@ import java.nio.IntBuffer
 import android.graphics.Bitmap
 import android.opengl.{GLES20, GLUtils}
 
-trait TextureProvider {
-  def getTexture: Int
-
+trait TextureUtils {
   def createTexture(bitmap: Bitmap): Int = {
     val name = IntBuffer.allocate(1)
     GLES20.glGenTextures(1, name)
