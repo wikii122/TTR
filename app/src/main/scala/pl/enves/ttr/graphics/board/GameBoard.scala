@@ -3,7 +3,7 @@ package pl.enves.ttr.graphics.board
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.Algebra
+import pl.enves.ttr.utils.math.Algebra
 
 /**
  * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)

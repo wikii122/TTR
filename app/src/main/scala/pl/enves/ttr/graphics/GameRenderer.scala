@@ -12,7 +12,7 @@ import pl.enves.androidx.color.ColorImplicits.AndroidToColor3
 import pl.enves.androidx.color.ColorTypes.Color3
 import pl.enves.ttr.graphics.board.GameBoard
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.Algebra
+import pl.enves.ttr.utils.math.Algebra
 import pl.enves.ttr.utils.themes._
 
 /**

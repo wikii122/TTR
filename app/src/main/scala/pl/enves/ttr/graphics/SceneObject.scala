@@ -3,8 +3,8 @@ package pl.enves.ttr.graphics
 import android.opengl.Matrix
 import pl.enves.ttr.graphics.transformations.{Rotation, Scale, Transformation, Translation}
 import pl.enves.ttr.logic.Game
+import pl.enves.ttr.utils.math.{Algebra, Ray, Triangle, Vector3}
 import pl.enves.ttr.utils.themes.Theme
-import pl.enves.ttr.utils.{Algebra, Ray, Triangle}
 
 import scala.collection.mutable
 
@@ -29,7 +29,7 @@ trait SceneObject extends Algebra {
 
   protected def onClick(): Unit = {}
 
-  protected def getBoundingFigure: Array[Triangle] = Array[Triangle]()
+  protected def getBoundingFigure: List[Triangle] = Nil
 
   def addChild(child: SceneObject): Unit = {
     children.append(child)
@@ -144,7 +144,7 @@ trait SceneObject extends Algebra {
     transformToPosition(mvMatrix)
     val boundingFigure = getBoundingFigure
 
-    var result = if (boundingFigure.length != 0) {
+    var result = if (boundingFigure.nonEmpty) {
 
       val p1 = Array(0.0f, 0.0f, 0.0f, 1.0f)
       val p2 = Array(0.0f, 0.0f, 0.0f, 1.0f)
@@ -153,10 +153,11 @@ trait SceneObject extends Algebra {
       var intersect = false
       var triangle = 0
       while (triangle < boundingFigure.length && !intersect) {
-        Matrix.multiplyMV(p1, 0, mvMatrix.get(), 0, boundingFigure(triangle).V1, 0)
-        Matrix.multiplyMV(p2, 0, mvMatrix.get(), 0, boundingFigure(triangle).V2, 0)
-        Matrix.multiplyMV(p3, 0, mvMatrix.get(), 0, boundingFigure(triangle).V3, 0)
-        val eyeSpaceTriangle = Triangle(p1, p2, p3)
+        //TODO: Optimize memory usage
+        Matrix.multiplyMV(p1, 0, mvMatrix.get(), 0, boundingFigure(triangle).p0.toArray4, 0)
+        Matrix.multiplyMV(p2, 0, mvMatrix.get(), 0, boundingFigure(triangle).p1.toArray4, 0)
+        Matrix.multiplyMV(p3, 0, mvMatrix.get(), 0, boundingFigure(triangle).p2.toArray4, 0)
+        val eyeSpaceTriangle = Triangle(Vector3(p1), Vector3(p2), Vector3(p3))
 
         intersect |= isRayIntersectingTriangle(eyeSpaceTriangle, eyeSpaceRay)
         triangle += 1

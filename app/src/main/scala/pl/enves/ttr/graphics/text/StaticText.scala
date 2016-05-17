@@ -3,7 +3,7 @@ package pl.enves.ttr.graphics.text
 import pl.enves.androidx.Logging
 import pl.enves.androidx.color.ColorTypes.ColorArray
 import pl.enves.ttr.graphics._
-import pl.enves.ttr.graphics.geometry.{Geometry, GeometryId, TextGeometry}
+import pl.enves.ttr.graphics.geometry.{Geometry, GeometryId}
 import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.texture.TextureId
 
@@ -30,7 +30,7 @@ class StaticText(geometryId: GeometryId.Value, textureId: TextureId.Value)
     maskShader.get.draw(mvMatrix, pMatrix, geometry.get, textColor, texture.get)
   }
 
-  def getWidth: Float = geometry.get.asInstanceOf[TextGeometry].getWidth
+  def getWidth: Float = geometry.get.dimensions.x
 
-  def getHeight: Float = geometry.get.asInstanceOf[TextGeometry].getHeight
+  def getHeight: Float = geometry.get.dimensions.y
 }

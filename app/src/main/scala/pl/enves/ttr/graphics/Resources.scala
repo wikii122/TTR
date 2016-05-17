@@ -40,7 +40,7 @@ class Resources(context: Context, game: Game) extends Logging {
     textures.clear()
     maskShader = None
 
-    addGeometry(GeometryId.Square, new SquareGeometry)
+    addGeometry(GeometryId.Square, Geometry(MeshRectangle2D()))
 
     addTexture(TextureId.MaskCross, new AssetTexture(context, "images/game/cross_mask.png").getTexture)
     addTexture(TextureId.MaskRing, new AssetTexture(context, "images/game/ring_mask.png").getTexture)
@@ -75,10 +75,10 @@ class Resources(context: Context, game: Game) extends Logging {
     val charactersTexture = new CharactersTexture(256, typeFace, allChars(words))
     addTexture(TextureId.Font, charactersTexture.getTexture)
 
-    addGeometry(GeometryId.Player1TurnText, new TextGeometry(player1TurnTextString, charactersTexture))
-    addGeometry(GeometryId.Player2TurnText, new TextGeometry(player2TurnTextString, charactersTexture))
-    addGeometry(GeometryId.DrawText, new TextGeometry(drawTextString, charactersTexture))
-    addGeometry(GeometryId.WinnerText, new TextGeometry(winnerTextString, charactersTexture))
+    addGeometry(GeometryId.Player1TurnText, TextGeometry(player1TurnTextString, charactersTexture))
+    addGeometry(GeometryId.Player2TurnText, TextGeometry(player2TurnTextString, charactersTexture))
+    addGeometry(GeometryId.DrawText, TextGeometry(drawTextString, charactersTexture))
+    addGeometry(GeometryId.WinnerText, TextGeometry(winnerTextString, charactersTexture))
 
     //create shaders
     maskShader = Some(new MaskShader())
