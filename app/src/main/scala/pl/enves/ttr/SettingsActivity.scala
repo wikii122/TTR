@@ -17,7 +17,6 @@ import pl.enves.ttr.utils.{AdUtils, Configuration}
 import scala.collection.mutable.ArrayBuffer
 
 class SettingsActivity extends ToolbarActivity with AdUtils {
-
   override def onCreate(savedInstanceState: Bundle) {
     super.onCreate(savedInstanceState)
     setContentView(R.layout.settings_layout)
@@ -115,7 +114,7 @@ class SettingsActivity extends ToolbarActivity with AdUtils {
   }
 
   private[this] def sendFeedback(v:View) = {
-    val email = "enves@enves.pl"
+    val email = "support@enves.pl"
     val itnt = sendIntent
     itnt setType "message/rfc822"
     itnt setData Uri.parse(s"mailto:$email")
