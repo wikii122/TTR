@@ -56,10 +56,7 @@ class ReplayGame(movesToReplay: List[LogEntry],
       }
 
       Try {
-        entry.move match {
-          case Position(x, y) => board.move(x, y)(entry.player)
-          case Rotation(b, r) => board.rotate(b, r)(entry.player)
-        }
+        board.make(entry.move)(entry.player)
         movesLog = entry :: movesLog
       }
 

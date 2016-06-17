@@ -19,23 +19,20 @@ private[logic] class Board private () extends Logging with JsonMappable {
 
   def version: Int = _version
 
-  def move(x: Int, y: Int)(implicit player: Player.Value): Boolean = {
+  def make(move: Move)(implicit player: Player.Value): Boolean = {
+    move match {
+      case Position(x, y) => put(x, y)
+      case Rotation(b, r) => rotate(b, r)
+    }
+  }
+
+  def put(x: Int, y: Int)(implicit player: Player.Value): Boolean = {
     if ((freeFields == 0) && _winner.isEmpty) throw new GameDrawn
 
     val quad = Quadrant(x, y)
 
     log(s"Move of $player at ($x, $y) in $quad quadrant")
     quadrants.move(quad, x, y, player)
-
-    _version += 1
-    freeFields -= 1
-
-    return checkVictory()
-  }
-
-  def move(quadrant: Quadrant.Value, x: Int, y: Int)(implicit player: Player.Value): Boolean = {
-    log(s"Move of $player at ($x, $y) in $quadrant quadrant")
-    quadrants.move(quadrant, x, y, player)
 
     _version += 1
     freeFields -= 1

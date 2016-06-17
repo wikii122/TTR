@@ -88,10 +88,7 @@ class BotGame(board: Board = Board()) extends Game(board) with Logging {
 
     log(s"Move: $move for $player")
 
-    val res = move match {
-      case Position(x, y) => board move(x, y)
-      case Rotation(b, r) => board rotate(b, r)
-    }
+    val res = board make move
 
     movesLog = LogEntry(player, move) :: movesLog
 
