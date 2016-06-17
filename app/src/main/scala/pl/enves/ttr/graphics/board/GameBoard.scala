@@ -124,13 +124,7 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
     // this is here and not in fields for performance reasons
     if (game.finished && game.finishingMove != Nil) {
       for ((x, y) <- game.finishingMove) {
-        val quadrant = if (y < Quadrant.size) {
-          if (x < Quadrant.size) Quadrant.first
-          else Quadrant.second
-        } else {
-          if (x < Quadrant.size) Quadrant.third
-          else Quadrant.fourth
-        }
+        val quadrant = Quadrant(x, y)
 
         quadrants(quadrant.id).setWinning(x % Quadrant.size, y % Quadrant.size)
       }

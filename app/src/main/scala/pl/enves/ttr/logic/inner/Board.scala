@@ -22,14 +22,7 @@ private[logic] class Board private () extends Logging with JsonMappable {
   def move(x: Int, y: Int)(implicit player: Player.Value): Boolean = {
     if ((freeFields == 0) && _winner.isEmpty) throw new GameDrawn
 
-    // TODO automate this
-    val quad = if (y < Quadrant.size) {
-      if (x < Quadrant.size) Quadrant.first
-      else Quadrant.second
-    } else {
-      if (x < Quadrant.size) Quadrant.third
-      else Quadrant.fourth
-    }
+    val quad = Quadrant(x, y)
 
     log(s"Move of $player at ($x, $y) in $quad quadrant")
     quadrants.move(quad, x, y, player)
@@ -74,14 +67,7 @@ private[logic] class Board private () extends Logging with JsonMappable {
   }
 
   def fieldState(x: Int, y: Int): Option[Player.Value] = {
-    // TODO automate this
-    val quadrant = if (y < Quadrant.size) {
-      if (x < Quadrant.size) Quadrant.first
-      else Quadrant.second
-    } else {
-      if (x < Quadrant.size) Quadrant.third
-      else Quadrant.fourth
-    }
+    val quadrant = Quadrant(x, y)
 
     return quadrants(quadrant).get(x % Quadrant.size, y % Quadrant.size)
   }
