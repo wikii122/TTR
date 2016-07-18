@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Activity titles, obviously -->
+    <string name="title_activity_settings">ustawienia</string>
+    <string name="title_activity_game">TicTacTurn</string>
+    <string name="title_activity_game_ended">koniec gry</string>
+    <string name="title_activity_game_replay">odtwarzanie gry</string>
+    <string name="title_activity_tutorial">tutorial</string>
+    <string name="title_activity_licenses">licencje open source</string>
+    <string name="title_activity_about">o grze</string>
+
+    <!-- Logo -->
+
+    <!-- Main menu -->
+    <string name="menu_online">gra online</string>
+    <string name="menu_offline">gra lokalna</string>
+    <string name="settings">ustawienia</string>
+
+    <!-- Local game menu -->
+    <string name="new_bot_game">graj z botem</string>
+    <string name="new_standard_game">graj ze znajomym</string>
+    <string name="continue_game">kontynuuj</string>
+
+    <!-- Online game menu -->
+    <string name="active">aktywne gry</string>
+    <string name="new_network_game">rozpocznij nową</string>
+
+    <!-- Settings -->
+    <string name="pick_theme">schemat kolorów</string>
+    <string name="playservices_signedin">wyloguj z google</string>
+    <string name="playservices_signedout">zaloguj do google</string>
+    <string name="licenses">licencje</string>
+    <string name="feedback">feedback</string>
+
+    <!-- Game board-->
+    <string name="board_player1">gracz 1:</string>
+    <string name="board_player2">gracz 2:</string>
+    <string name="board_your_turn">twoja tura:</string>
+    <string name="board_opponents_turn">tura przeciwnika:</string>
+    <string name="board_bots_turn">tura bota:</string>
+    <string name="board_winner">zwycięzca:</string>
+    <string name="board_draw">remis!</string>
+    <string name="board_replay">odtwarzanie:</string>
+
+    <!-- Bot game-->
+    <string name="difficulty">poziom:</string>
+    <string name="choose_symbol">wybierz swój znak</string>
+    <string name="button_symbol_X_description">wybierz X</string>
+    <string name="button_symbol_O_description">wybierz O</string>
+
+    <!-- Online game -->
+    <string name="sign_in_error">Nie można zalogować się z powodu błędu połączenia</string>
+    <string name="not_available">Ta opcja jest niedostępna w tej wersji gry.</string>
+
+    <!-- After game menu -->
+    <string name="game_ended">koniec gry!</string>
+    <string name="play_again">graj od nowa</string>
+    <string name="replay_moves">odtwórz ruchy</string>
+    <string name="show_game_end">pokaż koniec gry</string>
+
+    <!-- Tutorial -->
+    <string name="tutorial_figures">Możesz grać kółkami lub krzyżykami. Krzyżyki zaczynają.</string>
+    <string name="tutorial_rotations">Gdy strzałki na brzegach ćwiartki są aktywne, możesz ją obrócić.</string>
+    <string name="tutorial_goals">Ustaw 5 swoich znaków w linii żeby wygrać.</string>
+    <string name="tutorial_standard">Graj ze znajomym na jednym urządzeniu</string>
+    <string name="tutorial_network">lub graj online</string>
+    <string name="tutorial_bot">lub graj z komputerem</string>
+    <string name="tutorial_image_description">Obrazek pokazujący grę</string>
+    <string name="tutorial_skip">pomiń</string>
+    <string name="tutorial_next">następny</string>
+    <string name="tutorial_done">gotowe</string>
+
+    <!-- Licenses -->
+
+    <!-- About -->
+    <string name="created_by">stworzone przez</string>
+    <string name="app_description_1">Stary klasyk, dosłownie zakręcony! Kółko i krzyżyk w wersji 6x6 i możliwością obracania fragmentów planszy.</string>
+    <string name="app_description_2">Przećwicz swój umysł grając solo lub wyzwij znajomych na pojedynek - na jednym urządzeniu lub online. Masz do wyboru wiele schematów kolorów i poziomów trudności bota.</string>
+    <string name="app_description_3">Czy zostaniesz ostatecznym mistrzem w TicTacTurn?</string>
+    <string name="app_authors">Autorzy: %s</string>
+
+    <!-- Misc -->
+</resources>
