@@ -40,13 +40,13 @@ class Resources(context: Context, game: Game) extends Logging {
     textures.clear()
     maskShader = None
 
-    addGeometry(GeometryId.Square, new SquareGeometry)
+    addGeometry(GeometryId.Square, Geometry(MeshRectangle2D()))
 
-    addTexture(TextureId.MaskCross, new AssetTexture(context, "images/game/cross_mask.png").getTexture)
-    addTexture(TextureId.MaskRing, new AssetTexture(context, "images/game/ring_mask.png").getTexture)
-    addTexture(TextureId.MaskEmpty, new AssetTexture(context, "images/game/empty_mask.png").getTexture)
-    addTexture(TextureId.MaskArrowLeft, new AssetTexture(context, "images/game/arrow_left_mask.png").getTexture)
-    addTexture(TextureId.MaskArrowRight, new AssetTexture(context, "images/game/arrow_right_mask.png").getTexture)
+    addTexture(TextureId.MaskCross, AssetTexture(context, "images/game/cross_mask.png"))
+    addTexture(TextureId.MaskRing, AssetTexture(context, "images/game/ring_mask.png"))
+    addTexture(TextureId.MaskEmpty, AssetTexture(context, "images/game/empty_mask.png"))
+    addTexture(TextureId.MaskArrowLeft, AssetTexture(context, "images/game/arrow_left_mask.png"))
+    addTexture(TextureId.MaskArrowRight, AssetTexture(context, "images/game/arrow_right_mask.png"))
 
     val player1TurnTextString = game.gameType match {
       case Game.STANDARD => context.getString(R.string.board_player1)
@@ -65,7 +65,7 @@ class Resources(context: Context, game: Game) extends Logging {
     val drawTextString = context.getString(R.string.board_draw)
     val winnerTextString = context.getString(R.string.board_winner)
 
-    val words = Array(
+    val words = Seq(
       player1TurnTextString,
       player2TurnTextString,
       drawTextString,
@@ -75,16 +75,16 @@ class Resources(context: Context, game: Game) extends Logging {
     val charactersTexture = new CharactersTexture(256, typeFace, allChars(words))
     addTexture(TextureId.Font, charactersTexture.getTexture)
 
-    addGeometry(GeometryId.Player1TurnText, new TextGeometry(player1TurnTextString, charactersTexture))
-    addGeometry(GeometryId.Player2TurnText, new TextGeometry(player2TurnTextString, charactersTexture))
-    addGeometry(GeometryId.DrawText, new TextGeometry(drawTextString, charactersTexture))
-    addGeometry(GeometryId.WinnerText, new TextGeometry(winnerTextString, charactersTexture))
+    addGeometry(GeometryId.Player1TurnText, TextGeometry(player1TurnTextString, charactersTexture))
+    addGeometry(GeometryId.Player2TurnText, TextGeometry(player2TurnTextString, charactersTexture))
+    addGeometry(GeometryId.DrawText, TextGeometry(drawTextString, charactersTexture))
+    addGeometry(GeometryId.WinnerText, TextGeometry(winnerTextString, charactersTexture))
 
     //create shaders
     maskShader = Some(new MaskShader())
   }
 
-  private def allChars(words: Array[String]): Array[Char] = {
+  private def allChars(words: Seq[String]): Seq[Char] = {
     val set = mutable.Set[Char]()
     for (word <- words) {
       for (char <- word) {
@@ -93,7 +93,7 @@ class Resources(context: Context, game: Game) extends Logging {
         }
       }
     }
-    return set.toArray
+    return set.toSeq
   }
 
   private def addGeometry(name: GeometryId.Value, geometry: Geometry): Unit = {

@@ -68,8 +68,8 @@ class MaskShader extends Shader {
   def draw(mvMatrix: MatrixStack, pMatrix: MatrixStack, model: Geometry, color: ColorArray, mask: Int) {
     makeMVPMatrix(mvMatrix, pMatrix)
 
-    val positionsBuffer = model.getBuffers.positions
-    val texCoordsBuffer = model.getBuffers.texCoords
+    val positionsBuffer = model.buffers.positions
+    val texCoordsBuffer = model.buffers.texCoords
 
     GLES20.glUseProgram(program)
 
@@ -78,12 +78,12 @@ class MaskShader extends Shader {
 
     GLES20.glEnableVertexAttribArray(positionHandle)
 
-    GLES20.glVertexAttribPointer(positionHandle, model.PositionSize, GLES20.GL_FLOAT, false, 0, 0)
+    GLES20.glVertexAttribPointer(positionHandle, Geometry.PositionSize, GLES20.GL_FLOAT, false, 0, 0)
 
     // Apply texture coordinates
     GLES20.glBindBuffer(GLES20.GL_ARRAY_BUFFER, texCoordsBuffer)
 
-    GLES20.glVertexAttribPointer(texCoordHandle, model.TexCoordSize, GLES20.GL_FLOAT, false, 0, 0)
+    GLES20.glVertexAttribPointer(texCoordHandle, Geometry.TexCoordSize, GLES20.GL_FLOAT, false, 0, 0)
 
     GLES20.glEnableVertexAttribArray(texCoordHandle)
 

@@ -8,7 +8,7 @@ import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.Triangle
+import pl.enves.ttr.utils.math.Triangle
 import pl.enves.ttr.utils.themes.Theme
 
 class Field(quadrant: Quadrant.Value)
@@ -75,9 +75,5 @@ class Field(quadrant: Quadrant.Value)
     }
   }
 
-  override def getBoundingFigure: Array[Triangle] = if (square.isDefined) {
-    square.get.getBoundingFigure
-  } else {
-    Array(Triangle())
-  }
+  override def getBoundingFigure: List[Triangle] = square map (_.boundingFigure) getOrElse Nil
 }

@@ -4,7 +4,7 @@ import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.graphics.animations.QuadrantRotation
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.Algebra
+import pl.enves.ttr.utils.math.Algebra
 
 /**
  * Basic size: 3.0x3.0

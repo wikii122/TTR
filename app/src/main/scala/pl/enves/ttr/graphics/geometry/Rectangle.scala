@@ -1,26 +1,18 @@
 package pl.enves.ttr.graphics.geometry
 
+import pl.enves.ttr.utils.math._
+
 /**
- * Rectangle of GL_TRIANGLES
+ * Rectangle made with two Triangles
  */
 object Rectangle {
-  def positionsCenterYTriangles(x: Float, y: Float, width: Float, height: Float): Array[Float] = {
-    val w = width
-    val h = height / 2.0f
-    return Array(
-      x - 0, y - h, 0.0f, //0
-      x + w, y - h, 0.0f, //1
-      x - 0, y + h, 0.0f, //2
-      x - 0, y + h, 0.0f, //2
-      x + w, y - h, 0.0f, //1
-      x + w, y + h, 0.0f) //3
-  }
+  def apply(leftTop: Vector3, rightBottom: Vector3): List[Triangle] = {
 
-  def texCoordinatesTriangles(x: Float, y: Float, w: Float, h: Float) = Array(
-    x, y, //0
-    x + w, y, //1
-    x, y + h, //2
-    x, y + h, //2
-    x + w, y, //1
-    x + w, y + h) //3
+    val p0 = leftTop
+    val p1 = Vector3(rightBottom.x, leftTop.y, leftTop.z)
+    val p2 = Vector3(leftTop.x, rightBottom.y, rightBottom.z)
+    val p3 = rightBottom
+
+    return List(Triangle(p0, p1, p2), Triangle(p2, p1, p3))
+  }
 }

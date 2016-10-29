@@ -9,7 +9,7 @@ import pl.enves.ttr.graphics.shaders.MaskShader
 import pl.enves.ttr.graphics.texture.TextureId
 import pl.enves.ttr.graphics.{MatrixStack, Resources, SceneObject}
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.Triangle
+import pl.enves.ttr.utils.math.Triangle
 import pl.enves.ttr.utils.themes.Theme
 
 class Arrow(makeMove: Move => Unit, quadrant: Quadrant.Value, rotation: QRotation.Value)
@@ -97,11 +97,7 @@ class Arrow(makeMove: Move => Unit, quadrant: Quadrant.Value, rotation: QRotatio
     }
   }
 
-  override def getBoundingFigure: Array[Triangle] = if (square.isDefined) {
-    square.get.getBoundingFigure
-  } else {
-    Array(Triangle())
-  }
+  override def getBoundingFigure: List[Triangle] = square map (_.boundingFigure) getOrElse Nil
 
   override def discardIllegal(): Unit = {
     shakeAnimation.get.stop()

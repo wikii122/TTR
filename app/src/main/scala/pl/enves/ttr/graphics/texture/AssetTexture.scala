@@ -5,11 +5,10 @@ import java.io.{IOException, InputStream}
 import android.content.Context
 import android.graphics.BitmapFactory
 import pl.enves.androidx.{IOUtils, Logging}
-import pl.enves.ttr.graphics.TextureProvider
+import pl.enves.ttr.graphics.TextureUtils
 
-class AssetTexture(context: Context, path: String) extends TextureProvider with Logging {
-
-  def decode(path: String): Int = {
+object AssetTexture extends TextureUtils with Logging {
+  def apply(context: Context, path: String): Int = {
     try {
       val stream: InputStream = context.getAssets.open(path)
       val rawData = IOUtils.readBytes(stream)
@@ -27,8 +26,5 @@ class AssetTexture(context: Context, path: String) extends TextureProvider with 
         error(e.getMessage)
         return 0
     }
-
   }
-
-  override def getTexture: Int = decode(path)
 }

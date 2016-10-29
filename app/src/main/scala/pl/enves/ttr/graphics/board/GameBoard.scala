@@ -3,7 +3,7 @@ package pl.enves.ttr.graphics.board
 import pl.enves.androidx.Logging
 import pl.enves.ttr.graphics._
 import pl.enves.ttr.logic._
-import pl.enves.ttr.utils.Algebra
+import pl.enves.ttr.utils.math.Algebra
 
 /**
  * Size: Outer: 2.0x(2.0~2.5), inner: 8.0x(8.0~10.0)
@@ -124,13 +124,7 @@ class GameBoard(makeMove: Move => Unit) extends SceneObject with Logging with Al
     // this is here and not in fields for performance reasons
     if (game.finished && game.finishingMove != Nil) {
       for ((x, y) <- game.finishingMove) {
-        val quadrant = if (y < Quadrant.size) {
-          if (x < Quadrant.size) Quadrant.first
-          else Quadrant.second
-        } else {
-          if (x < Quadrant.size) Quadrant.third
-          else Quadrant.fourth
-        }
+        val quadrant = Quadrant(x, y)
 
         quadrants(quadrant.id).setWinning(x % Quadrant.size, y % Quadrant.size)
       }
