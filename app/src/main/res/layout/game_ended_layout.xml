@@ -15,7 +15,7 @@
         android:background="@null"
         android:contentDescription="@string/abc_action_bar_up_description"
         android:scaleType="center"
-        android:src="@drawable/abc_ic_ab_back_mtrl_am_alpha" />
+        android:src="@drawable/ic_arrow_back_white_24dp" />
 
     <TextView
         android:id="@+id/text_game_ended"

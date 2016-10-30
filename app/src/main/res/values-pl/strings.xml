@@ -74,7 +74,7 @@
 
     <!-- About -->
     <string name="created_by">stworzone przez</string>
-    <string name="app_description_1">Stary klasyk, dosłownie zakręcony! Kółko i krzyżyk w wersji 6x6 i możliwością obracania fragmentów planszy.</string>
+    <string name="app_description_1">Stary klasyk, dosłownie zakręcony! Kółko i krzyżyk w wersji 6x6 z możliwością obracania fragmentów planszy.</string>
     <string name="app_description_2">Przećwicz swój umysł grając solo lub wyzwij znajomych na pojedynek - na jednym urządzeniu lub online. Masz do wyboru wiele schematów kolorów i poziomów trudności bota.</string>
     <string name="app_description_3">Czy zostaniesz ostatecznym mistrzem w TicTacTurn?</string>
     <string name="app_authors">Autorzy: %s</string>
