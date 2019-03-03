@@ -116,3 +116,4 @@ project/plugins/project/
 # Sensitive files
 app/build.gradle
 *.db
+app/src/main/res/values/ids.xml

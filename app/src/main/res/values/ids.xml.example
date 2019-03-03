@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="admob_banner_end_game" translatable="false">FIXME</string>
+    <string name="admob_banner_settings" translatable="false">FIXME</string>
+    <string name="google_app_id" translatable="false">FIXME</string>
+</resources>
